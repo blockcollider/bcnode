@@ -53,11 +53,11 @@ function serializeNetworkInterface(active){
 
 }
 
-function config(opts){
+function identity(opts){
 
     var self = this;
-        self.configFile = "config.json";
-        self.configPath = getDataDir(); 
+        self.identityFile = "identity.json";
+        self.identityPath = getDataDir(); 
         self.endianness = os.endianness();
         self.platform = os.platform();
         self.arch = os.arch();
@@ -70,11 +70,11 @@ function config(opts){
     
 }
 
-config.prototype = {
+identity.prototype = {
 
 	saveToDisk: function(obj, cb){
 
-		fs.ensureDir(obj.configPath, function(err){
+		fs.ensureDir(obj.identityPath, function(err){
 
 			if(err) { cb(err); } else {
 
@@ -82,7 +82,7 @@ config.prototype = {
 
 				var str = JSON.stringify(obj);	
 
-				fs.writeFile(obj.configPath+"/"+obj.configFile, str, "utf8", function(err){
+				fs.writeFile(obj.identityPath+"/"+obj.identityFile, str, "utf8", function(err){
 					if(err) { cb(err); } else {
 						cb(null, obj);
 					}
@@ -94,7 +94,7 @@ config.prototype = {
 
 	},
 
-    getNetworkKey: function(currentConfig, cb){
+    getNetworkKey: function(currentIdentity, cb){
 
         var self = this;
 
@@ -104,13 +104,13 @@ config.prototype = {
 
                 var key = serializeNetworkInterface(active);
 
-                if(currentConfig.networkKey != undefined && currentConfig.networkKey != key){
-					log.warn("network key has changed "+currentConfig.networkKey+" -> "+key); 
+                if(currentIdentity.networkKey != undefined && currentIdentity.networkKey != key){
+					log.warn("network key has changed "+currentIdentity.networkKey+" -> "+key); 
                 }
 
-				currentConfig.networkKey = key;
+				currentIdentity.networkKey = key;
 
-				cb(null, currentConfig);
+				cb(null, currentIdentity);
 
             }
 
@@ -118,11 +118,11 @@ config.prototype = {
 
     },
 
-    finalizeSetup: function(currentConfig, cb){
+    finalizeSetup: function(currentIdentity, cb){
 
         var self = this;
 
-        self.getNetworkKey(currentConfig, function(err, cfg){
+        self.getNetworkKey(currentIdentity, function(err, cfg){
 
 			if(err) { cb(err); } else {
 
@@ -142,7 +142,7 @@ config.prototype = {
 
         var self = this;
 
-		var file = self.configPath + "/" + self.configFile;
+		var file = self.identityPath + "/" + self.identityFile;
 
         fs.pathExists(file, function(err, exists){
 
@@ -168,7 +168,7 @@ config.prototype = {
 
             } else {
 
-				log.info("creating new configuration file");
+				log.info("creating new identity file");
 
                 self.finalizeSetup(self, cb);
 
@@ -180,4 +180,4 @@ config.prototype = {
 
 }
 
-module.exports = config;
+module.exports = identity;

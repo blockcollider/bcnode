@@ -1,9 +1,7 @@
 # Helix Core
 Mining node with built-in block rover and DHT. 
 
-<<<<<<< HEAD
 
-floating-point type
-=======
-### Install 
->>>>>>> d6ac02823e48ac0c827aced3f46227f259b68a9e
+* identity.js - local configuration of client
+* network.js - interface and events for the network
+* dht.js - underlying storage and peer logic for network 
