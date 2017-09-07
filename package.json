@@ -1,0 +1,22 @@
+{
+  "name": "helixcore",
+  "version": "1.0.0",
+  "description": "Helix with miners and rovers",
+  "main": "init.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srskofficial/helixcore.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/srskofficial/helixcore/issues"
+  },
+  "homepage": "https://github.com/srskofficial/helixcore#readme",
+  "dependencies": {
+    "bitcore-p2p": "^1.1.2"
+  }
+}
