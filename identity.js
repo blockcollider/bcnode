@@ -4,6 +4,7 @@ var os = require('os');
 var network = require("network");
 var strings = require('./strings.js');
 var time = require("./time.js");
+var getos = require('getos');
 
 var log = global.log;
 
@@ -58,9 +59,16 @@ function identity(opts){
     var self = this;
         self.identityFile = "identity.json";
         self.identityPath = getDataDir(); 
-        self.endianness = os.endianness();
-        self.platform = os.platform();
-        self.arch = os.arch();
+
+        var platform = os.platform();
+        var arch = os.arch();
+        var agent = [
+            platform+":0",
+            arch+":0",
+            "HelixCore:"+ global._HelixVersion
+        ];
+
+    self.userAgent = agent.join("/");
 
     if(opts != undefined && opts.constructor == Object){
         Object.keys(opts).map(function(k){
@@ -98,23 +106,23 @@ identity.prototype = {
 
         var self = this;
 
-        network.get_active_interface(function(err, active){
+            network.get_active_interface(function(err, active){
 
-            if(err) { cb(err); } else {
+                if(err) { cb(err); } else {
 
-                var key = serializeNetworkInterface(active);
+                    var key = serializeNetworkInterface(active);
 
-                if(currentIdentity.networkKey != undefined && currentIdentity.networkKey != key){
-					log.warn("network key has changed "+currentIdentity.networkKey+" -> "+key); 
+                    if(currentIdentity.networkKey != undefined && currentIdentity.networkKey != key){
+                        log.warn("network key has changed "+currentIdentity.networkKey+" -> "+key); 
+                    }
+
+                    currentIdentity.networkKey = key;
+
+                    cb(null, currentIdentity);
+
                 }
 
-				currentIdentity.networkKey = key;
-
-				cb(null, currentIdentity);
-
-            }
-
-        });
+            });
 
     },
 

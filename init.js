@@ -2,6 +2,7 @@
 var Lock = require("./lock.js");
 var Log = require("./log.js");
 
+    global._HelixVersion = "0.0.1";
     global.log = new Log(); 
 
 var path = require('path'+''); // make browserify skip it

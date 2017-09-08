@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/srskofficial/helixcore#readme",
   "dependencies": {
-    "bitcore-p2p": "^1.1.2"
+    "bitcore-p2p": "^1.1.2",
+    "colors": "^1.1.2",
+    "getos": "^3.0.1",
+    "winston-color": "^1.0.0"
   }
 }

@@ -5,6 +5,17 @@ var btoa = require('btoa');
 
 var strings = {
 
+    swapOrder: function(str){
+
+      var split = str.split("").reverse()
+      var x='';
+      for (var i = 0; i < split.length; i+=2) {
+          x += split[i+1]+split[i];
+      } 
+      return x;
+
+    },
+
     sha: function(str){
 
         if(str == undefined || str.constructor != String){

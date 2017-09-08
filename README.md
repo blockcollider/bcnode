@@ -13,4 +13,37 @@ Mining node with built-in block rover, DHT, and client discovery.
 
 ## Install
 
+## Message Types
+
+## Block Reward
+
+The block reward remains the same at 1000 Carbons per Emblem. 
+
+(66 * Variance Threshold) / Unused Transaction Variance Allowance 
+
+## Consensys Longest Chain + Weighted Mining 
+
+Nodes relay transactions to eachother. If a node recieves a transaction it has already recieved from another node/peer it weights that node for block election.
+Block election / consensys
+
+* Node A, B, C, D, E are mining
+
+* Node C and D are not connected however they are both connected to A, B, and E
+
+* Node A and B discover a hash that passes the threshold.
+
+* Node A and B send their claim hash to Node C and D. C and D each begin mining on different chains. 
+
+* Node C and D relay the winning hash to E who beings mining based on how the weight of C or D. 
+
+* Nodes collect weight be relaying transactions to nodes that already have the same transaction. 
+
+In this way nodes are indirectly incentivised to always relay transactions in an effort to gain weight among other nodes. 
+
+
+
+## Helix Block
+
+prevHash: 
+
 
