@@ -10,9 +10,9 @@ var log = global.log;
 
 function getDataDir(){
     switch(process.platform){
-        case 'win32': return process.env.LOCALAPPDATA+"/.helix";
-        case 'linux': return process.env.HOME + '/.helix';
-        case 'darwin': return process.env.HOME + '/Library/Application Support/.helix';
+        case 'win32': return process.env.LOCALAPPDATA+"/.blockcollider";
+        case 'linux': return process.env.HOME + '/.blockcollider';
+        case 'darwin': return process.env.HOME + '/Library/Application Support/.blockcollider';
         default: throw Error("unknown platform "+process.platform);
     }
 }
@@ -65,7 +65,7 @@ function identity(opts){
         var agent = [
             platform+":0",
             arch+":0",
-            "HelixCore:"+ global._HelixVersion
+            "BCV:"+ global._BlockColliderVersion
         ];
 
     self.userAgent = agent.join("/");

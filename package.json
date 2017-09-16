@@ -20,6 +20,8 @@
     "bitcore-p2p": "^1.1.2",
     "colors": "^1.1.2",
     "getos": "^3.0.1",
+    "gossipmonger-tcp-transport": "^0.1.6",
+    "portscanner": "^2.1.1",
     "winston-color": "^1.0.0"
   }
 }

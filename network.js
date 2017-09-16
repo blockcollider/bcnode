@@ -1,16 +1,58 @@
 
-module.exports = Network;
+
+var fs = require('fs-extra')
+var portscanner = require('portscanner')
 var Gossipmonger = require('./dht.js'),
     TcpTransport = require('gossipmonger-tcp-transport'),
     util = require('util');
 
 var log = global.log;
 
-function Network(){
+function getOpenPort(a, cb){
 
-    if (!global._HelixIdentity)
+	var b = a+1000;
+
+	portscanner.findAPortNotInUse(a, b, function(err, port) {
+
+		if(err) { 
+			log.error("unable to find local network interface to listen on");
+			process.exit(3);
+		} else {
+			cb(null, port);
+		}
+
+	});
+
+}
+
+function Network(opts){
+
+    log.info("loading network interface");
+
+    if (!global._BlockColliderIdentity) {
         log.error("cannot start network module without load identity configuration");
         process.exit(3);
+    }
+
+    var self = this;
+    var config = global._BlockColliderIdentity;
+
+    if(opts != undefined){
+
+        Object.keys(opts).map(function(k){
+            self[k] = opts[k];
+        });
+        
+    }
+
+    if(!self.networkFile){
+        self.networkFile = "network.json";
+        self.networkPath = config.identityPath;
+    }
+
+    if(!self.networkKey){
+        self.networkKey = config.networkKey;
+	}
 
 }
 
@@ -20,13 +62,68 @@ var g1, g2;
 var id1 = "id1",
     id2 = "id2";
 
-t1 = TcpTransport.listen({port: 9991}, function () {
+Network.prototype = {
 
-	t2 = TcpTransport.listen({port: 9992}, function () {
-		init();
-	});
+	transport: false,
 
-});
+    setupConfig: function(cb) {
+
+        var self = this;
+
+        var file = self.networkPath+"/"+self.networkFile;
+
+        fs.pathExists(file, function(err, exists){
+
+            if(err) { 
+                log.error(err);
+                process.exit(3);
+            } 
+
+            if(exists == true){
+
+                fs.readFile(file, "utf8", function(err, data){
+
+                    if(err) { 
+                        log.error(err);
+                        process.exit(3);
+                    } 
+
+                    var d = JSON.parse(data);
+
+                    Object.keys(d).map(function(k){
+                        self[k] = d[k];
+                    });
+
+                    cb(null, d);
+
+                });
+
+            } else {
+                
+				getOpenPort(10066, function(err, port){
+					
+					self.gossipTcpPort = port;
+
+				});
+
+            }
+
+        });
+
+    },
+
+    createInterface: function(cb){
+
+		var self = this;
+
+        self.transport = TcpTransport.listen({port: self.gossipTcpPort }, function () {
+			cb(null, true);
+        });
+
+    }
+}
+
+
 
 function init () {
 
@@ -72,6 +169,7 @@ function init () {
         g.on('unknown peer', function (peer) {
             console.log('[' + g.localPeer.id + '] unknown peer: ' + util.inspect(peer));
         });
+        
         g.on('update', function (peerId, key, value) {
             console.log('[' + g.localPeer.id + '] update: ' + peerId + ', ' + key + ', ' + util.inspect(value));
         });
@@ -88,4 +186,6 @@ function init () {
 	}, 3000);
 
 }
+
+module.exports = Network;
 

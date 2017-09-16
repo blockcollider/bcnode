@@ -2,12 +2,13 @@
 var Lock = require("./lock.js");
 var Log = require("./log.js");
 
-    global._HelixVersion = "0.0.1";
+    global._BlockColliderVersion = "0.0.1";
     global.log = new Log(); 
 
 var path = require('path'+''); // make browserify skip it
 var fs = require('fs'); 
 var Identity = require("./identity.js");
+var Network = require("./network.js");
 
 var identity = new Identity();
 
@@ -20,13 +21,21 @@ var identity = new Identity();
 
         } else {
 
-			global._HelixIdentity = identity;
+            log.info("identity setup done");
 
-            console.log(data);
+			console.log(identity);
+			global._BlockColliderIdentity = identity;
+
+            var network = new Network(); 
+
+                network.setupConfig(function() {
+
+
+
+                });
 
         }
 
     });
 
-// metrics/distance/ratcliff-obershelp
 
