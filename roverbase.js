@@ -3,25 +3,31 @@
 var child = require('child_process');
 var time = require("./time.js");
 var ee = require('events').EventEmitter;
+var socket = require("socket.io")(6600);
+var events = new ee();
 var log = global.log;
 
-function serializeEthereumBlock(block) {
-    // double sha256 (header hash + block number)
-}
 
-function serializeBitcoinBlock(block) {
-    // double sha256 (header hash + block number)
-}
+function RoverBase(opts) {
 
+    var options = {
+        port: 6600
+    }
 
-function RoverBase() {
+    if(opts != undefined ){
+        Object.keys(opts).map(function(k){
+            options[k] = opts[k]
+        });
+    }
+
     this.running = [];
+
 }
 
 
 RoverBase.prototype = {
 
-    events: new ee(), 
+    events: events, 
 
     load: function(roverId){
 
@@ -47,22 +53,25 @@ RoverBase.prototype = {
             }
 
             n.on("message", function(msg){
+
+                var type = "log";
                 if(msg.type != undefined){
-
+                    type = msg.type;
 				    msg.utc = time.now();
+                } 
 
-                    self.events.emit(msg.type, msg);
+                socket.emit(type, msg);
+                events.emit(type, msg);
 
-                } else {
-                    self.events.emit("log", msg);
-                }
             });
 
             n.on("exit", function(){
                 log.info(roverId+" exited");
             });
 
-            n.send({ func: "init" });
+            n.send({ func: "init", args: [{
+                identity: global._BlockColliderIdentity 
+            }] });
 
             self.running.push(meta);
 

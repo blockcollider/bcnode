@@ -19,7 +19,6 @@ const rlp = require('rlp-encoding')
 
 const ID = "eth";
 const DEFAULT_TYPE = "log";
-
 const DAO_FORK_SUPPORT = true
 const ETH_1920000 = '4985f5ca3d2afbec36529aa96f74de3cc10a2a4a6c44f2157a57d2c6059a11bb'
 const ETH_1920000_HEADER = rlp.decode(Buffer.from('f9020da0a218e2c611f21232d857e3c8cecdcdf1f65f25a4477f98f6f47e4063807f2308a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d4934794bcdfc35b86bedf72f0cda046a3c16829a2ef41d1a0c5e389416116e3696cce82ec4533cce33efccb24ce245ae9546a4b8f0d5e9a75a07701df8e07169452554d14aadd7bfa256d4a1d0355c1d174ab373e3e2d0a3743a026cf9d9422e9dd95aedc7914db690b92bab6902f5221d62694a2fa5d065f534bb90100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008638c3bf2616aa831d4c008347e7c08301482084578f7aa88d64616f2d686172642d666f726ba05b5acbf4bf305f948bd7be176047b20623e1417f75597341a059729165b9239788bede87201de42426', 'hex'))
@@ -35,9 +34,8 @@ var bootNodes = require('ethereum-common').bootstrapNodes.map((node) => {
 
 
 var altBootnodes = [
-  { address: '52.169.42.101', udpPort: 30303 },
   { address: '52.16.188.185', udpPort: 30303 },
-  { address: '52.74.57.123', udpPort: 30303 },
+  { address: '52.74.57.123', udpPort: 30303 }
 ]
 
 
@@ -87,24 +85,24 @@ function transmitRoverBlock(block){
 
 	var d = block.toJSON({ labeled: true });
 
-	console.log("+++++++++++++++++++++++++++");
-	console.log(d);
-
 	var obj = {}
 
-		//obj.number = stringToInt(d.header.number);
+		obj.blockNumber = parseInt(d.header.number, 16);
 		obj.prevHash = d.header.parentHash;
+		obj.blockHash = "0x"+string.keccak(block.hash().toString("hex"));
 		obj.root = d.header.stateRoot;
 		//obj.gasLimit = stringToInt(d.header.gasLimit);
 		//obj.gasUsed = stringToInt(d.header.gasUsed);
-		//obj.nonce = stringToInt(d.header.nonce);
-		//obj.timestamp = stringToInt(d.header.timestamp);
-		//obj.difficulty = stringToInt(d.header.difficulty);
+		obj.nonce = parseInt(d.header.nonce, 16);
+		obj.timestamp = parseInt(d.header.timestamp, 16);
+		obj.difficulty = parseInt(d.header.difficulty, 16);
 		obj.coinbase = d.header.coinbase;
 		obj.marked = false;
 		obj.transactions = d.transactions.map(function(t){
 
 			var tx = new EthereumTx(t);
+			//var v = ethUtils.bufferToInt(t.v)
+			//var e = ethUtils.ecrecover(tx.hash(true), v, t.r, t.s).toString("hex");
 
 			t.txHash = ethUtils.bufferToHex(tx.hash(true));
 
@@ -112,7 +110,7 @@ function transmitRoverBlock(block){
 
 		}); 
 
-	console.log(obj);
+	//console.log(obj);
 
 	send("block", obj);
 
@@ -189,13 +187,13 @@ Network.prototype = {
 				// DPT
 				const dpt = new devp2p.DPT(self.key, {
 				  refreshInterval: 30000,
-				  timeout: 15000,
+				  timeout: 25000,
 				  endpoint: {
 					address: '0.0.0.0',
 					udpPort: null,
 					tcpPort: null
 				  }
-				})
+				});
 
 				dpt.on('error', function(err){ }); 
 
@@ -210,7 +208,8 @@ Network.prototype = {
 				  listenPort: null
 				})
 
-				rlpx.on('error', (err) => console.error(chalk.red(`RLPx error: ${err.stack || err}`)))
+				//rlpx.on('error', (err) => console.error(chalk.red(`RLPx error: ${err.stack || err}`)))
+				rlpx.on('error', function(err) { }); 
 
 				rlpx.on('peer:added', (peer) => {
 				  const addr = getPeerAddr(peer)
@@ -305,7 +304,7 @@ Network.prototype = {
 						  const header = new EthereumBlock.Header(payload[0])
 						  while (requests.headers.length > 0) {
 							const blockHash = requests.headers.shift()
-							console.log(blockHash);
+
 							if (header.hash().equals(blockHash)) {
 							  isValidPayload = true
 							  setTimeout(() => {
@@ -396,12 +395,13 @@ Network.prototype = {
 					return
 				  }
 
-				  console.error(chalk.red(`Peer error (${getPeerAddr(peer)}): ${err.stack || err}`))
+				  //console.error(chalk.red(`Peer error (${getPeerAddr(peer)}): ${err.stack || err}`))
+
 				})
 
 				for (let bootnode of BOOTNODES) {
 				  dpt.bootstrap(bootnode).catch((err) => {
-					console.error(chalk.bold.red(`DPT bootstrap error: ${err.stack || err}`))
+					//console.error(chalk.bold.red(`DPT bootstrap error: ${err.stack || err}`))
 				  })
 				}
 
@@ -415,19 +415,23 @@ Network.prototype = {
 				  //console.log(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
 				}
 
-				const blocksCache = new LRUCache({ max: 110 })
+				const blocksCache = new LRUCache({ max: 118 })
 
 				function onNewBlock (block, peer) {
+
 				  const blockHashHex = block.hash().toString('hex')
+
+				  const peersCount = dpt.getPeers().length
+
 				  if (blocksCache.has(blockHashHex)) return
 
 				  blocksCache.set(blockHashHex, true)
 
-				  console.log(`new block: ${blockHashHex} (from ${getPeerAddr(peer)})`)
-
 				  for (let tx of block.transactions) onNewTx(tx, peer)
 
-				  transmitRoverBlock(block);
+
+    			    transmitRoverBlock(block);
+
 
 				}
 

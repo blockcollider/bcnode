@@ -1,4 +1,5 @@
 
+var keccak = require('keccak');
 var crypto = require('crypto'); 
 var uuid = require('node-uuid');
 var btoa = require('btoa');
@@ -15,6 +16,19 @@ var strings = {
       return x;
 
     },
+
+	keccak: function(str) {
+		return keccak('keccak256').update(str).digest('hex')
+	},
+
+    doubleSha: function(str){
+
+        if(str == undefined || str.constructor != String){
+            return Error("failed to create sha of string");
+        }
+        return crypto.createHash("sha256").update(crypto.createHash("sha256").update(str).digest('hex')).digest("hex");
+
+    }, 
 
     sha: function(str){
 
