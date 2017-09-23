@@ -1,4 +1,5 @@
-# Status RSK : Helix Core
+Block Collider 
+==============
 Mining node with built-in block rover, DHT, and client discovery. 
 
 ## Index

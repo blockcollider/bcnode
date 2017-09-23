@@ -43,6 +43,7 @@ const big = require('big.js');
 const txCache = new LRUCache({ max: 3000 })
 const blocksCache = new LRUCache({ max: 110 })
 const async = require('async');
+const DB = require('./db.js');
 
 
 
@@ -172,7 +173,11 @@ function onNewTx(tx, block){
 
 } 
 
-function onNewBlock(height, block, cb) {
+function onNewBlock(height, block) {
+
+    function next(tx) { 
+        onNewTx(tx, block);
+    }
 
     var hash = block.header.hash;
     var timestamp = block.header.time;
@@ -191,11 +196,9 @@ function onNewBlock(height, block, cb) {
 
     var blockNumber = coinbaseTx.ins[0].script.getBlockHeight();
 
-	for (let tx of block.transactions) onNewTx(tx, block)
-
     console.log("blockNumber: "+blockNumber);
 
-    //if(blockNumber != undefined && isNaN(Number(blockNumber)) == false){
+    if(blockNumber != undefined && isNaN(Number(blockNumber)) == false){
 
         var n = Number(blockNumber) - 1;
 
@@ -205,17 +208,15 @@ function onNewBlock(height, block, cb) {
 
         ///}
 
-    //}
+    }
 
-    cb(null, blockNumber);
+	for (let tx of block.transactions) onNewTx(tx, block)
 
 
 }
 
 
 function Network (config) {
-
-    var self = this;
 
     var options = {
         maximumPeers: 112,
@@ -238,9 +239,10 @@ function Network (config) {
     }
 
     Object.keys(options).map(function(k){
-        self[k] = options[k];
+        this[k] = options[k];
     });
 
+    this.db = new DB({ path: this.identity.identityPath });
 
 }
 
@@ -294,20 +296,25 @@ Network.prototype = {
 
         }, []);
 
+
         var report = peers.reduce(function(all, peer){
 
-            var val = peer.bestHeight;
-            if(all[val] == undefined){
-                all[val] = 1;
-            } else {
-                all[val]++;
-            }
+            if(peer[key] != undefined) {
+
+                var val = peer[key];
+                if(all[val] == undefined){
+                    all[val] = 1;
+                } else {
+                    all[val]++;
+                }
                 
+            }
+            
             return all;
 
         }, {});
 
-        if(Object.keys(report).length < 1) return false;
+        if(Object.keys(report).length < 2) return;
 
         var ranks = Object.keys(report).sort(function(a, b){
 
@@ -323,9 +330,9 @@ Network.prototype = {
 
         });
 
-        if(ranks == undefined || ranks.length < 1) return false;
+        if(ranks == undefined || ranks.length < 2) return;
 
-        self.state.bestHeight = ranks[0];
+        self.state[key] = ranks[0];
 
         return ranks[0];
 
@@ -344,8 +351,97 @@ Network.prototype = {
         // connect to the network
         pool.connect();
 
-        return pool;
+        pool.on('peerready', function(peer, addr) {
+            
+            console.log("Connect: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
 
+            self.peerData[peer.host] = addr;
+
+            if(self.quorum != true && self.discoveredPeers >= self.quorum){
+
+                self.quorum = true;
+                self.lastBlock = self.setState("bestHeight");
+
+                send("log", "quorum established");
+
+            } else if(self.quorum != true && peer.subversion.indexOf("/Satoshi:") > -1){
+
+                self.lastBlock = self.setState("bestHeight");
+                self.discoveredPeers++;
+                self.indexPeer(peer);
+
+            }
+
+        });
+
+        pool.on('peerdisconnect', function(peer, addr) {
+
+            console.log("Disconnect: " + peer.host);
+
+            self.removePeer(peer);
+            self.setState("bestHeight");
+
+        });
+
+        pool.on("peererror", function(err){
+            console.log("peererror");
+        });
+
+        pool.on("error", function(err){
+
+        });
+
+        // attach peer events
+        pool.on('peerinv', (peer, message) => {
+
+            try { 
+
+                //console.log("PeerINV: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
+
+                if(peer.subversion != undefined && peer.subversion.indexOf("/Satoshi:") > -1){
+
+                    const peerMessage = new Messages().GetData(message.inventory);
+                    peer.sendMessage(peerMessage);
+
+                } else {
+
+                    //pool._deprioritizeAddr(self.peerData[peer.host]);
+                    //pool._removeConnectedPeer(self.peerData[peer.host]);
+
+                }
+
+            } catch(err) { 
+                console.trace(err);
+            }
+
+        });
+
+        pool.on('peerblock', (peer, { network, block }) => {
+
+            console.log("PeerBlock: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
+            console.log("peer best height submitting block: "+peer.bestHeight);
+
+            if(self.lastBlock != undefined && self.lastBlock != false) {
+
+                block.lastBlock = self.lastBlock;
+
+                onNewBlock(peer, block);
+
+            }
+
+        });
+
+        // Erors with bloom filter will need custom parser 
+        //pool.on('peertx', (peer, { network, block }) => {
+        //    self.indexPeer(peer); 
+        //    self.setState("bestHeight");
+        //});
+
+        self.poolInterval = setInterval(function() {
+
+            log.info(ID+" rover peers "+pool.numberConnected());
+
+        }, 45000);
 
     }
 
@@ -358,97 +454,19 @@ var Controller = {
 
     interfaces: [],
 
-    init: function(config) {
+    start: function(config) {
 
         var network = new Network(config);
 
-        var pool = network.connect();
+            network.connect();
 
-            pool.on('peerready', function(peer, addr) {
-                
-                //console.log("Connect: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
-
-                if(network.quorum != true && network.discoveredPeers >= network.quorum){
-
-                    network.quorum = true;
-                    network.lastBlock = network.setState();
-
-                    send("log", "quorum established");
-
-                } else if(network.quorum != true && peer.subversion.indexOf("/Satoshi:") > -1){
-
-                    network.discoveredPeers++;
-                    network.indexPeer(peer);
-
-                }
-
-            });
-
-            pool.on('peerdisconnect', function(peer, addr) { network.removePeer(peer); });
-
-            pool.on("peererror", function(err){ });
-
-            pool.on("error", function(err){ });
-
-            // attach peer events
-            pool.on('peerinv', (peer, message) => {
-
-                try { 
-
-                    //console.log("PeerINV: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
-
-                    if(peer.subversion != undefined && peer.subversion.indexOf("/Satoshi:") > -1){
-
-                        const peerMessage = new Messages().GetData(message.inventory);
-                        peer.sendMessage(peerMessage);
-
-                    } else {
-
-                        //pool._deprioritizeAddr(self.peerData[peer.host]);
-                        //pool._removeConnectedPeer(self.peerData[peer.host]);
-
-                    }
-
-                } catch(err) { 
-                    console.trace(err);
-                }
-
-            });
-
-            pool.on('peerblock', (peer, { net, block }) => {
-
-                log.info("PeerBlock: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
-                //console.log("peer best height submitting block: "+peer.bestHeight);
-                //console.log("LAST BLOCK "+network.state.bestHeight);
-
-                if(network.state.bestHeight != undefined) { 
-
-                    block.lastBlock = network.state.bestHeight;
-
-                    if(block.lastBlock != undefined && block.lastBlock != false) {
-
-                        onNewBlock(peer, block, function(err, num){
-
-                            console.log("setting new block: "+num);
-                            network.state.bestHeight = num;
-
-                        });
-
-                    }
-
-                }
-
-            });
-
-            setInterval(function() {
-
-                log.info(ID+" rover peers "+pool.numberConnected());
-
-            }, 45000);
-
+            Controller.interfaces.push(network);
 
     },
 
+    init: function(config) {
+        Controller.start(config);
+    },
 
     close: function(){
 
