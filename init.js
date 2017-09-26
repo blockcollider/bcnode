@@ -35,30 +35,30 @@ var identity = new Identity();
 
         } else {
 
-            log.info("identity setup done");
+            log.info("identity setup complete");
 
-			console.log(identity);
 			global._BlockColliderIdentity = identity;
 
-            //var network = new Network(); 
+            var network = new Network(); 
 
-            //    network.setupConfig(function() {
+            var rovers = new RoverBase(); 
 
-                    var rovers = new RoverBase(); 
+                network.setup(function() {
 
-                        rovers.load("btc");
-                        rovers.load("eth");
+                    network.connect(); 
 
-                        rovers.events.on("log", function(msg){
-                            console.log(msg);
-                        });
+                    //rovers.load("btc");
+                    //rovers.load("eth");
 
-                        rovers.events.on("block", function(msg){
-                            console.log("new "+msg.id+" block "+msg.data.blockHash);
-                        });
+                    rovers.events.on("log", function(msg){
+                        console.log(msg);
+                    });
 
+                    rovers.events.on("block", function(msg){
+                        console.log("new "+msg.id+" block "+msg.data.blockHash);
+                    });
 
-            //    });
+               });
 
         }
 
