@@ -151,65 +151,66 @@ Network.prototype = {
 
     },
 
-    connect: function(cb){
+    connect: function(){
 
-		var self = this;
 
-		var gossipmonger = new Gossipmonger(
-			{ // peerInfo
-				id: "localId",
-				transport: { // default gossipmonger-tcp-transport data
-					host: "localhost",
-					port: 9742
-				}
-			},
-			{ 
-				seeds: [
-					{id: "seed1", 
-						transport: {
-							host: "34.232.77.145",
-							port: 9993
-						}
-					},
-				]
-			});
+		//var self = this;
 
-		gossipmonger.on('error', function (error) {
-			console.dir(error); 
-		});
+		//var gossipmonger = new Gossipmonger(
+		//	{ // peerInfo
+		//		id: "localId",
+		//		transport: { // default gossipmonger-tcp-transport data
+		//			host: "localhost",
+		//			port: 9742
+		//		}
+		//	},
+		//	{ 
+		//		seeds: [
+		//			{id: "seed1", 
+		//				transport: {
+		//					host: "34.232.77.145",
+		//					port: 9993
+		//				}
+		//			},
+		//		]
+		//	});
 
-		gossipmonger.on('new peer', function (newPeer) {
-			console.log("found new peer " + newPeer.id + " at " + newPeer.transport);
-		});
+		//gossipmonger.on('error', function (error) {
+		//	console.dir(error); 
+		//});
 
-		gossipmonger.on('peer dead', function (deadPeer) {
-			console.log("peer " + deadPeer.id + " is now assumed unreachable");
-		});
+		//gossipmonger.on('new peer', function (newPeer) {
+		//	console.log("found new peer " + newPeer.id + " at " + newPeer.transport);
+		//});
 
-		gossipmonger.on('peer live', function (livePeer) {
-			console.log("peer " + livePeer.id + " is live again");
-		});
+		//gossipmonger.on('peer dead', function (deadPeer) {
+		//	console.log("peer " + deadPeer.id + " is now assumed unreachable");
+		//});
 
-		gossipmonger.on('update', function (peerId, key, value) {
-			console.log("peer " + peerId + " updated key " + key + " with " + value);
-		});
+		//gossipmonger.on('peer live', function (livePeer) {
+		//	console.log("peer " + livePeer.id + " is live again");
+		//});
 
-		/* **IMPORTANT**
-		 * Typically, one would create a `transport`, start it (call listen())
-		 * and then pass it in as `options.transport` in Gossipmonger constructor. This
-		 * makes the implementation of Gossipmonger less complex and simpler.
-		 * For development purposes, Gossipmonger comes with a default transport, so
-		 * it's easier to get a feel for it, but because of that, if you don't provide
-		 * a `transport`, the default one will be used but **you need to start it**.
-		 * The call illustrated below will start the default transport. If this isn't done,
-		 * you will not receive communications from other gossipmongers. */
-		gossipmonger.transport.listen(function () {
-			console.log('default transport is listening');
-		});
+		//gossipmonger.on('update', function (peerId, key, value) {
+		//	console.log("peer " + peerId + " updated key " + key + " with " + value);
+		//});
 
-		gossipmonger.gossip(); // start gossiping
+		///* **IMPORTANT**
+		// * Typically, one would create a `transport`, start it (call listen())
+		// * and then pass it in as `options.transport` in Gossipmonger constructor. This
+		// * makes the implementation of Gossipmonger less complex and simpler.
+		// * For development purposes, Gossipmonger comes with a default transport, so
+		// * it's easier to get a feel for it, but because of that, if you don't provide
+		// * a `transport`, the default one will be used but **you need to start it**.
+		// * The call illustrated below will start the default transport. If this isn't done,
+		// * you will not receive communications from other gossipmongers. */
+		//gossipmonger.transport.listen(function () {
+		//	console.log('default transport is listening');
+		//});
 
-		gossipmonger.update("this is that key", 10);
+		//gossipmonger.gossip(); // start gossiping
+
+		//gossipmonger.update("this is that key", 10);
 
     }
 }

@@ -3,6 +3,8 @@ var keccak = require('keccak');
 var crypto = require('crypto'); 
 var uuid = require('node-uuid');
 var btoa = require('btoa');
+var avon = require('avon');
+
 
 var strings = {
 
@@ -17,7 +19,18 @@ var strings = {
 
     },
 
+    blake2b: function(str){
+        if(str == undefined || str.constructor != String){
+            return Error("failed to create blake2b of string");
+        }
+        return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.B).toString("hex");
+
+    },
+
 	keccak: function(str) {
+        if(str == undefined || str.constructor != String){
+            return Error("failed to create keccak256 of string");
+        }
 		return keccak('keccak256').update(str).digest('hex')
 	},
 
@@ -36,6 +49,15 @@ var strings = {
             return Error("failed to create sha of string");
         }
         return crypto.createHash("sha1").update(str).digest('hex');
+
+    }, 
+
+    sha256: function(str){
+
+        if(str == undefined || str.constructor != String){
+            return Error("failed to create sha of string");
+        }
+        return crypto.createHash("sha256").update(str).digest('hex');
 
     }, 
 

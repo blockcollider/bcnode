@@ -12,7 +12,6 @@ var Identity = require("./identity.js");
 var Network = require("./network.js");
 var RoverBase = require("./roverbase.js");
 
-
 function readFile(){
 
     try {
@@ -36,25 +35,36 @@ var identity = new Identity();
         } else {
 
             log.info("identity setup complete");
+			log.info("collider base account "+data.colliderBase.address);
 
 			global._BlockColliderIdentity = identity;
 
             var network = new Network(); 
 
-            var rovers = new RoverBase(); 
+            var base = new RoverBase(); 
 
                 network.setup(function() {
 
                     network.connect(); 
 
-                    //rovers.load("btc");
-                    //rovers.load("eth");
+                    //base.launchRover("btc");
+                    //base.launchRover("eth");
+                    //base.launchRover("rsk");
+                    //base.launchRover("xcp");
+                    //base.launchRover("wav");
+                    //base.launchRover("lsk");
+                    //base.launchRover("urb");
 
-                    rovers.events.on("log", function(msg){
+                    base.events.on("work", function(msg){
+						console.log("*******************");
                         console.log(msg);
                     });
 
-                    rovers.events.on("block", function(msg){
+                    base.events.on("log", function(msg){
+                        console.log(msg);
+                    });
+
+                    base.events.on("block", function(msg){
                         console.log("new "+msg.id+" block "+msg.data.blockHash);
                     });
 

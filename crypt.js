@@ -1,83 +1,101 @@
 
 
-var { randomBytes } = require('crypto');
-var forge = require('node-forge');
-var ed = require('ed25519-supercop');
+var crypto = require('crypto');
 var secp256k1 = require('secp256k1');
+var randomBytes = crypto.randomBytes;
+var bitPony = require('bitpony');
+var string = require('./strings.js');
 
 
 function Crypt() { }
 
 Crypt.prototype = {
 
+	/**************************************
+		BTC Variable_length_integer
+	*/
+	readInt: function(i){
+		return bitPony.var_int.read(i);
+	},
+
+	writeInt: function(i){
+		return bitPony.var_int.write(i);
+	},
+
+	/**************************************
+		BTC Variable_length_string
+	*/
+	readStr: function(i){
+		return bitPony.string.read(i);
+	},
+
+	writeStr: function(i){
+		return bitPony.string.write(i);
+	},
+
+	/**************************************
+		BTC network byte order 
+	*/
+	readHash: function(i){
+		return bitPony.string.read(i);
+	},
+
+	writeHash: function(i){
+		return bitPony.string.write(i);
+	},
+
 	createSecPrivateKey: function(){
 		return randomBytes(32);
 	},
 
-	privateKeyVerify: function(key){
+	validSecPrivateKey: function(key){
 		return secp256k1.privateKeyVerify(key);
 	},
 
-	publicKeyCreate: function(privKey){
+	createSecPublicKey: function(privKey){
 		return secp256k1.publicKeyCreate(privKey);
 	},
 
 	signSec: function(msg, privKey){
-		return secp256k1.sign(msg, privKey);
+		return secp256k1.sign(new Buffer(crypto.createHash("sha256").update(msg).digest("hex"), "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
 	},
 
-	validSec: function(msg, sig, pubKey){
+	validSecSignature: function(msg, sig, pubKey){
 		return secp256k1.verify(msg, sig, pubKey);
-	}
+	},
 
-	/*
-		ed25519
+	/**************************************
+		AES-256-CTR
 	*/
-	createSeed: function() { 
-		return ed.createSeed()
-	},
+    encrypt: function(text, pass){
 
-	createEdPrivateKey: function(seed){
-		return ed.createKeyPair(seed);
-	},
+		  var iv = crypto.randomBytes(16);
+		  var p = new Buffer(crypto.createHash("sha256").update(pass).digest("hex"), "hex");
+		  var cipher = crypto.createCipheriv("AES-256-CTR", p, iv)
+		  var encrypted = cipher.update(text)
+		  	  encrypted = Buffer.concat([encrypted, cipher.final()]);
 
-	signEd: function(msg, pub, secret){
-		return ed.sign(msg, pub, secret);
-	},
+    	  return iv.toString('hex') + ':' + encrypted.toString('hex');
 
-	validEd: function(sig, msg, pub){
-		return ed.verify(sig, msg, pub);	
-	},
+    },
 
-	// password based key derivation
-	passwordKeyDerivation: function(pass, data) {
+	decrypt: function(text, pass){
 
-		var keySizeInBits = 128;
-		var keySize = 16;
-		var salt = forge.random.getBytes(8);  
-		var key = forge.pkcs5.pbkdf2(pass, salt, 1000, keySizeInBits);  
-		var iv = forge.random.getBytes(16);
-		var input = forge.util.createBuffer(data);  
-		var cipher = forge.aes.startEncrypting(key, iv);  
-			cipher.update(input);  
+		  var parts = text.split(":");
+		  var iv = new Buffer(parts.shift(),"hex");
+		  var encryptedText = new Buffer(parts.join(":"), "hex");
+		  var p = mhash("ripemd128", pass);
 
-		var status = cipher.finish();  
-		var ciphertext = cipher.output.data.toHex();
+		  var decipher = crypto.createDecipheriv("AES-256-CTR", p, iv);
+		  var dec = decipher.update(encryptedText);
 
-		console.log(ciphertext);
+	      dec = Buffer.concat([dec, decipher.final()]);
 
-	},
-
-	decryptWithKey(pass, iv){
-
+		  return dec.toString();
 
 	}
 
 }
 
-var crypt = new Crypt();
-
-var a= crypt.encryptWithPassword("test", "hello");
-
-console.log(a);
+module.exports = Crypt;
 
