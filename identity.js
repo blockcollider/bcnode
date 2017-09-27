@@ -4,6 +4,7 @@ var os = require('os');
 var network = require("network");
 var strings = require('./strings.js');
 var time = require("./time.js");
+var Account = require("./account.js");
 var getos = require('getos');
 
 var log = global.log;
@@ -138,7 +139,34 @@ identity.prototype = {
 					self[k] = cfg[k];
 				});
 
-				self.saveToDisk(self, cb);
+                var account = new Account({
+                    path: self.identityPath,
+					file: "accounts.json"
+                });
+
+				if(self.colliderBase == undefined){
+
+					account.networkKey = self.networkKey;
+
+    				account.createColliderBase(function(err, base){
+
+						if(err) { console.trace(err); process.exit(3); } else {
+
+							self.colliderBase = base;
+
+							log.info("collider base account created: "+base.address);
+
+							self.saveToDisk(self, cb);
+
+						}
+
+					});
+
+				} else {
+
+					self.saveToDisk(self, cb);
+
+				}
 
 			}
 

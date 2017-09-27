@@ -2,9 +2,13 @@
 
 var fs = require('fs-extra')
 var portscanner = require('portscanner')
-var Gossipmonger = require('./dht.js'),
-    TcpTransport = require('gossipmonger-tcp-transport'),
-    util = require('util');
+var ee = require('events').EventEmitter; 
+var BlockCollider = require('./blockcollider.js');
+var Gossipmonger = require('./dht.js');
+var TcpTransport = require('gossipmonger-tcp-transport');
+var util = require('util');
+
+var time = require("./time.js");
 
 var log = global.log;
 
@@ -27,7 +31,7 @@ function getOpenPort(a, cb){
 
 function Network(opts){
 
-    log.info("loading network interface");
+    log.info("initializing network");
 
     if (!global._BlockColliderIdentity) {
         log.error("cannot start network module without load identity configuration");
@@ -35,6 +39,7 @@ function Network(opts){
     }
 
     var self = this;
+
     var config = global._BlockColliderIdentity;
 
     if(opts != undefined){
@@ -54,6 +59,8 @@ function Network(opts){
         self.networkKey = config.networkKey;
 	}
 
+    self.blockCollider = new BlockCollider();
+
 }
 
 
@@ -66,7 +73,35 @@ Network.prototype = {
 
 	transport: false,
 
-    setupConfig: function(cb) {
+    events: new ee(),
+
+	saveToDisk: function(obj, cb){
+
+		fs.ensureDir(obj.networkPath, function(err){
+
+			if(err) { cb(err); } else {
+
+                if(obj.createdDate == undefined){
+
+				    obj.createdDate = time.now();
+
+                }
+
+				var str = JSON.stringify(obj);	
+
+				fs.writeFile(obj.networkPath+"/"+obj.networkFile, str, "utf8", function(err){
+					if(err) { cb(err); } else {
+						cb(null, obj);
+					}
+				});
+
+			}
+
+		});
+
+	},
+
+    setup: function(cb) {
 
         var self = this;
 
@@ -104,21 +139,78 @@ Network.prototype = {
 					
 					self.gossipTcpPort = port;
 
+                    self.saveToDisk(self, cb);
+
 				});
 
             }
 
         });
 
+        return self.events;
+
     },
 
-    createInterface: function(cb){
+    connect: function(){
 
-		var self = this;
 
-        self.transport = TcpTransport.listen({port: self.gossipTcpPort }, function () {
-			cb(null, true);
-        });
+		//var self = this;
+
+		//var gossipmonger = new Gossipmonger(
+		//	{ // peerInfo
+		//		id: "localId",
+		//		transport: { // default gossipmonger-tcp-transport data
+		//			host: "localhost",
+		//			port: 9742
+		//		}
+		//	},
+		//	{ 
+		//		seeds: [
+		//			{id: "seed1", 
+		//				transport: {
+		//					host: "34.232.77.145",
+		//					port: 9993
+		//				}
+		//			},
+		//		]
+		//	});
+
+		//gossipmonger.on('error', function (error) {
+		//	console.dir(error); 
+		//});
+
+		//gossipmonger.on('new peer', function (newPeer) {
+		//	console.log("found new peer " + newPeer.id + " at " + newPeer.transport);
+		//});
+
+		//gossipmonger.on('peer dead', function (deadPeer) {
+		//	console.log("peer " + deadPeer.id + " is now assumed unreachable");
+		//});
+
+		//gossipmonger.on('peer live', function (livePeer) {
+		//	console.log("peer " + livePeer.id + " is live again");
+		//});
+
+		//gossipmonger.on('update', function (peerId, key, value) {
+		//	console.log("peer " + peerId + " updated key " + key + " with " + value);
+		//});
+
+		///* **IMPORTANT**
+		// * Typically, one would create a `transport`, start it (call listen())
+		// * and then pass it in as `options.transport` in Gossipmonger constructor. This
+		// * makes the implementation of Gossipmonger less complex and simpler.
+		// * For development purposes, Gossipmonger comes with a default transport, so
+		// * it's easier to get a feel for it, but because of that, if you don't provide
+		// * a `transport`, the default one will be used but **you need to start it**.
+		// * The call illustrated below will start the default transport. If this isn't done,
+		// * you will not receive communications from other gossipmongers. */
+		//gossipmonger.transport.listen(function () {
+		//	console.log('default transport is listening');
+		//});
+
+		//gossipmonger.gossip(); // start gossiping
+
+		//gossipmonger.update("this is that key", 10);
 
     }
 }

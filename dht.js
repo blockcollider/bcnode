@@ -108,7 +108,6 @@ var Gossipmonger = module.exports = function Gossipmonger (peerInfo, options) {
               Each delta is of the form: [peerId, key, value, version].
     */
     self.transport.on('deltas', function (remotePeer, deltas) {
-
         self.emit('deltas receive', remotePeer, deltas);
         var remote = self.storage.get(remotePeer.id);
 
@@ -293,16 +292,11 @@ Gossipmonger.prototype.gossip = function gossip () {
     // gossip with live peers
     var livePeers = self.storage.livePeers();
     var digestToSend = self.digest(livePeers);
-
-    console.log(digestToSend);
-
     if (livePeers.length > 0) {
         // select random live peer
         var livePeer = livePeers[Math.floor(Math.random() * livePeers.length)];
-
         self.emit('digest send', livePeer, digestToSend);
         self.transport.digest(livePeer, self.localPeer, digestToSend);
-
     }
 
     // maybe try to gossip with a dead peer

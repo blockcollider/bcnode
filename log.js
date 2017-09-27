@@ -8,7 +8,7 @@ function logger(opts) {
 		return new (winston.Logger)({
 			transports: [
 			  new (winston.transports.Console)(),
-			  new (winston.transports.File)({ filename: 'helix.log' })
+			  new (winston.transports.File)({ filename: 'BLOCKCOLLIDER.log' })
 			]
 		});
 

@@ -8,6 +8,27 @@ var events = new ee();
 var log = global.log;
 
 
+socket.on("connection", function(client){
+
+    var id = global._BlockColliderIdentity;
+    var base = {
+        publicKey: id.colliderBase.publicKey,
+        address: id.colliderBase.address
+    }
+    
+    client.emit("setup", base);
+
+    client.on("work", function(msg){
+        console.log("-------------------WORK-----------------------");
+        console.log(msg);
+        events.emit("work", msg); 
+    });
+
+});
+
+
+
+
 function RoverBase(opts) {
 
     var options = {
@@ -29,7 +50,7 @@ RoverBase.prototype = {
 
     events: events, 
 
-    load: function(roverId){
+    launchRover: function(roverId){
 
         var self = this;
 
