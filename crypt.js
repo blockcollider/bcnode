@@ -26,11 +26,11 @@ Crypt.prototype = {
 		BTC Variable_length_string
 	*/
 	readStr: function(i){
-		return bitPony.string.read(i);
+		return bitPony.string.read(i).toString();
 	},
 
 	writeStr: function(i){
-		return bitPony.string.write(i);
+		return bitPony.string.write(i).toString('hex');
 	},
 
 	/**************************************
@@ -57,7 +57,8 @@ Crypt.prototype = {
 	},
 
 	signSec: function(msg, privKey){
-		return secp256k1.sign(new Buffer(crypto.createHash("sha256").update(msg).digest("hex"), "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
+		return secp256k1.sign(new Buffer(string.blake2s(msg), "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
+		//return secp256k1.sign(new Buffer(crypto.createHash("sha256").update(msg).digest("hex"), "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
 	},
 
 	validSecSignature: function(msg, sig, pubKey){
@@ -70,7 +71,8 @@ Crypt.prototype = {
     encrypt: function(text, pass){
 
 		  var iv = crypto.randomBytes(16);
-		  var p = new Buffer(crypto.createHash("sha256").update(pass).digest("hex"), "hex");
+		  var p = new Buffer(string.blake2bl(pass), "hex"); 
+		  //var p = new Buffer(crypto.createHash("sha256").update(pass).digest("hex"), "hex");
 		  var cipher = crypto.createCipheriv("AES-256-CTR", p, iv)
 		  var encrypted = cipher.update(text)
 		  	  encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -84,9 +86,8 @@ Crypt.prototype = {
 		  var parts = text.split(":");
 		  var iv = new Buffer(parts.shift(),"hex");
 		  var encryptedText = new Buffer(parts.join(":"), "hex");
-		  var p = mhash("ripemd128", pass);
-
-		  var decipher = crypto.createDecipheriv("AES-256-CTR", p, iv);
+		  var p = new Buffer(string.blake2bl(pass), "hex");
+		  var decipher = crypto.createDecipheriv("AES-128-CTR", p, iv);
 		  var dec = decipher.update(encryptedText);
 
 	      dec = Buffer.concat([dec, decipher.final()]);
@@ -98,4 +99,5 @@ Crypt.prototype = {
 }
 
 module.exports = Crypt;
+
 

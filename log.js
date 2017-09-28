@@ -1,5 +1,7 @@
 
-var winston = require('winston');
+const winston = require('winston');
+const moment = require('moment');
+const tsFormat = () => (moment().utc().format("YYYYMMDDHHmmss"));
 
 function logger(opts) {
 
@@ -7,7 +9,10 @@ function logger(opts) {
 
 		return new (winston.Logger)({
 			transports: [
-			  new (winston.transports.Console)(),
+			  new (winston.transports.Console)({ 
+                   timestamp: tsFormat,
+                   colorize: true 
+              }),
 			  new (winston.transports.File)({ filename: 'BLOCKCOLLIDER.log' })
 			]
 		});

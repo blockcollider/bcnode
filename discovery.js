@@ -1,15 +1,65 @@
+
 var swarm = require('discovery-swarm')
+var moment = require('moment');
+var crypto = require('crypto');
+var ee = require("events").EventEmitter;
+var string = require("./strings.js");
+var Log = require('./log.js');
 
-var sw = swarm()
+var log = new Log(); 
 
-sw.listen(9960)
+function Discovery(opts) {
 
-    // take the last 3 blocks of any compatible blockchain and concatentate the first 12 characters
-    // listen for peers from the last three of any blocks
+    var options = {
+        port: 16600
+    }
 
-sw.join('ubuntu-14.04') // can be any id/name/hash
+    if(opts != undefined){
 
-sw.on('connection', function (connection) {
-    console.log(connection);
-  console.log('found + connected to peer')
-})
+        Object.keys(opts).map(function(k){
+            options[k] = opts[k]; 
+        });
+
+    }
+
+    Object.keys(options).map(function(k){
+        this[k] = options[k];
+    });
+
+    this.swarm = swarm();
+}
+
+
+Discovery.prototype = {
+
+    events: new ee(),
+
+    start: function() {
+
+        var self = this;
+
+            self.hash = string.blake2bl("bc+"+moment().format("YYYY"));
+
+            self.swarm.listen(self.port);
+
+            self.swarm.join(self.hash); 
+
+			log.info("banner key assigned "+self.hash);
+
+            return self.swarm;
+
+    }, 
+
+    stop: function(){
+
+        var self = this;
+
+            self.swarm.leave(self.hash);
+
+    }
+    
+}
+
+module.exports = Discovery;
+
+

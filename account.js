@@ -3,9 +3,23 @@ var pt = require('prompt');
 var Crypt = require("./crypt.js");
 var crypt = new Crypt();
 var colors = require("colors/safe");
+var crypto = require('crypto');
 var fs = require('fs-extra')
 var string = require('./strings.js');
 var bitcoin = require('bitcoinjs-lib')
+var keythereum = require('keythereum');
+var ethUtil = require('ethereumjs-util')
+var ICAP = require('ethereumjs-icap');
+
+
+function generateDirectAddress () {
+  while(true) {
+    var privateKey = crypto.randomBytes(32) 
+    if (ethUtil.privateToAddress(privateKey)[0] == 0) {
+      return privateKey;
+    }
+  }
+}
 
 function Account(opts) {
 
@@ -89,23 +103,77 @@ Account.prototype = {
 
 			if(err) { cb(err); } else {
 
-				console.log("now in acccount: "+self.networkKey);
+				log.info("generating keys");
 
-				// Bitcoin
-				var privateKey = crypt.createSecPrivateKey();
-				var publicKey = crypt.createSecPublicKey(privateKey);
-				var blakeKey = string.blake2b(publicKey.toString("hex")); 
-				var publicKeyHash = bitcoin.crypto.hash160(blakeKey);
-				var addr = bitcoin.address.toBase58Check(publicKeyHash, bitcoin.networks.bitcoin.pubKeyHash)
+				var params = { keyBytes: 32, ivBytes: 16 };
 
-				var account = {
-					publicKey: publicKey.toString("hex"), 
-					address: addr,
-					ePrivateKey: crypt.encrypt(privateKey.toString("hex"), result.password),
-					networkSig: crypt.signSec(self.networkKey, privateKey.toString("hex"))  
-				}
+				var options = {
+				  kdf: "pbkdf2",
+				  cipher: "aes-128-ctr",
+				  kdfparams: {
+					c: 262144,
+					dklen: 32,
+					prf: "hmac-sha256"
+				  }
+				};
 
-				cb(null, account);
+				keythereum.create(params, function (dk) {
+
+					dk.privateKey = generateDirectAddress();
+
+					keythereum.dump(result.password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
+
+						// Bitcoin
+						//var privateKey = crypt.createSecPrivateKey();
+
+						var privateKey = dk.privateKey; 
+						var publicKey = crypt.createSecPublicKey(privateKey);
+						var publicKeyHash = bitcoin.crypto.hash160(publicKey);
+						var addr = bitcoin.address.toBase58Check(publicKeyHash, bitcoin.networks.bitcoin.pubKeyHash)
+
+						try { 
+
+							var account = {
+								publicKey: publicKey.toString("hex"), 
+								address: ICAP.fromAddress("0x"+keyObject.address),
+								longAddress: "0x"+keyObject.address,	
+								shortAddress: addr,
+								ePrivateKey: crypt.encrypt(privateKey.toString("hex"), result.password),
+								networkSig: crypt.signSec(self.networkKey, privateKey.toString("hex")) 
+							}
+
+							fs.ensureDir(global.path+"/keypairs", function(err){
+
+								if(err) { cb(err); } else {
+
+									fs.writeFile(global.path+"/keypairs/"+account.address+".json", JSON.stringify(keyObject), "utf8", function(err){
+
+										if(err) { cb(err); } else {
+
+											cb(null, account);
+
+										}
+
+									}); 
+
+								}
+
+							});	
+
+
+						} catch(err) {
+
+							log.error("unable to create keys rerunning");
+
+							self.createAccount(cb);
+
+						}
+
+						
+					});
+
+
+				});
 
 			}
 	  });
