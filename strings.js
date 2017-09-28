@@ -5,7 +5,6 @@ var uuid = require('node-uuid');
 var btoa = require('btoa');
 var avon = require('avon');
 
-
 var strings = {
 
     swapOrder: function(str){
@@ -23,8 +22,33 @@ var strings = {
         if(str == undefined || str.constructor != String){
             return Error("failed to create blake2b of string");
         }
+		/// here should set some hard flag for if machine architecture is 64 bit / multi core
+		// avon.ALGORITHMS.B  // avon.ALGORITHMS.BP 
         return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.B).toString("hex");
+    },
 
+    blake2bl: function(str){
+
+		// blake 2b-light
+        if(str == undefined || str.constructor != String){
+            return Error("failed to create blake2bl of string");
+        }
+		/// here should set some hard flag for if machine architecture is 64 bit / multi core
+		// avon.ALGORITHMS.B  // avon.ALGORITHMS.BP 
+        return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.B).toString("hex").slice(64, 128);
+    },
+
+    blake2bBuffer: function(buf){
+        return avon.sumBuffer(buf, avon.ALGORITHMS.B).toString("hex");
+    },
+
+    blake2s: function(str){
+        if(str == undefined || str.constructor != String){
+            return Error("failed to create blake2s of string");
+        }
+		/// here should set some hard flag for if machine architecture is 64 bit / multi core
+		// avon.ALGORITHMS.S  // avon.ALGORITHMS.SP 
+        return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.SP).toString("hex");
     },
 
 	keccak: function(str) {

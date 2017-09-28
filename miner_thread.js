@@ -1,13 +1,13 @@
 
 "strict";
 
-var avon = require('avon');
 var _ = require('lodash');
 var crypto = require('crypto');
 var distance = require('./distance.js');
 var generating = false;
 var fuz = require('clj-fuzzy');
 var big = require('big.js');
+var string = require("./strings.js");
 
 function randomStr() {
   return crypto.randomBytes(32).toString("hex");
@@ -36,7 +36,7 @@ Worker.prototype = {
             if(self.work.length > 0){
 
                 var val = randomStr(); 
-                var test = crypto.createHash("sha256").update(val).digest('hex');
+                var test = string.blake2bl(val);
                 var variance = 0;
                 var list = [];
                 

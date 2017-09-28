@@ -1,14 +1,23 @@
 
 
-var fs = require('fs-extra')
-var portscanner = require('portscanner')
-var ee = require('events').EventEmitter; 
-var BlockCollider = require('./blockcollider.js');
-var Gossipmonger = require('./dht.js');
-var TcpTransport = require('gossipmonger-tcp-transport');
-var util = require('util');
+const util = require('util');
+const fs = require('fs-extra')
+const portscanner = require('portscanner')
+const kad = require('kad');
+const ee = require('events').EventEmitter; 
+const BlockCollider = require('./blockcollider.js');
+const Gossipmonger = require('./dht.js');
+const TcpTransport = require('gossipmonger-tcp-transport');
+const quasar = require('kad-quasar');
+const { Transform } = require('stream');
+const Discovery = require('./discovery.js'); 
+const Crypt = require("./crypt.js");
+const string = require("./strings.js");
+const time = require("./time.js");
 
-var time = require("./time.js");
+////var DHT = require('bittorrent-dht')
+
+var crypt = new Crypt(); 
 
 var log = global.log;
 
@@ -153,64 +162,125 @@ Network.prototype = {
 
     connect: function(){
 
+		var self = this;
 
-		//var self = this;
+		log.info("starting DHT at port "+self.gossipTcpPort);
 
-		//var gossipmonger = new Gossipmonger(
-		//	{ // peerInfo
-		//		id: "localId",
-		//		transport: { // default gossipmonger-tcp-transport data
-		//			host: "localhost",
-		//			port: 9742
-		//		}
-		//	},
-		//	{ 
-		//		seeds: [
-		//			{id: "seed1", 
-		//				transport: {
-		//					host: "34.232.77.145",
-		//					port: 9993
-		//				}
-		//			},
-		//		]
-		//	});
+        var node = kad({
+		  identity: string.sha(self.networkKey),
+          transport: new kad.UDPTransport(),
+          storage: require('levelup')(self.networkPath+'/dht.db'),
+          contact: { hostname: 'localhost', port: self.gossipTcpPort  }
+        });
 
-		//gossipmonger.on('error', function (error) {
-		//	console.dir(error); 
+        node.listen(self.gossipTcpPort);
+
+		node.plugin(quasar);
+
+		log.info("starting discovery service");
+
+        var discovery = new Discovery();
+
+        var scan = discovery.start({
+                maxConnections: 45,
+                id: self.networkKey
+            });
+
+            scan.on("connection", function(peer, info, type){
+
+                peer.write(crypt.writeStr("i*localhost*"+self.gossipTcpPort));
+
+                peer.on("data", function(data){
+
+                    var msg = crypt.readStr(data.toString(""));
+
+                    var d = msg.split("*");
+
+                    var type = d[0];
+
+                    if(type == "i"){
+
+                        // URGENT: Must include strict typing here 
+
+                        var host = d[1];
+                        var port = d[2];
+
+                        var payload = {
+                            hostname: host,
+                            port: port
+                        }
+
+                        var req = [
+                           string.sha(data.toString("")),
+                           payload
+                        ];
+
+                        node.join(req, function(err){
+
+                            if(err) { log.error(err); } else {
+
+                            }
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+        node.use((req, res, next) => {
+          //let [identityString] = request.contact
+
+		  if(req.method == "STORE"){
+
+		  }
+
+		  console.log(req);
+          //if .includes(identityString)) {
+          //  return next(new Error('You have been blacklisted'));
+          //}
+          next();
+
+        });
+
+		//node.rpc.serializer.prepend(new Transform({
+		//  transform: function(data, encoding, callback) {
+
+		//  },
+		//  objectMode: true
+		//}));
+
+		//node.rpc.deserializer.append(new Transform({
+		//  transform: function(data, encoding, callback) {
+
+		//  },
+		//  objectMode: true
+		//}));
+
+
+		//node.quasarSubscribe("block", function(msg){
+
 		//});
 
-		//gossipmonger.on('new peer', function (newPeer) {
-		//	console.log("found new peer " + newPeer.id + " at " + newPeer.transport);
+		//node.quasarSubscribe("superblock", function(msg){
+
 		//});
 
-		//gossipmonger.on('peer dead', function (deadPeer) {
-		//	console.log("peer " + deadPeer.id + " is now assumed unreachable");
+		//node.quasarSubscribe("tx", function(msg){
+
 		//});
 
-		//gossipmonger.on('peer live', function (livePeer) {
-		//	console.log("peer " + livePeer.id + " is live again");
-		//});
+        //node.on("join", function(peer){
+        //    log.info("node connected to "+node.router.length+" peers");
+        //});
 
-		//gossipmonger.on('update', function (peerId, key, value) {
-		//	console.log("peer " + peerId + " updated key " + key + " with " + value);
-		//});
+        node.on("error", function(err){
+            log.error(err);
+        });
 
-		///* **IMPORTANT**
-		// * Typically, one would create a `transport`, start it (call listen())
-		// * and then pass it in as `options.transport` in Gossipmonger constructor. This
-		// * makes the implementation of Gossipmonger less complex and simpler.
-		// * For development purposes, Gossipmonger comes with a default transport, so
-		// * it's easier to get a feel for it, but because of that, if you don't provide
-		// * a `transport`, the default one will be used but **you need to start it**.
-		// * The call illustrated below will start the default transport. If this isn't done,
-		// * you will not receive communications from other gossipmongers. */
-		//gossipmonger.transport.listen(function () {
-		//	console.log('default transport is listening');
-		//});
-
-		//gossipmonger.gossip(); // start gossiping
-
-		//gossipmonger.update("this is that key", 10);
+		return node;
+        
 
     }
 }
