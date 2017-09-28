@@ -87,8 +87,7 @@ Crypt.prototype = {
 		  var iv = new Buffer(parts.shift(),"hex");
 		  var encryptedText = new Buffer(parts.join(":"), "hex");
 		  var p = new Buffer(string.blake2bl(pass), "hex");
-
-		  var decipher = crypto.createDecipheriv("AES-256-CTR", p, iv);
+		  var decipher = crypto.createDecipheriv("AES-128-CTR", p, iv);
 		  var dec = decipher.update(encryptedText);
 
 	      dec = Buffer.concat([dec, decipher.final()]);

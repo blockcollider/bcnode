@@ -35,7 +35,6 @@ var identity = new Identity();
         } else {
 
             log.info("identity setup complete");
-			log.info("collider base account "+data.colliderBase.address);
 
 			global._BlockColliderIdentity = identity;
 

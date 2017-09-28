@@ -13,6 +13,7 @@ const { Transform } = require('stream');
 const Discovery = require('./discovery.js'); 
 const Crypt = require("./crypt.js");
 const string = require("./strings.js");
+const levelup = require('levelup');
 const time = require("./time.js");
 
 ////var DHT = require('bittorrent-dht')
@@ -166,10 +167,15 @@ Network.prototype = {
 
 		log.info("starting DHT at port "+self.gossipTcpPort);
 
+		var dbDir = self.networkPath+"/dbdht";
+		var dbFile = self.networkPath+"/dbdht/block.db";
+
+			fs.ensureDirSync(dbDir);
+
         var node = kad({
 		  identity: string.sha(self.networkKey),
           transport: new kad.UDPTransport(),
-          storage: require('levelup')(self.networkPath+'/dht.db'),
+          storage: levelup(dbFile),
           contact: { hostname: 'localhost', port: self.gossipTcpPort  }
         });
 
@@ -177,7 +183,6 @@ Network.prototype = {
 
 		node.plugin(quasar);
 
-		log.info("starting discovery service");
 
         var discovery = new Discovery();
 
@@ -186,11 +191,15 @@ Network.prototype = {
                 id: self.networkKey
             });
 
+		log.info("waiting for peers");
+
             scan.on("connection", function(peer, info, type){
 
                 peer.write(crypt.writeStr("i*localhost*"+self.gossipTcpPort));
 
                 peer.on("data", function(data){
+
+					self.events.emit("peerdata", data);
 
                     var msg = crypt.readStr(data.toString(""));
 
@@ -211,7 +220,7 @@ Network.prototype = {
                         }
 
                         var req = [
-                           string.sha(data.toString("")),
+                           string.blake2bls(data.toString("")),
                            payload
                         ];
 
@@ -223,7 +232,12 @@ Network.prototype = {
 
                         });
 
-                    }
+                    } else if(type == "b") {
+
+						var from = d[1];
+						var to = d[1];
+
+					}
 
                 });
 
@@ -232,11 +246,11 @@ Network.prototype = {
         node.use((req, res, next) => {
           //let [identityString] = request.contact
 
-		  if(req.method == "STORE"){
-
-		  }
-
 		  console.log(req);
+		  //if(req.method == "STORE"){
+		  //  	console.log(req);
+		  //}
+
           //if .includes(identityString)) {
           //  return next(new Error('You have been blacklisted'));
           //}
@@ -258,7 +272,6 @@ Network.prototype = {
 		//  objectMode: true
 		//}));
 
-
 		//node.quasarSubscribe("block", function(msg){
 
 		//});
@@ -271,9 +284,12 @@ Network.prototype = {
 
 		//});
 
-        //node.on("join", function(peer){
-        //    log.info("node connected to "+node.router.length+" peers");
-        //});
+        node.on("join", function(peer){
+		 	var peers = Object.keys(node.router);
+
+			console.log(peers);
+            //log.info("node connected to "+node.router.length+" peers");
+        });
 
         node.on("error", function(err){
             log.error(err);

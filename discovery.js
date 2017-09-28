@@ -4,8 +4,9 @@ var moment = require('moment');
 var crypto = require('crypto');
 var ee = require("events").EventEmitter;
 var string = require("./strings.js");
+var Log = require('./log.js');
 
-var log = global.log;
+var log = new Log(); 
 
 function Discovery(opts) {
 
@@ -37,7 +38,7 @@ Discovery.prototype = {
 
         var self = this;
 
-            self.hash = string.blake2b("bc+"+moment().format("YYYY"));
+            self.hash = string.blake2bl("bc+"+moment().format("YYYY"));
 
             self.swarm.listen(self.port);
 
