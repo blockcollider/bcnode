@@ -1,10 +1,15 @@
 
+var BASE36_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 var crypto = require('crypto');
 var secp256k1 = require('secp256k1');
+var hex = require('convert-hex');
+var bs36 = require('base-x')(BASE36_ALPHABET)
 var randomBytes = crypto.randomBytes;
+var ethUtil = require('ethereumjs-util')
 var bitPony = require('bitpony');
 var string = require('./strings.js');
+var ICAP = require('ethereumjs-icap');
 
 
 function Crypt() { }
@@ -45,24 +50,53 @@ Crypt.prototype = {
 	},
 
 	createSecPrivateKey: function(){
-		return randomBytes(32);
+	  while(true) {
+
+		var privateKey = crypto.randomBytes(32);
+		var p = ethUtil.privateToAddress(privateKey).toString("hex");
+
+		if ((p[0] === '0') && (p[1] === '0')){
+
+		  var b = bs36.encode(hex.hexToBytes(p));
+
+		  if(b.length === 31 && /[LIO01]/.test(b.slice(1, 31)) == false){
+
+		  	return privateKey.toString("hex");
+
+		  }
+
+		}
+	  }
 	},
 
 	validSecPrivateKey: function(key){
-		return secp256k1.privateKeyVerify(key);
+		return secp256k1.privateKeyVerify(new Buffer(key, "hex"));
 	},
 
 	createSecPublicKey: function(privKey){
-		return secp256k1.publicKeyCreate(privKey);
+		return secp256k1.publicKeyCreate(new Buffer(privKey, "hex")).toString("hex");
 	},
 
 	signSec: function(msg, privKey){
-		return secp256k1.sign(new Buffer(string.blake2s(msg), "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
-		//return secp256k1.sign(new Buffer(crypto.createHash("sha256").update(msg).digest("hex"), "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
+		
+		if(msg.length !== 64) {
+			log.error("data to sign must be of length 64");
+			return;
+		}
+
+		return secp256k1.sign(new Buffer(msg, "hex"), new Buffer(privKey, "hex")).signature.toString('hex');
+
 	},
 
 	validSecSignature: function(msg, sig, pubKey){
-		return secp256k1.verify(msg, sig, pubKey);
+
+		if(msg.length !== 64) {
+			log.error("data to sign must be of length 64");
+			return;
+		}
+
+		return secp256k1.verify(new Buffer(msg, "hex"), new Buffer(sig, "hex"), new Buffer(pubKey, "hex"));
+
 	},
 
 	/**************************************

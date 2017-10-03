@@ -1,4 +1,5 @@
 
+//http://lpaste.net/1227902481019699200
 var pt = require('prompt');
 var Crypt = require("./crypt.js");
 var crypt = new Crypt();
@@ -13,12 +14,7 @@ var ICAP = require('ethereumjs-icap');
 
 
 function generateDirectAddress () {
-  while(true) {
-    var privateKey = crypto.randomBytes(32) 
-    if (ethUtil.privateToAddress(privateKey)[0] == 0) {
-      return privateKey;
-    }
-  }
+	return crypt.createSecPrivateKey();
 }
 
 function Account(opts) {
@@ -45,6 +41,22 @@ function Account(opts) {
 }
 
 Account.prototype = {
+
+    createCallback: function(tx, epkcode) {
+        
+		
+
+    },
+
+    createPromise: function() {
+
+
+    },
+
+    createTransaction: function() {
+
+
+    },
 
     createColliderBase: function(cb) {
 	
@@ -128,7 +140,7 @@ Account.prototype = {
 
 						var privateKey = dk.privateKey; 
 						var publicKey = crypt.createSecPublicKey(privateKey);
-						var publicKeyHash = bitcoin.crypto.hash160(publicKey);
+						var publicKeyHash = bitcoin.crypto.hash160(new Buffer(publicKey, "hex"));
 						var addr = bitcoin.address.toBase58Check(publicKeyHash, bitcoin.networks.bitcoin.pubKeyHash)
 
 						try { 
@@ -138,8 +150,8 @@ Account.prototype = {
 								address: ICAP.fromAddress("0x"+keyObject.address),
 								longAddress: "0x"+keyObject.address,	
 								shortAddress: addr,
-								ePrivateKey: crypt.encrypt(privateKey.toString("hex"), result.password),
-								networkSig: crypt.signSec(self.networkKey, privateKey.toString("hex")) 
+								ePrivateKey: crypt.encrypt(privateKey, result.password),
+								networkSig: crypt.signSec(string.blake2bl(self.networkKey), privateKey) 
 							}
 
 							fs.ensureDir(global.path+"/keypairs", function(err){
@@ -163,6 +175,7 @@ Account.prototype = {
 
 						} catch(err) {
 
+							
 							log.error("unable to create keys rerunning");
 
 							self.createAccount(cb);
@@ -197,7 +210,7 @@ Account.prototype = {
 
 			  }
 
-			  accounts[obj.pubk] = obj;
+			  accounts[obj.publicKey] = obj;
 
 			  fs.writeFile(file, JSON.stringify(accounts), "utf8", function(err, s){
 

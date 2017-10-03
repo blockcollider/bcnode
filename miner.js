@@ -35,11 +35,11 @@ function Miner() {
 
     this.initializing = true;
 
-    this.state = g.superedges.reduce(function(all, k){
+    this.state = g.edges.reduce(function(all, k){
 
         all[k.org] = k
 
-        k.hash = false; 
+        k.block = false; 
 
         return all;
 
@@ -62,6 +62,9 @@ Miner.prototype = {
 
         var t = 0;
 
+        
+
+
         if(start > 0){
 
             var count = 0;
@@ -70,7 +73,7 @@ Miner.prototype = {
             for(var i = 0; i<start;i++){
 
                 var worker = child_process.fork("./miner_thread.js"); 
-                
+
                 worker.on("message", function(msg){
 
                     var m = msg.split(":");                     
@@ -90,7 +93,6 @@ Miner.prototype = {
                         count = 0; 
                     }
 
-
                     if(m[0] == "W"){
                         console.log("Block found!");
                         console.log(m);
@@ -98,20 +100,19 @@ Miner.prototype = {
 
                 });
 
-                
-
                 worker.on("exit", function(w){
                     console.log("worker exited");
                 }); 
+
 
                 worker.send({ 
                     type: "work", 
                     data: { 
                         threshold: 0.72,
                         work: [
-                            crypto.randomBytes(32).toString('hex'),
-                            crypto.randomBytes(32).toString('hex'),
-                            crypto.randomBytes(32).toString('hex')
+                            string.blake2bl(crypto.randomBytes(32).toString('hex')),
+                            string.blake2bl(crypto.randomBytes(64).toString('hex')),
+                            string.blake2bl(crypto.randomBytes(33).toString('hex'))
                         ]
                     }
                 });
@@ -125,9 +126,9 @@ Miner.prototype = {
                             data: { 
                                 threshold: 0.5,
                                 work: [
-                                    crypto.randomBytes(32).toString('hex'),
-                                    crypto.randomBytes(32).toString('hex'),
-                                    crypto.randomBytes(32).toString('hex')
+									string.blake2bl(crypto.randomBytes(32).toString('hex')),
+									string.blake2bl(crypto.randomBytes(64).toString('hex')),
+									string.blake2bl(crypto.randomBytes(33).toString('hex'))
                                 ]
                             }
                         });
@@ -147,19 +148,22 @@ Miner.prototype = {
 
         var self = this;
 
-        var superedges = Object.keys(self.state);
+        var edges = Object.keys(self.state);
 
-        var work = superedges.reduce(function(all, a) {
+        var work = edges.reduce(function(all, a) {
 
-            if(self.state[a].hash != undefined && self.state[a].hash != false){
-                all.push(self.state[a].hash);
+            if(self.state[a].block != undefined && self.state[a].block != false){
+                self.state[a].block.data.work = string.blake2bl(self.state[a].block.data.blockHash);
+                all.push(self.state[a].block);
             }
 
             return all;
 
         }, []);
 
-        if(work.length == superedges.length && self.mining == false){
+        self.work = work;
+
+        if(work.length == edges.length && self.mining == false){
 
             self.mining = true;
 
@@ -169,7 +173,14 @@ Miner.prototype = {
             
         }
 
-        console.log(work);
+
+        console.log("------------------ WORK --------------------");
+        console.log("------------------ WORK --------------------");
+        console.log("------------------ WORK --------------------");
+        console.log("------------------ WORK --------------------");
+        console.log("------------------ WORK --------------------");
+        console.log("------------------ WORK --------------------");
+        console.log(self.work);
 
     },
 
@@ -179,18 +190,16 @@ Miner.prototype = {
 
         var tag = block.id;
 
-        self.genesis.superedges.map(function(edge){
+        self.genesis.edges.map(function(edge){
 
              if(edge.tag == tag){
 
                 console.log("new "+tag+" : "+block.data.blockHash);
-                self.state[edge.org].hash = block.data.blockHash;
+                self.state[edge.org].block = block;
 
              }
 
         });
-
-        console.log(self.state);
 
     }
 
@@ -220,8 +229,7 @@ var socket = require('socket.io-client')('http://localhost:6600');
         miner.processWork();
     });
 
-
-miner.start();
+//miner.start();
 
 //var test = {
 //    id: "btc",
