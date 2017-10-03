@@ -110,7 +110,7 @@ function transmitRoverBlock(block){
 
 		}); 
 
-	//console.log(obj);
+	console.log(obj);
 
 	send("block", obj);
 

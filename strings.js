@@ -1,11 +1,34 @@
 
-var keccak = require('keccak');
+var keccak = require('keccak/js');
 var crypto = require('crypto'); 
+var secp256k1 = require('secp256k1');
 var uuid = require('node-uuid');
 var btoa = require('btoa');
 var avon = require('avon');
 
+var ICAP = require('ethereumjs-icap');
+
 var strings = {
+
+	isHex: function (str) {
+	  if (str.length % 2 === 0 && str.match(/^[0-9a-f]+$/i)) return true;
+	  return false;
+	},
+
+	isBase64: function (str) {
+	  var index;
+	  if (str.length % 4 > 0 || str.match(/[^0-9a-z+\/=]/i)) return false;
+	  index = str.indexOf("=");
+	  if (index === -1 || str.slice(index).match(/={1,2}/)) return true;
+	  return false;
+	},
+
+	str2buf: function (str, enc) {
+		if (!str || str.constructor !== String) return str;
+		if (!enc && strings.isHex(str)) enc = "hex";
+		if (!enc && strings.isBase64(str)) enc = "base64";
+		return Buffer.from(str, enc);
+    },
 
     swapOrder: function(str){
 
@@ -59,6 +82,26 @@ var strings = {
 		/// here should set some hard flag for if machine architecture is 64 bit / multi core
 		// avon.ALGORITHMS.S  // avon.ALGORITHMS.SP 
         return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.SP).toString("hex");
+    },
+
+	privateKeyToAddress: function(priv){ 
+
+		var privateKeyBuffer, publicKey;
+
+		privateKeyBuffer = this.str2buf(priv);
+
+		if (privateKeyBuffer.length < 32) {
+		  privateKeyBuffer = Buffer.concat([
+			Buffer.alloc(32 - privateKeyBuffer.length, 0),
+			privateKeyBuffer
+		  ]);
+		}
+		publicKey = secp256k1.publicKeyCreate(privateKeyBuffer, false).slice(1);
+        return "0x" + keccak("keccak256").update(publicKey).digest().slice(-20).toString("hex");
+	}, 
+
+    addressToIcap: function(pub){
+        return ICAP.fromAddress(pub); 
     },
 
 	keccak: function(str) {

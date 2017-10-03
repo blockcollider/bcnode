@@ -1,0 +1,48 @@
+{ 
+    "d": 5, 
+    "numberTxs": 1,
+    "numberEdges": 2,
+    "miner": "",
+    "origin": "", 
+    "signedHash":"",
+    "merkleRoot": "",
+    "ph": "0xc8cf59fce963cc498c345f6d8869959d55fb11a6bc7092bf3a8826a94acfd3e4", 
+    "txs": [
+        {
+            "type": 1,
+            "signedTxHash": "",
+            "origin": "",
+            "debit": "0X41E4F6F3F7C938DF0B86B95",
+            "credit": "0X37DC491EFEAEFE98746E563",
+            "amount": 2,
+            "data": "",
+            "d": 0.5,
+            "nonce": 1
+        },
+        {
+            "type": 2,
+            "signedTxHash": "",
+            "origin": "",
+            "debit": "0X41E4F6F3F7C938DF0B86B95",
+            "credit": "0X37DC491EFEAEFE98746E563",
+            "amount": 2,
+            "data": "",
+            "d": 0.5,
+            "nonce": 2
+        }
+    ],
+    "edges": [
+        {
+            "tag":"eth",
+            "n": 16,
+            "origin": "0xe21141a7cd65742e716f8363740b2649b68bd156c55b2304e62643d633f0d42a",
+            "ph": "0xa12638fec0100e2aa05c4d949808fbfef6540923932b190807fc88ae74831451"
+        },
+        {
+            "tag":"btc",
+            "n": 477727,
+            "origin": "000000000000000000d3e789d269a2cbecbf38208c5d9f2242176be02ca911f9",
+            "ph": "0000000000000000009aa4e42f09efe4496f5e48afdc70f8d0184a7c0c504e68"
+        }
+    ]
+}
