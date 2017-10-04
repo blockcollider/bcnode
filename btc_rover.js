@@ -179,8 +179,6 @@ function onNewBlock(height, block, cb) {
 
 	if (blocksCache.has(hash)) return;
 
-    log.info("block: "+hash+" timestamp: "+timestamp);
-
 	blocksCache.set(hash, true)
 
     var cbTx = block.transactions[0]; 
@@ -194,6 +192,8 @@ function onNewBlock(height, block, cb) {
 	for (let tx of block.transactions) onNewTx(tx, block)
 
     console.log("blockNumber: "+blockNumber);
+
+	block.blockNumber = blockNumber;
 
     //if(blockNumber != undefined && isNaN(Number(blockNumber)) == false){
 
@@ -375,7 +375,7 @@ var Controller = {
 
                     send("log", "quorum established");
 
-                } else if(network.quorum != true && peer.subversion.indexOf("/Satoshi:") > -1){
+                } else if(network.quorum != true && peer.subversion.indexOf("/Satoshi:0.1") > -1){
 
                     network.discoveredPeers++;
                     network.indexPeer(peer);

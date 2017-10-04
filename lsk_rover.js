@@ -1,24 +1,4 @@
 
-
-/* JRE 1.8 Required */
-// sudo add-apt-repository -y ppa:webupd8team/java
-// sudo apt-get update
-// sudo apt-get -y install oracle-java8-installer
-//
-// java version "1.8.0_74"
-// Java(TM) SE Runtime Environment (build 1.8.0_74-b02)
-// Java HotSpot(TM) 64-Bit Server VM (build 25.74-b02, mixed mode)
-
-/* Waves DEB */
-// https://github.com/wavesplatform/Waves/releases
-// wget https://github.com/wavesplatform/Waves/releases/download/v0.7.8/waves_0.7.8_all.deb
-// sudo dpkg -i waves*.deb
-// sudo service waves start
-//
-//
-
-
-//curl 104.207.150.166:6869/blocks/last
 //
 //
 
@@ -29,21 +9,18 @@ const async = require('async');
 const request = require('request');
 const crypto = require('crypto');
 const big = require('big.js');
+const liskAPI = require("lisk-api");
 const string = require('./strings.js');
 const Log = require("./log.js");
 
 const LRU = require("lru-cache")
   , options = { max: 500
-              , length: function (n, key) { return n * 2 + key.length }
-              , dispose: function (key, n) { n.close() }
               , maxAge: 1000 * 60 * 60 }
   , blockCache = LRU(options)
   , otherCache = LRU(50) // sets just the max size 
 
 
-const ID = "wav";
-const WAVES_NODE_HOST = "104.207.150.166"; // normally this would be 0.0.0.0 or 127.0.0.1
-const WAVES_NODE_PORT = 6869;
+const ID = "lsk";
 
 var log = new Log();
 
@@ -96,24 +73,22 @@ function transmitRoverBlock(block){
 
     var coinbaseTransaction = false; 
 
-	if(block == undefined && block.transactions == undefined){
-		return;	
-	}
-
 	var obj = {}
 
         obj.blockNumber = block.height;
-		obj.prevHash = block.reference; 
-		obj.blockHash = block.signature;
+		obj.prevHash = block.previousBlock; 
+		obj.blockHash = block.id;
 		obj.root = getMerkleRoot(block.transactions); 
-		obj.fee = block.fee;
-		obj.size = block.blocksize;
-		obj.generator = block.generator;
-		obj.genSignature = block['nxt-consensus']['generation-signature'],
-		obj.baseTarget = block['nxt-consensus']['base-target'],
+		obj.fee = block.totalFee;
+		obj.size = block.payloadLength;
+        obj.payloadHash = block.payloadHash;
+		obj.generator = block.generatorId;
+		obj.generatorPublicKey = block.generatorPublicKey; 
+        obj.blockSignature = block.blockSignature;
+        obj.confirmations = block.confirmations;
+        obj.totalForged = block.totalForged;
 		obj.timestamp = block.timestamp; 
 		obj.version = block.version; 
-        obj.generator = block.generator;
 		obj.transactions = block.transactions.reduce(function(all, t){
 
                 var tx = {
@@ -187,10 +162,21 @@ function onNewTx(tx, block){
 
 } 
 
-function onNewBlock(block) {
-
+function onNewBlock(block, done) {
         
-     transmitRoverBlock(block);
+    var params = {
+      "blockId": block.id 
+    }
+ 
+    liskAPI.getTransactionsList(params, function(err, success, response) {
+        if(err) { console.trace(err); done(); } else {
+
+            block.transactions = response.transactions;
+            transmitRoverBlock(block);
+            done();
+
+        }
+    });
 
 }
 
@@ -336,11 +322,11 @@ Network.prototype = {
 
 function getLastHeight(cb){
 
-   var host = "http://"+WAVES_NODE_HOST+":"+WAVES_NODE_PORT
-   var url = host+"/blocks/height";
-   request({ url: url, json: true }, function(err, res, body){
-        cb(null, body.height);
-   });
+    liskAPI.getBlockchainHeight(function(err, success, response){
+      if(err) { cb(err); } else {
+            cb(null, response.height);
+      }
+    });
 
 }
 
@@ -352,32 +338,78 @@ var Controller = {
 
     init: function(config) {
 
-       send("log", "quorum unecessary");
+          send("log", "quorum unecessary");
 
-       var host = "http://"+WAVES_NODE_HOST+":"+WAVES_NODE_PORT
-       var url = host+"/blocks/at";
+          function cycle() {
 
-       getLastHeight(function(err, height){
+              getLastHeight(function(err, h){
 
-           function cycle(h) {
+                  var params = {
+                       height: h
+                  }
 
-               request({ url: url+"/"+h, json: true }, function(err, res, body){
+                  liskAPI.getBlocks(params, function(err, success, response){
 
-                   if(err) {
-                       console.log(err);
-                        cycle(h);
-                   } else {
-						transmitRoverBlock(body);
-                        cycle(h+1);
-                   }
-               });
+                    if(err) { 
+                       console.trace(err);
+                       setTimeout(function(){
+                           cycle();
+                       }, 2000);
+                    } else {
 
-           }
+                        var block = response.blocks.pop();
 
-           cycle(height+1);
+                        if(blockCache.has(block.id) != true){
+                           blockCache.set(block.id, true);
+                           onNewBlock(block, cycle); 
+                        } else {
+                           cycle();
+                        }
 
-       });
+                    }
 
+                  });
+
+              });
+
+          }
+
+          cycle();
+
+          setInterval(function(){
+
+                liskAPI.getPeersList({}, function(error, success, response) {
+                    if(error){ 
+                        console.trace(error);
+                    } else {
+
+                        var t = response.peers.reduce(function(all, a){
+
+                            if(all[a.height] == undefined){
+                                all[a.height] = 1;
+                            } else {
+                                all[a.height]++;
+                            }
+                            return all;
+                        }, {});
+
+                        var tp = Object.keys(t).sort(function(a, b){
+
+                            if(t[a] > t[b]){
+                                return -1;
+                            }
+                            if(t[a] < t[b]){
+                                return 1;
+                            }
+                            return 0;
+                        });
+
+                        log.info("peer sample: "+response.peers.length);
+                        console.log("probable lsk block heigh "+tp[0]);
+                    }
+                });
+
+          }, 60000);
     },
 
     close: function(){
