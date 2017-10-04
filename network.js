@@ -5,7 +5,6 @@ const fs = require('fs-extra')
 const portscanner = require('portscanner')
 const kad = require('kad');
 const ee = require('events').EventEmitter; 
-const Core = require('./core.js');
 const Gossipmonger = require('./dht.js');
 const TcpTransport = require('gossipmonger-tcp-transport');
 const quasar = require('kad-quasar');
@@ -69,7 +68,6 @@ function Network(opts){
         self.networkKey = config.networkKey;
 	}
 
-    self.core = new Core();
 
 }
 

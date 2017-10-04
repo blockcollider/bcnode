@@ -43,8 +43,5 @@ In this way nodes are indirectly incentivised to always relay transactions in an
 
 
 
-## Helix Block
-
-prevHash: 
 
 

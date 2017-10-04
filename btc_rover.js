@@ -417,7 +417,7 @@ var Controller = {
 
             pool.on('peerblock', (peer, { net, block }) => {
 
-                log.info("PeerBlock: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
+                //log.info("PeerBlock: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
                 //console.log("peer best height submitting block: "+peer.bestHeight);
                 //console.log("LAST BLOCK "+network.state.bestHeight);
 
@@ -429,7 +429,8 @@ var Controller = {
 
                         onNewBlock(peer, block, function(err, num){
 
-                            console.log("setting new block: "+num);
+                            log.info("setting new block: "+num);
+                            block.blockNumber = num;
                             network.state.bestHeight = num;
 
                         });

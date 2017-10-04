@@ -22,7 +22,6 @@ function readFile(){
 
 }
 
-
 var identity = new Identity();
 
     identity.load(function(err, data){
@@ -46,16 +45,15 @@ var identity = new Identity();
 
                     network.connect(); 
 
-                    //base.launchRover("btc");
-                    //base.launchRover("eth");
+                    base.launchRover("btc");
+                    base.launchRover("eth");
                     //base.launchRover("rsk");
                     //base.launchRover("xcp");
                     //base.launchRover("wav");
                     //base.launchRover("lsk");
                     //base.launchRover("urb");
 
-                    base.events.on("work", function(msg){
-						console.log("*******************");
+                    base.events.on("pow", function(msg){
                         console.log(msg);
                     });
 

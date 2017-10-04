@@ -1,15 +1,20 @@
 
 var _ = require('lodash');
-var Log = require("./log.js");
-var string = require('./strings.js');
 var child_process = require('child_process');
 var big = require('big.js');
+var async = require('async');
+var terminate = require('terminate');
 var crypto = require('crypto');
+var Log = require("./log.js");
+var string = require('./strings.js');
+var format = require("./format.js");
+var ee = require('events').EventEmitter;
+var Block = require('./block.js');
 
 var log = new Log();
 
     global._GenesisPath = "./genesis.json";
-    global._MiningThreads = 4;
+    global._MiningThreads = 2;
 
 function readFile(){
 
@@ -27,13 +32,17 @@ function Miner() {
 
     this.genesis = g; 
 
-    this.mining = false;
+	this.coinbase = g.coinbase;
+
+    this.readyToMine = false;
 
     this.identity = false;
 
-    this.threads = [];
-
     this.initializing = true;
+
+    this.pids = [];
+
+	this.workers = [];
 
     this.state = g.edges.reduce(function(all, k){
 
@@ -50,11 +59,35 @@ function Miner() {
 
 Miner.prototype = {
 
+	events: new ee(),
+
+	restart: function(cb){
+
+		var self = this;
+
+		log.info("posting update: "+self.pids);
+
+		var pids = self.workers.map(function(w){
+			return w.pid;
+		});
+
+		async.map(pids, terminate, function(err, s){
+
+			log.info("restarting...");
+			self.pids = [];
+			self.workers = [];
+
+			cb(null, s);
+
+		});
+
+	},
+
     start: function() {
 
         var self = this;
 
-        var start = global._MiningThreads-self.threads.length;
+        var start = global._MiningThreads - self.workers.length;
         
         var limit = 1000000;
 
@@ -62,157 +95,234 @@ Miner.prototype = {
 
         var t = 0;
 
-        
+		var pids = self.workers.map(function(e){
+			return e.pid;
+		});
 
+		async.map(pids, terminate, function(err){ 
 
-        if(start > 0){
+			if(start > 0){
 
-            var count = 0;
-            var cycles = 0;
+				log.info("threads: " + start);
 
-            for(var i = 0; i<start;i++){
+				var count = 0;
+				var cycles = 0;
 
-                var worker = child_process.fork("./miner_thread.js"); 
+				for(var i = 0; i < start; i++){
 
-                worker.on("message", function(msg){
+					var worker = child_process.fork("./miner_thread.js"); 
 
-                    var m = msg.split(":");                     
+					worker.on("message", function(m){
 
-                    if(m[0] == "C"){
-                        limit = big(m[2]).times(global._MiningThreads).toFixed(0);
-                        console.log(m);
-                        count=count+Number(m[2]);
-                        cycles=cycles+Number(m[2]);
-                    }
+						if(m.type == "pow"){
+							
+							if(self.readyToMine == true) {
 
-                    if(big(count).gte(limit) === true){
-                        var elapsed = big(Number(new Date())).minus(Number(startTimer)).div(1000);
-                        var hashRate = big(count).div(elapsed).toFixed();
-                        console.log("HZ: "+hashRate+" CYC: "+cycles);
-                        startTimer = new Date();
-                        count = 0; 
-                    }
+								log.info("Block found!");
 
-                    if(m[0] == "W"){
-                        console.log("Block found!");
-                        console.log(m);
-                    }
+								var pids = self.workers.map(function(w){
+									return w.pid;
+								});
 
-                });
+								var pids = _.pull(pids, m.pid);
 
-                worker.on("exit", function(w){
-                    console.log("worker exited");
-                }); 
+								async.map(pids, terminate, function(err, s){
 
+									if(err) { log.error(err); } 
 
-                worker.send({ 
-                    type: "work", 
-                    data: { 
-                        threshold: 0.72,
-                        work: [
-                            string.blake2bl(crypto.randomBytes(32).toString('hex')),
-                            string.blake2bl(crypto.randomBytes(64).toString('hex')),
-                            string.blake2bl(crypto.randomBytes(33).toString('hex'))
-                        ]
-                    }
-                });
+									self.pids = [];
+									self.workers = [];
+									self.readyToMine = false;
 
-                if(i % 2 == 0){
+									delete self.block;
 
-                    setTimeout(function() {
-                        console.log('sending update');
-                        worker.send({ 
-                            type: "update", 
-                            data: { 
-                                threshold: 0.5,
-                                work: [
-									string.blake2bl(crypto.randomBytes(32).toString('hex')),
-									string.blake2bl(crypto.randomBytes(64).toString('hex')),
-									string.blake2bl(crypto.randomBytes(33).toString('hex'))
-                                ]
-                            }
-                        });
+									socket.emit("pow", m.data);
 
-                    }, 5000);
+								});
 
-                }
+							}
+						}
 
-            }
+						if(m.type == "metric"){
+							limit = big(m.cycles).times(global._MiningThreads).toFixed(0);
+							count = count + Number(m.cycles);
+							cycles = cycles + Number(m.cycles);
+						}
 
-        }
+						if(big(count).gte(limit) === true){
+							var elapsed = big(Number(new Date())).minus(Number(startTimer)).div(1000);
+							var hashRate = big(count).div(elapsed).toFixed(2);
+							log.info("X:"+self.workers.length+" "+hashRate+"hz");
+							startTimer = new Date();
+							count = 0; 
+						}
+
+					});
+
+					worker.send({ 
+						type: "work", 
+						data: self.block 
+					});
+
+					worker.on("error", function(err){
+						console.trace(err);
+					});
+
+					worker.on("exit", function(){
+						log.info("thread closed");
+					});
+
+					self.workers.push(worker);
+
+				}
+
+				self.events.once("update", function(){
+
+					if(self.workers.length > 0){
+
+						var pids = self.workers.map(function(w){
+							return w.pid;
+						});
+
+						if(pids.length > 0){
+
+							async.map(pids, terminate, function(err){
+
+									self.pids = [];
+									self.workers = [];
+									self.events.emit("reset");
+
+							});
+
+						} else {
+
+							self.pids = [];
+							self.workers = [];
+							self.events.emit("reset");
+
+						}
+
+					}
+
+				});
+
+			}
             
+	  });
 
     },
+
 
     processWork: function(){
 
         var self = this;
 
-        var edges = Object.keys(self.state);
 
-        var work = edges.reduce(function(all, a) {
+        if(self.block != undefined && self.block.edges.length == self.genesis.edges.length){
 
-            if(self.state[a].block != undefined && self.state[a].block != false){
-                self.state[a].block.data.work = string.blake2bl(self.state[a].block.data.blockHash);
-                all.push(self.state[a].block);
-            }
+			if(self.readyToMine == false){
 
-            return all;
+				log.info("mining collider block "+self.block.input);
 
-        }, []);
+				self.readyToMine = true;
 
-        self.work = work;
+				self.start();
 
-        if(work.length == edges.length && self.mining == false){
+			} 
 
-            self.mining = true;
-
-            self.start();
-
-            console.log("Ready to work");
-            
         }
-
-
-        console.log("------------------ WORK --------------------");
-        console.log("------------------ WORK --------------------");
-        console.log("------------------ WORK --------------------");
-        console.log("------------------ WORK --------------------");
-        console.log("------------------ WORK --------------------");
-        console.log("------------------ WORK --------------------");
-        console.log(self.work);
 
     },
 
-    setBlock: function(block){
+	latestBlock: function(cb){
 
-        var self = this;
+		// here it should load the last collider chain block hash, for now we will take coinbase
 
-        var tag = block.id;
+		var self = this;
+			self.block = new Block({
+				"version": 2,
+				"distance": 0.745, 
+				"range": 2200,
+				"input": "69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55" 
+			});
 
-        self.genesis.edges.map(function(edge){
+		cb();
 
-             if(edge.tag == tag){
-
-                console.log("new "+tag+" : "+block.data.blockHash);
-                self.state[edge.org].block = block;
-
-             }
-
-        });
-
-    }
+	}
 
 }
 
+
+
 var miner = new Miner();
 
+	//miner.latestBlock(function() { });
+
+var queue = async.queue(function(roverBlock, cb){
+
+	var obj = format.roverBlockToEdgeBlock(roverBlock);
+
+	Object.keys(miner.state).map(function(k){
+		if(miner.state[k].tag === obj.tag){
+			obj.org = k
+		}
+	});	
+
+	// This is terrible, refactor
+	
+	if(miner.block != undefined){
+
+		miner.block.addEdge(obj);    
+
+		if(miner.readyToMine == true){
+
+			miner.events.once("reset", function(){
+				miner.workers = [];
+				miner.start();
+				cb(null, miner.block);
+			});
+
+			miner.events.emit("update");
+
+		} else {
+			miner.processWork();
+		    cb(null, miner.block);
+		}
+
+
+	} else {
+
+		miner.latestBlock(function() { 
+
+			miner.block.addEdge(obj);    
+
+			if(miner.readyToMine == true){
+
+				miner.events.once("reset", function(){
+					miner.workers = [];
+					miner.start();
+					cb(null, miner.block);
+				});
+
+				miner.events.emit("update");
+
+			} else {
+				miner.processWork();
+				cb(null, miner.block);
+			}
+
+
+		});
+
+	}
+
+
+});
 
 var socket = require('socket.io-client')('http://localhost:6600');
 
     socket.on('connect', function(){
         log.info("miner connected to rover base");
-        socket.emit("work", "test work drop");
     });
 
     socket.on("setup", function(data){
@@ -220,13 +330,19 @@ var socket = require('socket.io-client')('http://localhost:6600');
         miner.identity = data;
     });
 
-    socket.on("log", function(data){
-        console.log(data);
-    });
 
-    socket.on("block", function(block){
-        miner.setBlock(block);    
-        miner.processWork();
+    socket.on("block", function(roverBlock){
+
+		try { 
+
+			queue.push(roverBlock, function(err, block){ });
+
+		} catch (err) {
+			console.trace(err);
+			log.error("unable to parse block");
+		}
+
+
     });
 
 //miner.start();
