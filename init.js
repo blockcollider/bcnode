@@ -60,9 +60,9 @@ var identity = new Identity();
                     network.connect(); 
 
                     base.launchRover("btc");
-                    //base.launchRover("eth");
-                    //base.launchRover("wav");
-                    //base.launchRover("lsk");
+                    base.launchRover("eth");
+                    base.launchRover("wav");
+                    base.launchRover("lsk");
                     //base.launchRover("rsk");
                     //base.launchRover("xcp");
                     //base.launchRover("urb");
