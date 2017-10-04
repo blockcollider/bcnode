@@ -11,6 +11,20 @@ var fs = require('fs');
 var Identity = require("./identity.js");
 var Network = require("./network.js");
 var RoverBase = require("./roverbase.js");
+var colors = require('colors');
+
+
+function getColor(tag){
+
+    if(tag == "wav") return colors.cyan(tag);
+
+    if(tag == "lsk") return colors.red(tag);
+
+    if(tag == "eth") return colors.magenta(tag);
+
+    if(tag == "btc") return colors.yellow(tag);
+
+}
 
 function readFile(){
 
@@ -46,11 +60,11 @@ var identity = new Identity();
                     network.connect(); 
 
                     base.launchRover("btc");
-                    base.launchRover("eth");
-                    base.launchRover("wav");
+                    //base.launchRover("eth");
+                    //base.launchRover("wav");
+                    //base.launchRover("lsk");
                     //base.launchRover("rsk");
                     //base.launchRover("xcp");
-                    //base.launchRover("lsk");
                     //base.launchRover("urb");
 
                     base.events.on("pow", function(msg){
@@ -62,7 +76,7 @@ var identity = new Identity();
                     });
 
                     base.events.on("block", function(msg){
-                        log.info("new "+msg.id+" block "+msg.data.blockHash);
+                        log.info("new "+getColor(msg.id)+" block "+msg.data.blockNumber+" TXs "+msg.data.transactions.length);
                     });
 
                });
