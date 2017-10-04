@@ -45,6 +45,7 @@ function Block(opts) {
 
     var self = this;
     var options = {
+        preBonusDistance: 0.72,
         distance: 0.72,
         range: 2200,
 		emblems: 0,
@@ -178,8 +179,12 @@ Block.prototype = {
             self.edges.push(edge);
             self.ne = self.edges.length;
         } else {
-            log.error("edge already exists");
-            process.exit(3);
+
+            log.info("edge already exists");
+			console.log(edge);
+			console.log(self.edges);
+			self.addMutation(edge);
+
         }
 
         return self;
@@ -219,24 +224,41 @@ Block.prototype = {
 
 		var edges = self.edges.map(function(e){
 
-			if(e.org == edge.org){
+			if(e.org === edge.org){
 
 				found = true;
 
+				e.n = edge.n;
+
+				//log.info(e.input);
+
 				if(e.input.indexOf(":") > -1){
 
-					var c = e.input;
-					var cs = c.split(":");
+					var c = e.input.split(":").length;
 
-					if(cs.length > 2){
+					if(c > 2){
+
 						log.warn("maximum mutations added to block--edge is deleted.");
+						//self.preBonusDistance = big(self.preBonusDistance).times(0.97).toFixed(8);
+						self.distance = self.preBonusDistance; 
+						log.info("distance adjusted to "+self.distance);
 						return false;
+
+					} else {
+
+						e.input = e.input+":"+edge.input;
+
 					} 
+
+				} else {
+
+					e.input = e.input+":"+edge.input;
 
 				}
 
-				e.n = edge.n;
-				e.input = e.input+":"+edge.input;
+				log.info(e.input);
+
+				self.distance = big(self.distance).times(0.99).toFixed(8);
 
 			} 
 
@@ -252,9 +274,9 @@ Block.prototype = {
 
 			var edgesFalse = edges.filter(function(e){
 
-					if(e != false){
-						return e;
-					}
+				if(e != false){
+					return e;
+				}
 
 			});
 

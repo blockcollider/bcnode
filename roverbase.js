@@ -1,5 +1,6 @@
 
 
+var fs = require('fs');
 var child = require('child_process');
 var time = require("./time.js");
 var ee = require('events').EventEmitter;
@@ -18,10 +19,9 @@ socket.on("connection", function(client){
     
     client.emit("setup", base);
 
-    client.on("work", function(msg){
+    client.on("pow", function(msg){
         console.log("-------------------WORK-----------------------");
-        console.log(msg);
-        events.emit("work", msg); 
+        events.emit("pow", msg); 
     });
 
 });
@@ -76,10 +76,15 @@ RoverBase.prototype = {
             n.on("message", function(msg){
 
                 var type = "log";
+				var id = "coin";
                 if(msg.type != undefined){
                     type = msg.type;
 				    msg.utc = time.now();
                 } 
+
+				if(msg.id != undefined){
+					id = msg.id;
+				}
 
                 socket.emit(type, msg);
                 events.emit(type, msg);

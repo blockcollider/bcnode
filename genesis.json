@@ -1,5 +1,6 @@
 {
-    "collider": {
+    "coinbase": {
+        "tag": "nrg",
         "version": 2,
         "org":"69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55",
         "distance": 5,
@@ -13,14 +14,16 @@
            "tag":"btc",
            "n": 487774,
            "org":"0000000000000000009aa4e42f09efe4496f5e48afdc70f8d0184a7c0c504e68",
-           "mkd": ""
+           "mkd": "",
+           "bal": {}
         },
         {
            "version": 2,
            "tag":"eth",
            "n": 4327020,
            "org":"0xa12638fec0100e2aa05c4d949808fbfef6540923932b190807fc88ae74831451",
-           "mkd": ""
+           "mkd": "",
+           "bal": {}
         }
     ]
 }
