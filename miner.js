@@ -116,9 +116,9 @@ Miner.prototype = {
 
 						if(m.type == "pow"){
 							
+							log.info("block found");
+							
 							if(self.readyToMine == true) {
-
-								log.info("Block found!");
 
 								var pids = self.workers.map(function(w){
 									return w.pid;
@@ -139,6 +139,16 @@ Miner.prototype = {
 									socket.emit("pow", m.data);
 
 								});
+
+							} else {
+
+								self.pids = [];
+								self.workers = [];
+								self.readyToMine = false;
+
+								delete self.block;
+
+								socket.emit("pow", m.data);
 
 							}
 						}
@@ -202,6 +212,12 @@ Miner.prototype = {
 
 						}
 
+					} else {
+
+						self.pids = [];
+						self.workers = [];
+						self.events.emit("reset");
+
 					}
 
 				});
@@ -241,7 +257,7 @@ Miner.prototype = {
 		var self = this;
 			self.block = new Block({
 				"version": 2,
-				"distance": 0.745, 
+				"distance": 0.715, 
 				"range": 2200,
 				"input": "69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55" 
 			});
@@ -322,6 +338,12 @@ var queue = async.queue(function(roverBlock, cb){
 var socket = require('socket.io-client')('http://localhost:6600');
 
     socket.on('connect', function(){
+        log.info("miner connected to rover base");
+    });
+
+    socket.on('disconnect', function(){
+
+		miner.events.emit("update");
         log.info("miner connected to rover base");
     });
 

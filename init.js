@@ -47,9 +47,9 @@ var identity = new Identity();
 
                     base.launchRover("btc");
                     base.launchRover("eth");
+                    base.launchRover("wav");
                     //base.launchRover("rsk");
                     //base.launchRover("xcp");
-                    //base.launchRover("wav");
                     //base.launchRover("lsk");
                     //base.launchRover("urb");
 
@@ -62,7 +62,7 @@ var identity = new Identity();
                     });
 
                     base.events.on("block", function(msg){
-                        console.log("new "+msg.id+" block "+msg.data.blockHash);
+                        log.info("new "+msg.id+" block "+msg.data.blockHash);
                     });
 
                });

@@ -138,6 +138,13 @@ process.on("message", function(msg){
         //    worker[k] = msg.data[k];
         //});
 
+    } else if(msg.type == "exit"){
+
+		process.exit(3);
+        //Object.keys(msg.data).map(function(k){
+        //    worker[k] = msg.data[k];
+        //});
+
     }
 
 });
