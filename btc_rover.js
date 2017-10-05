@@ -42,6 +42,7 @@ const big = require('big.js');
 
 const txCache = new LRUCache({ max: 3000 })
 const blocksCache = new LRUCache({ max: 110 })
+const blocksNumber = new LRUCache({ max: 110 })
 const async = require('async');
 
 
@@ -188,6 +189,12 @@ function onNewBlock(height, block, cb) {
     var coinbaseTx = Transaction.deserialize(buf);
 
     var blockNumber = coinbaseTx.ins[0].script.getBlockHeight();
+
+    if(blocksNumber.has(blockNumber) == true){
+        log.warn("possible orphan conflict:  "+blockNumber+ " "+hash);
+    } else {
+        blocksNumber.set(blockNumber, true);
+    }
 
 	for (let tx of block.transactions) onNewTx(tx, block)
 

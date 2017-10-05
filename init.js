@@ -16,15 +16,15 @@ var colors = require('colors');
 
 function getColor(tag){
 
-    if(tag == "wav") return colors.cyan(tag);
+    if(tag == "wav") return colors.bgCyan(tag);
 
-    if(tag == "lsk") return colors.red(tag);
+    if(tag == "lsk") return colors.bgRed(tag);
 
-    if(tag == "eth") return colors.magenta(tag);
+    if(tag == "eth") return colors.bgMagenta(tag);
 
-    if(tag == "btc") return colors.yellow(tag);
+    if(tag == "btc") return colors.bgYellow(tag);
 
-    if(tag == "neo") return colors.green(tag);
+    if(tag == "neo") return colors.bgGreen(tag);
 
 }
 
@@ -64,8 +64,8 @@ var identity = new Identity();
                     base.launchRover("btc");
                     base.launchRover("eth");
                     base.launchRover("neo");
-                    base.launchRover("wav");
                     base.launchRover("lsk");
+                    //base.launchRover("wav");
                     //base.launchRover("rsk");
                     //base.launchRover("xcp");
                     //base.launchRover("urb");

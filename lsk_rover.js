@@ -405,7 +405,7 @@ var Controller = {
                         });
 
                         log.info("peer sample: "+response.peers.length);
-                        console.log("probable lsk block heigh "+tp[0]);
+                        log.info("probable lsk block heigh "+tp[0]);
                     }
                 });
 

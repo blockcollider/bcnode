@@ -341,11 +341,21 @@ var Controller = {
 
 							setTimeout(cycle, SUCCESS_RETRY_DELAY);
 
-						});
+						}).catch(function(err){
+
+                            console.trace(err);
+                            setTimeout(5000, cycle);
+                            
+                        });
 
 					}
 
-				});
+				}).catch(function(err){
+
+                    console.trace(err);
+                    setTimeout(5000, cycle);
+
+                });
 
           }
 
