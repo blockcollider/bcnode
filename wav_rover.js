@@ -82,13 +82,19 @@ function send(type, data){
 
 function getMerkleRoot(txs){
 
-    return txs.reduce(function(all, tx){
+    if(txs != undefined && txs.length > 0){
 
-        all = string.blake2b(all+tx.id);
+        return txs.reduce(function(all, tx){
 
-        return all;
+            all = string.blake2b(all+tx.id);
 
-    }, "");
+            return all;
+
+        }, "");
+
+    } 
+
+    return false;
 
 }
 
@@ -129,7 +135,11 @@ function transmitRoverBlock(block){
 
 		}, []); 
 
-	send("block", obj);
+    if(obj.root != false){
+
+    	send("block", obj);
+
+    }
 
 }
 
