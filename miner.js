@@ -160,11 +160,21 @@ Miner.prototype = {
 						}
 
 						if(big(count).gte(limit) === true){
+
 							var elapsed = big(Number(new Date())).minus(Number(startTimer)).div(1000);
 							var hashRate = big(count).div(elapsed).toFixed(2);
-							log.info("X:"+self.workers.length+" "+hashRate+"hz");
+							var start = "X:"+self.workers.length+" "+hashRate+"hz";
+                            var rep = {
+                                timestamp: moment().utc().format(),
+                                hashRate: hashRate,
+                                elapsed: elapsed
+                            }
+
+							log.info(start);
 							startTimer = new Date();
 							count = 0; 
+                            socket.emit("metric", rep);
+
 						}
 
 					});

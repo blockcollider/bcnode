@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "dependencies": {
+    "async": "~2.5.0",
     "avon": "^2.1.0",
     "base-x": "^3.0.2",
     "base58": "^1.0.1",

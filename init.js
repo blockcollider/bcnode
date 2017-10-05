@@ -24,6 +24,8 @@ function getColor(tag){
 
     if(tag == "btc") return colors.yellow(tag);
 
+    if(tag == "neo") return colors.green(tag);
+
 }
 
 function readFile(){
@@ -61,6 +63,7 @@ var identity = new Identity();
 
                     base.launchRover("btc");
                     base.launchRover("eth");
+                    base.launchRover("neo");
                     base.launchRover("wav");
                     base.launchRover("lsk");
                     //base.launchRover("rsk");
