@@ -39,6 +39,10 @@ Block election / consensys
 
 * Nodes collect weight be relaying transactions to nodes that already have the same transaction. 
 
+## Working with the Block Collider
+
+Check out the currated list at: (https://github.com/blockcollider/awesome-blockcollider)[https://github.com/blockcollider/awesome-blockcollider]
+
 In this way nodes are indirectly incentivised to always relay transactions in an effort to gain weight among other nodes. 
 
 

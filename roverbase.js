@@ -24,6 +24,12 @@ socket.on("connection", function(client){
         events.emit("pow", msg); 
     });
 
+    client.on("metric", function(msg){
+        console.log("-------------------METRIC-----------------------");
+        console.log(msg);
+        events.emit("metric", msg); 
+    });
+
 });
 
 
