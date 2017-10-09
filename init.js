@@ -8,9 +8,11 @@ var Log = require("./log.js");
 
 var path = require('path'+''); // make browserify skip it
 var fs = require('fs'); 
+var async = require('async');
 var Identity = require("./identity.js");
 var Network = require("./network.js");
 var RoverBase = require("./roverbase.js");
+var Storage = require("./storage.js");
 var colors = require('colors');
 
 
@@ -59,29 +61,67 @@ var identity = new Identity();
 
                 network.setup(function() {
 
-                    network.connect(); 
+                  var networkInterfaces = network.connect(); 
 
-                    base.launchRover("btc");
-                    base.launchRover("eth");
-                    base.launchRover("neo");
-                    base.launchRover("lsk");
-                    //base.launchRover("wav");
-                    //base.launchRover("rsk");
-                    //base.launchRover("xcp");
-                    //base.launchRover("urb");
+                  var dht = networkInterfaces.dht;
 
-                    base.events.on("pow", function(msg){
-                        console.log(msg);
-                    });
+                  var p2p = networkInterfaces.p2p;
 
-                    base.events.on("log", function(msg){
-                        console.log(msg);
-                    });
+			  	  var storage = new Storage();
 
-                    base.events.on("block", function(msg){
-                        log.info("new "+getColor(msg.id)+" block "+msg.data.blockNumber+" TXs "+msg.data.transactions.length);
-                    });
+                  var blockQueue = async.queue(function(msg, cb){
+                      storage.addBlock(msg, cb); 
+                  });
 
+			  		  storage.init(function() {
+
+
+						//base.launchRover("btc");
+						//base.launchRover("eth");
+						//base.launchRover("neo");
+						//base.launchRover("lsk");
+						//base.launchRover("wav");
+						//base.launchRover("rsk");
+						//base.launchRover("xcp");
+						//base.launchRover("urb");
+                        
+                        /* Rover Base Events */
+						base.events.on("pow", function(msg){
+							console.log(msg);
+						});
+
+						base.events.on("log", function(msg){
+							console.log(msg);
+						});
+
+						base.events.on("block", function(msg){
+							blockQueue.push(msg, function(err, msg){
+                                if(err) { log.error(err); } else {
+								    //elselog.info("new "+getColor(msg.id)+" block "+msg.data.blockNumber+" TXs "+msg.data.transactions.length);
+								    log.info("new "+getColor(msg.id)+" block "+msg.data.blockNumber);
+                                }
+							});
+						});
+
+                        /* Storage Events */
+                        storage.events.on("blockadded", function(block){
+                            dht.quasarPublish("block", block);
+                        });
+
+                        /* DHT Events */
+                        dht.subscribe("block", function(block){
+                            storage.addBlock(block, function(err, s){
+                                if(err) { log.error(err); } else {
+
+                                }
+                            });
+                        });
+
+                        dht.subscribe("tx", function(tx){
+                            storage.addBlockTransaction(tx);
+                        });
+
+			  		});
                });
 
         }

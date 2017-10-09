@@ -176,7 +176,48 @@ var strings = {
 
 		return value.join('');
 
-	}
+	},
+    
+    fnv1a: function(v){
+
+      var n = v.length, a = 2166136261, c, d, i = -1;
+      while (++i < n) {
+        c = v.charCodeAt(i);
+        if (d = c & 0xff000000) {
+          a ^= d >> 24;
+          a += (a << 1) + (a << 4) + (a << 7) + (a << 8) + (a << 24);
+        }
+        if (d = c & 0xff0000) {
+          a ^= d >> 16;
+          a += (a << 1) + (a << 4) + (a << 7) + (a << 8) + (a << 24);
+        }
+        if (d = c & 0xff00) {
+          a ^= d >> 8;
+          a += (a << 1) + (a << 4) + (a << 7) + (a << 8) + (a << 24);
+        }
+        a ^= c & 0xff;
+        a += (a << 1) + (a << 4) + (a << 7) + (a << 8) + (a << 24);
+      }
+      a += a << 13;
+      a ^= a >> 7;
+      a += a << 3;
+      a ^= a >> 17;
+      a += a << 5;
+      return a & 0xffffffff;
+
+    },
+
+    fnv1ab: function(a){
+
+          a += (a << 1) + (a << 4) + (a << 7) + (a << 8) + (a << 24);
+          a += a << 13;
+          a ^= a >> 7;
+          a += a << 3;
+          a ^= a >> 17;
+          a += a << 5;
+          return a & 0xffffffff;
+
+    }
 
 }
 

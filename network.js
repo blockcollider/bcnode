@@ -81,8 +81,6 @@ Network.prototype = {
 
 	transport: false,
 
-    events: new ee(),
-
 	saveToDisk: function(obj, cb){
 
 		fs.ensureDir(obj.networkPath, function(err){
@@ -155,20 +153,22 @@ Network.prototype = {
 
         });
 
-        return self.events;
+        return self;
 
     },
 
-    connect: function(){
+    connect: function(opts){
 
 		var self = this;
 
 		log.info("starting DHT at port "+self.gossipTcpPort);
 
-		var dbDir = self.networkPath+"/dbdht";
-		var dbFile = self.networkPath+"/dbdht/block.db";
+		var dbDir = self.networkPath+"/dht";
+		var dbFile = self.networkPath+"/dht/block.db";
 
 			fs.ensureDirSync(dbDir);
+
+        var events = new ee();
 
         var node = kad({
 		  identity: string.sha(self.networkKey),
@@ -177,10 +177,9 @@ Network.prototype = {
           contact: { hostname: 'localhost', port: self.gossipTcpPort  }
         });
 
-        node.listen(self.gossipTcpPort);
+            node.listen(self.gossipTcpPort);
 
-		node.plugin(quasar);
-
+            node.plugin(quasar);
 
         var discovery = new Discovery();
 
@@ -196,8 +195,6 @@ Network.prototype = {
                 peer.write(crypt.writeStr("i*localhost*"+self.gossipTcpPort));
 
                 peer.on("data", function(data){
-
-					self.events.emit("peerdata", data);
 
                     var msg = crypt.readStr(data.toString(""));
 
@@ -232,6 +229,7 @@ Network.prototype = {
 
                     } else if(type == "b") {
 
+                        /* block sync from collider chain*/
 						var from = d[1];
 						var to = d[1];
 
@@ -274,17 +272,28 @@ Network.prototype = {
 
 		//});
 
-		//node.quasarSubscribe("superblock", function(msg){
-
-		//});
-
 		//node.quasarSubscribe("tx", function(msg){
 
 		//});
+        //
+        node.subscribe = function(type, cb){
+            if(type != undefined){
+                node.quasarSubscribe(type, cb);
+            }
+        }
+
+        node.publish = function(type, data){
+
+            if(data != undefined && data.constructor == Object){
+                data.networkKey = self.networkKey;
+                data.timestamp = time.unix(); 
+                node.quasarPublish(type, data);
+            } 
+
+        }
 
         node.on("join", function(peer){
 		 	var peers = Object.keys(node.router);
-
 			console.log(peers);
             //log.info("node connected to "+node.router.length+" peers");
         });
@@ -293,8 +302,11 @@ Network.prototype = {
             log.error(err);
         });
 
-		return node;
-        
+        return {
+            events: events,
+            dht: node,
+            p2p: scan
+        }
 
     }
 }
