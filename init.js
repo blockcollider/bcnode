@@ -75,10 +75,9 @@ var identity = new Identity();
 
 			  		  storage.init(function() {
 
-
-						//base.launchRover("btc");
-						//base.launchRover("eth");
-						//base.launchRover("neo");
+						base.launchRover("btc");
+						base.launchRover("eth");
+						base.launchRover("neo");
 						//base.launchRover("lsk");
 						//base.launchRover("wav");
 						//base.launchRover("rsk");
@@ -87,6 +86,12 @@ var identity = new Identity();
                         
                         /* Rover Base Events */
 						base.events.on("pow", function(msg){
+                            console.log("--------------POW---------------");
+							console.log(msg);
+						});
+
+						base.events.on("metric", function(msg){
+                            console.log("--------------METRIC---------------");
 							console.log(msg);
 						});
 

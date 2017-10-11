@@ -5,6 +5,12 @@ var big = require('big.js');
 
 var log = global.log;
 
+if(log === undefined){
+
+    var Log = require("./log.js");
+    log = new Log();
+}
+
 var time = {
 
     now: function() {
@@ -25,9 +31,10 @@ var time = {
 
             if(err) { 
 
+               console.trace(err);
                log.warn("unable to establish delta NTP time sync servers"); 
 
-               cb(null, 0);
+               cb(null, 1);
 
             } else {
 
@@ -35,7 +42,7 @@ var time = {
 
                 var offset = Math.abs(t.t);
 
-                var seconds = big(offset).div(1000).toFixed(2);
+                var seconds = big(offset).div(1000).times(-1).toFixed(0);
 
                 cb(null, seconds);
 

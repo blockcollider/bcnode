@@ -9,7 +9,7 @@
     "miner": "0220d18aeddbf807bed67dcfbe58c171f63aa2df5a65695e6af18ca9710a662245",
     "input": "0xc8cf59fce963cc498c345f6d8869959d55fb11a6bc7092bf3a8826a94acfd3e4",  
     "sig":"", 
-    "proof": "", 
+    "blockHash": "", 
     "merkleRoot": "",
     "txs": [
         {
@@ -30,7 +30,6 @@
             "input": "", 
             "trust": "",
             "sig": "", 
-            "proof": "", 
             "miner": "", 
             "index": 2 
         }

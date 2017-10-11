@@ -45,13 +45,17 @@ const blocksCache = new LRUCache({ max: 110 })
 const blocksNumber = new LRUCache({ max: 110 })
 const async = require('async');
 
-
-
-var log = new Log();
+const log = new Log();
 
 const MARKED_BTC_REGEX = [];
 const ID = "btc";
 const DEFAULT_TYPE = "log";
+const BLOCK_VERSION = 536870912;
+
+process.on('disconnect', function() {
+  console.log('parent exited')
+  process.exit();
+});
 
 process.on("uncaughtError", function(e){
 
@@ -411,8 +415,8 @@ var Controller = {
 
                     } else {
 
-                        //pool._deprioritizeAddr(self.peerData[peer.host]);
-                        //pool._removeConnectedPeer(self.peerData[peer.host]);
+                        pool._deprioritizeAddr(self.peerData[peer.host]);
+                        pool._removeConnectedPeer(self.peerData[peer.host]);
 
                     }
 
@@ -428,7 +432,9 @@ var Controller = {
                 //console.log("peer best height submitting block: "+peer.bestHeight);
                 //console.log("LAST BLOCK "+network.state.bestHeight);
 
-                if(network.state.bestHeight != undefined) { 
+                console.log(JSON.stringify(block.header, null, 2));
+
+                if(network.state.bestHeight != undefined && block.header.version === BLOCK_VERSION) { 
 
                     block.lastBlock = network.state.bestHeight;
 

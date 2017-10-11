@@ -3,22 +3,30 @@
 
 var _ = require('lodash');
 var crypto = require('crypto');
+var ee = require('events').EventEmitter;
 var distance = require('./distance.js');
 var generating = false;
 var fuz = require('clj-fuzzy');
 var big = require('big.js');
+var promiseWhile = require('promise-while')(Promise)
 var string = require("./strings.js");
 
 
 process.on("uncaughtError", function(err){
-
 	console.trace(err);
 	log.error("critical error miner");
+});
 
+process.on("disconnect", function(err){
+	process.exit();
 });
 
 function randomStr() {
   return crypto.randomBytes(32).toString("hex");
+}
+
+function formatNRG(data){
+	return ["nrg", string.blake2bl(data.input)];
 }
 
 
@@ -32,6 +40,8 @@ function Worker(){
 }
 
 Worker.prototype = {
+	
+	events: new ee(),
 
     stop: function() {
         this.result = true;
@@ -49,12 +59,14 @@ Worker.prototype = {
 
                 if(self.cycles >= 100){
                     var elapsed = big(Number(new Date())).minus(Number(self.startTimer)).div(1000);
+
                     process.send({
 						type: "metric",
 						pid: process.pid,
 						cycles: self.cycles,
 						elapsed: elapsed
 					});
+
                     self.cycles = 1;
                     self.startTimer = new Date();
                 }
@@ -65,8 +77,8 @@ Worker.prototype = {
             	   self.cycles++;
             	   self.periodCycles++;
 
-	               var c = fuz.metrics.jaro_winkler(self.work[i], val);
-                
+	               var c = fuz.metrics.jaro_winkler(self.work[i][1], val);
+
                    if(big(c).lt(self.block.distance) === true){
 						variance = 0;
                         return false;
@@ -79,7 +91,7 @@ Worker.prototype = {
 
                 if(big(variance).gt(0) == true){
                     //worker.result = "W:"+self.block.distance+":"+variance+":"+val+":"+self.work.length+":"+self.work.join("+");
-					self.block.proof = val;
+					self.block.blockHash = val;
 
                     worker.result = {
 						pid: process.pid,
@@ -100,37 +112,48 @@ Worker.prototype = {
 }
 
 var worker = new Worker();
+var work = [];
 
 process.on("message", function(msg){
 
     if(msg == "stop"){
+
         process.exit();
-    //} else if(generating == false && msg.type == "work") {
+
     } else if(msg.type == "work") {
 
-        //generating = true;
-
-		console.log(msg.data);
 
 		worker.block = msg.data;
 
         worker.startTimer = new Date();
 
-		worker.work = worker.block.edges.map(function(e){
+		worker.work = worker.block.blocks.map(function(e){
 
-			return string.blake2bl(e.input);
+			return [e.tag, string.blake2bl(e.input)];
 
 		});
 
-		worker.work.unshift(worker.block.input);
+	 	var NRGBlock = formatNRG(worker.block);
 
-        // TODO: Move this part into node domains
+		worker.work.unshift(NRGBlock);
 
-        while(worker.mine() == false) { }
+		function cycle()
 
-		process.send(worker.result);
+		{
 
-		process.exit();
+		   if(worker.mine() == false){
+
+		   	setTimeout(cycle, 1);
+
+		   } else {
+
+		    process.send(worker.result);
+
+		   }
+
+		}
+
+		cycle();
 
     } else if(msg.type == "update"){
 
@@ -148,4 +171,8 @@ process.on("message", function(msg){
     }
 
 });
+
+
+
+
 
