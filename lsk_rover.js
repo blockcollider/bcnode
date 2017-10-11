@@ -27,11 +27,14 @@ var log = new Log();
 const DEFAULT_TYPE = "log";
 
 process.on("uncaughtError", function(e){
-
     console.trace(e);
     console.trace("critical error "+ID+" rover, exiting...");
     process.exit(3);
+});
 
+process.on('disconnect', function() {
+  console.log('parent exited')
+  process.exit();
 });
 
 function send(type, data){

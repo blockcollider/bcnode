@@ -2,13 +2,15 @@
     "coinbase": {
         "tag": "nrg",
         "version": 2,
+        "n": 1,
         "org":"69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55",
-        "distance": 5,
+        "range": 2200,
+        "distance": 0.72,
         "bal": {
             "XE5136GAE1KYDL1U9K5NDB25T4G2UXAP2U": 50000000000000000000000000
         }
     },
-    "edges":[
+    "blocks":[
         {
            "version": 2,
            "tag":"btc",
@@ -19,9 +21,9 @@
         },
         {
            "version": 2,
-           "tag":"wav",
-           "n": 588408,
-           "org":"5rwE2uLkFNKLhDCwkBmpKQz6rhFoQVuf5xXyMLtxMWhqWNqb5iEPR6PzBrxiekaiDvy7ceCMTXqzjWp2SEj5xiNq",
+           "tag":"neo",
+           "n": 1454270,
+           "org":"18d4e2e01237e5299a0a6c4bea192d621dca077f7a115e760957e5b26e113000",
            "mkd": "",
            "bal": {}
         },

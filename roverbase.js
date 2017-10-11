@@ -7,7 +7,7 @@ var ee = require('events').EventEmitter;
 var socket = require("socket.io")(6600);
 var events = new ee();
 var log = global.log;
-
+var timeOffset = 0;
 
 socket.on("connection", function(client){
 
@@ -20,20 +20,34 @@ socket.on("connection", function(client){
     client.emit("setup", base);
 
     client.on("pow", function(msg){
-        console.log("-------------------WORK-----------------------");
         events.emit("pow", msg); 
     });
 
     client.on("metric", function(msg){
-        console.log("-------------------METRIC-----------------------");
-        console.log(msg);
         events.emit("metric", msg); 
     });
 
 });
 
+var heart = setInterval(function(){
 
+    socket.emit("ping", timeOffset);
 
+}, 5000);
+
+function updateSNTPOffset(){
+
+    time.offset(function(err, offset){
+
+        if(err) { console.trace(err); } else {
+
+            timeOffset = offset;
+
+        }
+
+    });
+
+}
 
 function RoverBase(opts) {
 
@@ -127,6 +141,7 @@ RoverBase.prototype = {
 
 }
 
+updateSNTPOffset();
 
 module.exports = RoverBase;
 

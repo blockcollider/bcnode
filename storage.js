@@ -64,7 +64,8 @@ function Storage(opts) {
 		self[k] = options[k];
 	});
 
-    console.log(JSON.stringify(options,null, 2));
+    log.info("block storage: "+options.blockPath);
+
 	LinvoDB.dbPath = options.blockPath; 
 
 }
@@ -234,20 +235,23 @@ Storage.prototype = {
 
         var self = this;
 
-		self.db[block.id].findOne({ blockHash: block.data.prevHash }, function(err, res){
+        fs.writeFile("./backup/"+block.data.blockNumber+".json", JSON.stringify(block.data, null, 2), function(err){
 
-            if(err) { cb(err); } else {
+            self.db[block.id].findOne({ blockHash: block.data.prevHash }, function(err, res){
 
-                if(res) { cb(null, res); } else {
+                if(err) { cb(err); } else {
 
-                    log.warn("prev block hash not found"); 
+                    if(res) { cb(null, res); } else {
 
-                    cb(null, block);
+                        log.warn("prev block hash not found"); 
+
+                        cb(null, block);
+
+                    }
 
                 }
 
-            }
-
+            });
         });
 
     },
@@ -257,7 +261,7 @@ Storage.prototype = {
         var self = this;
 
         var notOrphans = candidates.filter(function(c){
-            if(c.orphan != undefined && c.orphan === false){
+            if(c._orphan != undefined && c._orphan === false){
                 return c;
             }
         });
@@ -270,10 +274,10 @@ Storage.prototype = {
 
         } else {
 
-            block.data.status = "pending";
+            block.data._status = "pending";
 
             candidates = candidates.map(function(c){
-                c.status = "pending";
+                c._status = "pending";
                 return c;
             });
 
@@ -287,7 +291,23 @@ Storage.prototype = {
                 return all;
             }, []);
 
-            async.map(formatCandidates, self.writeBlock, function(err, cs){
+            function writeBlock(block , cb) {
+
+                var obj = new self.db[block.id](block.data);
+
+                    obj.save(function(err){
+
+                        if(err) { cb(err); } else {
+
+                            cb(null, block);
+
+                        }
+
+                    });
+
+            }
+
+            async.map(formatCandidates, writeBlock, function(err, cs){
 
                 if(err) { cb(err); } else {
 
@@ -312,19 +332,19 @@ Storage.prototype = {
 
                 if(res.length > 0){
 
-                    log.warn("block fork/orphan state initiated");
+                    log.warn("set block fork/orphan rebase flag");
 
-                    getBlockForkSolution(block, res, cb);
+                    self.getBlockForkSolution(block, res, cb);
 
                 } else {
 
-                    block.data.status = "done";
+                    block.data._status = "done";
 
                     // Block ok to store, see if pruning orphans is possible
                     
                     self.getPrevBlock(block, function(err, prevBlock){
 
-                        if(prevBlock.status == "pending"){
+                        if(prevBlock._status == "pending"){
 
                             self.db[block.id].find({ prevHash: prevBlock.prevHash }, function(err, res){
 
@@ -334,8 +354,8 @@ Storage.prototype = {
 
                                         if(err) { cb(err); } else {
 
-                                            prevBlock.status = "done";
-                                            prevBlock.orphan = false;
+                                            prevBlock._status = "done";
+                                            prevBlock._orphan = false;
 
                                             prevBlock.save(function(err){
 
@@ -377,6 +397,18 @@ Storage.prototype = {
 
         var self = this;
 
+		if(self[block.id] == undefined){
+
+			var schema = {}
+
+			if(SCHEMAS[block.id] != undefined){
+				schema = SCHEMAS[block.id];
+			}
+
+			self.db[block.id] = new LinvoDB(block.id, schema);
+
+		}
+
         var obj = new self.db[block.id](block.data);
 
             obj.save(function(err){
@@ -384,6 +416,7 @@ Storage.prototype = {
                 if(err) { cb(err); } else {
 
                     var bloom = self.addBloom(block.data.blockHash);
+                    var bloomNumber = self.addBloom(block.id+block.data.blockNumber); // eth4355274
 
                     cb(null, block, bloom);
 

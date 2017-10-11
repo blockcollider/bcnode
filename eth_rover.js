@@ -77,46 +77,48 @@ function stringToInt(str){
     var a = Buffer(str.slice(2, str.length+1), 'hex')
     var b = ethUtils.bufferToInt(a)
 
-	return b;
+    return b;
 
 }
 
 function transmitRoverBlock(block){
 
-	var d = block.toJSON({ labeled: true });
+    var d = block.toJSON({ labeled: true });
 
-	var obj = {}
-
-		obj.blockNumber = parseInt(d.header.number, 16);
-		obj.prevHash = d.header.parentHash;
-		obj.blockHash = "0x"+string.keccak(block.hash().toString("hex"));
-		obj.root = d.header.stateRoot;
-		//obj.gasLimit = stringToInt(d.header.gasLimit);
-		//obj.gasUsed = stringToInt(d.header.gasUsed);
-		obj.nonce = parseInt(d.header.nonce, 16);
-		obj.timestamp = parseInt(d.header.timestamp, 16);
-		obj.difficulty = parseInt(d.header.difficulty, 16);
-		obj.coinbase = d.header.coinbase;
-		obj.marked = false;
-		obj.transactions = d.transactions.map(function(t){
-
-			var tx = new EthereumTx(t);
-			//var v = ethUtils.bufferToInt(t.v)
-			//var e = ethUtils.ecrecover(tx.hash(true), v, t.r, t.s).toString("hex");
-
-			t.txHash = ethUtils.bufferToHex(tx.hash(true));
-
-			return t;
-
-		}); 
+    var obj = {}
 
 
-	send("block", obj);
+        obj.blockNumber = parseInt(d.header.number, 16);
+        obj.prevHash = d.header.parentHash;
+        //obj.blockHash = "0x"+string.keccak(block.hash().toString("hex"));
+        obj.blockHash = "0x"+block.hash().toString("hex");
+        obj.root = d.header.stateRoot;
+        //obj.gasLimit = stringToInt(d.header.gasLimit);
+        //obj.gasUsed = stringToInt(d.header.gasUsed);
+        obj.nonce = parseInt(d.header.nonce, 16);
+        obj.timestamp = parseInt(d.header.timestamp, 16);
+        obj.difficulty = parseInt(d.header.difficulty, 16);
+        obj.coinbase = d.header.coinbase;
+        obj.marked = false;
+        obj.transactions = d.transactions.map(function(t){
+
+            var tx = new EthereumTx(t);
+            //var v = ethUtils.bufferToInt(t.v)
+            //var e = ethUtils.ecrecover(tx.hash(true), v, t.r, t.s).toString("hex");
+
+            t.txHash = ethUtils.bufferToHex(tx.hash(true));
+
+            return t;
+
+        }); 
+
+
+    send("block", obj);
 
 }
 
 function isOpenPort(host, port, cb){
-	portscanner.checkPortStatus(8545, host, cb); 
+    portscanner.checkPortStatus(8545, host, cb); 
 }
 
 function getPrivateKey() {
@@ -183,289 +185,289 @@ Network.prototype = {
 
             } else {
 
-				// DPT
-				const dpt = new devp2p.DPT(self.key, {
-				  refreshInterval: 30000,
-				  timeout: 25000,
-				  endpoint: {
-					address: '0.0.0.0',
-					udpPort: null,
-					tcpPort: null
-				  }
-				});
+                // DPT
+                const dpt = new devp2p.DPT(self.key, {
+                  refreshInterval: 30000,
+                  timeout: 25000,
+                  endpoint: {
+                    address: '0.0.0.0',
+                    udpPort: null,
+                    tcpPort: null
+                  }
+                });
 
-				dpt.on('error', function(err){ }); 
+                dpt.on('error', function(err){ }); 
 
-				// RLPx
-				const rlpx = new devp2p.RLPx(self.key, {
-				  dpt: dpt,
-				  maxPeers: 60,
-				  capabilities: [
-					devp2p.ETH.eth63,
-					devp2p.ETH.eth62
-				  ],
-				  listenPort: null
-				})
+                // RLPx
+                const rlpx = new devp2p.RLPx(self.key, {
+                  dpt: dpt,
+                  maxPeers: 60,
+                  capabilities: [
+                    devp2p.ETH.eth63,
+                    devp2p.ETH.eth62
+                  ],
+                  listenPort: null
+                })
 
-				//rlpx.on('error', (err) => console.error(chalk.red(`RLPx error: ${err.stack || err}`)))
-				rlpx.on('error', function(err) { }); 
+                //rlpx.on('error', (err) => console.error(chalk.red(`RLPx error: ${err.stack || err}`)))
+                rlpx.on('error', function(err) { }); 
 
-				rlpx.on('peer:added', (peer) => {
-				  const addr = getPeerAddr(peer)
+                rlpx.on('peer:added', (peer) => {
+                  const addr = getPeerAddr(peer)
 
-				  const host = addr.split(":")[0];
-				  const port = addr.split(":")[1];
-				
-				  const eth = peer.getProtocols()[0]
-				  const requests = { headers: [], bodies: [] }
+                  const host = addr.split(":")[0];
+                  const port = addr.split(":")[1];
+                
+                  const eth = peer.getProtocols()[0]
+                  const requests = { headers: [], bodies: [] }
 
-				  const clientId = peer.getHelloMessage().clientId
+                  const clientId = peer.getHelloMessage().clientId
 
-				  //console.log(chalk.green(`Add peer: ${addr} ${clientId} (eth${eth.getVersion()}) (total: ${rlpx.getPeers().length})`))
+                  //console.log(chalk.green(`Add peer: ${addr} ${clientId} (eth${eth.getVersion()}) (total: ${rlpx.getPeers().length})`))
 
-				  eth.sendStatus({
-					networkId: 1,
-					td: devp2p._util.int2buffer(17179869184), // total difficulty in genesis block
-					bestHash: Buffer.from('d4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3', 'hex'),
-					genesisHash: Buffer.from('d4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3', 'hex')
-				  })
+                  eth.sendStatus({
+                    networkId: 1,
+                    td: devp2p._util.int2buffer(17179869184), // total difficulty in genesis block
+                    bestHash: Buffer.from('d4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3', 'hex'),
+                    genesisHash: Buffer.from('d4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3', 'hex')
+                  })
 
-				  // check DAO
-				  let forkDrop = null
-				  let forkVerified = false
-				  eth.once('status', () => {
-					if (DAO_FORK_SUPPORT === null) return
-					eth.sendMessage(devp2p.ETH.MESSAGE_CODES.GET_BLOCK_HEADERS, [ 1920000, 1, 0, 0 ])
-					forkDrop = setTimeout(() => {
-					  peer.disconnect(devp2p.RLPx.DISCONNECT_REASONS.USELESS_PEER)
-					}, ms('15s'))
-					peer.once('close', () => clearTimeout(forkDrop))
-				  })
+                  // check DAO
+                  let forkDrop = null
+                  let forkVerified = false
+                  eth.once('status', () => {
+                    if (DAO_FORK_SUPPORT === null) return
+                    eth.sendMessage(devp2p.ETH.MESSAGE_CODES.GET_BLOCK_HEADERS, [ 1920000, 1, 0, 0 ])
+                    forkDrop = setTimeout(() => {
+                      peer.disconnect(devp2p.RLPx.DISCONNECT_REASONS.USELESS_PEER)
+                    }, ms('15s'))
+                    peer.once('close', () => clearTimeout(forkDrop))
+                  })
 
-				  eth.on('message', async (code, payload) => {
-					//console.log(`new message (${addr}) ${code} ${rlp.encode(payload).toString('hex')}`)
-					switch (code) {
-					  case devp2p.ETH.MESSAGE_CODES.NEW_BLOCK_HASHES:
-						if (DAO_FORK_SUPPORT !== null && !forkVerified) break
+                  eth.on('message', async (code, payload) => {
+                    //console.log(`new message (${addr}) ${code} ${rlp.encode(payload).toString('hex')}`)
+                    switch (code) {
+                      case devp2p.ETH.MESSAGE_CODES.NEW_BLOCK_HASHES:
+                        if (DAO_FORK_SUPPORT !== null && !forkVerified) break
 
-						for (let item of payload) {
-						  const blockHash = item[0]
-						  if (blocksCache.has(blockHash.toString('hex'))) continue
-						  setTimeout(() => {
-							eth.sendMessage(devp2p.ETH.MESSAGE_CODES.GET_BLOCK_HEADERS, [ blockHash, 1, 0, 0 ])
-							requests.headers.push(blockHash)
-						  }, ms('0.1s'))
-						}
-						break
+                        for (let item of payload) {
+                          const blockHash = item[0]
+                          if (blocksCache.has(blockHash.toString('hex'))) continue
+                          setTimeout(() => {
+                            eth.sendMessage(devp2p.ETH.MESSAGE_CODES.GET_BLOCK_HEADERS, [ blockHash, 1, 0, 0 ])
+                            requests.headers.push(blockHash)
+                          }, ms('0.1s'))
+                        }
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.TX:
-						if (DAO_FORK_SUPPORT !== null && !forkVerified) break
+                      case devp2p.ETH.MESSAGE_CODES.TX:
+                        if (DAO_FORK_SUPPORT !== null && !forkVerified) break
 
-						///////////////////////// FIX ME
-						for (let item of payload) {
-						  const tx = new EthereumTx(item)
-						  if (isValidTx(tx)) onNewTx(tx, peer)
-						}
+                        ///////////////////////// FIX ME
+                        for (let item of payload) {
+                          const tx = new EthereumTx(item)
+                          if (isValidTx(tx)) onNewTx(tx, peer)
+                        }
 
-						break
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.GET_BLOCK_HEADERS:
-						const headers = []
-						// hack
-						if (DAO_FORK_SUPPORT && devp2p._util.buffer2int(payload[0]) === 1920000) {
-						  headers.push(ETH_1920000_HEADER)
-						}
+                      case devp2p.ETH.MESSAGE_CODES.GET_BLOCK_HEADERS:
+                        const headers = []
+                        // hack
+                        if (DAO_FORK_SUPPORT && devp2p._util.buffer2int(payload[0]) === 1920000) {
+                          headers.push(ETH_1920000_HEADER)
+                        }
 
-						eth.sendMessage(devp2p.ETH.MESSAGE_CODES.BLOCK_HEADERS, headers)
-						break
+                        eth.sendMessage(devp2p.ETH.MESSAGE_CODES.BLOCK_HEADERS, headers)
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.BLOCK_HEADERS:
-						if (DAO_FORK_SUPPORT !== null && !forkVerified) {
-						  if (payload.length !== 1) {
-							//console.log(`${addr} expected one header for DAO fork verify (received: ${payload.length})`)
-							break
-						  }
+                      case devp2p.ETH.MESSAGE_CODES.BLOCK_HEADERS:
+                        if (DAO_FORK_SUPPORT !== null && !forkVerified) {
+                          if (payload.length !== 1) {
+                            //console.log(`${addr} expected one header for DAO fork verify (received: ${payload.length})`)
+                            break
+                          }
 
-						  const expectedHash = DAO_FORK_SUPPORT ? ETH_1920000 : ETC_1920000
-						  const header = new EthereumBlock.Header(payload[0])
-						  if (header.hash().toString('hex') === expectedHash) {
-							//console.log(`${addr} verified to be on the same side of the DAO fork`)
-							clearTimeout(forkDrop)
-							forkVerified = true
-						  }
-						} else {
-						  if (payload.length > 1) {
-							//console.log(`${addr} not more than one block header expected (received: ${payload.length})`)
-							break
-						  }
+                          const expectedHash = DAO_FORK_SUPPORT ? ETH_1920000 : ETC_1920000
+                          const header = new EthereumBlock.Header(payload[0])
+                          if (header.hash().toString('hex') === expectedHash) {
+                            //console.log(`${addr} verified to be on the same side of the DAO fork`)
+                            clearTimeout(forkDrop)
+                            forkVerified = true
+                          }
+                        } else {
+                          if (payload.length > 1) {
+                            //console.log(`${addr} not more than one block header expected (received: ${payload.length})`)
+                            break
+                          }
 
-						  let isValidPayload = false
-						  const header = new EthereumBlock.Header(payload[0])
-						  while (requests.headers.length > 0) {
-							const blockHash = requests.headers.shift()
+                          let isValidPayload = false
+                          const header = new EthereumBlock.Header(payload[0])
+                          while (requests.headers.length > 0) {
+                            const blockHash = requests.headers.shift()
 
-							if (header.hash().equals(blockHash)) {
-							  isValidPayload = true
-							  setTimeout(() => {
-								eth.sendMessage(devp2p.ETH.MESSAGE_CODES.GET_BLOCK_BODIES, [ blockHash ])
-								requests.bodies.push(header)
-							  }, ms('0.1s'))
-							  break
-							}
-						  }
+                            if (header.hash().equals(blockHash)) {
+                              isValidPayload = true
+                              setTimeout(() => {
+                                eth.sendMessage(devp2p.ETH.MESSAGE_CODES.GET_BLOCK_BODIES, [ blockHash ])
+                                requests.bodies.push(header)
+                              }, ms('0.1s'))
+                              break
+                            }
+                          }
 
-						  if (!isValidPayload) {
-							//console.log(`${addr} received wrong block header ${header.hash().toString('hex')}`)
-						  }
-						}
+                          if (!isValidPayload) {
+                            //console.log(`${addr} received wrong block header ${header.hash().toString('hex')}`)
+                          }
+                        }
 
-						break
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.GET_BLOCK_BODIES:
-						eth.sendMessage(devp2p.ETH.MESSAGE_CODES.BLOCK_BODIES, [])
-						break
+                      case devp2p.ETH.MESSAGE_CODES.GET_BLOCK_BODIES:
+                        eth.sendMessage(devp2p.ETH.MESSAGE_CODES.BLOCK_BODIES, [])
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.BLOCK_BODIES:
-						if (DAO_FORK_SUPPORT !== null && !forkVerified) break
+                      case devp2p.ETH.MESSAGE_CODES.BLOCK_BODIES:
+                        if (DAO_FORK_SUPPORT !== null && !forkVerified) break
 
-						if (payload.length !== 1) {
-						  console.log(`${addr} not more than one block body expected (received: ${payload.length})`)
-						  break
-						}
+                        if (payload.length !== 1) {
+                          console.log(`${addr} not more than one block body expected (received: ${payload.length})`)
+                          break
+                        }
 
-						let isValidPayload = false
-						while (requests.bodies.length > 0) {
-						  const header = requests.bodies.shift()
-						  const block = new EthereumBlock([header.raw, payload[0][0], payload[0][1]])
-						  const isValid = await isValidBlock(block)
-						  if (isValid) {
-							isValidPayload = true
-							onNewBlock(block, peer)
-							break
-						  }
-						}
+                        let isValidPayload = false
+                        while (requests.bodies.length > 0) {
+                          const header = requests.bodies.shift()
+                          const block = new EthereumBlock([header.raw, payload[0][0], payload[0][1]])
+                          const isValid = await isValidBlock(block)
+                          if (isValid) {
+                            isValidPayload = true
+                            onNewBlock(block, peer)
+                            break
+                          }
+                        }
 
-						if (!isValidPayload) {
-						  console.log(`${addr} received wrong block body`)
-						}
+                        if (!isValidPayload) {
+                          console.log(`${addr} received wrong block body`)
+                        }
 
-						break
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.NEW_BLOCK:
-						if (DAO_FORK_SUPPORT !== null && !forkVerified) break
+                      case devp2p.ETH.MESSAGE_CODES.NEW_BLOCK:
+                        if (DAO_FORK_SUPPORT !== null && !forkVerified) break
 
-						const newBlock = new EthereumBlock(payload[0])
-						const isValidNewBlock = await isValidBlock(newBlock)
-						if (isValidNewBlock) onNewBlock(newBlock, peer)
+                        const newBlock = new EthereumBlock(payload[0])
+                        const isValidNewBlock = await isValidBlock(newBlock)
+                        if (isValidNewBlock) onNewBlock(newBlock, peer)
 
-						break
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.GET_NODE_DATA:
-						eth.sendMessage(devp2p.ETH.MESSAGE_CODES.NODE_DATA, [])
-						break
+                      case devp2p.ETH.MESSAGE_CODES.GET_NODE_DATA:
+                        eth.sendMessage(devp2p.ETH.MESSAGE_CODES.NODE_DATA, [])
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.NODE_DATA:
-						break
+                      case devp2p.ETH.MESSAGE_CODES.NODE_DATA:
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.GET_RECEIPTS:
-						eth.sendMessage(devp2p.ETH.MESSAGE_CODES.RECEIPTS, [])
-						break
+                      case devp2p.ETH.MESSAGE_CODES.GET_RECEIPTS:
+                        eth.sendMessage(devp2p.ETH.MESSAGE_CODES.RECEIPTS, [])
+                        break
 
-					  case devp2p.ETH.MESSAGE_CODES.RECEIPTS:
-						break
-					}
-				  })
-				})
+                      case devp2p.ETH.MESSAGE_CODES.RECEIPTS:
+                        break
+                    }
+                  })
+                })
 
-				rlpx.on('peer:removed', (peer, reason, disconnectWe) => {
-				  const who = disconnectWe ? 'we disconnect' : 'peer disconnect'
-				  const total = rlpx.getPeers().length
-				  //console.log(chalk.yellow(`Remove peer: ${getPeerAddr(peer)} (${who}, reason code: ${String(reason)}) (total: ${total})`))
-				})
+                rlpx.on('peer:removed', (peer, reason, disconnectWe) => {
+                  const who = disconnectWe ? 'we disconnect' : 'peer disconnect'
+                  const total = rlpx.getPeers().length
+                  //console.log(chalk.yellow(`Remove peer: ${getPeerAddr(peer)} (${who}, reason code: ${String(reason)}) (total: ${total})`))
+                })
 
-				rlpx.on('peer:error', (peer, err) => {
-				  if (err.code === 'ECONNRESET') return
+                rlpx.on('peer:error', (peer, err) => {
+                  if (err.code === 'ECONNRESET') return
 
-				  if (err instanceof assert.AssertionError) {
-					const peerId = peer.getId()
-					if (peerId !== null) dpt.banPeer(peerId, ms('5m'))
+                  if (err instanceof assert.AssertionError) {
+                    const peerId = peer.getId()
+                    if (peerId !== null) dpt.banPeer(peerId, ms('5m'))
 
-					//console.error(chalk.red(`Peer error (${getPeerAddr(peer)}): ${err.message}`))
-					return
-				  }
+                    //console.error(chalk.red(`Peer error (${getPeerAddr(peer)}): ${err.message}`))
+                    return
+                  }
 
-				  //console.error(chalk.red(`Peer error (${getPeerAddr(peer)}): ${err.stack || err}`))
+                  //console.error(chalk.red(`Peer error (${getPeerAddr(peer)}): ${err.stack || err}`))
 
-				})
+                })
 
-				for (let bootnode of BOOTNODES) {
-				  dpt.bootstrap(bootnode).catch((err) => {
-					//console.error(chalk.bold.red(`DPT bootstrap error: ${err.stack || err}`))
-				  })
-				}
+                for (let bootnode of BOOTNODES) {
+                  dpt.bootstrap(bootnode).catch((err) => {
+                    //console.error(chalk.bold.red(`DPT bootstrap error: ${err.stack || err}`))
+                  })
+                }
 
-				const txCache = new LRUCache({ max: 2000 })
-
-
-				function onNewTx (tx, peer) {
-				  const txHashHex = tx.hash().toString('hex')
-				  if (txCache.has(txHashHex)) return
-				  txCache.set(txHashHex, true)
-				  //console.log(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
-				}
-
-				const blocksCache = new LRUCache({ max: 118 })
-
-				function onNewBlock (block, peer) {
-
-				  const blockHashHex = block.hash().toString('hex')
-
-				  const peersCount = dpt.getPeers().length
-
-				  if (blocksCache.has(blockHashHex)) return
-
-				  blocksCache.set(blockHashHex, true)
-
-				  for (let tx of block.transactions) onNewTx(tx, peer)
+                const txCache = new LRUCache({ max: 2000 })
 
 
-    			    transmitRoverBlock(block);
+                function onNewTx (tx, peer) {
+                  const txHashHex = tx.hash().toString('hex')
+                  if (txCache.has(txHashHex)) return
+                  txCache.set(txHashHex, true)
+                  //console.log(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
+                }
+
+                const blocksCache = new LRUCache({ max: 118 })
+
+                function onNewBlock (block, peer) {
+
+                  const blockHashHex = block.hash().toString('hex')
+
+                  const peersCount = dpt.getPeers().length
+
+                  if (blocksCache.has(blockHashHex)) return
+
+                  blocksCache.set(blockHashHex, true)
+
+                  for (let tx of block.transactions) onNewTx(tx, peer)
 
 
-				}
+                    transmitRoverBlock(block);
 
-				function isValidTx (tx) {
-				  return tx.validate(false)
-				}
 
-				async function isValidBlock (block) {
-				  if (!block.validateUnclesHash()) return false
-				  if (!block.transactions.every(isValidTx)) return false
-				  return new Promise((resolve, reject) => {
-					block.genTxTrie(() => {
-					  try {
-						resolve(block.validateTransactionsTrie())
-					  } catch (err) {
-						reject(err)
-					  }
-					})
-				  })
-				}
+                }
 
-				setInterval(() => {
+                function isValidTx (tx) {
+                  return tx.validate(false)
+                }
 
-				  //console.log(dpt.getPeers());
-				  const peersCount = dpt.getPeers().length
-				  const openSlots = rlpx._getOpenSlots()
-				  const queueLength = rlpx._peersQueue.length
-				  const queueLength2 = rlpx._peersQueue.filter((o) => o.ts <= Date.now()).length
+                async function isValidBlock (block) {
+                  if (!block.validateUnclesHash()) return false
+                  if (!block.transactions.every(isValidTx)) return false
+                  return new Promise((resolve, reject) => {
+                    block.genTxTrie(() => {
+                      try {
+                        resolve(block.validateTransactionsTrie())
+                      } catch (err) {
+                        reject(err)
+                      }
+                    })
+                  })
+                }
 
-				  log.info(`${ID} rover peers ${peersCount}, open slots: ${openSlots}, queue: ${queueLength} / ${queueLength2}`)
-				}, ms('30s'))
+                setInterval(() => {
 
-			}
+                  //console.log(dpt.getPeers());
+                  const peersCount = dpt.getPeers().length
+                  const openSlots = rlpx._getOpenSlots()
+                  const queueLength = rlpx._peersQueue.length
+                  const queueLength2 = rlpx._peersQueue.filter((o) => o.ts <= Date.now()).length
 
-		});
+                  log.info(`${ID} rover peers ${peersCount}, open slots: ${openSlots}, queue: ${queueLength} / ${queueLength2}`)
+                }, ms('30s'))
+
+            }
+
+        });
 
     },
 

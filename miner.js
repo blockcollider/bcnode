@@ -1,20 +1,47 @@
 
 var _ = require('lodash');
 var child_process = require('child_process');
+var fs = require('fs-extra');
 var big = require('big.js');
+var moment = require('moment');
 var async = require('async');
+var LinvoDB = require("linvodb3");
 var terminate = require('terminate');
 var crypto = require('crypto');
 var Log = require("./log.js");
 var string = require('./strings.js');
 var format = require("./format.js");
-var ee = require('events').EventEmitter;
 var Block = require('./block.js');
 
+//db.findOne({ 
+//    blockHash: "0x0cc2134397d9ed49d51f86f3ba54afbc50fa85842683667d108dc2a803d7bad2" }, function(err, doc){
+//
+//    if(err) { console.trace(err); } else {
+//        console.log(doc);
+//    }
+//
+//}); 
+
+var ee = require('events').EventEmitter;
 var log = new Log();
+var offset = 0;
 
     global._GenesisPath = "./genesis.json";
+
     global._MiningThreads = 2;
+
+	global._MinerPath = "./miner_data"; 
+
+	LinvoDB.dbPath = global._MinerPath; 
+
+	fs.ensureDirSync(global._MinerPath);
+
+var noPingTimeout = setTimeout(function(){
+
+	log.error("no communication from roverbase exiting...");
+	process.exit();
+
+}, 60000);
 
 function readFile(){
 
@@ -26,9 +53,11 @@ function readFile(){
 
 }
 
-function Miner() { 
+function Miner(opts) { 
 
     var g = readFile();
+
+	var self = this;
 
     this.genesis = g; 
 
@@ -40,11 +69,13 @@ function Miner() {
 
     this.initializing = true;
 
+	this.blockNumber = 0;
+
     this.pids = [];
 
 	this.workers = [];
 
-    this.state = g.edges.reduce(function(all, k){
+    this.state = g.blocks.reduce(function(all, k){
 
         all[k.org] = k
 
@@ -53,6 +84,14 @@ function Miner() {
         return all;
 
     }, {});
+
+	if(opts != undefined){
+
+		Object.keys(opts).map(function(k){
+			self[k] = opts[k];
+		});
+
+	}
 
 }
 
@@ -89,7 +128,7 @@ Miner.prototype = {
 
         var start = global._MiningThreads - self.workers.length;
         
-        var limit = 1000000;
+        var limit = 19900000;
 
         var startTimer = new Date();
 
@@ -114,9 +153,28 @@ Miner.prototype = {
 
 					worker.on("message", function(m){
 
+						if(self.block == undefined){
+
+							worker.send({
+								type: "exit"
+							});	
+
+							return; 
+
+						}
+
 						if(m.type == "pow"){
 							
 							log.info("block found");
+
+							m.data.tag = self.genesis.coinbase.tag;
+
+
+							Object.keys(self.block).map(function(k){
+								m.data[k] = self.block[k];
+							});
+
+							m.data.prevHash = self.block.input;
 							
 							if(self.readyToMine == true) {
 
@@ -124,7 +182,9 @@ Miner.prototype = {
 									return w.pid;
 								});
 
-								var pids = _.pull(pids, m.pid);
+								console.log(pids);
+
+								//var pids = _.pull(pids, m.pid);
 
 								async.map(pids, terminate, function(err, s){
 
@@ -135,6 +195,12 @@ Miner.prototype = {
 									self.readyToMine = false;
 
 									delete self.block;
+									
+									m.data.timestamp = moment().unix() + offset;
+
+									log.info("block timestamp set: "+m.data.timestamp);
+
+									self.events.emit("pow", m.data);
 
 									socket.emit("pow", m.data);
 
@@ -147,6 +213,12 @@ Miner.prototype = {
 								self.readyToMine = false;
 
 								delete self.block;
+
+								m.data.timestamp = moment().unix() + offset;
+
+								log.info("block timestamp set: "+m.data.timestamp);
+
+								self.events.emit("pow", m.data);
 
 								socket.emit("pow", m.data);
 
@@ -161,19 +233,26 @@ Miner.prototype = {
 
 						if(big(count).gte(limit) === true){
 
+							try {
+
 							var elapsed = big(Number(new Date())).minus(Number(startTimer)).div(1000);
 							var hashRate = big(count).div(elapsed).toFixed(2);
 							var start = "X:"+self.workers.length+" "+hashRate+"hz";
                             var rep = {
                                 timestamp: moment().utc().format(),
+								type: hashRate,
                                 hashRate: hashRate,
                                 elapsed: elapsed
                             }
 
-							log.info(start);
 							startTimer = new Date();
 							count = 0; 
                             socket.emit("metric", rep);
+
+							} catch(err){
+
+
+							}
 
 						}
 
@@ -188,9 +267,18 @@ Miner.prototype = {
 						console.trace(err);
 					});
 
-					worker.on("exit", function(){
+					worker.once("exit", function(){
 						log.info("thread closed");
 					});
+
+					self.events.once("reset", function(){
+
+						if(worker.connected === true){
+						   worker.send({ type: "exit" });
+						}
+
+					});
+
 
 					self.workers.push(worker);
 
@@ -222,6 +310,17 @@ Miner.prototype = {
 
 						}
 
+					} else if(self.pids.length > 0) {
+
+						async.map(pids, terminate, function(err){
+
+								self.pids = [];
+								self.workers = [];
+								self.events.emit("reset");
+
+						});
+
+
 					} else {
 
 						self.pids = [];
@@ -243,8 +342,7 @@ Miner.prototype = {
 
         var self = this;
 
-
-        if(self.block != undefined && self.block.edges.length == self.genesis.edges.length){
+        if(self.block != undefined && self.block.blocks.length == self.genesis.blocks.length){
 
 			if(self.readyToMine == false){
 
@@ -260,11 +358,13 @@ Miner.prototype = {
 
     },
 
-	latestBlock: function(cb){
+	latestBlocks: function(cb){
 
 		// here it should load the last collider chain block hash, for now we will take coinbase
 
 		var self = this;
+
+			//////// Needs to pull this block 
 			self.block = new Block({
 				"version": 2,
 				"distance": 0.715, 
@@ -272,55 +372,180 @@ Miner.prototype = {
 				"input": "69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55" 
 			});
 
-		cb();
+		if(self.db == undefined){
+
+			cb();
+
+		} else {
+
+			async.map(self.genesis.blocks, function(obj, next){
+
+				self.db.findOne({ tag: obj.tag }, next);
+
+			}, function(err, res){
+
+				if(err) { cb(err); } else {
+
+					self.db.find({ tag: self.genesis.coinbase.tag }).sort({ n: -1 }).exec(function(err, recent){
+
+						if(err) { cb(err);  } else {
+					
+							console.log(recent);			
+							var NRGBlock;
+
+							if(recent.length > 0) {
+
+								NRGBlock = recent.shift();
+								NRGBlock.n = NRGBlock.n + 1;
+
+								NRGBlock.distance = self.genesis.coinbase.distance;
+								NRGBlock.range = self.genesis.coinbase.range;
+
+								self.block = new Block(NRGBlock);
+
+							} else {
+
+								self.block = new Block({
+									tag: self.genesis.coinbase.tag,
+									input: self.genesis.coinbase.org,
+									distance: self.genesis.coinbase.distance, 
+									range: self.genesis.coinbase.range,
+									n: self.genesis.coinbase.n
+								});
+
+							}
+
+
+							console.log(self.block);
+
+							cb(null, recent);	
+
+						}
+						
+					});
+
+				}
+			
+			});
+
+
+		}
+
 
 	}
 
 }
 
+var miner = new Miner({
+	db: new LinvoDB("miner", {}) 
+});
 
+var socket = require('socket.io-client')('http://localhost:6600');
 
-var miner = new Miner();
+	socket.on('connect', function(){
+		log.info("miner connected to rover base");
+	});
 
-	//miner.latestBlock(function() { });
+	socket.on('disconnect', function(){
+		miner.events.emit("update");
+		log.info("miner connected to rover base");
+	});
 
-var queue = async.queue(function(roverBlock, cb){
+	socket.on("setup", function(data){
+		log.info("collider base recieved "+data.address);
+		miner.identity = data;
+	});
 
-	var obj = format.roverBlockToEdgeBlock(roverBlock);
+	socket.on("block", function(roverBlock){
 
-	Object.keys(miner.state).map(function(k){
-		if(miner.state[k].tag === obj.tag){
-			obj.org = k
+		try { 
+
+			var obj = format.roverBlockToEdgeBlock(roverBlock);
+
+			queue.push(obj, function(err, block){ });
+
+		} catch (err) {
+			console.trace(err);
+			log.error("unable to parse block");
 		}
-	});	
 
-	// This is terrible, refactor
-	
-	if(miner.block != undefined){
+	});
 
-		miner.block.addEdge(obj);    
+	socket.on("ping", function(oset){
 
-		if(miner.readyToMine == true){
+		clearTimeout(noPingTimeout);
 
-			miner.events.once("reset", function(){
-				miner.workers = [];
-				miner.start();
-				cb(null, miner.block);
+		noPingTimeout = setTimeout(function(){
+			log.error("no communication from roverbase exiting...");
+			process.exit();
+		}, 30000);
+
+	});
+
+
+		//miner.latestBlock(function() { });
+
+		miner.events.on("pow", function(data){
+			
+			var doc = new miner.db(data);
+
+				doc.save(function(err){
+
+					if(err) { 
+						log.error(err);
+					}
+
+				});
+
+		});
+
+	var queue = async.queue(function(obj, cb){
+
+		Object.keys(miner.state).map(function(k){
+			if(miner.state[k].tag === obj.tag){
+				obj.org = k
+			}
+		});	
+
+		// This is terrible, refactor
+
+		if(obj._id === undefined){
+
+			var list = obj.input.split("::");
+			var i = obj.n-1;
+
+			async.map(list, function(input, next){
+
+				i++;
+
+				var m = _.cloneDeep(obj);
+
+					m.n = i;
+
+					m.input = input;
+
+				var block = new miner.db(m);
+
+					block.save(function(err){
+						if(err) { console.trace(err); } else {
+							next();
+						}
+					});
+
+			}, function(err, res){
+
+
+				
+
 			});
 
-			miner.events.emit("update");
 
-		} else {
-			miner.processWork();
-		    cb(null, miner.block);
 		}
 
 
-	} else {
+		if(miner.block != undefined){
 
-		miner.latestBlock(function() { 
-
-			miner.block.addEdge(obj);    
+			miner.block.addBlock(obj, miner.readyToMine);    
 
 			if(miner.readyToMine == true){
 
@@ -330,7 +555,7 @@ var queue = async.queue(function(roverBlock, cb){
 					cb(null, miner.block);
 				});
 
-				miner.events.emit("update");
+				//miner.events.emit("update");
 
 			} else {
 				miner.processWork();
@@ -338,56 +563,50 @@ var queue = async.queue(function(roverBlock, cb){
 			}
 
 
-		});
+		} else {
 
-	}
+			log.info("creating working block");
+
+			miner.latestBlocks(function() { 
+
+				miner.block.addBlock(obj);    
+
+				if(miner.readyToMine == true){
+
+					miner.events.once("reset", function(){
+						miner.workers = [];
+						miner.start();
+						cb(null, miner.block);
+					});
+
+					//miner.events.emit("update");
+
+				} else {
+					miner.processWork();
+					cb(null, miner.block);
+				}
 
 
-});
+			});
 
-var socket = require('socket.io-client')('http://localhost:6600');
-
-    socket.on('connect', function(){
-        log.info("miner connected to rover base");
-    });
-
-    socket.on('disconnect', function(){
-
-		miner.events.emit("update");
-        log.info("miner connected to rover base");
-    });
-
-    socket.on("setup", function(data){
-        log.info("collider base recieved "+data.address);
-        miner.identity = data;
-    });
-
-
-    socket.on("block", function(roverBlock){
-
-		try { 
-
-			queue.push(roverBlock, function(err, block){ });
-
-		} catch (err) {
-			console.trace(err);
-			log.error("unable to parse block");
 		}
 
 
-    });
+	});
 
-//miner.start();
+	log.info("miner using genesis: "+global._GenesisPath);
 
-//var test = {
-//    id: "btc",
-//    type: "block",
-//    data: {
-//        blockHash: "0000000000000000000541abce378e49488abd794db03e8971273583dab5f10c"
-//    }
-//}
-//
-//miner.setBlock(test);
+	miner.latestBlocks(function(err, blocks) {
+
+			queue.push(blocks, function(err){
+
+
+			});
+
+	});
+
+
+
 
 
 

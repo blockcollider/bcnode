@@ -57,6 +57,11 @@ process.on("uncaughtError", function(e){
 
 });
 
+process.on('disconnect', function() {
+  console.log('parent exited')
+  process.exit();
+});
+
 function send(type, data){
 
     var d;

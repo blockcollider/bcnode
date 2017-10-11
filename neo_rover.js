@@ -34,11 +34,14 @@ const FAILED_RETRY_DELAY = 3000;
 const SUCCESS_RETRY_DELAY = 3000;
 
 process.on("uncaughtError", function(e){
-
     console.trace(e);
     console.trace("critical error "+ID+" rover, exiting...");
     process.exit(3);
+});
 
+process.on('disconnect', function() {
+  console.log('parent exited')
+  process.exit();
 });
 
 function send(type, data){
