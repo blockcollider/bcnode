@@ -202,8 +202,6 @@ function onNewBlock(height, block, cb) {
 
 	for (let tx of block.transactions) onNewTx(tx, block)
 
-    console.log("blockNumber: "+blockNumber);
-
 	block.blockNumber = blockNumber;
 
     //if(blockNumber != undefined && isNaN(Number(blockNumber)) == false){
@@ -229,7 +227,7 @@ function Network (config) {
     var self = this;
 
     var options = {
-        maximumPeers: 112,
+        maximumPeers: 96,
         discoveredPeers: 0,
         lastBlock: false,
         quorum: 91,
@@ -353,9 +351,18 @@ Network.prototype = {
         });
 
         // connect to the network
+
+		try { 
         pool.connect();
 
         return pool;
+
+		} catch(err) {
+        	pool.listen();
+
+			return pool
+
+		}
 
 
     }
@@ -371,33 +378,66 @@ var Controller = {
 
     init: function(config) {
 
+
         var network = new Network(config);
 
         var pool = network.connect();
 
+		var poolTimeout = setTimeout(function(){
+		  pool.disconnect().connect();
+		},3000);
+
             pool.on('peerready', function(peer, addr) {
                 
+				clearTimeout(poolTimeout);
                 //console.log("Connect: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
 
                 if(network.quorum != true && network.discoveredPeers >= network.quorum){
 
-                    network.quorum = true;
-                    network.lastBlock = network.setState();
+                    try { 
 
-                    send("log", "quorum established");
+                        network.quorum = true;
+                        network.lastBlock = network.setState();
+                        network.discoveredPeers++;
+                        network.indexPeer(peer);
+                        send("log", "quorum established");
+
+                    } catch(err) { 
+					  log.error(err); 
+					}
 
                 } else if(network.quorum != true && peer.subversion.indexOf("/Satoshi:0.1") > -1){
 
-                    network.discoveredPeers++;
-                    network.indexPeer(peer);
+                    try { 
+                        network.discoveredPeers++;
+                        network.indexPeer(peer);
+                    } catch(err) { 
+                        log.error(err);
+						peer.disconnect();
+                    }
 
-                }
+                } else {
+
+                    try { 
+						peer.disconnect();
+                    } catch(err) { 
+					  log.error(err);
+                    }
+
+
+				}
 
             });
 
             pool.on('peerdisconnect', function(peer, addr) { network.removePeer(peer); });
 
             pool.on("peererror", function(err){ });
+
+            pool.on("seederror", function(err){ });
+
+            pool.on("peertimeout", function(err){ });
+
+            pool.on("timeout", function(err){ });
 
             pool.on("error", function(err){ });
 
@@ -410,15 +450,23 @@ var Controller = {
 
                     if(peer.subversion != undefined && peer.subversion.indexOf("/Satoshi:") > -1){
 
-                        const peerMessage = new Messages().GetData(message.inventory);
-                        peer.sendMessage(peerMessage);
+                        try { 
+                           const peerMessage = new Messages().GetData(message.inventory);
+                           peer.sendMessage(peerMessage);
+                        } catch(err) { 
+                           log.error(err);
 
-                    } else {
+							try {
+								pool._removePeer(peer);
+							} catch(err) {
+								log.error(err);
+							}
 
-                        pool._deprioritizeAddr(self.peerData[peer.host]);
-                        pool._removeConnectedPeer(self.peerData[peer.host]);
+                        }
 
-                    }
+
+                    } 
+
 
                 } catch(err) { 
                     console.trace(err);
@@ -432,9 +480,8 @@ var Controller = {
                 //console.log("peer best height submitting block: "+peer.bestHeight);
                 //console.log("LAST BLOCK "+network.state.bestHeight);
 
-                console.log(JSON.stringify(block.header, null, 2));
-
                 if(network.state.bestHeight != undefined && block.header.version === BLOCK_VERSION) { 
+                //if(network.state.bestHeight != undefined)  { 
 
                     block.lastBlock = network.state.bestHeight;
 
@@ -442,7 +489,6 @@ var Controller = {
 
                         onNewBlock(peer, block, function(err, num){
 
-                            log.info("setting new block: "+num);
                             block.blockNumber = num;
                             network.state.bestHeight = num;
 
@@ -450,16 +496,19 @@ var Controller = {
 
                     }
 
+                } else {
+					try {
+						pool._removePeer(peer);
+					} catch(err) {
+						log.error(err);
+					}
                 }
 
             });
 
             setInterval(function() {
-
                 log.info(ID+" rover peers "+pool.numberConnected());
-
-            }, 45000);
-
+            }, 60000);
 
     },
 

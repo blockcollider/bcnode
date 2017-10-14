@@ -27,6 +27,10 @@ socket.on("connection", function(client){
         events.emit("metric", msg); 
     });
 
+    client.on("tx", function(msg){
+        events.emit("tx", msg); 
+    });
+
 });
 
 var heart = setInterval(function(){

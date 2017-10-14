@@ -348,7 +348,8 @@ Network.prototype = {
                         }
 
                         if (!isValidPayload) {
-                          console.log(`${addr} received wrong block body`)
+                          log.info(addr+" received wrong "+ID+" block body")
+                          peer.disconnect(devp2p.RLPx.DISCONNECT_REASONS.USELESS_PEER)
                         }
 
                         break
@@ -357,6 +358,7 @@ Network.prototype = {
                         if (DAO_FORK_SUPPORT !== null && !forkVerified) break
 
                         const newBlock = new EthereumBlock(payload[0])
+
                         const isValidNewBlock = await isValidBlock(newBlock)
                         if (isValidNewBlock) onNewBlock(newBlock, peer)
 
@@ -420,6 +422,7 @@ Network.prototype = {
 
                 function onNewBlock (block, peer) {
 
+
                   const blockHashHex = block.hash().toString('hex')
 
                   const peersCount = dpt.getPeers().length
@@ -427,11 +430,10 @@ Network.prototype = {
                   if (blocksCache.has(blockHashHex)) return
 
                   blocksCache.set(blockHashHex, true)
-
+				  
                   for (let tx of block.transactions) onNewTx(tx, peer)
 
-
-                    transmitRoverBlock(block);
+                  transmitRoverBlock(block);
 
 
                 }
@@ -443,15 +445,16 @@ Network.prototype = {
                 async function isValidBlock (block) {
                   if (!block.validateUnclesHash()) return false
                   if (!block.transactions.every(isValidTx)) return false
-                  return new Promise((resolve, reject) => {
-                    block.genTxTrie(() => {
-                      try {
-                        resolve(block.validateTransactionsTrie())
-                      } catch (err) {
-                        reject(err)
-                      }
-                    })
-                  })
+
+				  return new Promise((resolve, reject) => {
+					block.genTxTrie(() => {
+					  try {
+						resolve(block.validateTransactionsTrie())
+					  } catch (err) {
+						reject(err)
+					  }
+					})
+				  })
                 }
 
                 setInterval(() => {
@@ -463,6 +466,7 @@ Network.prototype = {
                   const queueLength2 = rlpx._peersQueue.filter((o) => o.ts <= Date.now()).length
 
                   log.info(`${ID} rover peers ${peersCount}, open slots: ${openSlots}, queue: ${queueLength} / ${queueLength2}`)
+
                 }, ms('30s'))
 
             }

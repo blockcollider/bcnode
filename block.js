@@ -11,6 +11,15 @@ var crypt = new Crypt();
 
 var privKey = crypt.createSecPrivateKey(); 
 
+process.on("uncaughtError", function(err){
+
+    if(err) { console.trace(err); } else {
+
+       console.log("exit"); 
+    }
+
+});
+
 if(global.log == undefined){
     var Log = require("./log.js");
     log = new Log(); 
@@ -45,9 +54,9 @@ function Block(opts) {
 
     var self = this;
     var options = {
-        preBonusDistance: 0.72,
-        maxMutations: 124,
-        distance: 0.72,
+        preBonusDistance: 0.71,
+        maxMutations: 224,
+        distance: 0.71,
         range: 2200,
 		emblems: 0,
         mne: 2,
@@ -180,17 +189,18 @@ Block.prototype = {
 
             self.blocks.push(block);
             self.ne = self.blocks.length;
+
         } else {
 
             if(forceAdd == undefined){
-                log.info("block already exists");
+                log.info("sequence "+block.tag+" exists");
 			    self.addMutation(block);
             } else if(forceAdd == true){
-                log.info("block already exists");
+                log.info("sequence "+block.tag+" exists");
 			    self.addMutation(block);
             } else if(forceAdd == false){
 
-                log.info(block.tag+" block recieved pending network baseline");
+                log.info(block.tag+" block pending network baseline");
                 
                 self.blocks = self.blocks.filter(function(b){
                        if(b.org != block.org && b.tag != block.tag){
@@ -199,8 +209,6 @@ Block.prototype = {
                 });
 
                 self.blocks.unshift(block);
-
-                console.log(self.blocks);
 
             }
 
@@ -267,20 +275,20 @@ Block.prototype = {
 
 					} else {
 
-                        console.log(e);
 						e.input = e.input+"::"+block.input;
+
+				        self.distance = big(self.distance).times(0.99).toFixed(8);
 
 					} 
 
 				} else {
 
-                    console.log(e);
 					e.input = e.input+"::"+block.input;
+
+				    self.distance = big(self.distance).times(0.99).toFixed(8);
 
 				}
 
-
-				self.distance = big(self.distance).times(0.995).toFixed(8);
 
 			} 
 

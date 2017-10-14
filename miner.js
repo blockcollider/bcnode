@@ -22,6 +22,26 @@ var Block = require('./block.js');
 //
 //}); 
 
+function formatPrevBlock(data){
+
+    data.blocks = data.blocks.reduce(function(all, a){
+
+        var l = a.input.split("::").length;
+
+                a.n = l - 1; 
+
+                a.input = a.input.split("::").pop();
+
+                all.push(a);
+
+        return all;
+
+    }, []);
+
+    return data;
+
+}
+
 var ee = require('events').EventEmitter;
 var log = new Log();
 var offset = 0;
@@ -70,6 +90,8 @@ function Miner(opts) {
     this.initializing = true;
 
 	this.blockNumber = 0;
+
+    this.bestScore = {}
 
     this.pids = [];
 
@@ -126,6 +148,13 @@ Miner.prototype = {
 
         var self = this;
 
+        if(self.workers.length > 0){
+
+            console.log("STARTING WITH WORKERS: "+self.workers.length);
+            process.exit();
+
+        }
+
         var start = global._MiningThreads - self.workers.length;
         
         var limit = 19900000;
@@ -155,9 +184,15 @@ Miner.prototype = {
 
 						if(self.block == undefined){
 
-							worker.send({
-								type: "exit"
-							});	
+                            log.info("block not defined"); 
+
+                            if(worker.connected == true) {
+
+                                worker.send({
+                                    type: "exit"
+                                });	
+
+                            }
 
 							return; 
 
@@ -168,7 +203,6 @@ Miner.prototype = {
 							log.info("block found");
 
 							m.data.tag = self.genesis.coinbase.tag;
-
 
 							Object.keys(self.block).map(function(k){
 								m.data[k] = self.block[k];
@@ -193,8 +227,11 @@ Miner.prototype = {
 									self.pids = [];
 									self.workers = [];
 									self.readyToMine = false;
+                                    self.prevBlock = formatPrevBlock(_.cloneDeep(self.block));
 
 									delete self.block;
+
+                                    delete self.bestScore;
 									
 									m.data.timestamp = moment().unix() + offset;
 
@@ -211,8 +248,10 @@ Miner.prototype = {
 								self.pids = [];
 								self.workers = [];
 								self.readyToMine = false;
+                                self.prevBlock = formatPrevBlock(_.cloneDeep(self.block));
 
 								delete self.block;
+                                delete self.bestScore;
 
 								m.data.timestamp = moment().unix() + offset;
 
@@ -267,69 +306,15 @@ Miner.prototype = {
 						console.trace(err);
 					});
 
-					worker.once("exit", function(){
+					worker.on("exit", function(){
 						log.info("thread closed");
 					});
 
-					self.events.once("reset", function(){
-
-						if(worker.connected === true){
-						   worker.send({ type: "exit" });
-						}
-
-					});
-
-
+					//self.events.once("reset", function(){
 					self.workers.push(worker);
 
 				}
 
-				self.events.once("update", function(){
-
-					if(self.workers.length > 0){
-
-						var pids = self.workers.map(function(w){
-							return w.pid;
-						});
-
-						if(pids.length > 0){
-
-							async.map(pids, terminate, function(err){
-
-									self.pids = [];
-									self.workers = [];
-									self.events.emit("reset");
-
-							});
-
-						} else {
-
-							self.pids = [];
-							self.workers = [];
-							self.events.emit("reset");
-
-						}
-
-					} else if(self.pids.length > 0) {
-
-						async.map(pids, terminate, function(err){
-
-								self.pids = [];
-								self.workers = [];
-								self.events.emit("reset");
-
-						});
-
-
-					} else {
-
-						self.pids = [];
-						self.workers = [];
-						self.events.emit("reset");
-
-					}
-
-				});
 
 			}
             
@@ -367,70 +352,71 @@ Miner.prototype = {
 			//////// Needs to pull this block 
 			self.block = new Block({
 				"version": 2,
-				"distance": 0.715, 
+				"distance": 0.71, 
 				"range": 2200,
 				"input": "69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55" 
 			});
 
-		if(self.db == undefined){
+		//if(self.db == undefined){
 
-			cb();
+		//	cb();
 
-		} else {
+		//} else {
 
-			async.map(self.genesis.blocks, function(obj, next){
+		//	async.map(self.genesis.blocks, function(obj, next){
 
-				self.db.findOne({ tag: obj.tag }, next);
+		//		self.db.findOne({ tag: obj.tag }, next);
 
-			}, function(err, res){
+		//	}, function(err, res){
 
-				if(err) { cb(err); } else {
+		//		if(err) { cb(err); } else {
 
-					self.db.find({ tag: self.genesis.coinbase.tag }).sort({ n: -1 }).exec(function(err, recent){
+		//			self.db.find({ tag: self.genesis.coinbase.tag }).sort({ n: -1 }).exec(function(err, recent){
 
-						if(err) { cb(err);  } else {
-					
-							console.log(recent);			
-							var NRGBlock;
+		//				if(err) { cb(err);  } else {
+		//			
+		//					console.log(recent);			
+		//					var NRGBlock;
 
-							if(recent.length > 0) {
+		//					if(recent.length > 0) {
 
-								NRGBlock = recent.shift();
-								NRGBlock.n = NRGBlock.n + 1;
+		//						NRGBlock = recent.shift();
+		//						NRGBlock.n = NRGBlock.n + 1;
 
-								NRGBlock.distance = self.genesis.coinbase.distance;
-								NRGBlock.range = self.genesis.coinbase.range;
+		//						NRGBlock.distance = self.genesis.coinbase.distance;
+		//						NRGBlock.range = self.genesis.coinbase.range;
 
-								self.block = new Block(NRGBlock);
+		//						self.block = new Block(NRGBlock);
 
-							} else {
+		//					} else {
 
-								self.block = new Block({
-									tag: self.genesis.coinbase.tag,
-									input: self.genesis.coinbase.org,
-									distance: self.genesis.coinbase.distance, 
-									range: self.genesis.coinbase.range,
-									n: self.genesis.coinbase.n
-								});
+		//						self.block = new Block({
+		//							tag: self.genesis.coinbase.tag,
+		//							input: self.genesis.coinbase.org,
+		//							distance: self.genesis.coinbase.distance, 
+		//							range: self.genesis.coinbase.range,
+		//							n: self.genesis.coinbase.n
+		//						});
 
-							}
-
-
-							console.log(self.block);
-
-							cb(null, recent);	
-
-						}
-						
-					});
-
-				}
-			
-			});
+		//					}
 
 
-		}
+		//					console.log(self.block);
 
+		//					cb(null, recent);	
+
+		//				}
+		//				
+		//			});
+
+		//		}
+		//	
+		//	});
+
+
+		//}
+
+        cb();
 
 	}
 
@@ -440,6 +426,52 @@ var miner = new Miner({
 	db: new LinvoDB("miner", {}) 
 });
 
+miner.events.once("update", function(){
+
+    if(miner.workers.length > 0){
+
+        var pids = miner.workers.map(function(w){
+            return w.pid;
+        });
+
+        if(pids.length > 0){
+
+            async.map(pids, terminate, function(err){
+
+                    miner.pids = [];
+                    miner.workers = [];
+                    miner.events.emit("reset");
+
+            });
+
+        } else {
+
+            miner.pids = [];
+            miner.workers = [];
+            miner.events.emit("reset");
+
+        }
+
+    } else if(miner.pids.length > 0) {
+
+        async.map(pids, terminate, function(err){
+
+                miner.pids = [];
+                miner.workers = [];
+                miner.events.emit("reset");
+
+        });
+
+
+    } else {
+
+        miner.pids = [];
+        miner.workers = [];
+        miner.events.emit("reset");
+
+    }
+
+});
 var socket = require('socket.io-client')('http://localhost:6600');
 
 	socket.on('connect', function(){
@@ -509,53 +541,68 @@ var socket = require('socket.io-client')('http://localhost:6600');
 
 		// This is terrible, refactor
 
-		if(obj._id === undefined){
+		//if(obj._id === undefined){
 
-			var list = obj.input.split("::");
-			var i = obj.n-1;
+		//	var list = obj.input.split("::");
+		//	var i = obj.n-1;
 
-			async.map(list, function(input, next){
+		//	async.map(list, function(input, next){
 
-				i++;
+		//		i++;
 
-				var m = _.cloneDeep(obj);
+		//		var m = _.cloneDeep(obj);
 
-					m.n = i;
+		//			m.n = i;
 
-					m.input = input;
+		//			m.input = input;
 
-				var block = new miner.db(m);
+		//		var block = new miner.db(m);
 
-					block.save(function(err){
-						if(err) { console.trace(err); } else {
-							next();
-						}
-					});
+		//			block.save(function(err){
+		//				if(err) { console.trace(err); } else {
+		//					next();
+		//				}
+		//			});
 
-			}, function(err, res){
-
-
-				
-
-			});
+		//	}, function(err, res){
 
 
-		}
+		//	});
+
+
+		//}
 
 
 		if(miner.block != undefined){
+
+            if(miner.prevBlock != undefined){
+
+                var add = miner.prevBlock.blocks.filter(function(b){
+
+                    if(b.tag != obj.tag){
+                        return b;
+                    }
+
+                });
+
+                for(var i = 0; i<add.length; i++){
+			        miner.block.addBlock(add[i], miner.readyToMine);    
+                }
+
+            }
 
 			miner.block.addBlock(obj, miner.readyToMine);    
 
 			if(miner.readyToMine == true){
 
-				miner.events.once("reset", function(){
-					miner.workers = [];
-					miner.start();
-					cb(null, miner.block);
-				});
+                 
+				////miner.events.once("reset", function(){
+				//	miner.workers = [];
+				//	miner.start();
+				////});
 
 				//miner.events.emit("update");
+				cb(null, miner.block);
 
 			} else {
 				miner.processWork();
@@ -569,16 +616,35 @@ var socket = require('socket.io-client')('http://localhost:6600');
 
 			miner.latestBlocks(function() { 
 
+                if(miner.prevBlock != undefined){
+
+                    var add = miner.prevBlock.blocks.filter(function(b){
+
+                        if(b.tag != obj.tag){
+                            return b;
+                        }
+
+                    });
+
+                    for(var i = 0; i<add.length; i++){
+                        miner.block.addBlock(add[i], miner.readyToMine);    
+                    }
+
+
+                }
+
 				miner.block.addBlock(obj);    
+
+                console.log(miner.block.blocks);
 
 				if(miner.readyToMine == true){
 
-					miner.events.once("reset", function(){
-						miner.workers = [];
-						miner.start();
-						cb(null, miner.block);
-					});
+					//miner.events.once("reset", function(){
+						//miner.workers = [];
+						//miner.start();
+					//});
 
+				    cb(null, miner.block);
 					//miner.events.emit("update");
 
 				} else {
@@ -598,10 +664,9 @@ var socket = require('socket.io-client')('http://localhost:6600');
 
 	miner.latestBlocks(function(err, blocks) {
 
-			queue.push(blocks, function(err){
+			//queue.push(blocks, function(err){ 
 
-
-			});
+			//});
 
 	});
 

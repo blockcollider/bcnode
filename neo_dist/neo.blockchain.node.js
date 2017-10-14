@@ -481,7 +481,7 @@ module.exports = function(network) {
           method: 'post',
           url: node.domain + ':' + node.port,
           data: {"jsonrpc": "2.0", "method": payload.method, "params": payload.params, "id": payload.id},
-          timeout: 20000
+          timeout: 5000
         })
           .then(function (response) {
             node.pendingRequests --;

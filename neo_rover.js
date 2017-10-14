@@ -30,8 +30,8 @@ const log = new Log();
 
 const ID = "neo";
 const DEFAULT_TYPE = "log";
-const FAILED_RETRY_DELAY = 3000;
-const SUCCESS_RETRY_DELAY = 3000;
+const FAILED_RETRY_DELAY = 3500;
+const SUCCESS_RETRY_DELAY = 3500;
 
 process.on("uncaughtError", function(e){
     console.trace(e);
@@ -325,7 +325,6 @@ var Controller = {
           send("log", "quorum unecessary");
 
 
-
           function cycle() {
 
 				neoNode.getBestBlockHash().then(function(a){
@@ -338,18 +337,22 @@ var Controller = {
 
 						blockCache.set(a, true);						
 
-						neoNode.getBlockByHash(a).then(function(b){
+                        setTimeout(function() {
 
-							onNewBlock(b);
+                            neoNode.getBlockByHash(a).then(function(b){
 
-							setTimeout(cycle, SUCCESS_RETRY_DELAY);
+                                onNewBlock(b);
 
-						}).catch(function(err){
+                                setTimeout(cycle, SUCCESS_RETRY_DELAY);
 
-                            console.trace(err);
-                            setTimeout(5000, cycle);
-                            
-                        });
+                            }).catch(function(err){
+
+                                console.trace(err);
+                                setTimeout(5000, cycle);
+                                
+                            });
+
+                        }, 2000);
 
 					}
 

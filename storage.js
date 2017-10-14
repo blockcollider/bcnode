@@ -235,7 +235,7 @@ Storage.prototype = {
 
         var self = this;
 
-        fs.writeFile("./backup/"+block.data.blockNumber+".json", JSON.stringify(block.data, null, 2), function(err){
+        //fs.writeFile("./backup/"+block.data.blockNumber+".json", JSON.stringify(block.data, null, 2), function(err){
 
             self.db[block.id].findOne({ blockHash: block.data.prevHash }, function(err, res){
 
@@ -252,7 +252,8 @@ Storage.prototype = {
                 }
 
             });
-        });
+
+        //});
 
     },
 
