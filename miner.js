@@ -48,7 +48,7 @@ var offset = 0;
 
     global._GenesisPath = "./genesis.json";
 
-    global._MiningThreads = 2;
+    global._MiningThreads = 5;
 
 	global._MinerPath = "./miner_data"; 
 
@@ -224,16 +224,18 @@ Miner.prototype = {
 
 									if(err) { log.error(err); } 
 
+                                    var prevBlock = _.cloneDeep(self.block);
+
 									self.pids = [];
 									self.workers = [];
 									self.readyToMine = false;
-                                    self.prevBlock = formatPrevBlock(_.cloneDeep(self.block));
+                                    self.prevBlock = formatPrevBlock(prevBlock);
 
 									delete self.block;
 
                                     delete self.bestScore;
 									
-									m.data.timestamp = moment().unix() + offset;
+									m.data.timestamp = Number(moment().unix()) + offset;
 
 									log.info("block timestamp set: "+m.data.timestamp);
 
@@ -245,15 +247,17 @@ Miner.prototype = {
 
 							} else {
 
+                                var prevBlock = _.cloneDeep(self.block);
+
 								self.pids = [];
 								self.workers = [];
 								self.readyToMine = false;
-                                self.prevBlock = formatPrevBlock(_.cloneDeep(self.block));
+                                self.prevBlock = formatPrevBlock(prevBlock);
 
 								delete self.block;
                                 delete self.bestScore;
 
-								m.data.timestamp = moment().unix() + offset;
+								m.data.timestamp = Number(moment().unix()) + offset;
 
 								log.info("block timestamp set: "+m.data.timestamp);
 
@@ -352,7 +356,7 @@ Miner.prototype = {
 			//////// Needs to pull this block 
 			self.block = new Block({
 				"version": 2,
-				"distance": 0.71, 
+				"distance": 0.735, 
 				"range": 2200,
 				"input": "69985e7ced6a0863bc3ecc64b6f10a2272480d3d67d194073a4716102fc20f55" 
 			});
@@ -589,9 +593,12 @@ var socket = require('socket.io-client')('http://localhost:6600');
 			        miner.block.addBlock(add[i], miner.readyToMine);    
                 }
 
+            } else {
+
+			    miner.block.addBlock(obj, miner.readyToMine);    
+
             }
 
-			miner.block.addBlock(obj, miner.readyToMine);    
 
 			if(miner.readyToMine == true){
 
@@ -631,9 +638,12 @@ var socket = require('socket.io-client')('http://localhost:6600');
                     }
 
 
+                } else {
+
+				    miner.block.addBlock(obj);    
+
                 }
 
-				miner.block.addBlock(obj);    
 
                 console.log(miner.block.blocks);
 

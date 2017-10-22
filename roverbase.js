@@ -9,6 +9,8 @@ var events = new ee();
 var log = global.log;
 var timeOffset = 0;
 
+global._RoverRestartDelay = 5000;
+
 socket.on("connection", function(client){
 
     var id = global._BlockColliderIdentity;
@@ -101,9 +103,12 @@ RoverBase.prototype = {
 
                 var type = "log";
 				var id = "coin";
+
                 if(msg.type != undefined){
                     type = msg.type;
 				    msg.utc = time.now();
+
+
                 } 
 
 				if(msg.id != undefined){
@@ -116,7 +121,25 @@ RoverBase.prototype = {
             });
 
             n.on("exit", function(){
-                log.info(roverId+" exited");
+
+                var restartSeconds = global._RoverRestartDelay / 1000;
+
+                log.info(roverId+" exited restarting in " + restartSeconds + "s");
+
+                self.running = self.running.filter(function(r){
+
+                    if(r.id != roverId){
+                        return r;
+                    }
+
+                });
+
+                setTimeout(function() {
+
+                    self.launchRover(roverId);
+                    
+                }, global._RoverRestartDelay);
+
             });
 
             n.send({ func: "init", args: [{

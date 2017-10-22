@@ -24,14 +24,12 @@ const LRU = require("lru-cache")
   , blockCache = LRU(options)
   , otherCache = LRU(50) // sets just the max size 
 
-
-
 const log = new Log();
 
 const ID = "neo";
 const DEFAULT_TYPE = "log";
-const FAILED_RETRY_DELAY = 3500;
-const SUCCESS_RETRY_DELAY = 3500;
+const FAILED_RETRY_DELAY = 5500;
+const SUCCESS_RETRY_DELAY = 5500;
 
 process.on("uncaughtError", function(e){
     console.trace(e);
@@ -327,6 +325,7 @@ var Controller = {
 
           function cycle() {
 
+
 				neoNode.getBestBlockHash().then(function(a){
 
 					if(blockCache.has(a) === true){
@@ -348,7 +347,7 @@ var Controller = {
                             }).catch(function(err){
 
                                 console.trace(err);
-                                setTimeout(5000, cycle);
+                                setTimeout(cycle, 6000);
                                 
                             });
 
@@ -359,7 +358,7 @@ var Controller = {
 				}).catch(function(err){
 
                     console.trace(err);
-                    setTimeout(5000, cycle);
+                    setTimeout(cycle, 6000);
 
                 });
 

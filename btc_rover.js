@@ -65,6 +65,7 @@ process.on("uncaughtError", function(e){
 
 });
 
+
 function send(type, data){
 
     var d;
@@ -230,7 +231,7 @@ function Network (config) {
         maximumPeers: 96,
         discoveredPeers: 0,
         lastBlock: false,
-        quorum: 91,
+        quorum: 61,
         peers: {},
         state: {},
         peerData: {},
@@ -412,14 +413,21 @@ var Controller = {
                         network.discoveredPeers++;
                         network.indexPeer(peer);
                     } catch(err) { 
-                        log.error(err);
-						peer.disconnect();
+
+                        if(peer != undefined && peer.status != undefined){
+						    peer.disconnect();
+                        }
+
                     }
 
                 } else {
 
                     try { 
-						peer.disconnect();
+
+                        if(peer != undefined && peer.status != undefined){
+						    peer.disconnect();
+                        }
+
                     } catch(err) { 
 					  log.error(err);
                     }
@@ -431,9 +439,15 @@ var Controller = {
 
             pool.on('peerdisconnect', function(peer, addr) { network.removePeer(peer); });
 
-            pool.on("peererror", function(err){ });
+            pool.on("peererror", function(peer, err){ 
+                //log.error("Peer Error");
+                //log.error(err);
+            });
 
-            pool.on("seederror", function(err){ });
+            pool.on("seederror", function(err){ 
+                log.error("Seed Error");
+                console.trace(err);
+            });
 
             pool.on("peertimeout", function(err){ });
 
