@@ -1,5 +1,6 @@
 
 var string = require('./strings.js');
+var scr = require("./schnorr.js");
 
 function Transaction(opts) {
 
@@ -37,7 +38,27 @@ Transaction.prototype = {
 
     },
 
-    createCallback: function(){
+    createCallback: function(tx, chain, opts){
+
+        /* Create/update Bore Lock 
+         *  
+         * @Object tx: presigned chain transction, compiler meta data 
+         * @Object chain: cross-compiler meta data
+         *
+         * */
+
+        var options = {
+            schnorr: false
+        }
+
+        if(opts != undefined){
+            Object.keys(opt).map(function(k){
+                options[k] = opts[k];
+            });
+        }
+
+
+
 
     },
 
