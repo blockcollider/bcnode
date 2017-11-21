@@ -1,7 +1,7 @@
 /*jslint node: true */
 "use strict";
 
-if (global._HelixInit)
-    throw Error("Error: Running multiple instances of Helix Core");
+if (global._BlockColliderInit)
+    throw Error("Error: Running multiple instances of Block Collider");
 
-global._HelixInit = true;
+global._BlockColliderInit = true;
