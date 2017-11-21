@@ -81,8 +81,6 @@ var identity = new Identity();
 						//base.launchRover("lsk");
 						//base.launchRover("wav");
 						//base.launchRover("rsk");
-						//base.launchRover("xcp");
-						//base.launchRover("urb");
                         
                         /* Rover Base Events */
 						base.events.on("pow", function(msg){
