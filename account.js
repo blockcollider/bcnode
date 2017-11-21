@@ -11,7 +11,14 @@ var bitcoin = require('bitcoinjs-lib')
 var keythereum = require('keythereum');
 var ethUtil = require('ethereumjs-util')
 var ICAP = require('ethereumjs-icap');
+var Log = require('./log.js');
+var log;
 
+if(!global.log){
+    log = new Log(); 
+} else {
+    log = global.log;
+}
 
 function generateDirectAddress () {
 	return crypt.createSecPrivateKey();
@@ -41,22 +48,6 @@ function Account(opts) {
 }
 
 Account.prototype = {
-
-    createCallback: function(tx, epkcode) {
-        
-		
-
-    },
-
-    createPromise: function() {
-
-
-    },
-
-    createTransaction: function() {
-
-
-    },
 
     createColliderBase: function(cb) {
 	
@@ -111,84 +102,104 @@ Account.prototype = {
 		}
 		], function (err, result) {
 
-			pt.stop();
+              pt.get([{
 
-			if(err) { cb(err); } else {
+                  properties: {
 
-				log.info("generating keys");
+                    hideKey: {
+                      description: ' Print and save your private key? (WARNING: less secure)',
+                      type: "boolean",
+                      delimiter: colors.grey(">"),
+                      default: false,
+                      required: true
+                    }
+                  },
+                }
+                ], function (err, hidePrivateKey) {
 
-				var params = { keyBytes: 32, ivBytes: 16 };
+                    pt.stop();
 
-				var options = {
-				  kdf: "pbkdf2",
-				  cipher: "aes-128-ctr",
-				  kdfparams: {
-					c: 262144,
-					dklen: 32,
-					prf: "hmac-sha256"
-				  }
-				};
+                    if(err) { cb(err); } else {
 
-				keythereum.create(params, function (dk) {
+                        log.info("generating keys");
 
-					dk.privateKey = generateDirectAddress();
+                        var params = { keyBytes: 32, ivBytes: 16 };
 
-					keythereum.dump(result.password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
+                        var options = {
+                          kdf: "pbkdf2",
+                          cipher: "aes-128-ctr",
+                          kdfparams: {
+                            c: 262144,
+                            dklen: 32,
+                            prf: "hmac-sha256"
+                          }
+                        };
 
-						// Bitcoin
-						//var privateKey = crypt.createSecPrivateKey();
+                        keythereum.create(params, function (dk) {
 
-						var privateKey = dk.privateKey; 
-						var publicKey = crypt.createSecPublicKey(privateKey);
-						var publicKeyHash = bitcoin.crypto.hash160(new Buffer(publicKey, "hex"));
-						var addr = bitcoin.address.toBase58Check(publicKeyHash, bitcoin.networks.bitcoin.pubKeyHash)
+                            dk.privateKey = generateDirectAddress();
 
-						try { 
+                            keythereum.dump(result.password, dk.privateKey, dk.salt, dk.iv, options, function (keyObject) {
 
-							var account = {
-								publicKey: publicKey.toString("hex"), 
-								address: ICAP.fromAddress("0x"+keyObject.address),
-								longAddress: "0x"+keyObject.address,	
-								shortAddress: addr,
-								ePrivateKey: crypt.encrypt(privateKey, result.password),
-								networkSig: crypt.signSec(string.blake2bl(self.networkKey), privateKey) 
-							}
+                                // Bitcoin
+                                //var privateKey = crypt.createSecPrivateKey();
 
-							fs.ensureDir(global.path+"/keypairs", function(err){
+                                var privateKey = dk.privateKey; 
+                                var publicKey = crypt.createSecPublicKey(privateKey);
+                                var publicKeyHash = bitcoin.crypto.hash160(new Buffer(publicKey, "hex"));
+                                var addr = bitcoin.address.toBase58Check(publicKeyHash, bitcoin.networks.bitcoin.pubKeyHash)
 
-								if(err) { cb(err); } else {
+                                try { 
 
-									fs.writeFile(global.path+"/keypairs/"+account.address+".json", JSON.stringify(keyObject), "utf8", function(err){
+                                    var account = {
+                                        publicKey: publicKey.toString("hex"), 
+                                        address: ICAP.fromAddress("0x"+keyObject.address),
+                                        longAddress: "0x"+keyObject.address,	
+                                        shortAddress: addr,
+                                        ePrivateKey: crypt.encrypt(privateKey, result.password),
+                                        networkSig: crypt.signSec(string.blake2bl(self.networkKey), privateKey) 
+                                    }
 
-										if(err) { cb(err); } else {
+                                    fs.ensureDir(global.path+"/keypairs", function(err){
 
-											cb(null, account);
+                                        if(err) { cb(err); } else {
 
-										}
+                                            fs.writeFile(global.path+"/keypairs/"+account.address+".json", JSON.stringify(keyObject), "utf8", function(err){
 
-									}); 
+                                                if(err) { cb(err); } else {
 
-								}
+                                                    if(hidePrivateKey.hideKey == false){
+                                                       console.log("Private Key: "+privateKey); 
+                                                       global.privateKey = privateKey;
+                                                    }
 
-							});	
+                                                    cb(null, account);
 
+                                                }
 
-						} catch(err) {
+                                            }); 
 
-							
-							log.error("unable to create keys rerunning");
+                                        }
 
-							self.createAccount(cb);
-
-						}
-
-						
-					});
+                                    });	
 
 
-				});
+                                } catch(err) {
 
-			}
+                                    
+                                    log.error("unable to create keys rerunning");
+
+                                    self.createAccount(cb);
+
+                                }
+
+                                
+                            });
+
+
+                        });
+
+                    }
 	  });
 
     },
@@ -261,3 +272,4 @@ Account.prototype = {
 }
 
 module.exports = Account;
+

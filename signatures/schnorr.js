@@ -4,18 +4,29 @@
  * https://github.com/bcoin-org/bcoin
  */
 
-
 'use strict';
 
 const assert = require('assert');
 const elliptic = require('elliptic');
 const Signature = require('elliptic/lib/elliptic/ec/signature');
-const BN = require('bcrypto/lib/bn');
-const DRBG = require('bcrypto/lib/drbg');
-const sha256 = require('bcrypto/lib/sha256');
+const BN = require('bn.js');
+const HmacDRBG = require('./hmac-drbg');
+const sha256 = require('./digest').sha256;
 const curve = elliptic.ec('secp256k1').curve;
 const POOL64 = Buffer.allocUnsafe(64);
+
+/**
+ * @exports crypto/schnorr
+ */
+
 const schnorr = exports;
+
+schnorr.rfc6979 = function rfc6979(msg, priv, data) {
+  var drbg = schnorr.drbg(msg, priv, data);
+  var bytes = drbg.generate(curve.n.byteLength());
+  return new Buffer(bytes);
+};
+
 
 /**
  * Hash (r | M).
@@ -31,7 +42,7 @@ schnorr.hash = function hash(msg, r) {
   R.copy(B, 0);
   msg.copy(B, 32);
 
-  return new BN(sha256.digest(B));
+  return new BN(sha256(B));
 };
 
 /**
@@ -61,6 +72,7 @@ schnorr.trySign = function trySign(msg, prv, k, pn) {
 
   if (pn)
     r = r.add(pn);
+    //r = pn;
 
   if (r.y.isOdd()) {
     k = k.umod(curve.n);
@@ -258,6 +270,18 @@ schnorr.combineKeys = function combineKeys(keys) {
   return Buffer.from(point.encode('array', true));
 };
 
+schnorr.nonce = function nonce(msg, priv, data, ncb) {
+  var pubnonce;
+
+  if (!ncb)
+    ncb = schnorr.rfc6979;
+
+  pubnonce = ncb(msg, priv, data);
+
+  return new BN(pubnonce);
+};
+
+
 /**
  * Partially sign.
  * @param {Buffer} msg
@@ -291,7 +315,7 @@ schnorr.alg = Buffer.from('Schnorr+SHA256  ', 'ascii');
  * @param {Buffer} msg
  * @param {Buffer} priv
  * @param {Buffer} data
- * @returns {DRBG}
+ * @returns {HmacDRBG}
  */
 
 schnorr.drbg = function drbg(msg, priv, data) {
@@ -300,13 +324,14 @@ schnorr.drbg = function drbg(msg, priv, data) {
   pers.fill(0);
 
   if (data) {
-    assert(data.length === 32);
+    //assert(data.length === 32); // 
     data.copy(pers, 0);
   }
 
   schnorr.alg.copy(pers, 32);
 
-  return new DRBG(sha256, 32, priv, msg, pers);
+  return new HmacDRBG(priv, msg, pers);
+
 };
 
 /**
@@ -321,8 +346,7 @@ schnorr.generateNoncePair = function generateNoncePair(msg, priv, data) {
   const drbg = schnorr.drbg(msg, priv, data);
   const len = curve.n.byteLength();
 
-  let k = null;
-
+  let k;
   for (;;) {
     k = new BN(drbg.generate(len));
 

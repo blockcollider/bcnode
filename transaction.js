@@ -1,6 +1,8 @@
 
 var string = require('./strings.js');
-var scr = require("./schnorr.js");
+var snr = require("../signatures/schnorr.js");
+var Promise = require("./lib/promise.js");
+
 
 function Transaction(opts) {
 
@@ -8,7 +10,8 @@ function Transaction(opts) {
     // type 02 : transfer transaction used for NRG credit/debit 
     // type 03 : callback transaction used for NRG-callbacks
     // type 05 : promise transaction used for multi-chain promises
-    // type 66 : emblem transaction used for EMBLEM credit/debit 
+    // type 66 : bleed transaction code 
+    // type 88 : emblem transaction used for EMBLEM credit/debit 
     // type 99 : private chain transaction type 
 
     var self = this;
@@ -48,7 +51,7 @@ Transaction.prototype = {
          * */
 
         var options = {
-            schnorr: false
+            schnorr: true
         }
 
         if(opts != undefined){
@@ -58,11 +61,24 @@ Transaction.prototype = {
         }
 
 
-
-
     },
 
-    createPromise: function(){
+    createPromise: function(compiler, data, expireBlock){
+
+        var self = this;
+
+        // TODO: Add default 1000 blocks to chain
+        if(!expireBlock){
+           expireBlock = 400380; 
+        }
+
+        var promise = new Promise({
+            expire: expireBlock,
+            compiler: compiler,
+            data: data
+        }).on(data).sign();
+
+        return promise;
 
     },
 
@@ -100,7 +116,6 @@ Transaction.prototype = {
     },
 
     addSignature: function(privKey){
-
 
     }
 
