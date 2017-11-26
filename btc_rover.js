@@ -231,7 +231,7 @@ function Network (config) {
         maximumPeers: 96,
         discoveredPeers: 0,
         lastBlock: false,
-        quorum: 61,
+        quorum: 31,
         peers: {},
         state: {},
         peerData: {},

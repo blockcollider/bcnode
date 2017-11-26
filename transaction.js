@@ -1,6 +1,5 @@
 
 var string = require('./strings.js');
-var snr = require("../signatures/schnorr.js");
 var Promise = require("./lib/promise.js");
 
 

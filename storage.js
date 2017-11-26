@@ -86,7 +86,13 @@ Storage.prototype = {
 
 					if(err) { cb(err); } else {
 
-						self.genesis = require(self.genesisPath+"/"+self.genesisFile);
+                        if(fs.existsSync(self.genesisPath+"/"+self.genesisFile) == true){
+						    self.genesis = require(self.genesisPath+"/"+self.genesisFile);
+                        } else {
+						    self.genesis = require("./"+self.genesisFile);
+                        }
+
+						//self.genesis = require(self.genesisPath+"/"+self.genesisFile);
 						self.writeMap = new Shared.Create(self.bloomPath+"/"+self.bloomFile, self.blockAlloc);
 						self.readMap = new Shared.Open(self.bloomPath+"/"+self.bloomFile, self.blockAlloc);
 						self.initialized = true;

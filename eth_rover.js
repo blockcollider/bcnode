@@ -34,7 +34,7 @@ var bootNodes = require('ethereum-common').bootstrapNodes.map((node) => {
 
 
 var altBootnodes = [
-  { address: '52.16.188.185', udpPort: 30303 },
+  //{ address: '52.16.188.185', udpPort: 30303 },
   { address: '52.74.57.123', udpPort: 30303 }
 ]
 
@@ -246,6 +246,7 @@ Network.prototype = {
 
                   eth.on('message', async (code, payload) => {
                     //console.log(`new message (${addr}) ${code} ${rlp.encode(payload).toString('hex')}`)
+                    var raw = rlp.encode(payload).toString('hex');
                     switch (code) {
                       case devp2p.ETH.MESSAGE_CODES.NEW_BLOCK_HASHES:
                         if (DAO_FORK_SUPPORT !== null && !forkVerified) break
