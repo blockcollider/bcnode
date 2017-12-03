@@ -28,8 +28,8 @@ const log = new Log();
 
 const ID = "neo";
 const DEFAULT_TYPE = "log";
-const FAILED_RETRY_DELAY = 5500;
-const SUCCESS_RETRY_DELAY = 5500;
+const FAILED_RETRY_DELAY = 6500;
+const SUCCESS_RETRY_DELAY = 6500;
 
 process.on("uncaughtError", function(e){
     console.trace(e);
