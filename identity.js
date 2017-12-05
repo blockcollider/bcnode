@@ -133,7 +133,7 @@ identity.prototype = {
 
         self.getNetworkKey(currentIdentity, function(err, cfg){
 
-			if(err) { cb(err); } else {
+			if(err) { console.trace(err); cb(err); } else {
 
 				Object.keys(cfg).map(function(k){
 					self[k] = cfg[k];

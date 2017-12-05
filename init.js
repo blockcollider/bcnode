@@ -6,6 +6,7 @@ var Log = require("./log.js");
     global.log = new Log(); 
     global._GenesisPath = "./genesis.json";
 
+var log = global.log;
 var path = require('path'+''); // make browserify skip it
 var fs = require('fs'); 
 var async = require('async');

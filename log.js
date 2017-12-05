@@ -11,6 +11,10 @@ function logger(opts) {
 			transports: [
 			  new (winston.transports.Console)({ 
                    timestamp: tsFormat,
+                   formatter: function(options) {
+                        return options.timestamp() + ' ['+options.level.toUpperCase() + '] \t' + (undefined !== options.message ? options.message : '') +
+                            (options.meta && Object.keys(options.meta).length ? '\n\t' + JSON.stringify(options.meta) : '' );
+                   },
                    colorize: true 
               }),
 			  new (winston.transports.File)({ filename: 'BLOCKCOLLIDER.log' })
