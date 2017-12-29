@@ -1,11 +1,12 @@
 {
+  "txid": "",
+  "work": "",
   "hash": "a1a76ca9427d08e5ac0a92762f5d80221cd8da3089d55ce57ae87c4fb2d699f2",
   "ver": 1,
   "vin_sz": 1,
   "vout_sz": 2,
-  "lock_time": 443868,
   "size": 226,
-  "in": [
+  "inputs": [
     {
       "prev_out": {
         "hash": "584780fa230b514d1bf0a4e2faa312c486073acc7cf20a285452d9eb6e12e02c",
@@ -15,24 +16,46 @@
       "sequence": 4294967294
     }
   ],
-  "out": [
+  "outputs": [
     {
-      "value": "0.67124791",
-      "scriptPubKey": "OP_DUP OP_HASH160 ec3b498e30c4086dbc75d4304514f6c7ffeaff89 OP_EQUALVERIFY OP_CHECKSIG",
-      "address": "1NY5VdQFJSV28XbxTwxuyUHJH3zxvevZqU",
-      "next_in": {
-        "hash": "9b3d82fabc0e363fb6fd21c8dc7e0bae1c8bc54b7cad5dfff915358f11457edc",
-        "n": 0
-      }
+      "type": "3",
+      "ver": "1",
+      "value": "0.1",
+      "hash": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
+      "fiber": "3a2x", 
+      "expire": 100,
+      "inputs": [
+          {
+            "valid half of transaction"
+          }
+      ],
+      "outputs": [
+          {
+            "valid half of transaction completed"
+          },
+          {
+            "next claim to fill out",
+            "data": "",
+            "scriptSig": "" 
+          }
+      ]
     },
     {
+      "type": "1",
+      "ver": "1",
+      "value": "0.57124791",
+      "scriptPubKey": "OP_DUP OP_HASH160 ec3b498e30c4086dbc75d4304514f6c7ffeaff89 OP_EQUALVERIFY OP_CHECKSIG",
+      "address": "1NY5VdQFJSV28XbxTwxuyUHJH3zxvevZqU"
+    },
+    {
+      "type": "1",
+      "ver": "1",
       "value": "1.79110000",
       "scriptPubKey": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG",
       "address": "13fro9YdUSAa4wmzGup3RBCb94rDPJ1YiJ"
     }
   ],
-  "nid": "1b6ae65b0177a70d706933b8c5a6b43666f55ea2f3d2d694da181cea940ce70f",
-  "block": "00000000000000000368ca004e61fa5ff9502b1cd5721f03318c968cdc941531",
-  "blocknumber": 443879,
+  "block": "92fd7fd30da2ef4567d6f026e2d54e4a1a1e6e715c7dcc00976299eb88871a0c",
+  "blocknumber": 3879,
   "time": "2016-12-17 19:42:51"
 }
