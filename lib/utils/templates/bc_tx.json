@@ -26,17 +26,19 @@
       "expire": 100,
       "inputs": [
           {
-            "valid half of transaction"
+            "valid half of transaction",
+            "scriptSig": "" 
           }
       ],
       "outputs": [
           {
             "valid half of transaction completed"
+            "scriptPubKey": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG",
           },
           {
             "next claim to fill out",
             "data": "",
-            "scriptSig": "" 
+            "scriptPubKey": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG",
           }
       ]
     },
