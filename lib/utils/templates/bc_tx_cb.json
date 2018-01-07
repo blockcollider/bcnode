@@ -5,6 +5,8 @@
     "fpk": 22,
     "v": "1",
     "d": "44",
+    "nin": "1",
+    "nou": "2",
     "inputs": [{
         "prevHash": "584780fa230b514d1bf0a4e2faa312c486073acc7cf20a285452d9eb6e12e02c",
         "signature": "3045022100d2f1b79095b185c618ee2823f10ccea32d9fc01ee3347f668adf80f0eb5f3a0f022078d8b4c19ac4e9d11a3f48d151b38ca4495c46ea395e6979b44320d4d688966901 03299a481c1ca84fe1d86b5b9d088cf56aac890279fc5a244c40d4c800ab4d421f"
