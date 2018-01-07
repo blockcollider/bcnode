@@ -1,6 +1,10 @@
-BLOCK COLLIDER 
-==============
+# BLOCK COLLIDER 
+
 Mining node with built-in block rover, DHT, and client discovery. 
+
+## Status
+
+[![Build Status](https://travis-ci.com/blockcollider/bcnode.svg?token=zcFCsPT3bTmtCApsaoXp&branch=master)](https://travis-ci.com/blockcollider/bcnode)
 
 ## Index
 * init.js - startup file
