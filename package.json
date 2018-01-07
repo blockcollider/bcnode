@@ -4,7 +4,9 @@
   "description": "Block Collider with miners and rovers",
   "main": "init.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --require babel-core/register"
+    "test": "./node_modules/mocha/bin/mocha --require babel-core/register",
+    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
+    "start": "npm run build && node dist/lib/init.js"
   },
   "repository": {
     "type": "git",
