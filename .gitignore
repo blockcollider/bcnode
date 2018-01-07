@@ -63,6 +63,9 @@ typings/
 # next.js build output
 .next
 
+# Generated files
+dist/
+
 # Block Collider specific data directories
 data
 miner_data
