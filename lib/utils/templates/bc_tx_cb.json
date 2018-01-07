@@ -1,0 +1,48 @@
+{
+    "hash": "a1a76ca9427d08e5ac0a92762f5d80221cd8da3089d55ce57ae87c4fb2d699f2",
+    "work": "",
+    "txid": "",
+    "fpk": 22,
+    "v": "1",
+    "d": "44",
+    "inputs": [{
+        "prevHash": "584780fa230b514d1bf0a4e2faa312c486073acc7cf20a285452d9eb6e12e02c",
+        "signature": "3045022100d2f1b79095b185c618ee2823f10ccea32d9fc01ee3347f668adf80f0eb5f3a0f022078d8b4c19ac4e9d11a3f48d151b38ca4495c46ea395e6979b44320d4d688966901 03299a481c1ca84fe1d86b5b9d088cf56aac890279fc5a244c40d4c800ab4d421f"
+    }],
+    "outputs": [{
+        "class": "3",
+        "v": "1",
+        "value": "10",
+        "hash": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
+        "address": "1NY5VdQFJSV28XbxTwxuyUHJH3zxvevZqU",
+        "fiber": "3a2x",
+        "script": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG",
+        "agreements": [{
+            "prevClaim": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
+            "value": 10,
+            "signature": "3045022100d2f1b79095b185c618ee2823f10ccea32d9fc01ee3347f668adf80f0eb5f3a0f022078d8b4c19ac4e9d11a3f48d151b38ca4495c46ea395e6979b44320d4d688966901 03299a481c1ca84fe1d86b5b9d088cf56aac890279fc5a244c40d4c800ab4d421f",
+            "sequence": 0
+        }],
+        "claims": [{
+            "cid": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
+            "struct": 101,
+            "value": 6,
+            "script": "OP_IF 38903985 OP_CHECKLOCKTIMEVERIFY DROP OP_ELSE OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG OP_ENDIF",
+            "expire": 100,
+            "sequence": 1
+        }, {
+            "cid": "7d2cc03cbbaf130331bae741f19bc3364bffeb0f084a1c917db7fb7aff07fe51",
+            "struct": 100,
+            "value": 4,
+            "script": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG",
+            "sequence": 2
+        }]
+    }, {
+        "class": "1",
+        "v": "1",
+        "value": "2",
+        "hash": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
+        "address": "1NY5VdQFJSV28XbxTwxuyUHJH3zxvevZqU",
+        "script": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG"
+    }]
+}
