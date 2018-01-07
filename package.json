@@ -4,9 +4,10 @@
   "description": "Block Collider with miners and rovers",
   "main": "init.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --require babel-core/register",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "start": "npm run build && node dist/lib/init.js"
+    "eslint": "./node_modules/eslint/bin/eslint.js lib/",
+    "start": "npm run build && node dist/lib/init.js",
+    "test": "./node_modules/mocha/bin/mocha --require babel-core/register"
   },
   "repository": {
     "type": "git",
@@ -90,6 +91,9 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
     "mocha": "^4.1.0",
     "rimraf": "^2.6.2"
   }
