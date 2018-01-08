@@ -18,6 +18,7 @@
         "hash": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
         "address": "1NY5VdQFJSV28XbxTwxuyUHJH3zxvevZqU",
         "fiber": "3a2x",
+        "sequence": 0,
         "script": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG",
         "agreements": [{
             "prevClaim": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
@@ -43,6 +44,7 @@
         "class": "1",
         "v": "1",
         "value": "2",
+        "sequence": 1,
         "hash": "212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
         "address": "1NY5VdQFJSV28XbxTwxuyUHJH3zxvevZqU",
         "script": "OP_DUP OP_HASH160 1d49a01be3ed863a717bad24d8c3a7760e20de20 OP_EQUALVERIFY OP_CHECKSIG"
