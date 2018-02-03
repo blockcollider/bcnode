@@ -11,3 +11,10 @@ node_js:
 cache:
   directories:
     - "node_modules"
+
+notifications:
+  email:
+    - aj@blockcollider.org
+    - ak@blockcollider.org
+    - pm@blockcollider.org
+    - tk@blockcollider.org
