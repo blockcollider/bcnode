@@ -14,7 +14,4 @@ cache:
 
 notifications:
   email:
-    - aj@blockcollider.org
-    - ak@blockcollider.org
-    - pm@blockcollider.org
-    - tk@blockcollider.org
+    - dev@blockcollider.org
