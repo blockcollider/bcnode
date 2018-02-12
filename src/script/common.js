@@ -158,201 +158,201 @@ exports.opcodes = {
   OP_INVALIDOPCODE: 0xff,
 
   /*
-   * OP_CHECKFIBER 256 
+   * OP_CHECKFIBER 256
    * Checks the hash of the block matches the fiber pattern supplied
    *
    * Ex. Valid spend only if blockHash matches fiber pattern
    * Output == OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG <fiber> OP_CHECKFIBER
-   * Signature == OP_PUSHDATA <blockHash> OP_PUSHDATA <sig> OP_PUSHDATA <pubKey> 
+   * Signature == OP_PUSHDATA <blockHash> OP_PUSHDATA <sig> OP_PUSHDATA <pubKey>
    *
-   */ 
-  OP_CHECKFIBER: 0x100,  
+   */
+  OP_CHECKFIBER: 0x100,
 
   /*
-   * OP_CHECKSIGFROMCHAIN 257 
-   * Arguments <sig> <chain> 
-   * Confirms given signture is valid from given chain 
+   * OP_CHECKSIGFROMCHAIN 257
+   * Arguments <sig> <chain>
+   * Confirms given signture is valid from given chain
    *
-   * chain here likely includes a version bit 
+   * chain here likely includes a version bit
    *
-   * Ex. Valid only if signature is of the specified chain and compiles with the specified chain 
-   * Output == OP_DUP OP_HASHBLAKE <chain> OP_VERIFYEQUAL OP_CHECKSIGFROMCHAIN 
-   * Signature == OP_PUSHDATA <sig> OP_PUSHDATA <chain> 
+   * Ex. Valid only if signature is of the specified chain and compiles with the specified chain
+   * Output == OP_DUP OP_HASHBLAKE <chain> OP_VERIFYEQUAL OP_CHECKSIGFROMCHAIN
+   * Signature == OP_PUSHDATA <sig> OP_PUSHDATA <chain>
    *
-   */ 
+   */
   OP_CHECKSIGFROMCHAIN: 0x101,
 
   /*
-   * OP_HASHSCHNORR 258 
-   * Arguments: <data> <rParam>  
+   * OP_HASHSCHNORR 258
+   * Arguments: <data> <rParam>
    *
-   * Ex. Takes two args and creates a Schnorr hash of the data value 
+   * Ex. Takes two args and creates a Schnorr hash of the data value
    *
-   */ 
+   */
   OP_HASHSCHNORR: 0x102,
 
   /*
-   * OP_HASHBLAKE 259 
-   * Arguments: <data> 
+   * OP_HASHBLAKE 259
+   * Arguments: <data>
    *
-   * Ex. Takes one arg pushes a Blake hash of the data value to the stack 
+   * Ex. Takes one arg pushes a Blake hash of the data value to the stack
    *
-   */ 
+   */
   OP_HASHBLAKE: 0x103,
 
   /*
-   * OP_VERIFYSTACK 260 
-   * Arguments: <complete stack> <stackId> 
+   * OP_VERIFYSTACK 260
+   * Arguments: <complete stack> <stackId>
    *
-   * Ex. A stackId is provided as an argument and validated in the transaction. 
+   * Ex. A stackId is provided as an argument and validated in the transaction.
    *
-   */ 
+   */
   OP_VERIFYSTACK: 0x104,
 
   /*
-   * OP_TOSTACK 261 
-   * Arguments: <stackId> <amount> 
+   * OP_TOSTACK 261
+   * Arguments: <stackId> <amount>
    *
-   * Ex. Sends value from stack to transaction 
+   * Ex. Sends value from stack to transaction
    *
-   */ 
+   */
   OP_TOSTACK: 0x105,
 
   /*
-   * OP_FROMSTACK 262 
-   * Arguments: <stackId> <amount> 
+   * OP_FROMSTACK 262
+   * Arguments: <stackId> <amount>
    *
    * Ex. Resolves output of stack value from transaction to stack
    *
-   */ 
+   */
   OP_FROMSTACK: 0x106,
 
   /*
-   * OP_GROUP 263 
-   * Arguments: <originPublicKey> <type> <reissueable> <units> <amount> 
+   * OP_GROUP 263
+   * Arguments: <originPublicKey> <type> <reissueable> <units> <amount>
    *
-   * Ex. Locks transaction value to a group 
+   * Ex. Locks transaction value to a group
    *
-   */ 
+   */
   OP_MARK: 0x107,
 
   /*
-   * OP_BALANCE 264 
-   * Arguments: <originPublicKey/null> <amount> 
+   * OP_BALANCE 264
+   * Arguments: <originPublicKey/null> <amount>
    *
-   * Ex. Amount now in unspent output TX 
+   * Ex. Amount now in unspent output TX
    *
-   */ 
+   */
   OP_BALANCE: 0x108,
 
   /*
-   * OP_BALANCEUNIT 265 
-   * Arguments: <amount> 
+   * OP_BALANCEUNIT 265
+   * Arguments: <amount>
    *
    * Ex. The divsor or minimum units to be sent of OP_BALANCE by an input
    *
-   */ 
+   */
   OP_BALANCEUNIT: 0x109,
 
   /*
-   * OP_VERIFYSIGCLAIM 266 
+   * OP_VERIFYSIGCLAIM 266
    * Arguments: <claimTXSignature> <chainSignature>
    *
    * A signature signing the Block Collider transaction signature with the same signature supplied for a given chain
    *
-   */ 
+   */
   OP_VERIFYSIGCLAIM: 0x10a,
 
   /*
-   * OP_CHECKSIGFROMCHAINBENEFACTOR 267 
-   * Arguments: <chainSignature> <chain> <filter/null> <benefactor> 
+   * OP_CHECKSIGFROMCHAINBENEFACTOR 267
+   * Arguments: <chainSignature> <chain> <filter/null> <benefactor>
    *
-   * INTPUT: <amount> <rawData> <chainSignature> <claimTXSignature> 
-   * OUTPUT: OP_OVER OP_SWAP OP_VERIFYSIGCLAIM OP_DUP <chain> <filter/null> <benefactor> OP_CHECKSIGCHAINBENEFACTOR OP_VERIFYSIGCHAINTXID OP_DUP <unitAmount> OP_BALANCEUNITS <amount> OP_BALANCE 
+   * INTPUT: <amount> <rawData> <chainSignature> <claimTXSignature>
+   * OUTPUT: OP_OVER OP_SWAP OP_VERIFYSIGCLAIM OP_DUP <chain> <filter/null> <benefactor> OP_CHECKSIGCHAINBENEFACTOR OP_VERIFYSIGCHAINTXID OP_DUP <unitAmount> OP_BALANCEUNITS <amount> OP_BALANCE
    *
    * Checks signature is from chain and sends value  can be null bits and filter can be null bits
    *
    *
-   */ 
+   */
   OP_CHECKSIGCHAINBENEFACTOR: 0x10b,
 
   /*
-   * OP_BITFILTER 268 
-   * Arguments: <remoteData> <lookup> <data> OP_BITFILTER 
+   * OP_BITFILTER 268
+   * Arguments: <remoteData> <lookup> <data> OP_BITFILTER
    *
-   * Takes a pattern type (transaction/signature) and origin chain returns the filtered value to the stack 
+   * Takes a pattern type (transaction/signature) and origin chain returns the filtered value to the stack
    *
    *
-   */ 
+   */
   OP_BITFILTER: 0x10c,
 
   /*
-   * OP_LOCKSTACKMUTABLEEXP 269 
-   * Arguments: <blockheight> 
+   * OP_LOCKSTACKMUTABLEEXP 269
+   * Arguments: <blockheight>
    *
    * Locks the stack until block height unless a OP_FROMSTACK is executed
    *
    *
-   */ 
-  OP_LOCKSTACKMUTABLEEXP: 0x10d
+   */
+  OP_LOCKSTACKMUTABLEEXP: 0x10d,
 
   /*
    * OP_LOCKSTACKIMMUTABLEEXP 270
-   * Arguments: <blockheight> 
+   * Arguments: <blockheight>
    *
-   * Locks the stack until block height 
+   * Locks the stack until block height
    *
    *
-   */ 
+   */
   OP_LOCKSTACKIMMUTABLEEXP: 0x10e,
 
   /*
    * OP_VERIFYAGELTE 271
-   * Arguments: Height of coinbase transaction 
+   * Arguments: Height of coinbase transaction
    *
-   * Coinbase of value Less than or equal to given block height 
+   * Coinbase of value Less than or equal to given block height
    *
-   */ 
+   */
   OP_VERIFYAGELTE: 0x10f,
 
   /*
    * OP_VERIFYAGEGTE 272
-   * Arguments: Height of coinbase transaction 
+   * Arguments: Height of coinbase transaction
    *
-   * Coinbase of value Greater than or equal to given block height 
+   * Coinbase of value Greater than or equal to given block height
    *
-   */ 
+   */
   OP_VERIFYAGEGTE: 0x110,
 
   /*
    * OP_VERIFYDEPTHLTE 273
-   * Arguments: Depth of transaction edges   
+   * Arguments: Depth of transaction edges
    *
-   * Less then or equal to the depth of the transaction tree 
+   * Less then or equal to the depth of the transaction tree
    *
-   */ 
+   */
   OP_VERIFYDEPTHLTE: 0x111,
 
   /*
    * OP_VERIFYDEPTHGTE 274
-   * Arguments: Height of coinbase transaction 
+   * Arguments: Height of coinbase transaction
    *
-   * Coinbase of value Greater than or equal to given block height 
+   * Coinbase of value Greater than or equal to given block height
    *
-   */ 
+   */
   OP_VERIFYDEPTHGTE: 0x112
 
   /*
-   * OP_NLOCKREBASE xxx 
-   * Arguments: <minimumBlockheight>  
+   * OP_NLOCKREBASE xxx
+   * Arguments: <minimumBlockheight>
    *
    * Ex. Unspent Stack values are rebased after a given block height
    *
-   */ 
-  //OP_NLOCKREBASE: xxx 
+   */
+  //OP_NLOCKREBASE: xxx
 
-  // TODO: DETERMINISTICRANDOM 
-  // TODO: CHECKSIGFROMSTACK 
+  // TODO: DETERMINISTICRANDOM
+  // TODO: CHECKSIGFROMSTACK
 
 };
 
