@@ -4,7 +4,19 @@ Mining node with built-in block rover, DHT, and client discovery.
 
 ## Status
 
-[![Build Status](https://travis-ci.com/blockcollider/bcnode.svg?token=zcFCsPT3bTmtCApsaoXp&branch=master)](https://travis-ci.com/blockcollider/bcnode)
+[![Build Status](https://travis-ci.com/blockcollider/bcnode.png?token=zcFCsPT3bTmtCApsaoXp&branch=master)](https://travis-ci.com/blockcollider/bcnode)
+
+## System Requirements
+
+### OS
+
+- Ubuntu 16.04
+- Mac OSX 10.11+
+
+### Software
+
+- [nodejs](https://nodejs.org) 4.3+
+- [npm](https://www.npmjs.com/) 1.3.3+
 
 ## Index
 * init.js - startup file
@@ -34,19 +46,27 @@ Mining node with built-in block rover, DHT, and client discovery.
 * wav_rover.js
 * lsk_rover.js
 
-## System Requirements
-* Software: Node.js 4.3+, NPM 1.3.3+
-* OS: Ubuntu 16.04, Mac OSX 10.11+
+## Getting started
 
-## Make from source 
-1. git clone https://github.com/blockcollider/bcnode
-2. cd bcnode
-3. npm install
-4. ./install_quickfix_debian.sh
+### Build from source
+
+```
+$ git clone https://github.com/blockcollider/bcnode
+$ cd bcnode
+$ ./scripts/debian_install_quickfix.sh
+$ npm install
+$ npm run dist
+```
+
+### Development
+
+```
+npm run watch
+```
 
 ## Block Collider Developer Community
 
-Helpful community tools will be added: (https://github.com/blockcollider/awesome-blockcollider)[https://github.com/blockcollider/awesome-blockcollider]
+Helpful community tools will be added: [https://github.com/blockcollider/awesome-blockcollider](https://github.com/blockcollider/awesome-blockcollider)
 
 ## Support
 * [Documentation](https://docs.blockcollider.org/docs)

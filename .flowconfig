@@ -1,0 +1,16 @@
+[ignore]
+<PROJECT_ROOT>/node_modules/npm/.*
+
+[include]
+<PROJECT_ROOT>/src/.*
+
+[libs]
+
+[lints]
+
+[options]
+module.file_ext=.js
+module.file_ext=.jsx
+module.file_ext=.es6
+
+[strict]
