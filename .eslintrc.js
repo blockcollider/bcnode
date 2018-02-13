@@ -12,7 +12,8 @@ module.exports = {
 
   "env": {
     "mocha": true,
-    "node": true
+    "node": true,
+    "§": true
   },
 
   "rules": {
