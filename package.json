@@ -4,6 +4,7 @@
   "description": "Block Collider with miners and rovers",
   "main": "init.js",
   "scripts": {
+    "babel": "./node_modules/babel-cli/bin/babel.js -d lib src/",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
     "dist": "./node_modules/gulp/bin/gulp.js dist",
     "eslint": "./node_modules/eslint/bin/eslint.js lib/",
@@ -31,6 +32,7 @@
     "async": "~2.5.0",
     "base-x": "^3.0.2",
     "base58": "^1.0.1",
+    "bcoin": "^1.0.0-beta.15",
     "big.js": "^3.2.0",
     "binstring": "^0.2.1",
     "bitcoin-net": "^4.5.0",
