@@ -2,16 +2,15 @@
   "name": "bcnode",
   "version": "1.0.0",
   "description": "Block Collider with miners and rovers",
-  "main": "init.js",
+  "main": "dist/src/init.js",
   "scripts": {
-    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "dist": "./node_modules/gulp/bin/gulp.js dist",
-    "eslint": "./node_modules/eslint/bin/eslint.js lib/",
-    "flow": "./node_modules/flow-bin/cli.js",
-    "outdated": "./node_modules/npm-check-updates/bin/ncu",
-    "start": "npm run build && node dist/lib/init.js",
-    "test": "./node_modules/gulp/bin/gulp.js test",
-    "watch": "./node_modules/gulp/bin/gulp.js"
+    "lint:eslint": "true || eslint src/",
+    "lint:flow": "flow",
+    "transpile": "babel ./ --plugins transform-flow-strip-types --out-dir ./dist/ --ignore ./dist/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
+    "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:eslint && yarn run transpile --copy-files ",
+    "dist": "yarn && yarn run build && yarn test",
+    "test": "jest",
+    "watch": "yarn run build && yarn run transpile --watch"
   },
   "repository": {
     "type": "git",
@@ -118,6 +117,7 @@
     "gulp-install": "^1.1.0",
     "gulp-mocha": "^5.0.0",
     "gulp-sourcemaps": "^2.6.4",
+    "jest": "22.2.2",
     "mocha": "^4.1.0",
     "npm-check-updates": "^2.14.0",
     "nyc": "^11.4.1",
