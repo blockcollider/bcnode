@@ -21,6 +21,7 @@
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "dependencies": {
     "async": "~2.5.0",
+    "avon": "^2.1.0",
     "base-x": "^3.0.2",
     "base58": "^1.0.1",
     "big.js": "^3.2.0",
@@ -79,6 +80,7 @@
     "rlp-encoding": "^3.0.0",
     "rocksdb": "^1.1.0",
     "secp256k1": "^3.3.0",
+    "sha3": "^1.2.0",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3",
     "terminate": "^2.1.0",
@@ -86,7 +88,8 @@
     "webcoin-bitcoin": "^3.1.4",
     "webcoin-bitcoin-testnet": "^1.1.1",
     "winston-color": "^1.0.0",
-    "xor-it": "^1.0.2"
+    "xor-it": "^1.0.2",
+    "zstd-codec": "0.0.7"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
