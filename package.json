@@ -27,11 +27,11 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "jest": {
-      "testPathIgnorePatterns": [
-        "/node_modules/",
-        "/dist/"
-      ],
-      "testEnvironment": "node"
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "testEnvironment": "node"
   },
   "dependencies": {
     "async": "~2.5.0",
@@ -118,15 +118,7 @@
     "eslint-plugin-flowtype": "^2.43.0",
     "eslint-plugin-import": "^2.8.0",
     "flow-bin": "^0.65.0",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^7.0.1",
-    "gulp-eslint": "^4.0.2",
-    "gulp-flowtype": "^1.0.0",
-    "gulp-install": "^1.1.0",
-    "gulp-mocha": "^5.0.0",
-    "gulp-sourcemaps": "^2.6.4",
     "jest": "22.2.2",
-    "mocha": "^4.1.0",
     "npm-check-updates": "^2.14.0",
     "nyc": "^11.4.1",
     "rimraf": "^2.6.2"
