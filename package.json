@@ -4,9 +4,9 @@
   "description": "Block Collider with miners and rovers",
   "main": "dist/src/init.js",
   "scripts": {
-    "lint:standard": "true || standard src/",
+    "lint:standard": "standard src/**/*.es6",
     "lint:flow": "flow",
-    "transpile": "babel ./ --plugins transform-flow-strip-types --out-dir ./dist/ --ignore ./dist/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
+    "transpile": "babel src --plugins transform-flow-strip-types --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files ",
     "dist": "yarn && yarn run build && yarn test",
     "test": "jest",
@@ -29,7 +29,7 @@
   "jest": {
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/dist/"
+      "/lib/"
     ],
     "testEnvironment": "node"
   },
@@ -44,7 +44,9 @@
       "it",
       "test",
       "expect"
-    ]
+    ],
+    "parser": "babel-eslint",
+    "plugins": [ "flowtype" ]
   },
   "dependencies": {
     "async": "~2.5.0",
@@ -126,6 +128,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-flow": "^6.23.0",
     "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-flowtype": "2.44.0",
     "flow-bin": "^0.65.0",
     "install": "^0.10.4",
     "jest": "22.2.2",
