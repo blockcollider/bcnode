@@ -26,8 +26,16 @@
     "url": "https://github.com/blockcollider/bcnode/issues"
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
+  "jest": {
+      "testPathIgnorePatterns": [
+        "/node_modules/",
+        "/dist/"
+      ],
+      "testEnvironment": "node"
+  },
   "dependencies": {
     "async": "~2.5.0",
+    "avon": "2.1.0",
     "base-x": "^3.0.2",
     "base58": "^1.0.1",
     "big.js": "^3.2.0",
