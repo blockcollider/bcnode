@@ -8,7 +8,7 @@
     "lint:flow": "flow",
     "transpile": "babel src --plugins transform-flow-strip-types --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files ",
-    "dist": "yarn && yarn run build && yarn test",
+    "dist": "yarn && yarn run build && yarn test --ci",
     "test": "jest",
     "watch": "yarn run build && yarn run transpile --watch"
   },
