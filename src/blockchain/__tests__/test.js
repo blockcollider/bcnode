@@ -110,12 +110,12 @@ const main = createBlock({
 
 const network = Network.get("main");
 
-const chain = new Chain({ 
+const chain = new Chain({
     db: 'memory',
     logger: logger,
-    network: network, 
-    location: "/Users/mtxodus1/Documents/GitHub/bcnode/lib/blockchain/tests"  
-}); 
+    network: network,
+    location: "/Users/mtxodus1/Documents/GitHub/bcnode/lib/blockchain/tests"
+});
 
 const miner = new Miner({
   chain,
@@ -142,16 +142,16 @@ async function handle(req, res) {
 
 }
 
-try { 
+try {
 
     handle(function(err){
         console.log(err);
     }, function(block){
-        console.log(block); 
+        console.log(block);
     });
 
 
-} catch (err) { 
+} catch (err) {
     console.trace(err);
 
 }
