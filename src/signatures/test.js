@@ -9,8 +9,8 @@ const crypto = require('crypto');
 const Signature = require('elliptic/lib/elliptic/ec/signature');
 const BN = require('bn.js');
 const secp256k1 = require('secp256k1');
-const sha256 = require('./digest').sha256;
-const digest = require('./digest');
+const sha256 = require('../crypto/digest').sha256;
+const digest = require('../crypto/digest');
 const schnorr = require('../crypto/schnorr');
 const utils = elliptic.utils;
 
@@ -144,7 +144,7 @@ var s = schnorr.sign(msg, R);
 
 console.log(s);
 
-process.exit()
+// process.exit()
 
 // Hash T from t and prepend with "03" for compact public
 var Ta = Buffer(createHash(t, new BN(R)).toString("hex"), "hex");
@@ -185,7 +185,7 @@ console.log(l);
 //
 //schnorr.partialSign(msg, st, T, T);
 
-process.exit();
+// process.exit();
 
 
 
