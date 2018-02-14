@@ -46,7 +46,9 @@
       "expect"
     ],
     "parser": "babel-eslint",
-    "plugins": [ "flowtype" ]
+    "plugins": [
+      "flowtype"
+    ]
   },
   "dependencies": {
     "async": "~2.5.0",
@@ -128,7 +130,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-flow": "^6.23.0",
     "eslint-config-standard": "^11.0.0-beta.0",
-    "eslint-plugin-flowtype": "2.44.0",
+    "eslint-plugin-flowtype": "^2.44.0",
     "flow-bin": "^0.65.0",
     "install": "^0.10.4",
     "jest": "22.2.2",
@@ -140,6 +142,6 @@
     "standard": "10.0.3"
   },
   "eslintConfig": {
-     "extends": "standard"
+    "extends": "standard"
   }
 }
