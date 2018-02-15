@@ -7,8 +7,8 @@
 
 'use strict'
 
-import Address from 'address'
-import Coin from 'coin'
+const Address = require('address')
+const Coin = require('coin')
 
 const assert = require('assert')
 const util = require('../utils/util')
