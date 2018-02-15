@@ -1,6 +1,6 @@
 const crypto = require('crypto')
 const hash = crypto.createHash("sha256").update("test").digest("hex")
-const MTX = require("../mtx.js")
+const MTX = require("../mtx.es6")
 const Output = require("../output.js")
 const SubInput = require("../subinput.js")
 const SubOutput = require("../suboutput.js")
