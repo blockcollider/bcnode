@@ -35,7 +35,7 @@ Mining node with built-in block rover, DHT, and client discovery.
 * lsk_rover.js
 
 ## System Requirements
-* Software: Node.js 4.3+, NPM 1.3.3+
+* Software: Node.js 4.3+, NPM 1.3.3+, Boost 1.66.0+
 * OS: Ubuntu 16.04, Mac OSX 10.11+
 
 ## Make from source 
