@@ -376,6 +376,7 @@ function getLastHeight(cb){
                 diff = diff-1;
                 body.height = Number(body.height) - diff; 
             } else if(body.height != LAST_HEIGHT){
+
                 LAST_HEIGHT = Number(body.height); 
             }
 
