@@ -5,6 +5,7 @@
 # Transpiled files
 lib/**/*.js
 lib/**/*.js.map
+lib/**/*.json
 
 # Logs
 logs
