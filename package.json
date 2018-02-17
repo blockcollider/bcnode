@@ -59,6 +59,7 @@
   "dependencies": {
     "async": "~2.5.0",
     "avon": "^2.1.0",
+    "axios": "^0.17.1",
     "base-x": "^3.0.2",
     "base58": "^1.0.1",
     "bcoin": "git+https://github.com/blockcollider/bcoin.git",
@@ -89,6 +90,7 @@
     "ethereumjs-util": "^5.1.2",
     "ethereumjs-vm": "^2.2.2",
     "ethjs-provider-http": "^0.1.6",
+    "express": "^4.16.2",
     "fs-extra": "^5.0.0",
     "getos": "^3.0.1",
     "gossipmonger-memory-storage": "^0.1.0",

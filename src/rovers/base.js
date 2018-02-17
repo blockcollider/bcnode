@@ -8,30 +8,43 @@ var socket = require("socket.io")(6600);
 var events = new ee();
 var log = global.log;
 var timeOffset = 0;
+var blockCache = {}
 
 global._RoverRestartDelay = 5000;
 
 socket.on("connection", function(client){
 
     var id = global._BlockColliderIdentity;
+    var connId = client.conn.id;
+
     var base = {
         publicKey: id.colliderBase.publicKey,
         address: id.colliderBase.address
     }
+
+    function broadcast(type, msg){
+
+       if(global.disableBroadcast) return; 
+
+       let data = {
+             type: type,
+             body: msg,
+             timestamp: new Date()
+       }
+
+       client.emit("msg", data); 
+
+    }
     
     client.emit("setup", base);
 
-    client.on("pow", function(msg){
-        events.emit("pow", msg); 
-    });
+	//events.on("block", function(msg){ broadcast("block", msg); });
 
-    client.on("metric", function(msg){
-        events.emit("metric", msg); 
-    });
+	//events.on("tx", function(msg){ broadcast("tx", msg); });
 
-    client.on("tx", function(msg){
-        events.emit("tx", msg); 
-    });
+	//events.on("pow", function(msg){ broadcast("pow", msg); });
+
+	//events.on("metric", function(msg){ broadcast("metric", msg); });
 
 });
 

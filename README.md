@@ -17,7 +17,7 @@ Mining node with built-in block rover, DHT, and client discovery.
 
 - [nodejs](https://nodejs.org) 4.3+
 - [yarn](https://yarnpkg.com/en/docs/install) 1.3.2+
-
+- [boost](http://www.boost.org/) Boost 1.66.0+
 ## Index
 * init.js - startup file
 * time.js - ntp offset, local UTC and UNIX timestamps
