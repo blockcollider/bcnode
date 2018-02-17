@@ -2,7 +2,7 @@
 
 import program from 'commander'
 
-const pkg = require('../package.json')
+const pkg = require('../../package.json')
 
 // eslint-disable-next-line import/prefer-default-export
 export function main () {
@@ -10,5 +10,7 @@ export function main () {
 
   program
     .version(pkg.version)
+    .option('--rpc', 'Start RPC Server')
+    .option('--ws', 'Start WebSocket Server')
     .parse(process.argv)
 }
