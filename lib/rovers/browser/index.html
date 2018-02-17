@@ -9,6 +9,7 @@
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.4/TweenMax.min.js"></script>
+    <script src="js/sha256.js"></script>
     <style>
         body { padding-top:50px; }
     </style>
@@ -18,13 +19,12 @@
     <div class="container">
         <div class="">
 			<div>
-				<h2>ROVER BASE</h2>
-				<b>BLOCK COLLIDER</b>
+				<h2>BLOCK COLLIDER</h2>
+				<b>ROVER BASE</b>
 				</br>
-				</br>
-				<div>
-					STATUS: <span id="status">DISCONNECTED</span> 
-				</div>
+				<p align="center">
+					STATUS: <span id="status">DISCONNECTED</span><span id="publicKey"></span>
+				</p>
 			</div>
 			<div style="width: 99%;">
 				<table style="width:100%">
@@ -37,6 +37,12 @@
 				  <tr id="work">
 				  </tr>
 				</table>
+				</br>
+				</br>
+				<p align="center">
+					<input style="width:550px" id="publicKey">
+				</p>
+				
 			</div>
         </div>
 		</br>
