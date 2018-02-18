@@ -10,8 +10,6 @@ class Block {
 
         if(type == "eth") type = "ethereum";
         if(type == "btc") type = "bitcoin";
-        if(type == "lsk") type = "lisk";
-        if(type == "lsk") type = "lisk";
 
         if(this[type] == undefined) throw Error("type: "+type+" not found");
 

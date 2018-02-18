@@ -29,7 +29,7 @@
     "binstring": "^0.2.1",
     "bitcoin-net": "^4.5.0",
     "bitcoin-script": "^0.1.1",
-    "bitcoinjs-lib": "^3.2.0",
+    "bitcoinjs-lib": "^3.3.2",
     "bitcore-p2p": "^1.1.2",
     "bitpony": "0.0.1",
     "blockchain-download": "^1.1.1",
@@ -99,8 +99,15 @@
     "babel-preset-es2015": "^6.24.1",
     "eslint": "^4.15.0",
     "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^6.0.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
     "mocha": "^4.1.0",
+    "prettier": "^1.10.2",
     "rimraf": "^2.6.2"
   }
 }
