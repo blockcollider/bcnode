@@ -16,14 +16,11 @@ const SubOutput = require("../../primitives/suboutput");
 const SubStack = require("../../primitives/substack");
 const {secp256k1, hash256} = require('bcrypto');
 
-const randgen = require("randgen");
-const pos = require("poisson-process");
+const Events = require('events').EventEmitter
 
-const Events = require('events').EventEmitter;
+const script = new Script()
 
-const script = new Script();
-
-const output = new Output(); 
+const output = new Output()
 
 output.script.pushSym("MARK")
 

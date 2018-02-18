@@ -362,7 +362,7 @@ Network.prototype = {
 
 function getLastHeight(cb){
 
-   var host = WAVES_NODE_HOST
+   var host = WAVES_NODE_HOST;
    var url = host+"/blocks/height";
 
    let agent = new https.Agent({ keepAlive: false });
