@@ -1,4 +1,3 @@
-
 const bitcoinBlock = require("./bitcoinBlock.js");
 const ethereumBlock = require("./ethereumBlock.js");
 
@@ -8,20 +7,18 @@ class Block {
          this.ethereum = new ethereumBlock();
       }
       getBlock(type, height, cb){
-
+        
+        if(this[type] == undefined) throw Error("type: "+type+" not found");
+        
         if(type == "eth") type = "ethereum";
         if(type == "btc") type = "bitcoin";
         if(type == "lsk") type = "lisk";
         if(type == "lsk") type = "lisk";
 
-        if(this[type] == undefined) throw Error("type: "+type+" not found");
-
         return this[type].getBlock(height, cb);
 
       }
 }
-
-
 
 const block = new Block();
 

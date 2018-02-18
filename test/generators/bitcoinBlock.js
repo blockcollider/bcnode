@@ -6,15 +6,13 @@ const blockexplorer = require('blockchain.info/blockexplorer').usingNetwork(3)
 class Bitcoin {
 
     getBlock(height, cb) {
-        
       try {
 
           blockexplorer.getBlockHeight(height, { apiCode: CODE }).then(function(data){
               const block = data.blocks[0];
               cb(null, block);
           });
-
-      } catch(err) { 
+      } catch(err) {
             cb(err);
       }
 
@@ -23,11 +21,3 @@ class Bitcoin {
 }
 
 module.exports = Bitcoin;
-
-
-
-
-
-
-
-
