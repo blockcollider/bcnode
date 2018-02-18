@@ -14,7 +14,7 @@ cache:
     - "node_modules"
 
 sudo: required
-before_script:
+before_install:
   # Repo for Yarn
   - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
   - echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
