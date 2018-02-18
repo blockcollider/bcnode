@@ -31,7 +31,8 @@
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "jest": {
     "testPathIgnorePatterns": [
-      "/node_modules/",
+      "/node_modules/*.*",
+      "node_modules/jest/node_modules/jest-cli/build/test_scheduler.js",
       "/lib/"
     ],
     "testEnvironment": "node",
