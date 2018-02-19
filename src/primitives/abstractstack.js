@@ -1,5 +1,5 @@
 /*!
- * abstractsubstack.js - transaction object for bcoin
+ * abstractstack.js - transaction object for bcoin
  * Copyright (c) 2014-2015, Fedor Indutny (MIT License)
  * Copyright (c) 2014-2017, Christopher Jeffrey (MIT License).
  * Copyright (c) 2017-2018, Block Collider (MIT License).
@@ -18,7 +18,7 @@ const policy = require('../protocol/policy');
 //const Network = require('../protocol/network');
 const StaticWriter = require('../utils/staticwriter');
 const Script = require('../script/script');
-const Input = require('./subinput');
+const Input = require('./stackinput');
 const consensus = require('../protocol/consensus');
 const Output = require('./output');
 const Outpoint = require('./outpoint');
@@ -39,9 +39,9 @@ const hashType = Script.hashType;
  * @property {Number} locktime - nLockTime
  */
 
-function AbstractSubStack(options) {
-  if (!(this instanceof AbstractSubStack))
-    return new AbstractSubStack(options);
+function AbstractStack(options) {
+  if (!(this instanceof AbstractStack))
+    return new AbstractStack(options);
 
   this.inputs = [];
   this.outputs = [];
@@ -70,7 +70,7 @@ function AbstractSubStack(options) {
  * @param {NakedTX} options
  */
 
-AbstractSubStack.prototype.fromOptions = function fromOptions(options) {
+AbstractStack.prototype.fromOptions = function fromOptions(options) {
   assert(options, 'TX data is required.');
 
   if (options.version != null) {
@@ -99,13 +99,13 @@ AbstractSubStack.prototype.fromOptions = function fromOptions(options) {
 };
 
 /**
- * Instantiate AbstractSubStack from options object.
+ * Instantiate AbstractStack from options object.
  * @param {NakedTX} options
  * @returns {TX}
  */
 
-AbstractSubStack.fromOptions = function fromOptions(options) {
-  return new AbstractSubStack().fromOptions(options);
+AbstractStack.fromOptions = function fromOptions(options) {
+  return new AbstractStack().fromOptions(options);
 };
 
 /**
@@ -113,8 +113,8 @@ AbstractSubStack.fromOptions = function fromOptions(options) {
  * @returns {TX}
  */
 
-AbstractSubStack.prototype.clone = function clone() {
-  return new AbstractSubStack().inject(this);
+AbstractStack.prototype.clone = function clone() {
+  return new AbstractStack().inject(this);
 };
 
 /**
@@ -125,7 +125,7 @@ AbstractSubStack.prototype.clone = function clone() {
  * @returns {TX}
  */
 
-AbstractSubStack.prototype.inject = function inject(tx) {
+AbstractStack.prototype.inject = function inject(tx) {
   this.version = tx.version;
 
   for (const input of tx.inputs)
@@ -143,7 +143,7 @@ AbstractSubStack.prototype.inject = function inject(tx) {
  * Clear any cached values.
  */
 
-AbstractSubStack.prototype.refresh = function refresh() {
+AbstractStack.prototype.refresh = function refresh() {
   this._hash = null;
   this._hhash = null;
   this._whash = null;
@@ -164,7 +164,7 @@ AbstractSubStack.prototype.refresh = function refresh() {
  * @returns {Hash|Buffer} hash
  */
 
-AbstractSubStack.prototype.hash = function hash(enc) {
+AbstractStack.prototype.hash = function hash(enc) {
   let h = this._hash;
 
   if (!h) {
@@ -195,7 +195,7 @@ AbstractSubStack.prototype.hash = function hash(enc) {
  * @returns {Buffer} Serialized transaction.
  */
 
-AbstractSubStack.prototype.toRaw = function toRaw() {
+AbstractStack.prototype.toRaw = function toRaw() {
   return this.frame().data;
 };
 
@@ -206,7 +206,7 @@ AbstractSubStack.prototype.toRaw = function toRaw() {
  * @returns {Buffer} Serialized transaction.
  */
 
-AbstractSubStack.prototype.toNormal = function toNormal() {
+AbstractStack.prototype.toNormal = function toNormal() {
   if (this.hasWitness())
     return this.frameNormal().data;
   return this.toRaw();
@@ -217,7 +217,7 @@ AbstractSubStack.prototype.toNormal = function toNormal() {
  * @param {BufferWriter} bw
  */
 
-AbstractSubStack.prototype.toWriter = function toWriter(bw) {
+AbstractStack.prototype.toWriter = function toWriter(bw) {
   if (this.mutable) {
     if (this.hasWitness())
       return this.writeWitness(bw);
@@ -235,7 +235,7 @@ AbstractSubStack.prototype.toWriter = function toWriter(bw) {
  * @param {BufferWriter} bw
  */
 
-AbstractSubStack.prototype.toNormalWriter = function toNormalWriter(bw) {
+AbstractStack.prototype.toNormalWriter = function toNormalWriter(bw) {
   if (this.hasWitness()) {
     this.writeNormal(bw);
     return bw;
@@ -252,7 +252,7 @@ AbstractSubStack.prototype.toNormalWriter = function toNormalWriter(bw) {
  * @returns {RawTX}
  */
 
-AbstractSubStack.prototype.frame = function frame() {
+AbstractStack.prototype.frame = function frame() {
   if (this.mutable) {
     assert(!this._raw);
     return this.frameNormal();
@@ -281,7 +281,7 @@ AbstractSubStack.prototype.frame = function frame() {
  * @returns {Object} Contains `size` and `witness`.
  */
 
-AbstractSubStack.prototype.getSizes = function getSizes() {
+AbstractStack.prototype.getSizes = function getSizes() {
   if (this.mutable) {
     return this.getNormalSizes();
   }
@@ -294,7 +294,7 @@ AbstractSubStack.prototype.getSizes = function getSizes() {
  * @returns {Number} vsize
  */
 
-AbstractSubStack.prototype.getVirtualSize = function getVirtualSize() {
+AbstractStack.prototype.getVirtualSize = function getVirtualSize() {
   const scale = consensus.WITNESS_SCALE_FACTOR;
   return (this.getWeight() + scale - 1) / scale | 0;
 };
@@ -306,7 +306,7 @@ AbstractSubStack.prototype.getVirtualSize = function getVirtualSize() {
  * @returns {Number} vsize
  */
 
-AbstractSubStack.prototype.getSigopsSize = function getSigopsSize(sigops) {
+AbstractStack.prototype.getSigopsSize = function getSigopsSize(sigops) {
   const scale = consensus.WITNESS_SCALE_FACTOR;
   const bytes = policy.BYTES_PER_SIGOP;
   const weight = Math.max(this.getWeight(), sigops * bytes);
@@ -319,7 +319,7 @@ AbstractSubStack.prototype.getSigopsSize = function getSigopsSize(sigops) {
  * @returns {Number} weight
  */
 
-AbstractSubStack.prototype.getWeight = function getWeight() {
+AbstractStack.prototype.getWeight = function getWeight() {
   const raw = this.getSizes();
   const base = raw.size - raw.witness;
   return base * (consensus.WITNESS_SCALE_FACTOR - 1) + raw.size;
@@ -331,7 +331,7 @@ AbstractSubStack.prototype.getWeight = function getWeight() {
  * @returns {Number} size
  */
 
-AbstractSubStack.prototype.getSize = function getSize() {
+AbstractStack.prototype.getSize = function getSize() {
   return this.getSizes().size;
 };
 
@@ -342,7 +342,7 @@ AbstractSubStack.prototype.getSize = function getSize() {
  * @returns {Number} size
  */
 
-AbstractSubStack.prototype.getBaseSize = function getBaseSize() {
+AbstractStack.prototype.getBaseSize = function getBaseSize() {
   const raw = this.getSizes();
   return raw.size - raw.witness;
 };
@@ -352,7 +352,7 @@ AbstractSubStack.prototype.getBaseSize = function getBaseSize() {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.hasWitness = function hasWitness() {
+AbstractStack.prototype.hasWitness = function hasWitness() {
   if (this._witness !== -1)
     return this._witness !== 0;
 
@@ -376,7 +376,7 @@ AbstractSubStack.prototype.hasWitness = function hasWitness() {
  * @returns {Buffer} Signature hash.
  */
 
-AbstractSubStack.prototype.signatureHash = function signatureHash(index, prev, value, type, version) {
+AbstractStack.prototype.signatureHash = function signatureHash(index, prev, value, type, version) {
   assert(index >= 0 && index < this.inputs.length);
   assert(prev instanceof Script);
   assert(typeof value === 'number');
@@ -402,7 +402,7 @@ AbstractSubStack.prototype.signatureHash = function signatureHash(index, prev, v
  * @returns {Buffer}
  */
 
-AbstractSubStack.prototype.signatureHashV0 = function signatureHashV0(index, prev, type) {
+AbstractStack.prototype.signatureHashV0 = function signatureHashV0(index, prev, type) {
   if ((type & 0x1f) === hashType.SINGLE) {
     // Bitcoind used to return 1 as an error code:
     // it ended up being treated like a hash.
@@ -520,7 +520,7 @@ AbstractSubStack.prototype.signatureHashV0 = function signatureHashV0(index, pre
  * @returns {Number}
  */
 
-AbstractSubStack.prototype.hashSize = function hashSize(index, prev, type) {
+AbstractStack.prototype.hashSize = function hashSize(index, prev, type) {
   let size = 0;
 
   size += 4;
@@ -569,7 +569,7 @@ AbstractSubStack.prototype.hashSize = function hashSize(index, prev, type) {
  * @returns {Buffer}
  */
 
-AbstractSubStack.prototype.signatureHashV1 = function signatureHashV1(index, prev, value, type) {
+AbstractStack.prototype.signatureHashV1 = function signatureHashV1(index, prev, value, type) {
   const input = this.inputs[index];
   let prevouts = encoding.ZERO_HASH;
   let sequences = encoding.ZERO_HASH;
@@ -665,7 +665,7 @@ AbstractSubStack.prototype.signatureHashV1 = function signatureHashV1(index, pre
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.checksig = function checksig(index, prev, value, sig, key, version) {
+AbstractStack.prototype.checksig = function checksig(index, prev, value, sig, key, version) {
   if (sig.length === 0)
     return false;
 
@@ -688,7 +688,7 @@ AbstractSubStack.prototype.checksig = function checksig(index, prev, value, sig,
  * @returns {Buffer} Signature in DER format.
  */
 
-AbstractSubStack.prototype.signature = function signature(index, prev, value, key, type, version) {
+AbstractStack.prototype.signature = function signature(index, prev, value, key, type, version) {
   if (type == null)
     type = hashType.ALL;
 
@@ -712,7 +712,7 @@ AbstractSubStack.prototype.signature = function signature(index, prev, value, ke
  * @throws {ScriptError} on invalid inputs
  */
 
-AbstractSubStack.prototype.check = function check(view, flags) {
+AbstractStack.prototype.check = function check(view, flags) {
   if (this.inputs.length === 0)
     throw new ScriptError('UNKNOWN_ERROR', 'No inputs.');
 
@@ -739,7 +739,7 @@ AbstractSubStack.prototype.check = function check(view, flags) {
  * @throws {ScriptError} on invalid input
  */
 
-AbstractSubStack.prototype.checkInput = function checkInput(index, coin, flags) {
+AbstractStack.prototype.checkInput = function checkInput(index, coin, flags) {
   const input = this.inputs[index];
 
   assert(input, 'Input does not exist.');
@@ -765,7 +765,7 @@ AbstractSubStack.prototype.checkInput = function checkInput(index, coin, flags) 
  * @returns {Promise}
  */
 
-AbstractSubStack.prototype.checkAsync = async function checkAsync(view, flags, pool) {
+AbstractStack.prototype.checkAsync = async function checkAsync(view, flags, pool) {
   if (this.inputs.length === 0)
     throw new ScriptError('UNKNOWN_ERROR', 'No inputs.');
 
@@ -790,7 +790,7 @@ AbstractSubStack.prototype.checkAsync = async function checkAsync(view, flags, p
  * @returns {Promise}
  */
 
-AbstractSubStack.prototype.checkInputAsync = async function checkInputAsync(index, coin, flags, pool) {
+AbstractStack.prototype.checkInputAsync = async function checkInputAsync(index, coin, flags, pool) {
   const input = this.inputs[index];
 
   assert(input, 'Input does not exist.');
@@ -811,7 +811,7 @@ AbstractSubStack.prototype.checkInputAsync = async function checkInputAsync(inde
  * @returns {Boolean} Whether the inputs are valid.
  */
 
-AbstractSubStack.prototype.verify = function verify(view, flags) {
+AbstractStack.prototype.verify = function verify(view, flags) {
   try {
     this.check(view, flags);
   } catch (e) {
@@ -831,7 +831,7 @@ AbstractSubStack.prototype.verify = function verify(view, flags) {
  * @returns {Boolean} Whether the input is valid.
  */
 
-AbstractSubStack.prototype.verifyInput = function verifyInput(index, coin, flags) {
+AbstractStack.prototype.verifyInput = function verifyInput(index, coin, flags) {
   try {
     this.checkInput(index, coin, flags);
   } catch (e) {
@@ -851,7 +851,7 @@ AbstractSubStack.prototype.verifyInput = function verifyInput(index, coin, flags
  * @returns {Promise}
  */
 
-AbstractSubStack.prototype.verifyAsync = async function verifyAsync(view, flags, pool) {
+AbstractStack.prototype.verifyAsync = async function verifyAsync(view, flags, pool) {
   try {
     await this.checkAsync(view, flags, pool);
   } catch (e) {
@@ -872,7 +872,7 @@ AbstractSubStack.prototype.verifyAsync = async function verifyAsync(view, flags,
  * @returns {Promise}
  */
 
-AbstractSubStack.prototype.verifyInputAsync = async function verifyInputAsync(index, coin, flags, pool) {
+AbstractStack.prototype.verifyInputAsync = async function verifyInputAsync(index, coin, flags, pool) {
   try {
     await this.checkInput(index, coin, flags, pool);
   } catch (e) {
@@ -889,7 +889,7 @@ AbstractSubStack.prototype.verifyInputAsync = async function verifyInputAsync(in
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.isCoinbase = function isCoinbase() {
+AbstractStack.prototype.isCoinbase = function isCoinbase() {
   return this.inputs.length === 1 && this.inputs[0].prevout.isNull();
 };
 
@@ -898,7 +898,7 @@ AbstractSubStack.prototype.isCoinbase = function isCoinbase() {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.isRBF = function isRBF() {
+AbstractStack.prototype.isRBF = function isRBF() {
   // Core doesn't do this, but it should:
   if (this.version === 2)
     return false;
@@ -917,7 +917,7 @@ AbstractSubStack.prototype.isRBF = function isRBF() {
  * @returns {Amount} fee (zero if not all coins are available).
  */
 
-AbstractSubStack.prototype.getFee = function getFee(view) {
+AbstractStack.prototype.getFee = function getFee(view) {
   if (!this.hasCoins(view))
     return 0;
 
@@ -930,7 +930,7 @@ AbstractSubStack.prototype.getFee = function getFee(view) {
  * @returns {Amount} value
  */
 
-AbstractSubStack.prototype.getInputValue = function getInputValue(view) {
+AbstractStack.prototype.getInputValue = function getInputValue(view) {
   let total = 0;
 
   for (const {prevout} of this.inputs) {
@@ -950,7 +950,7 @@ AbstractSubStack.prototype.getInputValue = function getInputValue(view) {
  * @returns {Amount} value
  */
 
-AbstractSubStack.prototype.getOutputValue = function getOutputValue() {
+AbstractStack.prototype.getOutputValue = function getOutputValue() {
   let total = 0;
 
   for (const output of this.outputs)
@@ -966,7 +966,7 @@ AbstractSubStack.prototype.getOutputValue = function getOutputValue() {
  * @returns {Array} [addrs, table]
  */
 
-AbstractSubStack.prototype._getInputAddresses = function _getInputAddresses(view) {
+AbstractStack.prototype._getInputAddresses = function _getInputAddresses(view) {
   const table = Object.create(null);
   const addrs = [];
 
@@ -997,7 +997,7 @@ AbstractSubStack.prototype._getInputAddresses = function _getInputAddresses(view
  * @returns {Array} [addrs, table]
  */
 
-AbstractSubStack.prototype._getOutputAddresses = function _getOutputAddresses() {
+AbstractStack.prototype._getOutputAddresses = function _getOutputAddresses() {
   const table = Object.create(null);
   const addrs = [];
 
@@ -1025,7 +1025,7 @@ AbstractSubStack.prototype._getOutputAddresses = function _getOutputAddresses() 
  * @returns {Array} [addrs, table]
  */
 
-AbstractSubStack.prototype._getAddresses = function _getAddresses(view) {
+AbstractStack.prototype._getAddresses = function _getAddresses(view) {
   const [addrs, table] = this._getInputAddresses(view);
   const output = this.getOutputAddresses();
 
@@ -1047,7 +1047,7 @@ AbstractSubStack.prototype._getAddresses = function _getAddresses(view) {
  * @returns {Address[]} addresses
  */
 
-AbstractSubStack.prototype.getInputAddresses = function getInputAddresses(view) {
+AbstractStack.prototype.getInputAddresses = function getInputAddresses(view) {
   const [addrs] = this._getInputAddresses(view);
   return addrs;
 };
@@ -1057,7 +1057,7 @@ AbstractSubStack.prototype.getInputAddresses = function getInputAddresses(view) 
  * @returns {Address[]} addresses
  */
 
-AbstractSubStack.prototype.getOutputAddresses = function getOutputAddresses() {
+AbstractStack.prototype.getOutputAddresses = function getOutputAddresses() {
   const [addrs] = this._getOutputAddresses();
   return addrs;
 };
@@ -1068,7 +1068,7 @@ AbstractSubStack.prototype.getOutputAddresses = function getOutputAddresses() {
  * @returns {Address[]} addresses
  */
 
-AbstractSubStack.prototype.getAddresses = function getAddresses(view) {
+AbstractStack.prototype.getAddresses = function getAddresses(view) {
   const [addrs] = this._getAddresses(view);
   return addrs;
 };
@@ -1079,7 +1079,7 @@ AbstractSubStack.prototype.getAddresses = function getAddresses(view) {
  * @returns {Hash[]} hashes
  */
 
-AbstractSubStack.prototype.getInputHashes = function getInputHashes(view, enc) {
+AbstractStack.prototype.getInputHashes = function getInputHashes(view, enc) {
   if (enc === 'hex') {
     const [, table] = this._getInputAddresses(view);
     return Object.keys(table);
@@ -1099,7 +1099,7 @@ AbstractSubStack.prototype.getInputHashes = function getInputHashes(view, enc) {
  * @returns {Hash[]} hashes
  */
 
-AbstractSubStack.prototype.getOutputHashes = function getOutputHashes(enc) {
+AbstractStack.prototype.getOutputHashes = function getOutputHashes(enc) {
   if (enc === 'hex') {
     const [, table] = this._getOutputAddresses();
     return Object.keys(table);
@@ -1120,7 +1120,7 @@ AbstractSubStack.prototype.getOutputHashes = function getOutputHashes(enc) {
  * @returns {Hash[]} hashes
  */
 
-AbstractSubStack.prototype.getHashes = function getHashes(view, enc) {
+AbstractStack.prototype.getHashes = function getHashes(view, enc) {
   if (enc === 'hex') {
     const [, table] = this._getAddresses(view);
     return Object.keys(table);
@@ -1142,7 +1142,7 @@ AbstractSubStack.prototype.getHashes = function getHashes(view, enc) {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.hasCoins = function hasCoins(view) {
+AbstractStack.prototype.hasCoins = function hasCoins(view) {
   if (this.inputs.length === 0)
     return false;
 
@@ -1170,7 +1170,7 @@ AbstractSubStack.prototype.hasCoins = function hasCoins(view) {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.isFinal = function isFinal(height, time) {
+AbstractStack.prototype.isFinal = function isFinal(height, time) {
   const THRESHOLD = consensus.LOCKTIME_THRESHOLD;
 
   if (this.locktime === 0)
@@ -1195,7 +1195,7 @@ AbstractSubStack.prototype.isFinal = function isFinal(height, time) {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.verifyLocktime = function verifyLocktime(index, predicate) {
+AbstractStack.prototype.verifyLocktime = function verifyLocktime(index, predicate) {
   const THRESHOLD = consensus.LOCKTIME_THRESHOLD;
   const input = this.inputs[index];
 
@@ -1223,7 +1223,7 @@ AbstractSubStack.prototype.verifyLocktime = function verifyLocktime(index, predi
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.verifySequence = function verifySequence(index, predicate) {
+AbstractStack.prototype.verifySequence = function verifySequence(index, predicate) {
   const DISABLE_FLAG = consensus.SEQUENCE_DISABLE_FLAG;
   const TYPE_FLAG = consensus.SEQUENCE_TYPE_FLAG;
   const MASK = consensus.SEQUENCE_MASK;
@@ -1261,7 +1261,7 @@ AbstractSubStack.prototype.verifySequence = function verifySequence(index, predi
  * @returns {Number} sigop count
  */
 
-AbstractSubStack.prototype.getLegacySigops = function getLegacySigops() {
+AbstractStack.prototype.getLegacySigops = function getLegacySigops() {
   if (this._sigops !== -1)
     return this._sigops;
 
@@ -1285,7 +1285,7 @@ AbstractSubStack.prototype.getLegacySigops = function getLegacySigops() {
  * @returns {Number} sigop count
  */
 
-AbstractSubStack.prototype.getScripthashSigops = function getScripthashSigops(view) {
+AbstractStack.prototype.getScripthashSigops = function getScripthashSigops(view) {
   if (this.isCoinbase())
     return 0;
 
@@ -1314,7 +1314,7 @@ AbstractSubStack.prototype.getScripthashSigops = function getScripthashSigops(vi
  * @returns {Number} sigop weight
  */
 
-AbstractSubStack.prototype.getSigopsCost = function getSigopsCost(view, flags) {
+AbstractStack.prototype.getSigopsCost = function getSigopsCost(view, flags) {
   if (flags == null)
     flags = Script.flags.STANDARD_VERIFY_FLAGS;
 
@@ -1335,7 +1335,7 @@ AbstractSubStack.prototype.getSigopsCost = function getSigopsCost(view, flags) {
  * @returns {Number} sigop count
  */
 
-AbstractSubStack.prototype.getSigops = function getSigops(view, flags) {
+AbstractStack.prototype.getSigops = function getSigops(view, flags) {
   const scale = consensus.WITNESS_SCALE_FACTOR;
   return (this.getSigopsCost(view, flags) + scale - 1) / scale | 0;
 };
@@ -1347,7 +1347,7 @@ AbstractSubStack.prototype.getSigops = function getSigops(view, flags) {
  * @returns {Array} [result, reason, score]
  */
 
-AbstractSubStack.prototype.isSane = function isSane() {
+AbstractStack.prototype.isSane = function isSane() {
   const [valid] = this.checkSanity();
   return valid;
 };
@@ -1359,7 +1359,7 @@ AbstractSubStack.prototype.isSane = function isSane() {
  * @returns {Array} [valid, reason, score]
  */
 
-AbstractSubStack.prototype.checkSanity = function checkSanity() {
+AbstractStack.prototype.checkSanity = function checkSanity() {
   if (this.inputs.length === 0)
     return [false, 'bad-txns-vin-empty', 100];
 
@@ -1419,7 +1419,7 @@ AbstractSubStack.prototype.checkSanity = function checkSanity() {
  * @returns {Array} [valid, reason, score]
  */
 
-AbstractSubStack.prototype.isStandard = function isStandard() {
+AbstractStack.prototype.isStandard = function isStandard() {
   const [valid] = this.checkStandard();
   return valid;
 };
@@ -1434,7 +1434,7 @@ AbstractSubStack.prototype.isStandard = function isStandard() {
  * @returns {Array} [valid, reason, score]
  */
 
-AbstractSubStack.prototype.checkStandard = function checkStandard() {
+AbstractStack.prototype.checkStandard = function checkStandard() {
   if (this.version < 1 || this.version > policy.MAX_TX_VERSION)
     return [false, 'version', 0];
 
@@ -1482,7 +1482,7 @@ AbstractSubStack.prototype.checkStandard = function checkStandard() {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.hasStandardInputs = function hasStandardInputs(view) {
+AbstractStack.prototype.hasStandardInputs = function hasStandardInputs(view) {
   if (this.isCoinbase())
     return true;
 
@@ -1521,7 +1521,7 @@ AbstractSubStack.prototype.hasStandardInputs = function hasStandardInputs(view) 
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.hasStandardWitness = function hasStandardWitness(view) {
+AbstractStack.prototype.hasStandardWitness = function hasStandardWitness(view) {
   if (this.isCoinbase())
     return true;
 
@@ -1643,7 +1643,7 @@ AbstractSubStack.prototype.hasStandardWitness = function hasStandardWitness(view
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.verifyInputs = function verifyInputs(view, height) {
+AbstractStack.prototype.verifyInputs = function verifyInputs(view, height) {
   const [fee] = this.checkInputs(view, height);
   return fee !== -1;
 };
@@ -1661,7 +1661,7 @@ AbstractSubStack.prototype.verifyInputs = function verifyInputs(view, height) {
  * @returns {Array} [fee, reason, score]
  */
 
-AbstractSubStack.prototype.checkInputs = function checkInputs(view, height) {
+AbstractStack.prototype.checkInputs = function checkInputs(view, height) {
   assert(typeof height === 'number');
 
   let total = 0;
@@ -1714,7 +1714,7 @@ AbstractSubStack.prototype.checkInputs = function checkInputs(view, height) {
  * @returns {Number} Modified size.
  */
 
-AbstractSubStack.prototype.getModifiedSize = function getModifiedSize(size) {
+AbstractStack.prototype.getModifiedSize = function getModifiedSize(size) {
   if (size == null)
     size = this.getVirtualSize();
 
@@ -1736,7 +1736,7 @@ AbstractSubStack.prototype.getModifiedSize = function getModifiedSize(size) {
  * @returns {Number}
  */
 
-AbstractSubStack.prototype.getPriority = function getPriority(view, height, size) {
+AbstractStack.prototype.getPriority = function getPriority(view, height, size) {
   assert(typeof height === 'number', 'Must pass in height.');
 
   if (this.isCoinbase())
@@ -1773,7 +1773,7 @@ AbstractSubStack.prototype.getPriority = function getPriority(view, height, size
  * @returns {Number}
  */
 
-AbstractSubStack.prototype.getChainValue = function getChainValue(view) {
+AbstractStack.prototype.getChainValue = function getChainValue(view) {
   if (this.isCoinbase())
     return 0;
 
@@ -1809,7 +1809,7 @@ AbstractSubStack.prototype.getChainValue = function getChainValue(view) {
  * @returns {Boolean}
  */
 
-AbstractSubStack.prototype.isFree = function isFree(view, height, size) {
+AbstractStack.prototype.isFree = function isFree(view, height, size) {
   const priority = this.getPriority(view, height, size);
   return priority > policy.FREE_THRESHOLD;
 };
@@ -1823,7 +1823,7 @@ AbstractSubStack.prototype.isFree = function isFree(view, height, size) {
  * @returns {Amount} fee
  */
 
-AbstractSubStack.prototype.getMinFee = function getMinFee(size, rate) {
+AbstractStack.prototype.getMinFee = function getMinFee(size, rate) {
   if (size == null)
     size = this.getVirtualSize();
 
@@ -1840,7 +1840,7 @@ AbstractSubStack.prototype.getMinFee = function getMinFee(size, rate) {
  * @returns {Amount} fee
  */
 
-AbstractSubStack.prototype.getRoundFee = function getRoundFee(size, rate) {
+AbstractStack.prototype.getRoundFee = function getRoundFee(size, rate) {
   if (size == null)
     size = this.getVirtualSize();
 
@@ -1855,7 +1855,7 @@ AbstractSubStack.prototype.getRoundFee = function getRoundFee(size, rate) {
  * @returns {Rate}
  */
 
-AbstractSubStack.prototype.getRate = function getRate(view, size) {
+AbstractStack.prototype.getRate = function getRate(view, size) {
   const fee = this.getFee(view);
 
   if (fee < 0)
@@ -1872,7 +1872,7 @@ AbstractSubStack.prototype.getRate = function getRate(view, size) {
  * @returns {Hash[]} Outpoint hashes.
  */
 
-AbstractSubStack.prototype.getPrevout = function getPrevout() {
+AbstractStack.prototype.getPrevout = function getPrevout() {
   if (this.isCoinbase())
     return [];
 
@@ -1895,7 +1895,7 @@ AbstractSubStack.prototype.getPrevout = function getPrevout() {
  * @returns {Boolean} True if the transaction matched.
  */
 
-AbstractSubStack.prototype.isWatched = function isWatched(filter) {
+AbstractStack.prototype.isWatched = function isWatched(filter) {
   let found = false;
 
   // 1. Test the tx hash
@@ -1947,7 +1947,7 @@ AbstractSubStack.prototype.isWatched = function isWatched(filter) {
  * @returns {Hash}
  */
 
-AbstractSubStack.prototype.rhash = function rhash() {
+AbstractStack.prototype.rhash = function rhash() {
   return util.revHex(this.hash('hex'));
 };
 
@@ -1956,7 +1956,7 @@ AbstractSubStack.prototype.rhash = function rhash() {
  * @returns {Hash}
  */
 
-AbstractSubStack.prototype.rwhash = function rwhash() {
+AbstractStack.prototype.rwhash = function rwhash() {
   return true 
 };
 
@@ -1965,7 +1965,7 @@ AbstractSubStack.prototype.rwhash = function rwhash() {
  * @returns {Hash}
  */
 
-AbstractSubStack.prototype.txid = function txid() {
+AbstractStack.prototype.txid = function txid() {
   return this.rhash();
 };
 
@@ -1974,7 +1974,7 @@ AbstractSubStack.prototype.txid = function txid() {
  * @returns {Hash}
  */
 
-AbstractSubStack.prototype.wtxid = function wtxid() {
+AbstractStack.prototype.wtxid = function wtxid() {
   return this.rwhash();
 };
 
@@ -1983,8 +1983,8 @@ AbstractSubStack.prototype.wtxid = function wtxid() {
  * @returns {InvItem}
  */
 
-AbstractSubStack.prototype.toInv = function toInv() {
-  return new InvItem(InvItem.types.AbstractSubStack, this.hash('hex'));
+AbstractStack.prototype.toInv = function toInv() {
+  return new InvItem(InvItem.types.AbstractStack, this.hash('hex'));
 };
 
 /**
@@ -1993,7 +1993,7 @@ AbstractSubStack.prototype.toInv = function toInv() {
  * @returns {Object}
  */
 
-AbstractSubStack.prototype.inspect = function inspect() {
+AbstractStack.prototype.inspect = function inspect() {
   return this.format();
 };
 
@@ -2006,7 +2006,7 @@ AbstractSubStack.prototype.inspect = function inspect() {
  * @returns {Object}
  */
 
-AbstractSubStack.prototype.format = function format(view, entry, index) {
+AbstractStack.prototype.format = function format(view, entry, index) {
   let rate = 0;
   let fee = 0;
   let height = -1;
@@ -2053,7 +2053,7 @@ AbstractSubStack.prototype.format = function format(view, entry, index) {
  * @returns {Object}
  */
 
-AbstractSubStack.prototype.toJSON = function toJSON() {
+AbstractStack.prototype.toJSON = function toJSON() {
   return this.getJSON();
 };
 
@@ -2069,7 +2069,7 @@ AbstractSubStack.prototype.toJSON = function toJSON() {
  * @returns {Object}
  */
 
-AbstractSubStack.prototype.getJSON = function getJSON(network, view, entry, index) {
+AbstractStack.prototype.getJSON = function getJSON(network, view, entry, index) {
   let rate, fee, height, block, time, date;
 
   if (view) {
@@ -2120,7 +2120,7 @@ AbstractSubStack.prototype.getJSON = function getJSON(network, view, entry, inde
  * @param {Object} json
  */
 
-AbstractSubStack.prototype.fromJSON = function fromJSON(json) {
+AbstractStack.prototype.fromJSON = function fromJSON(json) {
   assert(json, 'TX data is required.');
   assert(util.isU32(json.version), 'Version must be a uint32.');
   assert(Array.isArray(json.inputs), 'Inputs must be an array.');
@@ -2147,8 +2147,8 @@ AbstractSubStack.prototype.fromJSON = function fromJSON(json) {
  * @returns {TX}
  */
 
-AbstractSubStack.fromJSON = function fromJSON(json) {
-  return new AbstractSubStack().fromJSON(json);
+AbstractStack.fromJSON = function fromJSON(json) {
+  return new AbstractStack().fromJSON(json);
 };
 
 /**
@@ -2158,10 +2158,10 @@ AbstractSubStack.fromJSON = function fromJSON(json) {
  * @returns {TX}
  */
 
-AbstractSubStack.fromRaw = function fromRaw(data, enc) {
+AbstractStack.fromRaw = function fromRaw(data, enc) {
   if (typeof data === 'string')
     data = Buffer.from(data, enc);
-  return new AbstractSubStack().fromRaw(data);
+  return new AbstractStack().fromRaw(data);
 };
 
 /**
@@ -2170,8 +2170,8 @@ AbstractSubStack.fromRaw = function fromRaw(data, enc) {
  * @returns {TX}
  */
 
-AbstractSubStack.fromReader = function fromReader(br) {
-  return new AbstractSubStack().fromReader(br);
+AbstractStack.fromReader = function fromReader(br) {
+  return new AbstractStack().fromReader(br);
 };
 
 /**
@@ -2180,7 +2180,7 @@ AbstractSubStack.fromReader = function fromReader(br) {
  * @param {Buffer} data
  */
 
-AbstractSubStack.prototype.fromRaw = function fromRaw(data) {
+AbstractStack.prototype.fromRaw = function fromRaw(data) {
   return this.fromReader(new BufferReader(data));
 };
 
@@ -2190,7 +2190,7 @@ AbstractSubStack.prototype.fromRaw = function fromRaw(data) {
  * @param {BufferReader} br
  */
 
-AbstractSubStack.prototype.fromReader = function fromReader(br) {
+AbstractStack.prototype.fromReader = function fromReader(br) {
   if (hasWitnessBytes(br))
     return this.fromWitnessReader(br);
 
@@ -2228,7 +2228,7 @@ AbstractSubStack.prototype.fromReader = function fromReader(br) {
  * @param {BufferReader} br
  */
 
-AbstractSubStack.prototype.fromWitnessReader = function fromWitnessReader(br) {
+AbstractStack.prototype.fromWitnessReader = function fromWitnessReader(br) {
   br.start();
 
   this.version = br.readU32();
@@ -2294,7 +2294,7 @@ AbstractSubStack.prototype.fromWitnessReader = function fromWitnessReader(br) {
  * @returns {RawTX}
  */
 
-AbstractSubStack.prototype.frameNormal = function frameNormal() {
+AbstractStack.prototype.frameNormal = function frameNormal() {
   const raw = this.getNormalSizes();
   const bw = new StaticWriter(raw.size);
   this.writeNormal(bw);
@@ -2310,7 +2310,7 @@ AbstractSubStack.prototype.frameNormal = function frameNormal() {
  * @returns {RawTX}
  */
 
-AbstractSubStack.prototype.writeNormal = function writeNormal(bw) {
+AbstractStack.prototype.writeNormal = function writeNormal(bw) {
   if (this.inputs.length === 0 && this.outputs.length !== 0)
     throw new Error('Cannot serialize zero-input tx.');
 
@@ -2338,7 +2338,7 @@ AbstractSubStack.prototype.writeNormal = function writeNormal(bw) {
  * @returns {RawTX}
  */
 
-AbstractSubStack.prototype.getNormalSizes = function getNormalSizes() {
+AbstractStack.prototype.getNormalSizes = function getNormalSizes() {
   let base = 0;
 
   base += 4;
@@ -2360,13 +2360,13 @@ AbstractSubStack.prototype.getNormalSizes = function getNormalSizes() {
 
 
 /**
- * Test whether an object is a AbstractSubStack.
+ * Test whether an object is a AbstractStack.
  * @param {Object} obj
  * @returns {Boolean}
  */
 
-AbstractSubStack.isTX = function isTX(obj) {
-  return obj instanceof AbstractSubStack;
+AbstractStack.isTX = function isTX(obj) {
+  return obj instanceof AbstractStack;
 };
 
 /*
@@ -2391,4 +2391,4 @@ function RawTX(size, witness) {
  * Expose
  */
 
-module.exports = AbstractSubStack;
+module.exports = AbstractStack;
