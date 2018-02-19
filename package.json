@@ -4,6 +4,7 @@
   "description": "Block Collider with miners and rovers",
   "main": "lib/src/init.js",
   "scripts": {
+    "doc": "./node_modules/.bin/esdoc",
     "lint:standard": "standard src/**/*.es6",
     "lint:flow": "flow",
     "transpile": "babel src --plugins transform-flow-strip-types --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
@@ -148,6 +149,8 @@
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-flow": "^6.23.0",
     "concurrently": "3.5.1",
+    "esdoc": "^1.0.4",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-plugin-flowtype": "^2.44.0",
     "flow-bin": "^0.65.0",
