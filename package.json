@@ -133,7 +133,8 @@
     "web3": "^1.0.0-beta.30",
     "webcoin-bitcoin": "^3.1.4",
     "webcoin-bitcoin-testnet": "^1.1.1",
-    "winston-color": "^1.0.0",
+    "winston": "^2.4.0",
+    "winston-daily-rotate-file": "^1.7.2",
     "xor-it": "^1.0.2",
     "zstd-codec": "0.0.7"
   },
