@@ -13,6 +13,7 @@ var async = require('async');
 var Identity = require("./identity.js");
 var Network = require("./network.js");
 var RoverBase = require("./rovers/base.js");
+var RoverBaseGUI = require("./browser/roverbase/server.js");
 var Storage = require("./storage.js");
 var colors = require('colors');
 
@@ -40,6 +41,8 @@ function readFile(){
     }
 
 }
+
+module.exports = function main(opts) {
 
 var identity = new Identity();
 
@@ -74,16 +77,35 @@ var identity = new Identity();
                       storage.addBlock(msg, cb); 
                   });
 
-              storage.init(function() {
+            storage.init(function() {
 
-            base.launchRover("btc");
-            base.launchRover("eth");
-            base.launchRover("neo");
-            base.launchRover("wav");
+            if(opts.norovers){
+
+                    log.warn("startup configuration deploys no rovers");
+
+            } else if(opts.rovers != undefined){
+
+                for(var i = 0; i<opts.rovers.length; i++){
+                    base.launchRover(opts.rovers[i]);
+                }
+
+            } else {
+                    base.launchRover("btc");
+                    base.launchRover("eth");
+                    base.launchRover("neo");
+                    base.launchRover("wav");
+            }
+
+            
+            /* In Development */
             //base.launchRover("lsk");
-            //base.launchRover("xcp");
+                
+            /* Rover Base Monitor GUI */
+            if(opts.roverbase){
+                RoverBaseGUI({});
+            }
                         
-                        /* Rover Base Events */
+            /* Rover Base Events */
             base.events.on("pow", function(msg){
                             console.log("--------------POW---------------");
               console.log(msg);
@@ -95,6 +117,10 @@ var identity = new Identity();
             });
 
             base.events.on("log", function(msg){
+              console.log(msg);
+            });
+
+            base.events.on("info", function(msg){
               console.log(msg);
             });
 
@@ -131,5 +157,7 @@ var identity = new Identity();
         }
 
     });
+
+}
 
 

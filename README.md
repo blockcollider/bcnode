@@ -1,6 +1,8 @@
-# BLOCK COLLIDER
+Block Collider Node 
+===================
+#### Build 1 - "Boson Hunter"
 
-Mining node with built-in block rover, DHT, and client discovery.
+Mining node with built-in block rover, DHT, and peer discovery.
 
 ## Status
 
@@ -10,14 +12,45 @@ Mining node with built-in block rover, DHT, and client discovery.
 
 ### OS
 
-- Ubuntu 16.04
-- Mac OSX 10.11+
+- Ubuntu 16.04 (GNU)
+- Mac OSX 10.11+ (Debian)
 
 ### Software
 
+- [git](https://git-scm.com/downloads) 2.1+
 - [nodejs](https://nodejs.org) 4.3+
 - [yarn](https://yarnpkg.com/en/docs/install) 1.3.2+
 - [boost](http://www.boost.org/) Boost 1.66.0+
+
+
+## Getting started
+
+### Build from source
+
+```
+$ git clone https://github.com/blockcollider/bcnode
+$ cd bcnode
+$ npm install
+$ npm run dist
+```
+
+### Run From Command Line
+
+#### Startup node with default rovers
+```
+$ ./bin/cli 
+```
+#### Startup node with rover GUI & NEO & Ethereum rovers 
+```
+$ ./bin/cli --roverbase --rovers wav,eth 
+```
+
+### Development
+
+```
+npm run watch
+```
+
 ## Index
 * init.js - startup file
 * time.js - ntp offset, local UTC and UNIX timestamps
@@ -34,36 +67,16 @@ Mining node with built-in block rover, DHT, and client discovery.
 * dht.js - K-Bucket storage library for a distributed hash table.
 * distance.js - Ratcliff Obershelm
 * genesis.json - testnet genesis block with origin blockchain hashes.
-* install_quickfix_debian.sh - Ubuntu build file for FIX protocol
 * log.js - streaming global WINSTON log
 * pool.js - miner template for in memory TX pool
 * storage.js - blockchain storage MMAP and ztsd
 
-## Rovers
-* btc_rover.js
-* eth_rover.js
-* neo_rover.js
-* wav_rover.js
-* lsk_rover.js
-
-## Getting started
-
-### Build from source
-
-```
-$ git clone https://github.com/blockcollider/bcnode
-$ cd bcnode
-$ ./scripts/debian_install_quickfix.sh
-$ npm install
-$ npm run dist
-```
-
-### Development
-
-```
-npm run watch
-```
-
+## Rovers (Alphabetical) 
+* Bitcoin Blockchain
+* Ethereum Blockchain 
+* Lisk Blockchain 
+* Neo Blockchain
+* Waves Blockchain
 ## Block Collider Developer Community
 
 Helpful community tools will be added: [https://github.com/blockcollider/awesome-blockcollider](https://github.com/blockcollider/awesome-blockcollider)

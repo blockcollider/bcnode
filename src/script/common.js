@@ -158,15 +158,11 @@ exports.opcodes = {
   OP_INVALIDOPCODE: 0xff,
 
   /*
-   * OP_CHECKFIBER 256 
-   * Checks the hash of the block matches the fiber pattern supplied
-   *
-   * Ex. Valid spend only if blockHash matches fiber pattern
-   * Output == OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG <fiber> OP_CHECKFIBER
-   * Signature == OP_PUSHDATA <blockHash> OP_PUSHDATA <sig> OP_PUSHDATA <pubKey> 
+   * OP_RFBAND 256 
+   * Placeholder for 776 
    *
    */ 
-  OP_CHECKFIBER: 0x100,  
+  OP_RFBAND: 0x100,  
 
   /*
    * OP_CHECKSIGFROMCHAIN 257 
@@ -313,7 +309,7 @@ exports.opcodes = {
    * Coinbase of value Less than or equal to given block height 
    *
    */ 
-  OP_VERIFYAGELTE: 0x10f,
+  OP_AGELTE: 0x10f,
 
   /*
    * OP_VERIFYAGEGTE 272
@@ -322,7 +318,7 @@ exports.opcodes = {
    * Coinbase of value Greater than or equal to given block height 
    *
    */ 
-  OP_VERIFYAGEGTE: 0x110,
+  OP_AGEGTE: 0x110,
 
   /*
    * OP_VERIFYDEPTHLTE 273
@@ -331,7 +327,7 @@ exports.opcodes = {
    * Less then or equal to the depth of the transaction tree 
    *
    */ 
-  OP_VERIFYDEPTHLTE: 0x111,
+  OP_DEPTHLTE: 0x111,
 
   /*
    * OP_VERIFYDEPTHGTE 274
@@ -340,13 +336,21 @@ exports.opcodes = {
    * Coinbase of value Greater than or equal to given block height 
    *
    */ 
-  OP_VERIFYDEPTHGTE: 0x112
+  OP_DEPTHGTE: 0x112
 
   /*
-   * OP_NLOCKREBASE xxx 
+   * OP_NLOCKREBASEBLOCK xxx 
    * Arguments: <minimumBlockheight>  
    *
    * Ex. Unspent Stack values are rebased after a given block height
+   *
+   */ 
+
+  /*
+   * OP_NLOCKREBASETX xxx 
+   * Arguments: <minimumBlockheight>  
+   *
+   * Ex. Unspent Stack values are rebased after a given transaction age 
    *
    */ 
   //OP_NLOCKREBASE: xxx 
