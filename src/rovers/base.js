@@ -106,7 +106,7 @@ RoverBase.prototype = {
 
             log.info(roverId+" rover leaving base");
 
-            var n = child.fork("./rovers/"+roverId+"_rover.js");
+            var n = child.fork(__dirname+"/"+roverId+"_rover.js");
             var meta = {
                 id: roverId,
                 process: n

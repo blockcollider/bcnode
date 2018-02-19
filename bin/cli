@@ -1,5 +1,5 @@
 #! /usr/bin/env node --harmony
 
-const cli = require('../lib/cli')
+const cli = require('../src/cli')
 
-cli.main()
+console.log(cli());

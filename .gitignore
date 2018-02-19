@@ -75,3 +75,4 @@ dist/
 # Block Collider specific data directories
 data
 miner_data
+.wavescache
