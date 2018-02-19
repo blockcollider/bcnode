@@ -1,6 +1,6 @@
-Block Collder Node 
-==================
-## Developer Build 1 - "Boson Hunter"
+Block Collider Node 
+===================
+#### Build 1 - "Boson Hunter"
 
 Mining node with built-in block rover, DHT, and peer discovery.
 
