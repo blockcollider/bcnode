@@ -1,9 +1,16 @@
 
 /*
- *  Stable Coin using modified Bitcoin Script (BEAM)
+ *  Stable Coin using modified Bitcoin Script (BEAM) on Block Collider
  *
  *  Ex. Deploy a fixed supply token supply stablecoin with managed issuance 
  *  as a basket of assets on Waves, Ethereum, and NEO. Compatible with Basecoin!
+ *
+ *  WHAT YOU GET FROM RUNNING THIS
+ *  1. Fixed supply token deployed on Waves, Ethereum, and NEO blockchains managed by your account.
+ *  2. Token is fully owned by you but people once they have it can sell it back to you for a fixed NRG rate.
+ *  3. NRG is locked up from your account to a Stablecoin address deployed to the Block Collider. 
+ *
+ *  Learn more at https://docs.blockcollider.org
  *
  */
 
@@ -88,6 +95,7 @@ const wavOutput = new StackOutput()
 	  wavOutput.script.fromArray([
           "OVER",
           "SWAP",
+          "PUSHDATA " + Convert.wav().id,
           "VERFIYSIGCLAIM", // Makes sure the signature provided is of the correct chain
           "DUP",
           "PUSHDATA " + wavToken.address(),
@@ -105,10 +113,10 @@ const wavOutput = new StackOutput()
 
 /* Add the remaining two tokens */
 const ethOutput = new StackOutput(); 
-      ethOutput.script.fromArray([ "OVER", "SWAP", "VERFIYSIGCLAIM", "DUP", "PUSHDATA " + ethToken.address(), "PUSHDATA " + Convert.eth().id, "CHECKSIGCHAINBENEFACTOR", "PUSHDATA " + Convert.eth().id, "PUSHDATA 5", "PUSHDATA 100" "VERIFYBLOCKCHAINSEQUENCEGTE", "PUSHDATA 10", "BALANCEUNITS", "PUSHDATA " + Convert.nrg(10, "nrg").toBosons(), "BALANCE" ]); 
+      ethOutput.script.fromArray([ "OVER", "SWAP", "PUSHDATA " + Convert.eth().id, "VERFIYSIGCLAIM", "DUP", "PUSHDATA " + ethToken.address(), "PUSHDATA " + Convert.eth().id, "CHECKSIGCHAINBENEFACTOR", "PUSHDATA " + Convert.eth().id, "PUSHDATA 5", "PUSHDATA 100" "VERIFYBLOCKCHAINSEQUENCEGTE", "PUSHDATA 10", "BALANCEUNITS", "PUSHDATA " + Convert.nrg(10, "nrg").toBosons(), "BALANCE" ]); 
 
 const neoOutput = new StackOutput(); 
-      neoOutput.script.fromArray([ "OVER", "SWAP", "VERFIYSIGCLAIM", "DUP", "PUSHDATA " + neoToken.address(), "PUSHDATA " + Convert.neo().id, "CHECKSIGCHAINBENEFACTOR", "PUSHDATA " + Convert.neo().id, "PUSHDATA 5", "PUSHDATA 100" "VERIFYBLOCKCHAINSEQUENCEGTE", "PUSHDATA 10", "BALANCEUNITS", "PUSHDATA " + Convert.nrg(10, "nrg").toBosons(), "BALANCE" ]); 
+      neoOutput.script.fromArray([ "OVER", "SWAP", "PUSHDATA " + Convert.neo().id, "VERFIYSIGCLAIM", "DUP", "PUSHDATA " + neoToken.address(), "PUSHDATA " + Convert.neo().id, "CHECKSIGCHAINBENEFACTOR", "PUSHDATA " + Convert.neo().id, "PUSHDATA 5", "PUSHDATA 100" "VERIFYBLOCKCHAINSEQUENCEGTE", "PUSHDATA 10", "BALANCEUNITS", "PUSHDATA " + Convert.nrg(10, "nrg").toBosons(), "BALANCE" ]); 
 	  
 	  /* Add all stable coin addresses to the stack */
 	  output.stack.addOutput(wavOutput);

@@ -339,13 +339,23 @@ exports.opcodes = {
   OP_DEPTHGTE: 0x112,
 
   /*
-   * OP_BLOCKCHAINSEQUENCEGTE 275
-   * Arguments: <txBitPattern> <blockchain> <length> <noOrphanDepth> 
+   * OP_SWITCH 275 - STACK ONLY
+   * Arguments: <value> <value> 
    *
-   * This is valid if the txBitPattern found in given blockchain has been referrenced in the Block Collider chain for length otherwise it is valid after the block was not orphaned from noOrphanDepth 
+   * This is a logic gate that requires the values to trade places in the stack for each transaction
    *
    */ 
-  OP_VERIFYBLOCKCHAINSEQUENCEGTE: 0x113
+  OP_SWITCH: 0x113,
+
+  /*
+   * OP_SWITCH 276
+   * Arguments: <mark/null> <value> 
+   *
+   * This is a modified form of BALANCE which when the stack expires expires to previous holder it can accept
+   * marked transactions
+   *
+   */ 
+  OP_VERIFYLEASEDBALANCE: 0x114
 
   /*
    * OP_NLOCKREBASEBLOCK xxx 

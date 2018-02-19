@@ -675,7 +675,7 @@ Opcode.isOpcode = function isOpcode(obj) {
 
 PARSE_ERROR = Object.freeze(new Opcode(-1));
 
-for (let value = 0x00; value <= 0x112; value++) {
+for (let value = 0x00; value <= 0x114; value++) {
   if (value >= 0x01 && value <= 0x4e) {
     opCache.push(null);
     continue;
