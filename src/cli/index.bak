@@ -7,7 +7,6 @@ const app = require("../init.js");
 
 // eslint-disable-next-line import/prefer-default-export
 module.exports = function main () {
-
    program
     .version(pkg.version)
     .option('--rpc', 'Start RPC Server')
@@ -20,17 +19,11 @@ module.exports = function main () {
     .parse(process.argv)
 
    if(!program.options.length) {
-
        //[program.help();
-
    } else {
-
        if(program.rovers) {
-
            if(program.rovers.indexOf(",") > -1){
-
                program.rovers = program.rovers.split(",").reduce(function(all, r){
-
                     if(dict[r.trim()] != undefined){
                         all.push(dict[r.trim()]);
                     } else {
@@ -39,17 +32,12 @@ module.exports = function main () {
                     return all;
 
                }, []);
-
            } else {
-
                program.rovers = [program.rovers.trim()];
-
            }
-
        }
-
    }
-  
+
    app(program);
 
 }
