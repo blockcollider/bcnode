@@ -25,4 +25,7 @@ script: yarn run dist
 
 notifications:
   email:
-    - dev@blockcollider.org
+    - aj@blockcollider.org
+    - ak@blockcollider.org
+    - pm@blockcollider.org
+    - tk@blockcollider.org
