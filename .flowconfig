@@ -1,7 +1,8 @@
 [ignore]
-<PROJECT_ROOT>/node_modules/npm/.*
-<PROJECT_ROOT>/node_modules/npmi/.*
-<PROJECT_ROOT>/node_modules/npm-check-updates/.*
+<PROJECT_ROOT>/node_modules/config-chain
+<PROJECT_ROOT>/node_modules/npm
+<PROJECT_ROOT>/node_modules/npmi
+<PROJECT_ROOT>/node_modules/oboe
 
 [include]
 <PROJECT_ROOT>/src/.*
