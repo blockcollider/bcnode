@@ -2,8 +2,6 @@ const moment = require('moment')
 const winston = require('winston')
 require('winston-daily-rotate-file')
 
-console.log('Initializing logger included!')
-
 const tsFormat = () => moment().utc().format('YYYYMMDDHHmmss')
 
 const format = (options) => {
@@ -16,8 +14,6 @@ const format = (options) => {
 }
 
 export const logger = (function init () {
-  console.log('Initializing logger - winston!')
-
   return new (winston.Logger)({
     transports: [
       // Console
