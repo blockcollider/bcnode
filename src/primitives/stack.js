@@ -19,7 +19,6 @@ const encoding = require('../utils/encoding');
 const consensus = require('../protocol/consensus');
 const policy = require('../protocol/policy');
 const Amount = require('../utils/amount');
-const Stack = require('../script/stack');
 
 /**
  * A mutable transaction object.
