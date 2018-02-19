@@ -32,6 +32,11 @@ const big = require('big.js');
 const string = require('../utils/strings.js');
 const Log = require("../log.js");
 const https = require('https');
+const fs = require('fs');
+
+fs.writeFileSync(".wavescache", JSON.stringify({
+    LAST_HEIGHT: 0
+}));
 
 const LRU = require("lru-cache")
   , options = { max: 500
@@ -53,7 +58,6 @@ var log = new Log();
 
 const DEFAULT_TYPE = "log";
 
-let LAST_HEIGHT = 0;
 
 process.on("uncaughtError", function(e){
 
@@ -365,23 +369,52 @@ function getLastHeight(cb){
    var host = WAVES_NODE_HOST;
    var url = host+"/blocks/height";
 
-   let agent = new https.Agent({ keepAlive: false });
 
-   request({ url: url, json: true, agent: agent }, function(err, res, body){
-       if(err) { cb(err); } else {
+   fs.readFile(".wavescache", "utf8", function(err, file){
 
-            let diff = Number(body.height)-LAST_HEIGHT;
+       if(err) { console.trace(err); process.exit(3); } 
+   
+       file = JSON.parse(file);
 
-            if(diff > 1 && LAST_HEIGHT != 0){
-                diff = diff-1;
-                body.height = Number(body.height) - diff; 
-            } else if(body.height != LAST_HEIGHT){
-                LAST_HEIGHT = Number(body.height); 
-            }
+       LAST_HEIGHT = file.LAST_HEIGHT;
 
-            cb(null, body.height);
+       let agent = new https.Agent({ keepAlive: false });
 
-       }
+       request({ url: url, json: true, agent: agent }, function(err, res, body){
+           if(err) { cb(err); } else {
+
+                let newBlock = false;
+
+                if(LAST_HEIGHT != 0 && LAST_HEIGHT != body.height){
+
+                    LAST_HEIGHT = LAST_HEIGHT + 1;
+                    newBlock = true;
+                } else if(LAST_HEIGHT == 0){
+
+                    newBlock = true;
+                    LAST_HEIGHT = body.height;
+
+                }  else if(LAST_HEIGHT == body.height) {
+
+                    newBlock = false;
+
+                } 
+
+                fs.writeFile(".wavescache", JSON.stringify({ LAST_HEIGHT: LAST_HEIGHT }), function(err){
+
+                    if(err) { console.trace(err); process.exit(3); } 
+
+                    if(newBlock == true){
+                        cb(null, LAST_HEIGHT);
+                    } else {
+                        cb(null, false);
+                    }
+
+                });
+
+           }
+       });
+
    });
 
 }
@@ -399,18 +432,20 @@ var Controller = {
        var host = WAVES_NODE_HOST;
        var url = host+"/blocks/at";
 
-       getLastHeight(function(err, height){
-
-           send("metric", { scope: "wav", type: "blockheight", data: height });
-
-           if(err) { console.trace(err); } 
-
-           var h = height;
-
            function cycle(w) {
 
-               var h = w;
+              getLastHeight(function(err, h){
+
+               //var h = w;
                var u = url+"/"+h;
+
+               if(h == false){
+
+                   setTimeout(function () { 
+                        cycle(w);
+                   }, 5000);
+
+               } else {
 
                let agent = new https.Agent({ keepAlive: false });
 
@@ -418,9 +453,11 @@ var Controller = {
 
                    if(err) {
 
-                       setTimeout(function () { 
-                            cycle(h);
-                       }, 5000);
+                       fs.writeFile(".wavescache", JSON.stringify({ LAST_HEIGHT: h-1 }), function(err){
+                           setTimeout(function () { 
+                                cycle(h);
+                           }, 5000);
+                       });
 
                    } else if(body.status == "error"){
 
@@ -430,25 +467,32 @@ var Controller = {
                            t = 19000;
                        }
 
-                       setTimeout(function () { 
-                            cycle(h);
-                       }, t);
+                       fs.writeFile(".wavescache", JSON.stringify({ LAST_HEIGHT: h-1 }), function(err){
+
+                           setTimeout(function () { 
+                                cycle(h);
+                           }, t);
+
+                       });
 
                    } else {
+
 					   transmitRoverBlock(body);
                        setTimeout(function () { 
                             h = h+1;
                             cycle(h);
                        }, 6000);
+
                    }
+
                });
+             }
+
+             });
 
            }
 
-
-           cycle(height);
-
-       });
+           cycle(1);
 
     },
 

@@ -1,0 +1,22 @@
+{
+    "btc": "btc",
+    "bitcoin": "btc",
+    "bitc": "btc",
+    "xbt": "btc",
+    "btcc": "btc",
+    "eth": "eth",
+    "ethereum": "eth",
+    "etheruem": "eth",
+    "neo": "neo",
+    "antshare": "neo",
+    "antshares": "neo",
+    "lsk": "lsk",
+    "xcp": "xcp",
+    "counterparty": "xcp",
+    "waves": "wav",
+    "wave": "wav",
+    "wavesplatform": "wav",
+    "lisk": "lsk",
+    "ripple": "xrp",
+    "xrp": "xrp"
+}

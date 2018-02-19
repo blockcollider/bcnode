@@ -4,7 +4,7 @@
 var _ = require('lodash');
 var crypto = require('crypto');
 var ee = require('events').EventEmitter;
-var distance = require('../distance.js');
+var distance = require('compute-cosine-distance'); 
 var generating = false;
 var fuz = require('clj-fuzzy');
 var big = require('big.js');
@@ -29,6 +29,11 @@ function formatNRG(data){
 	return ["nrg", string.blake2bl(data.input)];
 }
 
+function split(t){
+
+   return t.split("").map(function(an){ return an.charCodeAt(0) });
+
+}
 
 function Worker(){
 
@@ -77,7 +82,7 @@ Worker.prototype = {
             	   self.cycles++;
             	   self.periodCycles++;
 
-	               var c = fuz.metrics.jaro_winkler(self.work[i][1], val);
+	               var c = distance(split(self.work[i][1]), split(val));
 
                    if(big(c).lt(self.block.distance) === true){
 						variance = 0;

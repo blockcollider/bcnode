@@ -8,7 +8,7 @@ const async = require('async');
 const request = require('request');
 const crypto = require('crypto');
 const big = require('big.js');
-const liskAPI = require("lisk-js");
+const lisk = require("lisk-js");
 const string = require('../utils/strings.js');
 const Log = require("../log.js");
 
@@ -170,7 +170,7 @@ function onNewBlock(block, done) {
       "blockId": block.id 
     }
  
-    liskAPI.getTransactionsList(params, function(err, success, response) {
+    lisk.api().getTransactionsList(params, function(err, success, response) {
         if(err) { console.trace(err); done(); } else {
 
             block.transactions = response.transactions;
@@ -324,8 +324,9 @@ Network.prototype = {
 
 function getLastHeight(cb){
 
-    liskAPI.api().sendRequest('blocks/getHeight', function (response) {
+    lisk.api().sendRequest('blocks/getHeight', function (response) {
       //if(err) { cb(err); } else {
+            console.log(response);
             cb(null, response.height);
       //}
     });
@@ -350,7 +351,8 @@ var Controller = {
                        height: h
                   }
 
-                  liskAPI.getBlocks(params, function(err, success, response){
+
+                  lisk.api().getBlock(params, function(err, success, response){
 
                     if(err) { 
                        console.trace(err);

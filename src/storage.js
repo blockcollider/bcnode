@@ -249,7 +249,7 @@ Storage.prototype = {
 
                     if(res) { cb(null, res); } else {
 
-                        log.warn("prev block hash not found"); 
+                        //log.warn("prev block hash not found"); 
 
                         cb(null, block);
 

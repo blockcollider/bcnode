@@ -6,6 +6,7 @@ var big = require('big.js');
 var cl = require('clj-fuzzy');
 var fs = require('fs');
 var moment = require('moment');
+var distance = require('compute-cosine-distance');
 
 var ws = fs.createWriteStream("results.csv", "utf8");
     var rm = "timestamp,mean,mutations,chest,ticket\n";
