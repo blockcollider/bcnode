@@ -2,12 +2,12 @@ const crypto = require('crypto')
 const hash = crypto.createHash("sha256").update("test").digest("hex")
 const MTX = require("../mtx.es6")
 const Output = require("../output.js")
-const SubInput = require("../subinput.js")
-const SubOutput = require("../suboutput.js")
+const StackInput = require("../stackinput.js")
+const StackOutput = require("../stackoutput.js")
 const Script = require("../../script/script")
 const Opcode = require("../../script/opcode")
 
-const subInput = {
+const stackInput = {
   prevout: {
     hash: hash,
     index: 0
@@ -22,13 +22,13 @@ describe('primitives', () => {
   })
 
   test('ouputs', () => {
-    const subOutput = new SubOutput()
+    const stackOutput = new StackOutput()
 
-    subOutput.script.pushSym("HASH160")
-    output.stack.addInput(subInput)
-    output.stack.outputs.push(subOutput)
+    stackOutput.script.pushSym("HASH160")
+    output.stack.addInput(stackInput)
+    output.stack.outputs.push(stackOutput)
 
-    expect(output.stack.inputs[0]).toBeInstanceOf(SubInput)
+    expect(output.stack.inputs[0]).toBeInstanceOf(StackInput)
     expect(output.stack.inputs[0].prevout.hash).toBe("9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08")
     expect(output.stack.inputs[0].sequence).toBe(4294967295)
     expect(output.stack.mutable).toBe(true)

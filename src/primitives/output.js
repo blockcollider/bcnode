@@ -12,7 +12,7 @@ const util = require('../utils/util');
 const Amount = require('../utils/amount');
 const Script = require('../script/script');
 const Address = require('./address');
-const SubStack = require("./substack");
+const Stack = require("./stack");
 
 /**
  * Represents a transaction output.
@@ -28,7 +28,7 @@ function Output(options) {
     return new Output(options);
 
   this.value = 0;
-  this.stack = new SubStack();
+  this.stack = new Stack();
   this.script = new Script();
 
   if (options)

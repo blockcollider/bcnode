@@ -2368,8 +2368,8 @@ TX.prototype.getNormalSizes = function getNormalSizes() {
     base += output.getSize();
     if(output.stack.outputs.length > 0){
       base += encoding.sizeVarint(output.stack.outputs.length);
-      for (const suboutput of output.stack.outputs) {
-        base += suboutput.getSize();
+      for (const stackoutput of output.stack.outputs) {
+        base += stackoutput.getSize();
       }
     }
   }
