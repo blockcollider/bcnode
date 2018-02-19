@@ -13,6 +13,4 @@ export function main () {
     .option('--rpc', 'Start RPC Server')
     .option('--ws', 'Start WebSocket Server')
     .parse(process.argv)
-
-  console.log(progam);
 }
