@@ -8,7 +8,9 @@ const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
 
 // See http://www.programwitherik.com/getting-started-with-socket-io-node-js-and-express/
 export default class Server {
-  constructor () {
+  constructor (opts) {
+    this._opts = opts
+
     this._app = null
     this._io = null
     this._server = null
@@ -22,6 +24,10 @@ export default class Server {
     return this._io
   }
 
+  get opts () {
+    return this._opts
+  }
+
   get server () {
     return this._server
   }
@@ -30,12 +36,31 @@ export default class Server {
     logger.info('Starting Server for Web UI')
 
     // Create express app instance
-    const app = (this._app = express())
+    this._app = express()
 
     // Create http server
     const server = (this._server = require('http').Server(this.app))
 
-    // TODO: Init websocket only if requested
+    if (this.opts.ws) {
+      this.initWebSocket()
+    }
+
+    if (this.opts.rpc) {
+      this.initRpc()
+    }
+
+    if (this.opts.ui) {
+      this.initUi()
+    }
+
+    // Listen for connections
+    const port = 3000
+    server.listen(port, () => {
+      logger.info(`Server available at http://0.0.0.0:${port}`)
+    })
+  }
+
+  initWebSocket () {
     const io = (this._io = socketIo(this.server, {
       path: '/ws'
     }))
@@ -54,26 +79,23 @@ export default class Server {
         )
       })
     })
+  }
 
-    // Routes
+  initRpc () {
     this.app.post('/rpc', (req, res) => {
       res.json({
         msg: 'Not implemented yet!'
       })
     })
+  }
 
+  initUi () {
     // Serve static content
-    app.use(
+    this.app.use(
       express.static(assetsDir),
       serveIndex(assetsDir, {
         icons: true
       })
     )
-
-    // Listen for connections
-    const port = 3000
-    server.listen(port, () => {
-      logger.info(`Server available at http://0.0.0.0:${port}`)
-    })
   }
 }

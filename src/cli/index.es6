@@ -10,10 +10,10 @@ const pkg = require('../../package.json')
 export function main () {
   program
     .version(pkg.version)
-    .option('--rover', 'Start Rover(s)')
-    .option('--rpc', 'Start RPC Server')
-    .option('--server', 'Start Server')
-    .option('--ws', 'Start WebSocket Server')
+    .option('--rovers', 'Start Rover')
+    .option('--rpc', 'Enable RPC')
+    .option('--ui', 'Enable Web UI')
+    .option('--ws', 'Enable WebSocket')
     .parse(process.argv)
 
   // Print help if no arguments were given
@@ -35,13 +35,12 @@ export function main () {
   }
 
   // Should the Server be started?
-  if (program.server) {
-    engine.startServer()
-  }
-
-  // Should the WebSocket be started?
-  if (program.ws) {
-    engine.startWebSocket()
+  if (program.rpc || program.ui || program.ws) {
+    engine.startServer({
+      rpc: program.rpc, // Enable RPC - /rpc
+      ui: program.ui,   // Enable UI - /
+      ws: program.ws    // Enable WS - /ws
+    })
   }
 
   // TODO: Wait for engine finish

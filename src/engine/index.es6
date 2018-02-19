@@ -8,7 +8,6 @@ export default class Engine {
     this._rovers = null
     this._rpc = null
     this._server = null
-    this._ws = null
   }
 
   get rovers () {
@@ -23,10 +22,7 @@ export default class Engine {
     return this._server
   }
 
-  get ws () {
-    return this._ws
-  }
-
+  // TODO: Pass which rovers should be started
   startRovers () {
     logger.info('Starting Rovers')
 
@@ -37,13 +33,12 @@ export default class Engine {
     logger.info('Starting RPC')
   }
 
-  startServer () {
-    this._server = new Server()
+  /**
+   *
+   * @param opts Options to start server with
+   */
+  startServer (opts) {
+    this._server = new Server(opts)
     this.server.run()
-  }
-
-  startWebSocket () {
-    logger.info('Starting WebSocket')
-    console.log('done')
   }
 }
