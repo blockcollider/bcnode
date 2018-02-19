@@ -1,7 +1,7 @@
 // @flow
 
 const program = require("commander")
-const dict = require("../vendor/dict.json");
+const dict = require("../../vendor/dict.json");
 const pkg = require('../../package.json')
 const app = require("../init.js");
 

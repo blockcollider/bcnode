@@ -1,7 +1,8 @@
 [ignore]
-<PROJECT_ROOT>/node_modules/npm/.*
-<PROJECT_ROOT>/node_modules/npmi/.*
-<PROJECT_ROOT>/node_modules/npm-check-updates/.*
+<PROJECT_ROOT>/node_modules/config-chain
+<PROJECT_ROOT>/node_modules/npm
+<PROJECT_ROOT>/node_modules/npmi
+<PROJECT_ROOT>/node_modules/oboe
 
 [include]
 <PROJECT_ROOT>/src/.*
@@ -11,8 +12,10 @@
 [lints]
 
 [options]
+module.file_ext=.es
+module.file_ext=.es6
 module.file_ext=.js
 module.file_ext=.jsx
-module.file_ext=.es6
+module.file_ext=.json
 
 [strict]
