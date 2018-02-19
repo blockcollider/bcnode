@@ -251,13 +251,13 @@ exports.opcodes = {
   OP_BALANCEUNIT: 0x109,
 
   /*
-   * OP_VERIFYSIGCLAIM 266 
-   * Arguments: <claimTXSignature> <chainSignature>
+   * OP_VERIFYBLOCKCHAINSEQUENCEGTE 275
+   * Arguments: <txBitPattern> <blockchain> <length> <noOrphanDepth> 
    *
-   * A signature signing the Block Collider transaction signature with the same signature supplied for a given chain
+   * This is valid if the txBitPattern found in given blockchain has been referrenced in the Block Collider chain for length otherwise it is valid after the block was not orphaned from noOrphanDepth 
    *
    */ 
-  OP_VERIFYSIGCLAIM: 0x10a,
+  OP_VERIFYBLOCKCHAINSEQUENCEGTE: 0x10a,
 
   /*
    * OP_CHECKSIGFROMCHAINBENEFACTOR 267 
@@ -321,7 +321,7 @@ exports.opcodes = {
   OP_AGEGTE: 0x110,
 
   /*
-   * OP_VERIFYDEPTHLTE 273
+   * OP_DEPTHLTE 273
    * Arguments: Depth of transaction edges   
    *
    * Less then or equal to the depth of the transaction tree 
@@ -330,13 +330,22 @@ exports.opcodes = {
   OP_DEPTHLTE: 0x111,
 
   /*
-   * OP_VERIFYDEPTHGTE 274
+   * OP_DEPTHGTE 274
    * Arguments: Height of coinbase transaction 
    *
    * Coinbase of value Greater than or equal to given block height 
    *
    */ 
-  OP_DEPTHGTE: 0x112
+  OP_DEPTHGTE: 0x112,
+
+  /*
+   * OP_BLOCKCHAINSEQUENCEGTE 275
+   * Arguments: <txBitPattern> <blockchain> <length> <noOrphanDepth> 
+   *
+   * This is valid if the txBitPattern found in given blockchain has been referrenced in the Block Collider chain for length otherwise it is valid after the block was not orphaned from noOrphanDepth 
+   *
+   */ 
+  OP_VERIFYBLOCKCHAINSEQUENCEGTE: 0x113
 
   /*
    * OP_NLOCKREBASEBLOCK xxx 

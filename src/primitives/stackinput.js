@@ -13,9 +13,9 @@ const util = require('../utils/util');
 const Script = require('../script/script');
 const Outpoint = require('./outpoint.js');
 
-function SubInput(options) {
-  if (!(this instanceof SubInput))
-    return new SubInput(options);
+function StackInput(options) {
+  if (!(this instanceof StackInput))
+    return new StackInput(options);
 
   this.prevout = new Outpoint();
   this.script = new Script();
@@ -31,8 +31,8 @@ function SubInput(options) {
  * @param {Object} options
  */
 
-SubInput.prototype.fromOptions = function fromOptions(options) {
-  assert(options, 'SubInput data is required.');
+StackInput.prototype.fromOptions = function fromOptions(options) {
+  assert(options, 'StackInput data is required.');
 
   this.prevout.fromOptions(options.prevout);
 
@@ -49,22 +49,22 @@ SubInput.prototype.fromOptions = function fromOptions(options) {
 };
 
 /**
- * Instantiate an SubInput from options object.
- * @param {NakedSubInput} options
- * @returns {SubInput}
+ * Instantiate an StackInput from options object.
+ * @param {NakedStackInput} options
+ * @returns {StackInput}
  */
 
-SubInput.fromOptions = function fromOptions(options) {
-  return new SubInput().fromOptions(options);
+StackInput.fromOptions = function fromOptions(options) {
+  return new StackInput().fromOptions(options);
 };
 
 /**
  * Clone the input.
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.prototype.clone = function clone() {
-  const input = new SubInput();
+StackInput.prototype.clone = function clone() {
+  const input = new StackInput();
   input.prevout = this.prevout;
   input.script.inject(this.script);
   input.sequence = this.sequence;
@@ -73,23 +73,23 @@ SubInput.prototype.clone = function clone() {
 
 /**
  * Test equality against another input.
- * @param {SubInput} input
+ * @param {StackInput} input
  * @returns {Boolean}
  */
 
-SubInput.prototype.equals = function equals(input) {
-  assert(SubInput.isSubInput(input));
+StackInput.prototype.equals = function equals(input) {
+  assert(StackInput.isStackInput(input));
   return this.prevout.equals(input.prevout);
 };
 
 /**
  * Compare against another input (BIP69).
- * @param {SubInput} input
+ * @param {StackInput} input
  * @returns {Number}
  */
 
-SubInput.prototype.compare = function compare(input) {
-  assert(SubInput.isSubInput(input));
+StackInput.prototype.compare = function compare(input) {
+  assert(StackInput.isStackInput(input));
   return this.prevout.compare(input.prevout);
 };
 
@@ -101,9 +101,9 @@ SubInput.prototype.compare = function compare(input) {
  * @returns {ScriptType} type
  */
 
-SubInput.prototype.getType = function getType(coin) {
+StackInput.prototype.getType = function getType(coin) {
   if (this.isCoinbase())
-    return 'subcoinbase';
+    return 'stackcoinbase';
 
   if (coin)
     return coin.getType();
@@ -129,7 +129,7 @@ SubInput.prototype.getType = function getType(coin) {
  * @returns {Script?} Redeem script.
  */
 
-SubInput.prototype.getRedeem = function getRedeem(coin) {
+StackInput.prototype.getRedeem = function getRedeem(coin) {
   if (this.isCoinbase())
     return null;
 
@@ -157,7 +157,7 @@ SubInput.prototype.getRedeem = function getRedeem(coin) {
  * @returns {String} subtype
  */
 
-SubInput.prototype.getSubtype = function getSubtype(coin) {
+StackInput.prototype.getSubtype = function getSubtype(coin) {
   if (this.isCoinbase())
     return null;
 
@@ -179,7 +179,7 @@ SubInput.prototype.getSubtype = function getSubtype(coin) {
  * @returns {Address?} addr
  */
 
-SubInput.prototype.getAddress = function getAddress(coin) {
+StackInput.prototype.getAddress = function getAddress(coin) {
   if (this.isCoinbase())
     return null;
 
@@ -196,7 +196,7 @@ SubInput.prototype.getAddress = function getAddress(coin) {
  * @returns {Hash} hash
  */
 
-SubInput.prototype.getHash = function getHash(enc) {
+StackInput.prototype.getHash = function getHash(enc) {
   const addr = this.getAddress();
 
   if (!addr)
@@ -210,7 +210,7 @@ SubInput.prototype.getHash = function getHash(enc) {
  * @returns {Boolean}
  */
 
-SubInput.prototype.isFinal = function isFinal() {
+StackInput.prototype.isFinal = function isFinal() {
   return this.sequence === 0xffffffff;
 };
 
@@ -219,7 +219,7 @@ SubInput.prototype.isFinal = function isFinal() {
  * @returns {Boolean}
  */
 
-SubInput.prototype.isRBF = function isRBF() {
+StackInput.prototype.isRBF = function isRBF() {
   return this.sequence < 0xfffffffe;
 };
 
@@ -228,7 +228,7 @@ SubInput.prototype.isRBF = function isRBF() {
  * @returns {Boolean}
  */
 
-SubInput.prototype.isCoinbase = function isCoinbase() {
+StackInput.prototype.isCoinbase = function isCoinbase() {
   return this.prevout.isNull();
 };
 
@@ -237,7 +237,7 @@ SubInput.prototype.isCoinbase = function isCoinbase() {
  * @returns {Object}
  */
 
-SubInput.prototype.inspect = function inspect() {
+StackInput.prototype.inspect = function inspect() {
   return this.format();
 };
 
@@ -247,7 +247,7 @@ SubInput.prototype.inspect = function inspect() {
  * @returns {Object}
  */
 
-SubInput.prototype.format = function format(coin) {
+StackInput.prototype.format = function format(coin) {
   return {
     type: this.getType(coin),
     subtype: this.getSubtype(coin),
@@ -266,7 +266,7 @@ SubInput.prototype.format = function format(coin) {
  * @returns {Object}
  */
 
-SubInput.prototype.toJSON = function toJSON(network, coin) {
+StackInput.prototype.toJSON = function toJSON(network, coin) {
   return this.getJSON();
 };
 
@@ -280,7 +280,7 @@ SubInput.prototype.toJSON = function toJSON(network, coin) {
  * @returns {Object}
  */
 
-SubInput.prototype.getJSON = function getJSON(network, coin) {
+StackInput.prototype.getJSON = function getJSON(network, coin) {
   network = Network.get(network);
 
   let addr;
@@ -305,8 +305,8 @@ SubInput.prototype.getJSON = function getJSON(network, coin) {
  * @param {Object} json
  */
 
-SubInput.prototype.fromJSON = function fromJSON(json) {
-  assert(json, 'SubInput data is required.');
+StackInput.prototype.fromJSON = function fromJSON(json) {
+  assert(json, 'StackInput data is required.');
   assert(util.isU32(json.sequence), 'Sequence must be a uint32.');
   this.prevout.fromJSON(json.prevout);
   this.script.fromJSON(json.script);
@@ -315,13 +315,13 @@ SubInput.prototype.fromJSON = function fromJSON(json) {
 };
 
 /**
- * Instantiate an SubInput from a jsonified input object.
+ * Instantiate an StackInput from a jsonified input object.
  * @param {Object} json - The jsonified input object.
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.fromJSON = function fromJSON(json) {
-  return new SubInput().fromJSON(json);
+StackInput.fromJSON = function fromJSON(json) {
+  return new StackInput().fromJSON(json);
 };
 
 /**
@@ -329,7 +329,7 @@ SubInput.fromJSON = function fromJSON(json) {
  * @returns {Number}
  */
 
-SubInput.prototype.getSize = function getSize() {
+StackInput.prototype.getSize = function getSize() {
   return 40 + this.script.getVarSize();
 };
 
@@ -339,7 +339,7 @@ SubInput.prototype.getSize = function getSize() {
  * @returns {Buffer|String}
  */
 
-SubInput.prototype.toRaw = function toRaw() {
+StackInput.prototype.toRaw = function toRaw() {
   const size = this.getSize();
   return this.toWriter(new StaticWriter(size)).render();
 };
@@ -349,7 +349,7 @@ SubInput.prototype.toRaw = function toRaw() {
  * @param {BufferWriter} bw
  */
 
-SubInput.prototype.toWriter = function toWriter(bw) {
+StackInput.prototype.toWriter = function toWriter(bw) {
   this.prevout.toWriter(bw);
   bw.writeVarBytes(this.script.toRaw());
   bw.writeU32(this.sequence);
@@ -362,7 +362,7 @@ SubInput.prototype.toWriter = function toWriter(bw) {
  * @param {BufferReader} br
  */
 
-SubInput.prototype.fromReader = function fromReader(br) {
+StackInput.prototype.fromReader = function fromReader(br) {
   this.prevout.fromReader(br);
   this.script.fromRaw(br.readVarBytes());
   this.sequence = br.readU32();
@@ -374,31 +374,31 @@ SubInput.prototype.fromReader = function fromReader(br) {
  * @param {Buffer} data
  */
 
-SubInput.prototype.fromRaw = function fromRaw(data) {
+StackInput.prototype.fromRaw = function fromRaw(data) {
   return this.fromReader(new BufferReader(data));
 };
 
 /**
  * Instantiate an input from a buffer reader.
  * @param {BufferReader} br
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.fromReader = function fromReader(br) {
-  return new SubInput().fromReader(br);
+StackInput.fromReader = function fromReader(br) {
+  return new StackInput().fromReader(br);
 };
 
 /**
  * Instantiate an input from a serialized Buffer.
  * @param {Buffer} data
  * @param {String?} enc - Encoding, can be `'hex'` or null.
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.fromRaw = function fromRaw(data, enc) {
+StackInput.fromRaw = function fromRaw(data, enc) {
   if (typeof data === 'string')
     data = Buffer.from(data, enc);
-  return new SubInput().fromRaw(data);
+  return new StackInput().fromRaw(data);
 };
 
 /**
@@ -407,7 +407,7 @@ SubInput.fromRaw = function fromRaw(data, enc) {
  * @param {Outpoint} outpoint
  */
 
-SubInput.prototype.fromOutpoint = function fromOutpoint(outpoint) {
+StackInput.prototype.fromOutpoint = function fromOutpoint(outpoint) {
   assert(typeof outpoint.hash === 'string');
   assert(typeof outpoint.index === 'number');
   this.prevout.hash = outpoint.hash;
@@ -418,11 +418,11 @@ SubInput.prototype.fromOutpoint = function fromOutpoint(outpoint) {
 /**
  * Instantiate input from outpoint.
  * @param {Outpoint}
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.fromOutpoint = function fromOutpoint(outpoint) {
-  return new SubInput().fromOutpoint(outpoint);
+StackInput.fromOutpoint = function fromOutpoint(outpoint) {
+  return new StackInput().fromOutpoint(outpoint);
 };
 
 /**
@@ -431,7 +431,7 @@ SubInput.fromOutpoint = function fromOutpoint(outpoint) {
  * @param {Coin} coin
  */
 
-SubInput.prototype.fromCoin = function fromCoin(coin) {
+StackInput.prototype.fromCoin = function fromCoin(coin) {
   assert(typeof coin.hash === 'string');
   assert(typeof coin.index === 'number');
   this.prevout.hash = coin.hash;
@@ -442,11 +442,11 @@ SubInput.prototype.fromCoin = function fromCoin(coin) {
 /**
  * Instantiate input from coin.
  * @param {Coin}
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.fromCoin = function fromCoin(coin) {
-  return new SubInput().fromCoin(coin);
+StackInput.fromCoin = function fromCoin(coin) {
+  return new StackInput().fromCoin(coin);
 };
 
 /**
@@ -456,7 +456,7 @@ SubInput.fromCoin = function fromCoin(coin) {
  * @param {Number} index
  */
 
-SubInput.prototype.fromTX = function fromTX(tx, index) {
+StackInput.prototype.fromTX = function fromTX(tx, index) {
   assert(tx);
   assert(typeof index === 'number');
   assert(index >= 0 && index < tx.outputs.length);
@@ -469,28 +469,28 @@ SubInput.prototype.fromTX = function fromTX(tx, index) {
  * Instantiate input from tx.
  * @param {TX} tx
  * @param {Number} index
- * @returns {SubInput}
+ * @returns {StackInput}
  */
 
-SubInput.fromTX = function fromTX(tx, index) {
-  return new SubInput().fromTX(tx, index);
+StackInput.fromTX = function fromTX(tx, index) {
+  return new StackInput().fromTX(tx, index);
 };
 
 /**
- * Test an object to see if it is an SubInput.
+ * Test an object to see if it is an StackInput.
  * @param {Object} obj
  * @returns {Boolean}
  */
 
-SubInput.isSubInput = function isSubInput(obj) {
-  return obj instanceof SubInput;
+StackInput.isStackInput = function isStackInput(obj) {
+  return obj instanceof StackInput;
 };
 
 /*
  * Expose
  */
 
-module.exports = SubInput;
+module.exports = StackInput;
 
 
 
