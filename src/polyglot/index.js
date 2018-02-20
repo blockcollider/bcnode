@@ -11,10 +11,19 @@ class Polyglot {
 
     constructor(opts){
 
+        this.nrg = new nrg();
+        this.btc = new btc();
+        this.eth = new eth();
+        this.neo = new neo();
+        this.wav = new wav();
+
     }
 
 }
 
 module.exports = Polyglot; 
+
+const p = new Polyglot();
+
 
 

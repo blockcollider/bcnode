@@ -131,6 +131,7 @@
     "tar": "^4.3.3",
     "terminate": "^2.1.0",
     "tx-builder": "^0.7.0",
+    "waves-api": "^0.21.5",
     "web3": "^1.0.0-beta.30",
     "webcoin-bitcoin": "^3.1.4",
     "webcoin-bitcoin-testnet": "^1.1.1",

@@ -11,7 +11,7 @@
 const assert = require('assert');
 const util = require('../utils/util');
 const Script = require('../script/script');
-const AbstractStack = require('./abstractsubstack');
+const AbstractStack = require('./abstractstack');
 const Input = require('./stackinput');
 const Output = require('./stackoutput');
 const Outpoint = require('./stackoutpoint');
@@ -19,7 +19,6 @@ const encoding = require('../utils/encoding');
 const consensus = require('../protocol/consensus');
 const policy = require('../protocol/policy');
 const Amount = require('../utils/amount');
-const Stack = require('../script/stack');
 
 /**
  * A mutable transaction object.
