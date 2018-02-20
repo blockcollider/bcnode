@@ -4,14 +4,12 @@
  * https://github.com/bcoin-org/bcoin
  */
 
-'use strict';
+'use strict'
 
-exports.binding = null;
+exports.binding = null
 
 if (Number(process.env.BCOIN_NO_NATIVE) !== 1) {
   try {
-    exports.binding = require('bcoin-native');
-  } catch (e) {
-    ;
-  }
+    exports.binding = require('bcoin-native')
+  } catch (e) {}
 }

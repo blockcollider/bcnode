@@ -5,21 +5,21 @@
  * https://github.com/bcoin-org/bcoin
  */
 
-'use strict';
+'use strict'
 
-const assert = require('assert');
-const util = require('../utils/util');
-const encoding = require('../utils/encoding');
-const digest = require('../crypto/digest');
-const merkle = require('../crypto/merkle');
-const consensus = require('../protocol/consensus');
-const AbstractBlock = require('./abstractblock');
-const BufferReader = require('../utils/reader');
-const StaticWriter = require('../utils/staticwriter');
-const TX = require('./tx');
-const MerkleBlock = require('./merkleblock');
-//const Headers = require('./headers');
-const Network = require('../protocol/network');
+const assert = require('assert')
+const util = require('../utils/util')
+const encoding = require('../utils/encoding')
+const digest = require('../crypto/digest')
+const merkle = require('../crypto/merkle')
+const consensus = require('../protocol/consensus')
+const AbstractBlock = require('./abstractblock')
+const BufferReader = require('../utils/reader')
+const StaticWriter = require('../utils/staticwriter')
+const TX = require('./tx')
+const MerkleBlock = require('./merkleblock')
+// const Headers = require('./headers');
+const Network = require('../protocol/network')
 
 /**
  * Represents a full block.
@@ -29,23 +29,21 @@ const Network = require('../protocol/network');
  * @param {NakedBlock} options
  */
 
-function Block(options) {
-  if (!(this instanceof Block))
-    return new Block(options);
+function Block (options) {
+  if (!(this instanceof Block)) return new Block(options)
 
-  AbstractBlock.call(this);
+  AbstractBlock.call(this)
 
-  this.txs = [];
+  this.txs = []
 
-  this._raw = null;
-  this._size = -1;
-  this._witness = -1;
+  this._raw = null
+  this._size = -1
+  this._witness = -1
 
-  if (options)
-    this.fromOptions(options);
+  if (options) this.fromOptions(options)
 }
 
-Object.setPrototypeOf(Block.prototype, AbstractBlock.prototype);
+Object.setPrototypeOf(Block.prototype, AbstractBlock.prototype)
 
 /**
  * Inject properties from options object.
@@ -53,17 +51,17 @@ Object.setPrototypeOf(Block.prototype, AbstractBlock.prototype);
  * @param {Object} options
  */
 
-Block.prototype.fromOptions = function fromOptions(options) {
-  this.parseOptions(options);
+Block.prototype.fromOptions = function fromOptions (options) {
+  this.parseOptions(options)
 
   if (options.txs) {
-    assert(Array.isArray(options.txs));
+    assert(Array.isArray(options.txs))
     for (const tx of options.txs) {
-      assert(tx instanceof TX);
-      this.txs.push(tx);
+      assert(tx instanceof TX)
+      this.txs.push(tx)
     }
   }
-};
+}
 
 /**
  * Instantiate block from options.
@@ -71,76 +69,72 @@ Block.prototype.fromOptions = function fromOptions(options) {
  * @returns {Block}
  */
 
-Block.fromOptions = function fromOptions(options) {
-  return new Block().fromOptions(options);
-};
+Block.fromOptions = function fromOptions (options) {
+  return new Block().fromOptions(options)
+}
 
 /**
  * Clear any cached values.
  * @param {Boolean?} all - Clear transactions.
  */
 
-Block.prototype.refresh = function refresh(all) {
-  this._refresh();
+Block.prototype.refresh = function refresh (all) {
+  this._refresh()
 
-  this._raw = null;
-  this._size = -1;
-  this._witness = -1;
+  this._raw = null
+  this._size = -1
+  this._witness = -1
 
-  if (!all)
-    return;
+  if (!all) return
 
-  for (const tx of this.txs)
-    tx.refresh();
-};
+  for (const tx of this.txs) tx.refresh()
+}
 
 /**
  * Serialize the block. Include witnesses if present.
  * @returns {Buffer}
  */
 
-Block.prototype.toRaw = function toRaw() {
-  return this.frame().data;
-};
+Block.prototype.toRaw = function toRaw () {
+  return this.frame().data
+}
 
 /**
  * Serialize the block, do not include witnesses.
  * @returns {Buffer}
  */
 
-Block.prototype.toNormal = function toNormal() {
-  if (this.hasWitness())
-    return this.frameNormal().data;
-  return this.toRaw();
-};
+Block.prototype.toNormal = function toNormal () {
+  if (this.hasWitness()) return this.frameNormal().data
+  return this.toRaw()
+}
 
 /**
  * Serialize the block. Include witnesses if present.
  * @param {BufferWriter} bw
  */
 
-Block.prototype.toWriter = function toWriter(bw) {
-  if (this.mutable)
-    return this.writeWitness(bw);
+Block.prototype.toWriter = function toWriter (bw) {
+  if (this.mutable) return this.writeWitness(bw)
 
-  const raw = this.frame();
-  bw.writeBytes(raw.data);
+  const raw = this.frame()
+  bw.writeBytes(raw.data)
 
-  return bw;
-};
+  return bw
+}
 
 /**
  * Serialize the block, do not include witnesses.
  * @param {BufferWriter} bw
  */
 
-Block.prototype.toNormalWriter = function toNormalWriter(bw) {
+Block.prototype.toNormalWriter = function toNormalWriter (bw) {
   if (this.hasWitness()) {
-    this.writeNormal(bw);
-    return bw;
+    this.writeNormal(bw)
+    return bw
   }
-  return this.toWriter(bw);
-};
+  return this.toWriter(bw)
+}
 
 /**
  * Get the raw block serialization.
@@ -149,79 +143,78 @@ Block.prototype.toNormalWriter = function toNormalWriter(bw) {
  * @returns {RawBlock}
  */
 
-Block.prototype.frame = function frame() {
+Block.prototype.frame = function frame () {
   if (this.mutable) {
-    assert(!this._raw);
-    return this.frameWitness();
+    assert(!this._raw)
+    return this.frameWitness()
   }
 
   if (this._raw) {
-    assert(this._size >= 0);
-    assert(this._witness >= 0);
-    const raw = new RawBlock(this._size, this._witness);
-    raw.data = this._raw;
-    return raw;
+    assert(this._size >= 0)
+    assert(this._witness >= 0)
+    const raw = new RawBlock(this._size, this._witness)
+    raw.data = this._raw
+    return raw
   }
 
-  const raw = this.frameWitness();
+  const raw = this.frameWitness()
 
-  this._raw = raw.data;
-  this._size = raw.size;
-  this._witness = raw.witness;
+  this._raw = raw.data
+  this._size = raw.size
+  this._witness = raw.witness
 
-  return raw;
-};
+  return raw
+}
 
 /**
  * Calculate real size and size of the witness bytes.
  * @returns {Object} Contains `size` and `witness`.
  */
 
-Block.prototype.getSizes = function getSizes() {
-  if (this.mutable)
-    return this.getWitnessSizes();
-  return this.frame();
-};
+Block.prototype.getSizes = function getSizes () {
+  if (this.mutable) return this.getWitnessSizes()
+  return this.frame()
+}
 
 /**
  * Calculate virtual block size.
  * @returns {Number} Virtual size.
  */
 
-Block.prototype.getVirtualSize = function getVirtualSize() {
-  const scale = consensus.WITNESS_SCALE_FACTOR;
-  return (this.getWeight() + scale - 1) / scale | 0;
-};
+Block.prototype.getVirtualSize = function getVirtualSize () {
+  const scale = consensus.WITNESS_SCALE_FACTOR
+  return ((this.getWeight() + scale - 1) / scale) | 0
+}
 
 /**
  * Calculate block weight.
  * @returns {Number} weight
  */
 
-Block.prototype.getWeight = function getWeight() {
-  const raw = this.getSizes();
-  const base = raw.size - raw.witness;
-  return base * (consensus.WITNESS_SCALE_FACTOR - 1) + raw.size;
-};
+Block.prototype.getWeight = function getWeight () {
+  const raw = this.getSizes()
+  const base = raw.size - raw.witness
+  return base * (consensus.WITNESS_SCALE_FACTOR - 1) + raw.size
+}
 
 /**
  * Get real block size.
  * @returns {Number} size
  */
 
-Block.prototype.getSize = function getSize() {
-  return this.getSizes().size;
-};
+Block.prototype.getSize = function getSize () {
+  return this.getSizes().size
+}
 
 /**
  * Get base block size (without witness).
  * @returns {Number} size
  */
 
-Block.prototype.getBaseSize = function getBaseSize() {
-  const raw = this.getSizes();
-  return raw.size - raw.witness;
-};
+Block.prototype.getBaseSize = function getBaseSize () {
+  const raw = this.getSizes()
+  return raw.size - raw.witness
+}
 
 /**
  * Test whether the block contains a
@@ -229,17 +222,15 @@ Block.prototype.getBaseSize = function getBaseSize() {
  * @returns {Boolean}
  */
 
-Block.prototype.hasWitness = function hasWitness() {
-  if (this._witness !== -1)
-    return this._witness !== 0;
+Block.prototype.hasWitness = function hasWitness () {
+  if (this._witness !== -1) return this._witness !== 0
 
   for (const tx of this.txs) {
-    if (tx.hasWitness())
-      return true;
+    if (tx.hasWitness()) return true
   }
 
-  return false;
-};
+  return false
+}
 
 /**
  * Test the block's transaction vector against a hash.
@@ -247,9 +238,9 @@ Block.prototype.hasWitness = function hasWitness() {
  * @returns {Boolean}
  */
 
-Block.prototype.hasTX = function hasTX(hash) {
-  return this.indexOf(hash) !== -1;
-};
+Block.prototype.hasTX = function hasTX (hash) {
+  return this.indexOf(hash) !== -1
+}
 
 /**
  * Find the index of a transaction in the block.
@@ -257,15 +248,14 @@ Block.prototype.hasTX = function hasTX(hash) {
  * @returns {Number} index (-1 if not present).
  */
 
-Block.prototype.indexOf = function indexOf(hash) {
+Block.prototype.indexOf = function indexOf (hash) {
   for (let i = 0; i < this.txs.length; i++) {
-    const tx = this.txs[i];
-    if (tx.hash('hex') === hash)
-      return i;
+    const tx = this.txs[i]
+    if (tx.hash('hex') === hash) return i
   }
 
-  return -1;
-};
+  return -1
+}
 
 /**
  * Calculate merkle root. Returns null
@@ -274,28 +264,26 @@ Block.prototype.indexOf = function indexOf(hash) {
  * @returns {Hash|null}
  */
 
-Block.prototype.createMerkleRoot = function createMerkleRoot(enc) {
-  const leaves = [];
+Block.prototype.createMerkleRoot = function createMerkleRoot (enc) {
+  const leaves = []
 
-  for (const tx of this.txs)
-    leaves.push(tx.hash());
+  for (const tx of this.txs) leaves.push(tx.hash())
 
-  const [root, malleated] = merkle.createRoot(leaves);
+  const [root, malleated] = merkle.createRoot(leaves)
 
-  if (malleated)
-    return null;
+  if (malleated) return null
 
-  return enc === 'hex' ? root.toString('hex') : root;
-};
+  return enc === 'hex' ? root.toString('hex') : root
+}
 
 /**
  * Create a witness nonce (for mining).
  * @returns {Buffer}
  */
 
-Block.prototype.createWitnessNonce = function createWitnessNonce() {
-  return Buffer.from(encoding.ZERO_HASH);
-};
+Block.prototype.createWitnessNonce = function createWitnessNonce () {
+  return Buffer.from(encoding.ZERO_HASH)
+}
 
 /**
  * Calculate commitment hash (the root of the
@@ -304,30 +292,28 @@ Block.prototype.createWitnessNonce = function createWitnessNonce() {
  * @returns {Hash}
  */
 
-Block.prototype.createCommitmentHash = function createCommitmentHash(enc) {
-  const nonce = this.getWitnessNonce();
-  const leaves = [];
+Block.prototype.createCommitmentHash = function createCommitmentHash (enc) {
+  const nonce = this.getWitnessNonce()
+  const leaves = []
 
-  assert(nonce, 'No witness nonce present.');
+  assert(nonce, 'No witness nonce present.')
 
-  leaves.push(encoding.ZERO_HASH);
+  leaves.push(encoding.ZERO_HASH)
 
   for (let i = 1; i < this.txs.length; i++) {
-    const tx = this.txs[i];
-    leaves.push(tx.witnessHash());
+    const tx = this.txs[i]
+    leaves.push(tx.witnessHash())
   }
 
-  const [root] = merkle.createRoot(leaves);
+  const [root] = merkle.createRoot(leaves)
 
   // Note: malleation check ignored here.
   // assert(!malleated);
 
-  const hash = digest.root256(root, nonce);
+  const hash = digest.root256(root, nonce)
 
-  return enc === 'hex'
-    ? hash.toString('hex')
-    : hash;
-};
+  return enc === 'hex' ? hash.toString('hex') : hash
+}
 
 /**
  * Retrieve the merkle root from the block header.
@@ -335,11 +321,10 @@ Block.prototype.createCommitmentHash = function createCommitmentHash(enc) {
  * @returns {Hash}
  */
 
-Block.prototype.getMerkleRoot = function getMerkleRoot(enc) {
-  if (enc === 'hex')
-    return this.merkleRoot;
-  return Buffer.from(this.merkleRoot, 'hex');
-};
+Block.prototype.getMerkleRoot = function getMerkleRoot (enc) {
+  if (enc === 'hex') return this.merkleRoot
+  return Buffer.from(this.merkleRoot, 'hex')
+}
 
 /**
  * Retrieve the witness nonce from the
@@ -347,25 +332,21 @@ Block.prototype.getMerkleRoot = function getMerkleRoot(enc) {
  * @returns {Buffer|null}
  */
 
-Block.prototype.getWitnessNonce = function getWitnessNonce() {
-  if (this.txs.length === 0)
-    return null;
+Block.prototype.getWitnessNonce = function getWitnessNonce () {
+  if (this.txs.length === 0) return null
 
-  const coinbase = this.txs[0];
+  const coinbase = this.txs[0]
 
-  if (coinbase.inputs.length !== 1)
-    return null;
+  if (coinbase.inputs.length !== 1) return null
 
-  const input = coinbase.inputs[0];
+  const input = coinbase.inputs[0]
 
-  if (input.witness.items.length !== 1)
-    return null;
+  if (input.witness.items.length !== 1) return null
 
-  if (input.witness.items[0].length !== 32)
-    return null;
+  if (input.witness.items[0].length !== 32) return null
 
-  return input.witness.items[0];
-};
+  return input.witness.items[0]
+}
 
 /**
  * Retrieve the commitment hash
@@ -374,28 +355,24 @@ Block.prototype.getWitnessNonce = function getWitnessNonce() {
  * @returns {Hash|null}
  */
 
-Block.prototype.getCommitmentHash = function getCommitmentHash(enc) {
-  if (this.txs.length === 0)
-    return null;
+Block.prototype.getCommitmentHash = function getCommitmentHash (enc) {
+  if (this.txs.length === 0) return null
 
-  const coinbase = this.txs[0];
-  let hash;
+  const coinbase = this.txs[0]
+  let hash
 
   for (let i = coinbase.outputs.length - 1; i >= 0; i--) {
-    const output = coinbase.outputs[i];
+    const output = coinbase.outputs[i]
     if (output.script.isCommitment()) {
-      hash = output.script.getCommitment();
-      break;
+      hash = output.script.getCommitment()
+      break
     }
   }
 
-  if (!hash)
-    return null;
+  if (!hash) return null
 
-  return enc === 'hex'
-    ? hash.toString('hex')
-    : hash;
-};
+  return enc === 'hex' ? hash.toString('hex') : hash
+}
 
 /**
  * Do non-contextual verification on the block. Including checking the block
@@ -403,10 +380,10 @@ Block.prototype.getCommitmentHash = function getCommitmentHash(enc) {
  * @returns {Boolean}
  */
 
-Block.prototype.verifyBody = function verifyBody() {
-  const [valid] = this.checkBody();
-  return valid;
-};
+Block.prototype.verifyBody = function verifyBody () {
+  const [valid] = this.checkBody()
+  return valid
+}
 
 /**
  * Do non-contextual verification on the block. Including checking the block
@@ -414,85 +391,78 @@ Block.prototype.verifyBody = function verifyBody() {
  * @returns {Array} [valid, reason, score]
  */
 
-Block.prototype.checkBody = function checkBody() {
+Block.prototype.checkBody = function checkBody () {
   // Check merkle root.
-  const root = this.createMerkleRoot('hex');
+  const root = this.createMerkleRoot('hex')
 
   // If the merkle is mutated,
   // we have duplicate txs.
-  if (!root)
-    return [false, 'bad-txns-duplicate', 100];
+  if (!root) return [false, 'bad-txns-duplicate', 100]
 
-  if (this.merkleRoot !== root)
-    return [false, 'bad-txnmrklroot', 100];
+  if (this.merkleRoot !== root) return [false, 'bad-txnmrklroot', 100]
 
   // Check base size.
-  if (this.txs.length === 0
-      || this.txs.length > consensus.MAX_BLOCK_SIZE
-      || this.getBaseSize() > consensus.MAX_BLOCK_SIZE) {
-    return [false, 'bad-blk-length', 100];
+  if (
+    this.txs.length === 0 ||
+    this.txs.length > consensus.MAX_BLOCK_SIZE ||
+    this.getBaseSize() > consensus.MAX_BLOCK_SIZE
+  ) {
+    return [false, 'bad-blk-length', 100]
   }
 
   // First TX must be a coinbase.
-  if (this.txs.length === 0 || !this.txs[0].isCoinbase())
-    return [false, 'bad-cb-missing', 100];
+  if (this.txs.length === 0 || !this.txs[0].isCoinbase()) { return [false, 'bad-cb-missing', 100] }
 
   // Test all transactions.
-  const scale = consensus.WITNESS_SCALE_FACTOR;
-  let sigops = 0;
+  const scale = consensus.WITNESS_SCALE_FACTOR
+  let sigops = 0
 
   for (let i = 0; i < this.txs.length; i++) {
-    const tx = this.txs[i];
+    const tx = this.txs[i]
 
     // The rest of the txs must not be coinbases.
-    if (i > 0 && tx.isCoinbase())
-      return [false, 'bad-cb-multiple', 100];
+    if (i > 0 && tx.isCoinbase()) return [false, 'bad-cb-multiple', 100]
 
     // Sanity checks.
-    const [valid, reason, score] = tx.checkSanity();
+    const [valid, reason, score] = tx.checkSanity()
 
-    if (!valid)
-      return [valid, reason, score];
+    if (!valid) return [valid, reason, score]
 
     // Count legacy sigops (do not count scripthash or witness).
-    sigops += tx.getLegacySigops();
-    if (sigops * scale > consensus.MAX_BLOCK_SIGOPS_COST)
-      return [false, 'bad-blk-sigops', 100];
+    sigops += tx.getLegacySigops()
+    if (sigops * scale > consensus.MAX_BLOCK_SIGOPS_COST) { return [false, 'bad-blk-sigops', 100] }
   }
 
-  return [true, 'valid', 0];
-};
+  return [true, 'valid', 0]
+}
 
 /**
  * Retrieve the coinbase height from the coinbase input script.
  * @returns {Number} height (-1 if not present).
  */
 
-Block.prototype.getCoinbaseHeight = function getCoinbaseHeight() {
-  if (this.version < 2)
-    return -1;
+Block.prototype.getCoinbaseHeight = function getCoinbaseHeight () {
+  if (this.version < 2) return -1
 
-  if (this.txs.length === 0)
-    return -1;
+  if (this.txs.length === 0) return -1
 
-  const coinbase = this.txs[0];
+  const coinbase = this.txs[0]
 
-  if (coinbase.inputs.length === 0)
-    return -1;
+  if (coinbase.inputs.length === 0) return -1
 
-  return coinbase.inputs[0].script.getCoinbaseHeight();
-};
+  return coinbase.inputs[0].script.getCoinbaseHeight()
+}
 
 /**
  * Get the "claimed" reward by the coinbase.
  * @returns {Amount} claimed
  */
 
-Block.prototype.getClaimed = function getClaimed() {
-  assert(this.txs.length > 0);
-  assert(this.txs[0].isCoinbase());
-  return this.txs[0].getOutputValue();
-};
+Block.prototype.getClaimed = function getClaimed () {
+  assert(this.txs.length > 0)
+  assert(this.txs[0].isCoinbase())
+  return this.txs[0].getOutputValue()
+}
 
 /**
  * Get all unique outpoint hashes in the
@@ -500,18 +470,17 @@ Block.prototype.getClaimed = function getClaimed() {
  * @returns {Hash[]} Outpoint hashes.
  */
 
-Block.prototype.getPrevout = function getPrevout() {
-  const prevout = Object.create(null);
+Block.prototype.getPrevout = function getPrevout () {
+  const prevout = Object.create(null)
 
   for (let i = 1; i < this.txs.length; i++) {
-    const tx = this.txs[i];
+    const tx = this.txs[i]
 
-    for (const input of tx.inputs)
-      prevout[input.prevout.hash] = true;
+    for (const input of tx.inputs) prevout[input.prevout.hash] = true
   }
 
-  return Object.keys(prevout);
-};
+  return Object.keys(prevout)
+}
 
 /**
  * Inspect the block and return a more
@@ -519,9 +488,9 @@ Block.prototype.getPrevout = function getPrevout() {
  * @returns {Object}
  */
 
-Block.prototype.inspect = function inspect() {
-  return this.format();
-};
+Block.prototype.inspect = function inspect () {
+  return this.format()
+}
 
 /**
  * Inspect the block and return a more
@@ -531,8 +500,8 @@ Block.prototype.inspect = function inspect() {
  * @returns {Object}
  */
 
-Block.prototype.format = function format(view, height) {
-  const commitmentHash = this.getCommitmentHash('hex');
+Block.prototype.format = function format (view, height) {
+  const commitmentHash = this.getCommitmentHash('hex')
   return {
     hash: this.rhash(),
     height: height != null ? height : -1,
@@ -542,17 +511,15 @@ Block.prototype.format = function format(view, height) {
     version: util.hex32(this.version),
     prevBlock: util.revHex(this.prevBlock),
     merkleRoot: util.revHex(this.merkleRoot),
-    commitmentHash: commitmentHash
-      ? util.revHex(commitmentHash)
-      : null,
+    commitmentHash: commitmentHash ? util.revHex(commitmentHash) : null,
     time: this.time,
     bits: this.bits,
     nonce: this.nonce,
     txs: this.txs.map((tx, i) => {
-      return tx.format(view, null, i);
+      return tx.format(view, null, i)
     })
-  };
-};
+  }
+}
 
 /**
  * Convert the block to an object suitable
@@ -560,9 +527,9 @@ Block.prototype.format = function format(view, height) {
  * @returns {Object}
  */
 
-Block.prototype.toJSON = function toJSON() {
-  return this.getJSON();
-};
+Block.prototype.toJSON = function toJSON () {
+  return this.getJSON()
+}
 
 /**
  * Convert the block to an object suitable
@@ -575,8 +542,13 @@ Block.prototype.toJSON = function toJSON() {
  * @returns {Object}
  */
 
-Block.prototype.getJSON = function getJSON(network, view, height, confirmations) {
-  network = Network.get(network);
+Block.prototype.getJSON = function getJSON (
+  network,
+  view,
+  height,
+  confirmations
+) {
+  network = Network.get(network)
   return {
     hash: this.rhash(),
     height: height,
@@ -588,10 +560,10 @@ Block.prototype.getJSON = function getJSON(network, view, height, confirmations)
     bits: this.bits,
     nonce: this.nonce,
     txs: this.txs.map((tx, i) => {
-      return tx.getJSON(network, view, null, i);
+      return tx.getJSON(network, view, null, i)
     })
-  };
-};
+  }
+}
 
 /**
  * Inject properties from json object.
@@ -599,17 +571,16 @@ Block.prototype.getJSON = function getJSON(network, view, height, confirmations)
  * @param {Object} json
  */
 
-Block.prototype.fromJSON = function fromJSON(json) {
-  assert(json, 'Block data is required.');
-  assert(Array.isArray(json.txs));
+Block.prototype.fromJSON = function fromJSON (json) {
+  assert(json, 'Block data is required.')
+  assert(Array.isArray(json.txs))
 
-  this.parseJSON(json);
+  this.parseJSON(json)
 
-  for (const tx of json.txs)
-    this.txs.push(TX.fromJSON(tx));
+  for (const tx of json.txs) this.txs.push(TX.fromJSON(tx))
 
-  return this;
-};
+  return this
+}
 
 /**
  * Instantiate a block from a jsonified block object.
@@ -617,9 +588,9 @@ Block.prototype.fromJSON = function fromJSON(json) {
  * @returns {Block}
  */
 
-Block.fromJSON = function fromJSON(json) {
-  return new Block().fromJSON(json);
-};
+Block.fromJSON = function fromJSON (json) {
+  return new Block().fromJSON(json)
+}
 
 /**
  * Inject properties from serialized data.
@@ -627,28 +598,28 @@ Block.fromJSON = function fromJSON(json) {
  * @param {Buffer} data
  */
 
-Block.prototype.fromReader = function fromReader(br) {
-  br.start();
+Block.prototype.fromReader = function fromReader (br) {
+  br.start()
 
-  this.readHead(br);
+  this.readHead(br)
 
-  const count = br.readVarint();
-  let witness = 0;
+  const count = br.readVarint()
+  let witness = 0
 
   for (let i = 0; i < count; i++) {
-    const tx = TX.fromReader(br);
-    witness += tx._witness;
-    this.txs.push(tx);
+    const tx = TX.fromReader(br)
+    witness += tx._witness
+    this.txs.push(tx)
   }
 
   if (!this.mutable) {
-    this._raw = br.endData();
-    this._size = this._raw.length;
-    this._witness = witness;
+    this._raw = br.endData()
+    this._size = this._raw.length
+    this._witness = witness
   }
 
-  return this;
-};
+  return this
+}
 
 /**
  * Inject properties from serialized data.
@@ -656,9 +627,9 @@ Block.prototype.fromReader = function fromReader(br) {
  * @param {Buffer} data
  */
 
-Block.prototype.fromRaw = function fromRaw(data) {
-  return this.fromReader(new BufferReader(data));
-};
+Block.prototype.fromRaw = function fromRaw (data) {
+  return this.fromReader(new BufferReader(data))
+}
 
 /**
  * Instantiate a block from a serialized Buffer.
@@ -667,9 +638,9 @@ Block.prototype.fromRaw = function fromRaw(data) {
  * @returns {Block}
  */
 
-Block.fromReader = function fromReader(data) {
-  return new Block().fromReader(data);
-};
+Block.fromReader = function fromReader (data) {
+  return new Block().fromReader(data)
+}
 
 /**
  * Instantiate a block from a serialized Buffer.
@@ -678,11 +649,10 @@ Block.fromReader = function fromReader(data) {
  * @returns {Block}
  */
 
-Block.fromRaw = function fromRaw(data, enc) {
-  if (typeof data === 'string')
-    data = Buffer.from(data, enc);
-  return new Block().fromRaw(data);
-};
+Block.fromRaw = function fromRaw (data, enc) {
+  if (typeof data === 'string') data = Buffer.from(data, enc)
+  return new Block().fromRaw(data)
+}
 
 /**
  * Convert the Block to a MerkleBlock.
@@ -692,9 +662,9 @@ Block.fromRaw = function fromRaw(data, enc) {
  * @returns {MerkleBlock}
  */
 
-Block.prototype.toMerkle = function toMerkle(filter) {
-  return MerkleBlock.fromBlock(this, filter);
-};
+Block.prototype.toMerkle = function toMerkle (filter) {
+  return MerkleBlock.fromBlock(this, filter)
+}
 
 /**
  * Serialze block with or without witness data.
@@ -704,35 +674,15 @@ Block.prototype.toMerkle = function toMerkle(filter) {
  * @returns {Buffer}
  */
 
-Block.prototype.writeNormal = function writeNormal(bw) {
-  this.writeHead(bw);
+Block.prototype.writeNormal = function writeNormal (bw) {
+  this.writeHead(bw)
 
-  bw.writeVarint(this.txs.length);
+  bw.writeVarint(this.txs.length)
 
-  for (const tx of this.txs)
-    tx.toNormalWriter(bw);
+  for (const tx of this.txs) tx.toNormalWriter(bw)
 
-  return bw;
-};
-
-/**
- * Serialze block with or without witness data.
- * @private
- * @param {Boolean} witness
- * @param {BufferWriter?} writer
- * @returns {Buffer}
- */
-
-Block.prototype.writeWitness = function writeWitness(bw) {
-  this.writeHead(bw);
-
-  bw.writeVarint(this.txs.length);
-
-  for (const tx of this.txs)
-    tx.toWriter(bw);
-
-  return bw;
-};
+  return bw
+}
 
 /**
  * Serialze block with or without witness data.
@@ -742,13 +692,31 @@ Block.prototype.writeWitness = function writeWitness(bw) {
  * @returns {Buffer}
  */
 
-Block.prototype.frameNormal = function frameNormal() {
-  const raw = this.getNormalSizes();
-  const bw = new StaticWriter(raw.size);
-  this.writeNormal(bw);
-  raw.data = bw.render();
-  return raw;
-};
+Block.prototype.writeWitness = function writeWitness (bw) {
+  this.writeHead(bw)
+
+  bw.writeVarint(this.txs.length)
+
+  for (const tx of this.txs) tx.toWriter(bw)
+
+  return bw
+}
+
+/**
+ * Serialze block with or without witness data.
+ * @private
+ * @param {Boolean} witness
+ * @param {BufferWriter?} writer
+ * @returns {Buffer}
+ */
+
+Block.prototype.frameNormal = function frameNormal () {
+  const raw = this.getNormalSizes()
+  const bw = new StaticWriter(raw.size)
+  this.writeNormal(bw)
+  raw.data = bw.render()
+  return raw
+}
 
 /**
  * Serialze block without witness data.
@@ -757,60 +725,59 @@ Block.prototype.frameNormal = function frameNormal() {
  * @returns {Buffer}
  */
 
-Block.prototype.frameWitness = function frameWitness() {
-  const raw = this.getWitnessSizes();
-  const bw = new StaticWriter(raw.size);
-  this.writeWitness(bw);
-  raw.data = bw.render();
-  return raw;
-};
+Block.prototype.frameWitness = function frameWitness () {
+  const raw = this.getWitnessSizes()
+  const bw = new StaticWriter(raw.size)
+  this.writeWitness(bw)
+  raw.data = bw.render()
+  return raw
+}
 
 /**
  * Convert the block to a headers object.
  * @returns {Headers}
  */
 
-Block.prototype.toHeaders = function toHeaders() {
-  //return Headers.fromBlock(this);
-};
+Block.prototype.toHeaders = function toHeaders () {
+  // return Headers.fromBlock(this);
+}
 
 /**
  * Get real block size without witness.
  * @returns {RawBlock}
  */
 
-Block.prototype.getNormalSizes = function getNormalSizes() {
-  let size = 0;
+Block.prototype.getNormalSizes = function getNormalSizes () {
+  let size = 0
 
-  size += 80;
-  size += encoding.sizeVarint(this.txs.length);
+  size += 80
+  size += encoding.sizeVarint(this.txs.length)
 
-  for (const tx of this.txs)
-    size += tx.getBaseSize();
+  for (const tx of this.txs) size += tx.getBaseSize()
 
-  return new RawBlock(size, 0);
-};
+  return new RawBlock(size, 0)
+}
 
 /**
  * Get real block size with witness.
  * @returns {RawBlock}
  */
 
-Block.prototype.getWitnessSizes = function getWitnessSizes() {
-  let size = 0;
-  let witness = 0;
+Block.prototype.getWitnessSizes = function getWitnessSizes () {
+  let size = 0
+  let witness = 0
 
-  size += 80;
-  size += encoding.sizeVarint(this.txs.length);
+  size += 80
+  size += encoding.sizeVarint(this.txs.length)
 
   for (const tx of this.txs) {
-    const raw = tx.getSizes();
-    size += raw.size;
-    witness += raw.witness;
+    const raw = tx.getSizes()
+    size += raw.size
+    witness += raw.witness
   }
 
-  return new RawBlock(size, witness);
-};
+  return new RawBlock(size, witness)
+}
 
 /**
  * Test whether an object is a Block.
@@ -818,22 +785,22 @@ Block.prototype.getWitnessSizes = function getWitnessSizes() {
  * @returns {Boolean}
  */
 
-Block.isBlock = function isBlock(obj) {
-  return obj instanceof Block;
-};
+Block.isBlock = function isBlock (obj) {
+  return obj instanceof Block
+}
 
 /*
  * Helpers
  */
 
-function RawBlock(size, witness) {
-  this.data = null;
-  this.size = size;
-  this.witness = witness;
+function RawBlock (size, witness) {
+  this.data = null
+  this.size = size
+  this.witness = witness
 }
 
 /*
  * Expose
  */
 
-module.exports = Block;
+module.exports = Block
