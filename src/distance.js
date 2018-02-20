@@ -1,4 +1,3 @@
-
 /**
  * Talisman metrics/distance/ratcliff-obershelp
  * =============================================
@@ -20,74 +19,72 @@
  * [Tags]: string metric.
  */
 
-var GSA = require("mnemonist");
-var GeneralizedSuffixArray = GSA.GeneralizedSuffixArray; 
+const GSA = require('mnemonist')
+const GeneralizedSuffixArray = GSA.GeneralizedSuffixArray
+const cosine = require('compute-cosine-distance')
 
-function indexOf(haystack, needle) {
-  if (typeof haystack === 'string')
-    return haystack.indexOf(needle);
+function split (t) {
+  return t.split('').map(function (an) {
+    return an.charCodeAt(0)
+  })
+}
+
+function indexOf (haystack, needle) {
+  if (typeof haystack === 'string') return haystack.indexOf(needle)
 
   for (let i = 0, j = 0, l = haystack.length, n = needle.length; i < l; i++) {
     if (haystack[i] === needle[j]) {
-      j++;
+      j++
 
-      if (j === n)
-        return i - j + 1;
-    }
-    else {
-      j = 0;
+      if (j === n) return i - j + 1
+    } else {
+      j = 0
     }
   }
 
-  return -1;
+  return -1
 }
 
-function matches(a, b) {
-  const stack = [a, b];
+function matches (a, b) {
+  const stack = [a, b]
 
-  let m = 0;
+  let m = 0
 
   while (stack.length) {
-    a = stack.pop();
-    b = stack.pop();
+    a = stack.pop()
+    b = stack.pop()
 
-    if (!a.length || !b.length)
-      continue;
+    if (!a.length || !b.length) continue
 
-    const lcs = (new GeneralizedSuffixArray([a, b]).longestCommonSubsequence()),
-          length = lcs.length;
+    const lcs = new GeneralizedSuffixArray([a, b]).longestCommonSubsequence(),
+      length = lcs.length
 
-    if (!length)
-      continue;
+    if (!length) continue
 
     // Increasing matches
-    m += length;
+    m += length
 
     // Add to the stack
     const aStart = indexOf(a, lcs),
-          bStart = indexOf(b, lcs);
+      bStart = indexOf(b, lcs)
 
-    stack.push(a.slice(0, aStart), b.slice(0, bStart));
-    stack.push(a.slice(aStart + length), b.slice(bStart + length));
+    stack.push(a.slice(0, aStart), b.slice(0, bStart))
+    stack.push(a.slice(aStart + length), b.slice(bStart + length))
   }
 
-  return m;
+  return m
 }
 
-function similarity(a, b) {
-  if (a === b)
-    return 1;
+function similarity (a, b) {
+  if (a === b) return 1
 
-  if (!a.length || !b.length)
-    return 0;
+  if (!a.length || !b.length) return 0
 
-  return 2 * matches(a, b) / (a.length + b.length);
+  return 2 * matches(a, b) / (a.length + b.length)
 }
 
-function distance(a, b) {
-  return 1 - similarity(a, b);
+function distance (a, b) {
+  return cosine(split(a), split(b));
 }
 
-module.exports = distance;
-
-
+module.exports = distance

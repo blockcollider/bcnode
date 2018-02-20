@@ -3,15 +3,6 @@
  *
  */
 
-
 class Language {
-
-    generator(){
-
-
-
-    }
-
-
-
+  generator () {}
 }

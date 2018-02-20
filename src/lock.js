@@ -1,24 +1,23 @@
-/*jslint node: true */
+/* jslint node: true */
 
 /*
- * Prevent multiple instances from running 
- */ 
+ * Prevent multiple instances from running
+ */
 
-"use strict";
+'use strict'
 
-if (global._BlockColliderInit)
-    throw Error("Error: Running multiple instances of Block Collider");
+if (global._BlockColliderInit) { throw Error('Error: Running multiple instances of Block Collider') }
 
-global._BlockColliderInit = true;
+global._BlockColliderInit = true
 
 /*
- * Limit the global event listeners 
- */ 
+ * Limit the global event listeners
+ */
 
-var EventEmitter = require('events').EventEmitter;
+var EventEmitter = require('events').EventEmitter
 
-var eventEmitter = new EventEmitter();
+var eventEmitter = new EventEmitter()
 
-eventEmitter.setMaxListeners(20);
+eventEmitter.setMaxListeners(20)
 
-module.exports = eventEmitter;
+module.exports = eventEmitter
