@@ -37,6 +37,7 @@
       "/lib/"
     ],
     "testEnvironment": "node",
+    "testMatch": [ "**/__tests__/**/*.(js|es6)" ],
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     }
