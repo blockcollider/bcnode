@@ -39,7 +39,7 @@
     "testEnvironment": "node",
     "testMatch": [ "**/__tests__/**/*.(js|es6)" ],
     "transform": {
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.(js|es6)$": "babel-jest"
     }
   },
   "standard": {
