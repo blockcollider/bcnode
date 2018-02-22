@@ -5,12 +5,12 @@
  * https://github.com/bcoin-org/bcoin
  */
 
-'use strict';
+'use strict'
 
-const util = require('../utils/util');
-const AbstractBlock = require('./abstractblock');
-const StaticWriter = require('../utils/staticwriter');
-const BufferReader = require('../utils/reader');
+const util = require('../utils/util')
+const AbstractBlock = require('./abstractblock')
+const StaticWriter = require('../utils/staticwriter')
+const BufferReader = require('../utils/reader')
 
 /**
  * Represents block headers obtained from the network via `headers`.
@@ -20,17 +20,15 @@ const BufferReader = require('../utils/reader');
  * @param {NakedBlock} options
  */
 
-function Headers(options) {
-  if (!(this instanceof Headers))
-    return new Headers(options);
+function Headers (options) {
+  if (!(this instanceof Headers)) return new Headers(options)
 
-  AbstractBlock.call(this);
+  AbstractBlock.call(this)
 
-  if (options)
-    this.parseOptions(options);
+  if (options) this.parseOptions(options)
 }
 
-Object.setPrototypeOf(Headers.prototype, AbstractBlock.prototype);
+Object.setPrototypeOf(Headers.prototype, AbstractBlock.prototype)
 
 /**
  * Do non-contextual verification on the headers.
@@ -39,39 +37,39 @@ Object.setPrototypeOf(Headers.prototype, AbstractBlock.prototype);
  * @returns {Boolean}
  */
 
-Headers.prototype.verifyBody = function verifyBody(ret) {
-  return true;
-};
+Headers.prototype.verifyBody = function verifyBody (ret) {
+  return true
+}
 
 /**
  * Get size of the headers.
  * @returns {Number}
  */
 
-Headers.prototype.getSize = function getSize() {
-  return 81;
-};
+Headers.prototype.getSize = function getSize () {
+  return 81
+}
 
 /**
  * Serialize the headers to a buffer writer.
  * @param {BufferWriter} bw
  */
 
-Headers.prototype.toWriter = function toWriter(bw) {
-  this.writeHead(bw);
-  bw.writeVarint(0);
-  return bw;
-};
+Headers.prototype.toWriter = function toWriter (bw) {
+  this.writeHead(bw)
+  bw.writeVarint(0)
+  return bw
+}
 
 /**
  * Serialize the headers.
  * @returns {Buffer|String}
  */
 
-Headers.prototype.toRaw = function toRaw() {
-  const size = this.getSize();
-  return this.toWriter(new StaticWriter(size)).render();
-};
+Headers.prototype.toRaw = function toRaw () {
+  const size = this.getSize()
+  return this.toWriter(new StaticWriter(size)).render()
+}
 
 /**
  * Inject properties from buffer reader.
@@ -79,11 +77,11 @@ Headers.prototype.toRaw = function toRaw() {
  * @param {Buffer} data
  */
 
-Headers.prototype.fromReader = function fromReader(br) {
-  this.readHead(br);
-  br.readVarint();
-  return this;
-};
+Headers.prototype.fromReader = function fromReader (br) {
+  this.readHead(br)
+  br.readVarint()
+  return this
+}
 
 /**
  * Inject properties from serialized data.
@@ -91,9 +89,9 @@ Headers.prototype.fromReader = function fromReader(br) {
  * @param {Buffer} data
  */
 
-Headers.prototype.fromRaw = function fromRaw(data) {
-  return this.fromReader(new BufferReader(data));
-};
+Headers.prototype.fromRaw = function fromRaw (data) {
+  return this.fromReader(new BufferReader(data))
+}
 
 /**
  * Instantiate headers from buffer reader.
@@ -101,9 +99,9 @@ Headers.prototype.fromRaw = function fromRaw(data) {
  * @returns {Headers}
  */
 
-Headers.fromReader = function fromReader(br) {
-  return new Headers().fromReader(br);
-};
+Headers.fromReader = function fromReader (br) {
+  return new Headers().fromReader(br)
+}
 
 /**
  * Instantiate headers from serialized data.
@@ -112,11 +110,10 @@ Headers.fromReader = function fromReader(br) {
  * @returns {Headers}
  */
 
-Headers.fromRaw = function fromRaw(data, enc) {
-  if (typeof data === 'string')
-    data = Buffer.from(data, enc);
-  return new Headers().fromRaw(data);
-};
+Headers.fromRaw = function fromRaw (data, enc) {
+  if (typeof data === 'string') data = Buffer.from(data, enc)
+  return new Headers().fromRaw(data)
+}
 
 /**
  * Instantiate headers from serialized data.
@@ -125,11 +122,10 @@ Headers.fromRaw = function fromRaw(data, enc) {
  * @returns {Headers}
  */
 
-Headers.fromHead = function fromHead(data, enc) {
-  if (typeof data === 'string')
-    data = Buffer.from(data, enc);
-  return new Headers().fromHead(data);
-};
+Headers.fromHead = function fromHead (data, enc) {
+  if (typeof data === 'string') data = Buffer.from(data, enc)
+  return new Headers().fromHead(data)
+}
 
 /**
  * Instantiate headers from a chain entry.
@@ -137,27 +133,27 @@ Headers.fromHead = function fromHead(data, enc) {
  * @returns {Headers}
  */
 
-Headers.fromEntry = function fromEntry(entry) {
-  const headers = new Headers();
-  headers.version = entry.version;
-  headers.prevBlock = entry.prevBlock;
-  headers.merkleRoot = entry.merkleRoot;
-  headers.time = entry.time;
-  headers.bits = entry.bits;
-  headers.nonce = entry.nonce;
-  headers._hash = Buffer.from(entry.hash, 'hex');
-  headers._hhash = entry.hash;
-  return headers;
-};
+Headers.fromEntry = function fromEntry (entry) {
+  const headers = new Headers()
+  headers.version = entry.version
+  headers.prevBlock = entry.prevBlock
+  headers.merkleRoot = entry.merkleRoot
+  headers.time = entry.time
+  headers.bits = entry.bits
+  headers.nonce = entry.nonce
+  headers._hash = Buffer.from(entry.hash, 'hex')
+  headers._hhash = entry.hash
+  return headers
+}
 
 /**
  * Convert the block to a headers object.
  * @returns {Headers}
  */
 
-Headers.prototype.toHeaders = function toHeaders() {
-  return this;
-};
+Headers.prototype.toHeaders = function toHeaders () {
+  return this
+}
 
 /**
  * Convert the block to a headers object.
@@ -165,12 +161,12 @@ Headers.prototype.toHeaders = function toHeaders() {
  * @returns {Headers}
  */
 
-Headers.fromBlock = function fromBlock(block) {
-  const headers = new Headers(block);
-  headers._hash = block._hash;
-  headers._hhash = block._hhash;
-  return headers;
-};
+Headers.fromBlock = function fromBlock (block) {
+  const headers = new Headers(block)
+  headers._hash = block._hash
+  headers._hhash = block._hhash
+  return headers
+}
 
 /**
  * Convert the block to an object suitable
@@ -178,9 +174,9 @@ Headers.fromBlock = function fromBlock(block) {
  * @returns {Object}
  */
 
-Headers.prototype.toJSON = function toJSON() {
-  return this.getJSON();
-};
+Headers.prototype.toJSON = function toJSON () {
+  return this.getJSON()
+}
 
 /**
  * Convert the block to an object suitable
@@ -193,7 +189,7 @@ Headers.prototype.toJSON = function toJSON() {
  * @returns {Object}
  */
 
-Headers.prototype.getJSON = function getJSON(network, view, height) {
+Headers.prototype.getJSON = function getJSON (network, view, height) {
   return {
     hash: this.rhash(),
     height: height,
@@ -203,8 +199,8 @@ Headers.prototype.getJSON = function getJSON(network, view, height) {
     time: this.time,
     bits: this.bits,
     nonce: this.nonce
-  };
-};
+  }
+}
 
 /**
  * Inject properties from json object.
@@ -212,10 +208,10 @@ Headers.prototype.getJSON = function getJSON(network, view, height) {
  * @param {Object} json
  */
 
-Headers.prototype.fromJSON = function fromJSON(json) {
-  this.parseJSON(json);
-  return this;
-};
+Headers.prototype.fromJSON = function fromJSON (json) {
+  this.parseJSON(json)
+  return this
+}
 
 /**
  * Instantiate a merkle block from a jsonified block object.
@@ -223,9 +219,9 @@ Headers.prototype.fromJSON = function fromJSON(json) {
  * @returns {Headers}
  */
 
-Headers.fromJSON = function fromJSON(json) {
-  return new Headers().fromJSON(json);
-};
+Headers.fromJSON = function fromJSON (json) {
+  return new Headers().fromJSON(json)
+}
 
 /**
  * Inspect the headers and return a more
@@ -233,9 +229,9 @@ Headers.fromJSON = function fromJSON(json) {
  * @returns {Object}
  */
 
-Headers.prototype.inspect = function inspect() {
-  return this.format();
-};
+Headers.prototype.inspect = function inspect () {
+  return this.format()
+}
 
 /**
  * Inspect the headers and return a more
@@ -245,7 +241,7 @@ Headers.prototype.inspect = function inspect() {
  * @returns {Object}
  */
 
-Headers.prototype.format = function format(view, height) {
+Headers.prototype.format = function format (view, height) {
   return {
     hash: this.rhash(),
     height: height != null ? height : -1,
@@ -256,8 +252,8 @@ Headers.prototype.format = function format(view, height) {
     time: this.time,
     bits: this.bits,
     nonce: this.nonce
-  };
-};
+  }
+}
 
 /**
  * Test an object to see if it is a Headers object.
@@ -265,13 +261,12 @@ Headers.prototype.format = function format(view, height) {
  * @returns {Boolean}
  */
 
-Headers.isHeaders = function isHeaders(obj) {
-  return obj instanceof Headers;
-};
+Headers.isHeaders = function isHeaders (obj) {
+  return obj instanceof Headers
+}
 
 /*
  * Expose
  */
 
-module.exports = Headers;
-
+module.exports = Headers

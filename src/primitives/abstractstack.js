@@ -6,23 +6,23 @@
  * https://github.com/bcoin-org/bcoin
  */
 
-'use strict';
+'use strict'
 
-const assert = require('assert');
-const util = require('../utils/util');
-const encoding = require('../utils/encoding');
-const digest = require('../crypto/digest');
-const secp256k1 = require('../crypto/secp256k1');
-const Amount = require('../utils/amount');
-const policy = require('../protocol/policy');
-//const Network = require('../protocol/network');
-const StaticWriter = require('../utils/staticwriter');
-const Script = require('../script/script');
-const Input = require('./stackinput');
-const consensus = require('../protocol/consensus');
-const Output = require('./output');
-const Outpoint = require('./outpoint');
-const hashType = Script.hashType;
+const assert = require('assert')
+const util = require('../utils/util')
+const encoding = require('../utils/encoding')
+const digest = require('../crypto/digest')
+const secp256k1 = require('../crypto/secp256k1')
+const Amount = require('../utils/amount')
+const policy = require('../protocol/policy')
+// const Network = require('../protocol/network');
+const StaticWriter = require('../utils/staticwriter')
+const Script = require('../script/script')
+const Input = require('./stackinput')
+const consensus = require('../protocol/consensus')
+const Output = require('./output')
+const Outpoint = require('./outpoint')
+const hashType = Script.hashType
 
 /**
  * A static transaction object.
@@ -39,29 +39,27 @@ const hashType = Script.hashType;
  * @property {Number} locktime - nLockTime
  */
 
-function AbstractStack(options) {
-  if (!(this instanceof AbstractStack))
-    return new AbstractStack(options);
+function AbstractStack (options) {
+  if (!(this instanceof AbstractStack)) return new AbstractStack(options)
 
-  this.inputs = [];
-  this.outputs = [];
+  this.inputs = []
+  this.outputs = []
 
-  this.mutable = false;
+  this.mutable = false
 
-  this._hash = null;
-  this._hhash = null;
-  this._whash = null;
+  this._hash = null
+  this._hhash = null
+  this._whash = null
 
-  this._raw = null;
-  this._size = -1;
-  this._sigops = -1;
+  this._raw = null
+  this._size = -1
+  this._sigops = -1
 
-  this._hashPrevouts = null;
-  this._hashSequence = null;
-  this._hashOutputs = null;
+  this._hashPrevouts = null
+  this._hashSequence = null
+  this._hashOutputs = null
 
-  if (options)
-    this.fromOptions(options);
+  if (options) this.fromOptions(options)
 }
 
 /**
@@ -70,33 +68,31 @@ function AbstractStack(options) {
  * @param {NakedTX} options
  */
 
-AbstractStack.prototype.fromOptions = function fromOptions(options) {
-  assert(options, 'TX data is required.');
+AbstractStack.prototype.fromOptions = function fromOptions (options) {
+  assert(options, 'TX data is required.')
 
   if (options.version != null) {
-    assert(util.isU32(options.version), 'Version must be a uint32.');
-    this.version = options.version;
+    assert(util.isU32(options.version), 'Version must be a uint32.')
+    this.version = options.version
   }
 
   if (options.inputs) {
-    assert(Array.isArray(options.inputs), 'Inputs must be an array.');
-    for (const input of options.inputs)
-      this.inputs.push(new Input(input));
+    assert(Array.isArray(options.inputs), 'Inputs must be an array.')
+    for (const input of options.inputs) this.inputs.push(new Input(input))
   }
 
   if (options.outputs) {
-    assert(Array.isArray(options.outputs), 'Outputs must be an array.');
-    for (const output of options.outputs)
-      this.outputs.push(new Output(output));
+    assert(Array.isArray(options.outputs), 'Outputs must be an array.')
+    for (const output of options.outputs) this.outputs.push(new Output(output))
   }
 
   if (options.locktime != null) {
-    assert(util.isU32(options.locktime), 'Locktime must be a uint32.');
-    this.locktime = options.locktime;
+    assert(util.isU32(options.locktime), 'Locktime must be a uint32.')
+    this.locktime = options.locktime
   }
 
-  return this;
-};
+  return this
+}
 
 /**
  * Instantiate AbstractStack from options object.
@@ -104,18 +100,18 @@ AbstractStack.prototype.fromOptions = function fromOptions(options) {
  * @returns {TX}
  */
 
-AbstractStack.fromOptions = function fromOptions(options) {
-  return new AbstractStack().fromOptions(options);
-};
+AbstractStack.fromOptions = function fromOptions (options) {
+  return new AbstractStack().fromOptions(options)
+}
 
 /**
  * Clone the transaction.
  * @returns {TX}
  */
 
-AbstractStack.prototype.clone = function clone() {
-  return new AbstractStack().inject(this);
-};
+AbstractStack.prototype.clone = function clone () {
+  return new AbstractStack().inject(this)
+}
 
 /**
  * Inject properties from tx.
@@ -125,38 +121,36 @@ AbstractStack.prototype.clone = function clone() {
  * @returns {TX}
  */
 
-AbstractStack.prototype.inject = function inject(tx) {
-  this.version = tx.version;
+AbstractStack.prototype.inject = function inject (tx) {
+  this.version = tx.version
 
-  for (const input of tx.inputs)
-    this.inputs.push(input.clone());
+  for (const input of tx.inputs) this.inputs.push(input.clone())
 
-  for (const output of tx.outputs)
-    this.outputs.push(output.clone());
+  for (const output of tx.outputs) this.outputs.push(output.clone())
 
-  this.locktime = tx.locktime;
+  this.locktime = tx.locktime
 
-  return this;
-};
+  return this
+}
 
 /**
  * Clear any cached values.
  */
 
-AbstractStack.prototype.refresh = function refresh() {
-  this._hash = null;
-  this._hhash = null;
-  this._whash = null;
+AbstractStack.prototype.refresh = function refresh () {
+  this._hash = null
+  this._hhash = null
+  this._whash = null
 
-  this._raw = null;
-  this._size = -1;
-  this._witness = -1;
-  this._sigops = -1;
+  this._raw = null
+  this._size = -1
+  this._witness = -1
+  this._sigops = -1
 
-  this._hashPrevouts = null;
-  this._hashSequence = null;
-  this._hashOutputs = null;
-};
+  this._hashPrevouts = null
+  this._hashSequence = null
+  this._hashOutputs = null
+}
 
 /**
  * Hash the transaction with the non-witness serialization.
@@ -164,28 +158,25 @@ AbstractStack.prototype.refresh = function refresh() {
  * @returns {Hash|Buffer} hash
  */
 
-AbstractStack.prototype.hash = function hash(enc) {
-  let h = this._hash;
+AbstractStack.prototype.hash = function hash (enc) {
+  let h = this._hash
 
   if (!h) {
-    h = digest.hash256(this.toNormal());
-    if (!this.mutable)
-      this._hash = h;
+    h = digest.hash256(this.toNormal())
+    if (!this.mutable) this._hash = h
   }
 
   if (enc === 'hex') {
-    let hex = this._hhash;
+    let hex = this._hhash
     if (!hex) {
-      hex = h.toString('hex');
-      if (!this.mutable)
-        this._hhash = hex;
+      hex = h.toString('hex')
+      if (!this.mutable) this._hhash = hex
     }
-    h = hex;
+    h = hex
   }
 
-  return h;
-};
-
+  return h
+}
 
 /**
  * Serialize the transaction. Note
@@ -195,9 +186,9 @@ AbstractStack.prototype.hash = function hash(enc) {
  * @returns {Buffer} Serialized transaction.
  */
 
-AbstractStack.prototype.toRaw = function toRaw() {
-  return this.frame().data;
-};
+AbstractStack.prototype.toRaw = function toRaw () {
+  return this.frame().data
+}
 
 /**
  * Serialize the transaction without the
@@ -206,28 +197,26 @@ AbstractStack.prototype.toRaw = function toRaw() {
  * @returns {Buffer} Serialized transaction.
  */
 
-AbstractStack.prototype.toNormal = function toNormal() {
-  if (this.hasWitness())
-    return this.frameNormal().data;
-  return this.toRaw();
-};
+AbstractStack.prototype.toNormal = function toNormal () {
+  if (this.hasWitness()) return this.frameNormal().data
+  return this.toRaw()
+}
 
 /**
  * Write the transaction to a buffer writer.
  * @param {BufferWriter} bw
  */
 
-AbstractStack.prototype.toWriter = function toWriter(bw) {
+AbstractStack.prototype.toWriter = function toWriter (bw) {
   if (this.mutable) {
-    if (this.hasWitness())
-      return this.writeWitness(bw);
-    return this.writeNormal(bw);
+    if (this.hasWitness()) return this.writeWitness(bw)
+    return this.writeNormal(bw)
   }
 
-  bw.writeBytes(this.toRaw());
+  bw.writeBytes(this.toRaw())
 
-  return bw;
-};
+  return bw
+}
 
 /**
  * Write the transaction to a buffer writer.
@@ -235,13 +224,13 @@ AbstractStack.prototype.toWriter = function toWriter(bw) {
  * @param {BufferWriter} bw
  */
 
-AbstractStack.prototype.toNormalWriter = function toNormalWriter(bw) {
+AbstractStack.prototype.toNormalWriter = function toNormalWriter (bw) {
   if (this.hasWitness()) {
-    this.writeNormal(bw);
-    return bw;
+    this.writeNormal(bw)
+    return bw
   }
-  return this.toWriter(bw);
-};
+  return this.toWriter(bw)
+}
 
 /**
  * Serialize the transaction. Note
@@ -252,41 +241,41 @@ AbstractStack.prototype.toNormalWriter = function toNormalWriter(bw) {
  * @returns {RawTX}
  */
 
-AbstractStack.prototype.frame = function frame() {
+AbstractStack.prototype.frame = function frame () {
   if (this.mutable) {
-    assert(!this._raw);
-    return this.frameNormal();
+    assert(!this._raw)
+    return this.frameNormal()
   }
 
   if (this._raw) {
-    assert(this._size >= 0);
-    assert(this._witness >= 0);
-    const raw = new RawTX(this._size, this._witness);
-    raw.data = this._raw;
-    return raw;
+    assert(this._size >= 0)
+    assert(this._witness >= 0)
+    const raw = new RawTX(this._size, this._witness)
+    raw.data = this._raw
+    return raw
   }
 
-  let raw;
-      raw = this.frameNormal();
+  let raw
+  raw = this.frameNormal()
 
-  this._raw = raw.data;
-  this._size = raw.size;
-  this._witness = raw.witness;
+  this._raw = raw.data
+  this._size = raw.size
+  this._witness = raw.witness
 
-  return raw;
-};
+  return raw
+}
 
 /**
  * Calculate total size and size of the witness bytes.
  * @returns {Object} Contains `size` and `witness`.
  */
 
-AbstractStack.prototype.getSizes = function getSizes() {
+AbstractStack.prototype.getSizes = function getSizes () {
   if (this.mutable) {
-    return this.getNormalSizes();
+    return this.getNormalSizes()
   }
-  return this.frame();
-};
+  return this.frame()
+}
 
 /**
  * Calculate the virtual size of the transaction.
@@ -294,10 +283,10 @@ AbstractStack.prototype.getSizes = function getSizes() {
  * @returns {Number} vsize
  */
 
-AbstractStack.prototype.getVirtualSize = function getVirtualSize() {
-  const scale = consensus.WITNESS_SCALE_FACTOR;
-  return (this.getWeight() + scale - 1) / scale | 0;
-};
+AbstractStack.prototype.getVirtualSize = function getVirtualSize () {
+  const scale = consensus.WITNESS_SCALE_FACTOR
+  return ((this.getWeight() + scale - 1) / scale) | 0
+}
 
 /**
  * Calculate the virtual size of the transaction
@@ -306,12 +295,12 @@ AbstractStack.prototype.getVirtualSize = function getVirtualSize() {
  * @returns {Number} vsize
  */
 
-AbstractStack.prototype.getSigopsSize = function getSigopsSize(sigops) {
-  const scale = consensus.WITNESS_SCALE_FACTOR;
-  const bytes = policy.BYTES_PER_SIGOP;
-  const weight = Math.max(this.getWeight(), sigops * bytes);
-  return (weight + scale - 1) / scale | 0;
-};
+AbstractStack.prototype.getSigopsSize = function getSigopsSize (sigops) {
+  const scale = consensus.WITNESS_SCALE_FACTOR
+  const bytes = policy.BYTES_PER_SIGOP
+  const weight = Math.max(this.getWeight(), sigops * bytes)
+  return ((weight + scale - 1) / scale) | 0
+}
 
 /**
  * Calculate the weight of the transaction.
@@ -319,11 +308,11 @@ AbstractStack.prototype.getSigopsSize = function getSigopsSize(sigops) {
  * @returns {Number} weight
  */
 
-AbstractStack.prototype.getWeight = function getWeight() {
-  const raw = this.getSizes();
-  const base = raw.size - raw.witness;
-  return base * (consensus.WITNESS_SCALE_FACTOR - 1) + raw.size;
-};
+AbstractStack.prototype.getWeight = function getWeight () {
+  const raw = this.getSizes()
+  const base = raw.size - raw.witness
+  return base * (consensus.WITNESS_SCALE_FACTOR - 1) + raw.size
+}
 
 /**
  * Calculate the real size of the transaction
@@ -331,9 +320,9 @@ AbstractStack.prototype.getWeight = function getWeight() {
  * @returns {Number} size
  */
 
-AbstractStack.prototype.getSize = function getSize() {
-  return this.getSizes().size;
-};
+AbstractStack.prototype.getSize = function getSize () {
+  return this.getSizes().size
+}
 
 /**
  * Calculate the size of the transaction
@@ -342,27 +331,25 @@ AbstractStack.prototype.getSize = function getSize() {
  * @returns {Number} size
  */
 
-AbstractStack.prototype.getBaseSize = function getBaseSize() {
-  const raw = this.getSizes();
-  return raw.size - raw.witness;
-};
+AbstractStack.prototype.getBaseSize = function getBaseSize () {
+  const raw = this.getSizes()
+  return raw.size - raw.witness
+}
 
 /**
  * Test whether the transaction has a non-empty witness.
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.hasWitness = function hasWitness() {
-  if (this._witness !== -1)
-    return this._witness !== 0;
+AbstractStack.prototype.hasWitness = function hasWitness () {
+  if (this._witness !== -1) return this._witness !== 0
 
   for (const input of this.inputs) {
-    if (input.witness.items.length > 0)
-      return true;
+    if (input.witness.items.length > 0) return true
   }
 
-  return false;
-};
+  return false
+}
 
 /**
  * Get the signature hash of the transaction for signing verifying.
@@ -376,22 +363,26 @@ AbstractStack.prototype.hasWitness = function hasWitness() {
  * @returns {Buffer} Signature hash.
  */
 
-AbstractStack.prototype.signatureHash = function signatureHash(index, prev, value, type, version) {
-  assert(index >= 0 && index < this.inputs.length);
-  assert(prev instanceof Script);
-  assert(typeof value === 'number');
-  assert(typeof type === 'number');
+AbstractStack.prototype.signatureHash = function signatureHash (
+  index,
+  prev,
+  value,
+  type,
+  version
+) {
+  assert(index >= 0 && index < this.inputs.length)
+  assert(prev instanceof Script)
+  assert(typeof value === 'number')
+  assert(typeof type === 'number')
 
   // Traditional sighashing
-  if (version === 0)
-    return this.signatureHashV0(index, prev, type);
+  if (version === 0) return this.signatureHashV0(index, prev, type)
 
   // Segwit sighashing
-  if (version === 1)
-    return this.signatureHashV1(index, prev, value, type);
+  if (version === 1) return this.signatureHashV1(index, prev, value, type)
 
-  throw new Error('Unknown sighash version.');
-};
+  throw new Error('Unknown sighash version.')
+}
 
 /**
  * Legacy sighashing -- O(n^2).
@@ -402,67 +393,70 @@ AbstractStack.prototype.signatureHash = function signatureHash(index, prev, valu
  * @returns {Buffer}
  */
 
-AbstractStack.prototype.signatureHashV0 = function signatureHashV0(index, prev, type) {
+AbstractStack.prototype.signatureHashV0 = function signatureHashV0 (
+  index,
+  prev,
+  type
+) {
   if ((type & 0x1f) === hashType.SINGLE) {
     // Bitcoind used to return 1 as an error code:
     // it ended up being treated like a hash.
-    if (index >= this.outputs.length)
-      return Buffer.from(encoding.ONE_HASH);
+    if (index >= this.outputs.length) return Buffer.from(encoding.ONE_HASH)
   }
 
   // Remove all code separators.
-  prev = prev.removeSeparators();
+  prev = prev.removeSeparators()
 
   // Calculate buffer size.
-  const size = this.hashSize(index, prev, type);
-  const bw = StaticWriter.pool(size);
+  const size = this.hashSize(index, prev, type)
+  const bw = StaticWriter.pool(size)
 
-  bw.writeU32(this.version);
+  bw.writeU32(this.version)
 
   // Serialize inputs.
   if (type & hashType.ANYONECANPAY) {
     // Serialize only the current
     // input if ANYONECANPAY.
-    const input = this.inputs[index];
+    const input = this.inputs[index]
 
     // Count.
-    bw.writeVarint(1);
+    bw.writeVarint(1)
 
     // Outpoint.
-    input.prevout.toWriter(bw);
+    input.prevout.toWriter(bw)
 
     // Replace script with previous
     // output script if current index.
-    bw.writeVarBytes(prev.toRaw());
-    bw.writeU32(input.sequence);
+    bw.writeVarBytes(prev.toRaw())
+    bw.writeU32(input.sequence)
   } else {
-    bw.writeVarint(this.inputs.length);
+    bw.writeVarint(this.inputs.length)
     for (let i = 0; i < this.inputs.length; i++) {
-      const input = this.inputs[i];
+      const input = this.inputs[i]
 
       // Outpoint.
-      input.prevout.toWriter(bw);
+      input.prevout.toWriter(bw)
 
       // Replace script with previous
       // output script if current index.
       if (i === index) {
-        bw.writeVarBytes(prev.toRaw());
-        bw.writeU32(input.sequence);
-        continue;
+        bw.writeVarBytes(prev.toRaw())
+        bw.writeU32(input.sequence)
+        continue
       }
 
       // Script is null.
-      bw.writeVarint(0);
+      bw.writeVarint(0)
 
       // Sequences are 0 if NONE or SINGLE.
       switch (type & 0x1f) {
         case hashType.NONE:
         case hashType.SINGLE:
-          bw.writeU32(0);
-          break;
+          bw.writeU32(0)
+          break
         default:
-          bw.writeU32(input.sequence);
-          break;
+          bw.writeU32(input.sequence)
+          break
       }
     }
   }
@@ -471,45 +465,44 @@ AbstractStack.prototype.signatureHashV0 = function signatureHashV0(index, prev, 
   switch (type & 0x1f) {
     case hashType.NONE: {
       // No outputs if NONE.
-      bw.writeVarint(0);
-      break;
+      bw.writeVarint(0)
+      break
     }
     case hashType.SINGLE: {
-      const output = this.outputs[index];
+      const output = this.outputs[index]
 
       // Drop all outputs after the
       // current input index if SINGLE.
-      bw.writeVarint(index + 1);
+      bw.writeVarint(index + 1)
 
       for (let i = 0; i < index; i++) {
         // Null all outputs not at
         // current input index.
-        bw.writeI64(-1);
-        bw.writeVarint(0);
+        bw.writeI64(-1)
+        bw.writeVarint(0)
       }
 
       // Regular serialization
       // at current input index.
-      output.toWriter(bw);
+      output.toWriter(bw)
 
-      break;
+      break
     }
     default: {
       // Regular output serialization if ALL.
-      bw.writeVarint(this.outputs.length);
-      for (const output of this.outputs)
-        output.toWriter(bw);
-      break;
+      bw.writeVarint(this.outputs.length)
+      for (const output of this.outputs) output.toWriter(bw)
+      break
     }
   }
 
-  bw.writeU32(this.locktime);
+  bw.writeU32(this.locktime)
 
   // Append the hash type.
-  bw.writeU32(type);
+  bw.writeU32(type)
 
-  return digest.hash256(bw.render());
-};
+  return digest.hash256(bw.render())
+}
 
 /**
  * Calculate sighash size.
@@ -520,44 +513,43 @@ AbstractStack.prototype.signatureHashV0 = function signatureHashV0(index, prev, 
  * @returns {Number}
  */
 
-AbstractStack.prototype.hashSize = function hashSize(index, prev, type) {
-  let size = 0;
+AbstractStack.prototype.hashSize = function hashSize (index, prev, type) {
+  let size = 0
 
-  size += 4;
+  size += 4
 
   if (type & hashType.ANYONECANPAY) {
-    size += 1;
-    size += 36;
-    size += prev.getVarSize();
-    size += 4;
+    size += 1
+    size += 36
+    size += prev.getVarSize()
+    size += 4
   } else {
-    size += encoding.sizeVarint(this.inputs.length);
-    size += 41 * (this.inputs.length - 1);
-    size += 36;
-    size += prev.getVarSize();
-    size += 4;
+    size += encoding.sizeVarint(this.inputs.length)
+    size += 41 * (this.inputs.length - 1)
+    size += 36
+    size += prev.getVarSize()
+    size += 4
   }
 
   switch (type & 0x1f) {
     case hashType.NONE:
-      size += 1;
-      break;
+      size += 1
+      break
     case hashType.SINGLE:
-      size += encoding.sizeVarint(index + 1);
-      size += 9 * index;
-      size += this.outputs[index].getSize();
-      break;
+      size += encoding.sizeVarint(index + 1)
+      size += 9 * index
+      size += this.outputs[index].getSize()
+      break
     default:
-      size += encoding.sizeVarint(this.outputs.length);
-      for (const output of this.outputs)
-        size += output.getSize();
-      break;
+      size += encoding.sizeVarint(this.outputs.length)
+      for (const output of this.outputs) size += output.getSize()
+      break
   }
 
-  size += 8;
+  size += 8
 
-  return size;
-};
+  return size
+}
 
 /**
  * Witness sighashing -- O(n).
@@ -569,90 +561,89 @@ AbstractStack.prototype.hashSize = function hashSize(index, prev, type) {
  * @returns {Buffer}
  */
 
-AbstractStack.prototype.signatureHashV1 = function signatureHashV1(index, prev, value, type) {
-  const input = this.inputs[index];
-  let prevouts = encoding.ZERO_HASH;
-  let sequences = encoding.ZERO_HASH;
-  let outputs = encoding.ZERO_HASH;
+AbstractStack.prototype.signatureHashV1 = function signatureHashV1 (
+  index,
+  prev,
+  value,
+  type
+) {
+  const input = this.inputs[index]
+  let prevouts = encoding.ZERO_HASH
+  let sequences = encoding.ZERO_HASH
+  let outputs = encoding.ZERO_HASH
 
   if (!(type & hashType.ANYONECANPAY)) {
     if (this._hashPrevouts) {
-      prevouts = this._hashPrevouts;
+      prevouts = this._hashPrevouts
     } else {
-      const bw = StaticWriter.pool(this.inputs.length * 36);
+      const bw = StaticWriter.pool(this.inputs.length * 36)
 
-      for (const input of this.inputs)
-        input.prevout.toWriter(bw);
+      for (const input of this.inputs) input.prevout.toWriter(bw)
 
-      prevouts = digest.hash256(bw.render());
+      prevouts = digest.hash256(bw.render())
 
-      if (!this.mutable)
-        this._hashPrevouts = prevouts;
+      if (!this.mutable) this._hashPrevouts = prevouts
     }
   }
 
-  if (!(type & hashType.ANYONECANPAY)
-      && (type & 0x1f) !== hashType.SINGLE
-      && (type & 0x1f) !== hashType.NONE) {
+  if (
+    !(type & hashType.ANYONECANPAY) &&
+    (type & 0x1f) !== hashType.SINGLE &&
+    (type & 0x1f) !== hashType.NONE
+  ) {
     if (this._hashSequence) {
-      sequences = this._hashSequence;
+      sequences = this._hashSequence
     } else {
-      const bw = StaticWriter.pool(this.inputs.length * 4);
+      const bw = StaticWriter.pool(this.inputs.length * 4)
 
-      for (const input of this.inputs)
-        bw.writeU32(input.sequence);
+      for (const input of this.inputs) bw.writeU32(input.sequence)
 
-      sequences = digest.hash256(bw.render());
+      sequences = digest.hash256(bw.render())
 
-      if (!this.mutable)
-        this._hashSequence = sequences;
+      if (!this.mutable) this._hashSequence = sequences
     }
   }
 
-  if ((type & 0x1f) !== hashType.SINGLE
-      && (type & 0x1f) !== hashType.NONE) {
+  if ((type & 0x1f) !== hashType.SINGLE && (type & 0x1f) !== hashType.NONE) {
     if (this._hashOutputs) {
-      outputs = this._hashOutputs;
+      outputs = this._hashOutputs
     } else {
-      let size = 0;
+      let size = 0
 
-      for (const output of this.outputs)
-        size += output.getSize();
+      for (const output of this.outputs) size += output.getSize()
 
-      const bw = StaticWriter.pool(size);
+      const bw = StaticWriter.pool(size)
 
-      for (const output of this.outputs)
-        output.toWriter(bw);
+      for (const output of this.outputs) output.toWriter(bw)
 
-      outputs = digest.hash256(bw.render());
+      outputs = digest.hash256(bw.render())
 
-      if (!this.mutable)
-        this._hashOutputs = outputs;
+      if (!this.mutable) this._hashOutputs = outputs
     }
   } else if ((type & 0x1f) === hashType.SINGLE) {
     if (index < this.outputs.length) {
-      const output = this.outputs[index];
-      outputs = digest.hash256(output.toRaw());
+      const output = this.outputs[index]
+      outputs = digest.hash256(output.toRaw())
     }
   }
 
-  const size = 156 + prev.getVarSize();
-  const bw = StaticWriter.pool(size);
+  const size = 156 + prev.getVarSize()
+  const bw = StaticWriter.pool(size)
 
-  bw.writeU32(this.version);
-  bw.writeBytes(prevouts);
-  bw.writeBytes(sequences);
-  bw.writeHash(input.prevout.hash);
-  bw.writeU32(input.prevout.index);
-  bw.writeVarBytes(prev.toRaw());
-  bw.writeI64(value);
-  bw.writeU32(input.sequence);
-  bw.writeBytes(outputs);
-  bw.writeU32(this.locktime);
-  bw.writeU32(type);
+  bw.writeU32(this.version)
+  bw.writeBytes(prevouts)
+  bw.writeBytes(sequences)
+  bw.writeHash(input.prevout.hash)
+  bw.writeU32(input.prevout.index)
+  bw.writeVarBytes(prev.toRaw())
+  bw.writeI64(value)
+  bw.writeU32(input.sequence)
+  bw.writeBytes(outputs)
+  bw.writeU32(this.locktime)
+  bw.writeU32(type)
 
-  return digest.hash256(bw.render());
-};
+  return digest.hash256(bw.render())
+}
 
 /**
  * Verify signature.
@@ -665,15 +656,21 @@ AbstractStack.prototype.signatureHashV1 = function signatureHashV1(index, prev, 
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.checksig = function checksig(index, prev, value, sig, key, version) {
-  if (sig.length === 0)
-    return false;
+AbstractStack.prototype.checksig = function checksig (
+  index,
+  prev,
+  value,
+  sig,
+  key,
+  version
+) {
+  if (sig.length === 0) return false
 
-  const type = sig[sig.length - 1];
-  const hash = this.signatureHash(index, prev, value, type, version);
+  const type = sig[sig.length - 1]
+  const hash = this.signatureHash(index, prev, value, type, version)
 
-  return secp256k1.verify(hash, sig.slice(0, -1), key);
-};
+  return secp256k1.verify(hash, sig.slice(0, -1), key)
+}
 
 /**
  * Create a signature suitable for inserting into scriptSigs/witnesses.
@@ -688,22 +685,27 @@ AbstractStack.prototype.checksig = function checksig(index, prev, value, sig, ke
  * @returns {Buffer} Signature in DER format.
  */
 
-AbstractStack.prototype.signature = function signature(index, prev, value, key, type, version) {
-  if (type == null)
-    type = hashType.ALL;
+AbstractStack.prototype.signature = function signature (
+  index,
+  prev,
+  value,
+  key,
+  type,
+  version
+) {
+  if (type == null) type = hashType.ALL
 
-  if (version == null)
-    version = 0;
+  if (version == null) version = 0
 
-  const hash = this.signatureHash(index, prev, value, type, version);
-  const sig = secp256k1.sign(hash, key);
-  const bw = new StaticWriter(sig.length + 1);
+  const hash = this.signatureHash(index, prev, value, type, version)
+  const sig = secp256k1.sign(hash, key)
+  const bw = new StaticWriter(sig.length + 1)
 
-  bw.writeBytes(sig);
-  bw.writeU8(type);
+  bw.writeBytes(sig)
+  bw.writeU8(type)
 
-  return bw.render();
-};
+  return bw.render()
+}
 
 /**
  * Verify all transaction inputs.
@@ -712,23 +714,20 @@ AbstractStack.prototype.signature = function signature(index, prev, value, key, 
  * @throws {ScriptError} on invalid inputs
  */
 
-AbstractStack.prototype.check = function check(view, flags) {
-  if (this.inputs.length === 0)
-    throw new ScriptError('UNKNOWN_ERROR', 'No inputs.');
+AbstractStack.prototype.check = function check (view, flags) {
+  if (this.inputs.length === 0) { throw new ScriptError('UNKNOWN_ERROR', 'No inputs.') }
 
-  if (this.isCoinbase())
-    return;
+  if (this.isCoinbase()) return
 
   for (let i = 0; i < this.inputs.length; i++) {
-    const {prevout} = this.inputs[i];
-    const coin = view.getOutput(prevout);
+    const { prevout } = this.inputs[i]
+    const coin = view.getOutput(prevout)
 
-    if (!coin)
-      throw new ScriptError('UNKNOWN_ERROR', 'No coin available.');
+    if (!coin) throw new ScriptError('UNKNOWN_ERROR', 'No coin available.')
 
-    this.checkInput(i, coin, flags);
+    this.checkInput(i, coin, flags)
   }
-};
+}
 
 /**
  * Verify a transaction input.
@@ -739,11 +738,11 @@ AbstractStack.prototype.check = function check(view, flags) {
  * @throws {ScriptError} on invalid input
  */
 
-AbstractStack.prototype.checkInput = function checkInput(index, coin, flags) {
-  const input = this.inputs[index];
+AbstractStack.prototype.checkInput = function checkInput (index, coin, flags) {
+  const input = this.inputs[index]
 
-  assert(input, 'Input does not exist.');
-  assert(coin, 'No coin passed.');
+  assert(input, 'Input does not exist.')
+  assert(coin, 'No coin passed.')
 
   Script.verify(
     input.script,
@@ -753,8 +752,8 @@ AbstractStack.prototype.checkInput = function checkInput(index, coin, flags) {
     index,
     coin.value,
     flags
-  );
-};
+  )
+}
 
 /**
  * Verify the transaction inputs on the worker pool
@@ -765,20 +764,22 @@ AbstractStack.prototype.checkInput = function checkInput(index, coin, flags) {
  * @returns {Promise}
  */
 
-AbstractStack.prototype.checkAsync = async function checkAsync(view, flags, pool) {
-  if (this.inputs.length === 0)
-    throw new ScriptError('UNKNOWN_ERROR', 'No inputs.');
+AbstractStack.prototype.checkAsync = async function checkAsync (
+  view,
+  flags,
+  pool
+) {
+  if (this.inputs.length === 0) { throw new ScriptError('UNKNOWN_ERROR', 'No inputs.') }
 
-  if (this.isCoinbase())
-    return;
+  if (this.isCoinbase()) return
 
   if (!pool) {
-    this.check(view, flags);
-    return;
+    this.check(view, flags)
+    return
   }
 
-  await pool.check(this, view, flags);
-};
+  await pool.check(this, view, flags)
+}
 
 /**
  * Verify a transaction input asynchronously.
@@ -790,19 +791,24 @@ AbstractStack.prototype.checkAsync = async function checkAsync(view, flags, pool
  * @returns {Promise}
  */
 
-AbstractStack.prototype.checkInputAsync = async function checkInputAsync(index, coin, flags, pool) {
-  const input = this.inputs[index];
+AbstractStack.prototype.checkInputAsync = async function checkInputAsync (
+  index,
+  coin,
+  flags,
+  pool
+) {
+  const input = this.inputs[index]
 
-  assert(input, 'Input does not exist.');
-  assert(coin, 'No coin passed.');
+  assert(input, 'Input does not exist.')
+  assert(coin, 'No coin passed.')
 
   if (!pool) {
-    this.checkInput(index, coin, flags);
-    return;
+    this.checkInput(index, coin, flags)
+    return
   }
 
-  await pool.checkInput(this, index, coin, flags);
-};
+  await pool.checkInput(this, index, coin, flags)
+}
 
 /**
  * Verify all transaction inputs.
@@ -811,16 +817,15 @@ AbstractStack.prototype.checkInputAsync = async function checkInputAsync(index, 
  * @returns {Boolean} Whether the inputs are valid.
  */
 
-AbstractStack.prototype.verify = function verify(view, flags) {
+AbstractStack.prototype.verify = function verify (view, flags) {
   try {
-    this.check(view, flags);
+    this.check(view, flags)
   } catch (e) {
-    if (e.type === 'ScriptError')
-      return false;
-    throw e;
+    if (e.type === 'ScriptError') return false
+    throw e
   }
-  return true;
-};
+  return true
+}
 
 /**
  * Verify a transaction input.
@@ -831,16 +836,15 @@ AbstractStack.prototype.verify = function verify(view, flags) {
  * @returns {Boolean} Whether the input is valid.
  */
 
-AbstractStack.prototype.verifyInput = function verifyInput(index, coin, flags) {
+AbstractStack.prototype.verifyInput = function verifyInput (index, coin, flags) {
   try {
-    this.checkInput(index, coin, flags);
+    this.checkInput(index, coin, flags)
   } catch (e) {
-    if (e.type === 'ScriptError')
-      return false;
-    throw e;
+    if (e.type === 'ScriptError') return false
+    throw e
   }
-  return true;
-};
+  return true
+}
 
 /**
  * Verify the transaction inputs on the worker pool
@@ -851,16 +855,19 @@ AbstractStack.prototype.verifyInput = function verifyInput(index, coin, flags) {
  * @returns {Promise}
  */
 
-AbstractStack.prototype.verifyAsync = async function verifyAsync(view, flags, pool) {
+AbstractStack.prototype.verifyAsync = async function verifyAsync (
+  view,
+  flags,
+  pool
+) {
   try {
-    await this.checkAsync(view, flags, pool);
+    await this.checkAsync(view, flags, pool)
   } catch (e) {
-    if (e.type === 'ScriptError')
-      return false;
-    throw e;
+    if (e.type === 'ScriptError') return false
+    throw e
   }
-  return true;
-};
+  return true
+}
 
 /**
  * Verify a transaction input asynchronously.
@@ -872,16 +879,20 @@ AbstractStack.prototype.verifyAsync = async function verifyAsync(view, flags, po
  * @returns {Promise}
  */
 
-AbstractStack.prototype.verifyInputAsync = async function verifyInputAsync(index, coin, flags, pool) {
+AbstractStack.prototype.verifyInputAsync = async function verifyInputAsync (
+  index,
+  coin,
+  flags,
+  pool
+) {
   try {
-    await this.checkInput(index, coin, flags, pool);
+    await this.checkInput(index, coin, flags, pool)
   } catch (e) {
-    if (e.type === 'ScriptError')
-      return false;
-    throw e;
+    if (e.type === 'ScriptError') return false
+    throw e
   }
-  return true;
-};
+  return true
+}
 
 /**
  * Test whether the transaction is a coinbase
@@ -889,27 +900,25 @@ AbstractStack.prototype.verifyInputAsync = async function verifyInputAsync(index
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.isCoinbase = function isCoinbase() {
-  return this.inputs.length === 1 && this.inputs[0].prevout.isNull();
-};
+AbstractStack.prototype.isCoinbase = function isCoinbase () {
+  return this.inputs.length === 1 && this.inputs[0].prevout.isNull()
+}
 
 /**
  * Test whether the transaction is replaceable.
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.isRBF = function isRBF() {
+AbstractStack.prototype.isRBF = function isRBF () {
   // Core doesn't do this, but it should:
-  if (this.version === 2)
-    return false;
+  if (this.version === 2) return false
 
   for (const input of this.inputs) {
-    if (input.isRBF())
-      return true;
+    if (input.isRBF()) return true
   }
 
-  return false;
-};
+  return false
+}
 
 /**
  * Calculate the fee for the transaction.
@@ -917,12 +926,11 @@ AbstractStack.prototype.isRBF = function isRBF() {
  * @returns {Amount} fee (zero if not all coins are available).
  */
 
-AbstractStack.prototype.getFee = function getFee(view) {
-  if (!this.hasCoins(view))
-    return 0;
+AbstractStack.prototype.getFee = function getFee (view) {
+  if (!this.hasCoins(view)) return 0
 
-  return this.getInputValue(view) - this.getOutputValue();
-};
+  return this.getInputValue(view) - this.getOutputValue()
+}
 
 /**
  * Calculate the total input value.
@@ -930,34 +938,32 @@ AbstractStack.prototype.getFee = function getFee(view) {
  * @returns {Amount} value
  */
 
-AbstractStack.prototype.getInputValue = function getInputValue(view) {
-  let total = 0;
+AbstractStack.prototype.getInputValue = function getInputValue (view) {
+  let total = 0
 
-  for (const {prevout} of this.inputs) {
-    const coin = view.getOutput(prevout);
+  for (const { prevout } of this.inputs) {
+    const coin = view.getOutput(prevout)
 
-    if (!coin)
-      return 0;
+    if (!coin) return 0
 
-    total += coin.value;
+    total += coin.value
   }
 
-  return total;
-};
+  return total
+}
 
 /**
  * Calculate the total output value.
  * @returns {Amount} value
  */
 
-AbstractStack.prototype.getOutputValue = function getOutputValue() {
-  let total = 0;
+AbstractStack.prototype.getOutputValue = function getOutputValue () {
+  let total = 0
 
-  for (const output of this.outputs)
-    total += output.value;
+  for (const output of this.outputs) total += output.value
 
-  return total;
-};
+  return total
+}
 
 /**
  * Get all input addresses.
@@ -966,30 +972,28 @@ AbstractStack.prototype.getOutputValue = function getOutputValue() {
  * @returns {Array} [addrs, table]
  */
 
-AbstractStack.prototype._getInputAddresses = function _getInputAddresses(view) {
-  const table = Object.create(null);
-  const addrs = [];
+AbstractStack.prototype._getInputAddresses = function _getInputAddresses (view) {
+  const table = Object.create(null)
+  const addrs = []
 
-  if (this.isCoinbase())
-    return [addrs, table];
+  if (this.isCoinbase()) return [addrs, table]
 
   for (const input of this.inputs) {
-    const coin = view ? view.getOutputFor(input) : null;
-    const addr = input.getAddress(coin);
+    const coin = view ? view.getOutputFor(input) : null
+    const addr = input.getAddress(coin)
 
-    if (!addr)
-      continue;
+    if (!addr) continue
 
-    const hash = addr.getHash('hex');
+    const hash = addr.getHash('hex')
 
     if (!table[hash]) {
-      table[hash] = true;
-      addrs.push(addr);
+      table[hash] = true
+      addrs.push(addr)
     }
   }
 
-  return [addrs, table];
-};
+  return [addrs, table]
+}
 
 /**
  * Get all output addresses.
@@ -997,26 +1001,25 @@ AbstractStack.prototype._getInputAddresses = function _getInputAddresses(view) {
  * @returns {Array} [addrs, table]
  */
 
-AbstractStack.prototype._getOutputAddresses = function _getOutputAddresses() {
-  const table = Object.create(null);
-  const addrs = [];
+AbstractStack.prototype._getOutputAddresses = function _getOutputAddresses () {
+  const table = Object.create(null)
+  const addrs = []
 
   for (const output of this.outputs) {
-    const addr = output.getAddress();
+    const addr = output.getAddress()
 
-    if (!addr)
-      continue;
+    if (!addr) continue
 
-    const hash = addr.getHash('hex');
+    const hash = addr.getHash('hex')
 
     if (!table[hash]) {
-      table[hash] = true;
-      addrs.push(addr);
+      table[hash] = true
+      addrs.push(addr)
     }
   }
 
-  return [addrs, table];
-};
+  return [addrs, table]
+}
 
 /**
  * Get all addresses.
@@ -1025,21 +1028,21 @@ AbstractStack.prototype._getOutputAddresses = function _getOutputAddresses() {
  * @returns {Array} [addrs, table]
  */
 
-AbstractStack.prototype._getAddresses = function _getAddresses(view) {
-  const [addrs, table] = this._getInputAddresses(view);
-  const output = this.getOutputAddresses();
+AbstractStack.prototype._getAddresses = function _getAddresses (view) {
+  const [addrs, table] = this._getInputAddresses(view)
+  const output = this.getOutputAddresses()
 
   for (const addr of output) {
-    const hash = addr.getHash('hex');
+    const hash = addr.getHash('hex')
 
     if (!table[hash]) {
-      table[hash] = true;
-      addrs.push(addr);
+      table[hash] = true
+      addrs.push(addr)
     }
   }
 
-  return [addrs, table];
-};
+  return [addrs, table]
+}
 
 /**
  * Get all input addresses.
@@ -1047,20 +1050,20 @@ AbstractStack.prototype._getAddresses = function _getAddresses(view) {
  * @returns {Address[]} addresses
  */
 
-AbstractStack.prototype.getInputAddresses = function getInputAddresses(view) {
-  const [addrs] = this._getInputAddresses(view);
-  return addrs;
-};
+AbstractStack.prototype.getInputAddresses = function getInputAddresses (view) {
+  const [addrs] = this._getInputAddresses(view)
+  return addrs
+}
 
 /**
  * Get all output addresses.
  * @returns {Address[]} addresses
  */
 
-AbstractStack.prototype.getOutputAddresses = function getOutputAddresses() {
-  const [addrs] = this._getOutputAddresses();
-  return addrs;
-};
+AbstractStack.prototype.getOutputAddresses = function getOutputAddresses () {
+  const [addrs] = this._getOutputAddresses()
+  return addrs
+}
 
 /**
  * Get all addresses.
@@ -1068,10 +1071,10 @@ AbstractStack.prototype.getOutputAddresses = function getOutputAddresses() {
  * @returns {Address[]} addresses
  */
 
-AbstractStack.prototype.getAddresses = function getAddresses(view) {
-  const [addrs] = this._getAddresses(view);
-  return addrs;
-};
+AbstractStack.prototype.getAddresses = function getAddresses (view) {
+  const [addrs] = this._getAddresses(view)
+  return addrs
+}
 
 /**
  * Get all input address hashes.
@@ -1079,40 +1082,38 @@ AbstractStack.prototype.getAddresses = function getAddresses(view) {
  * @returns {Hash[]} hashes
  */
 
-AbstractStack.prototype.getInputHashes = function getInputHashes(view, enc) {
+AbstractStack.prototype.getInputHashes = function getInputHashes (view, enc) {
   if (enc === 'hex') {
-    const [, table] = this._getInputAddresses(view);
-    return Object.keys(table);
+    const [, table] = this._getInputAddresses(view)
+    return Object.keys(table)
   }
 
-  const addrs = this.getInputAddresses(view);
-  const hashes = [];
+  const addrs = this.getInputAddresses(view)
+  const hashes = []
 
-  for (const addr of addrs)
-    hashes.push(addr.getHash());
+  for (const addr of addrs) hashes.push(addr.getHash())
 
-  return hashes;
-};
+  return hashes
+}
 
 /**
  * Get all output address hashes.
  * @returns {Hash[]} hashes
  */
 
-AbstractStack.prototype.getOutputHashes = function getOutputHashes(enc) {
+AbstractStack.prototype.getOutputHashes = function getOutputHashes (enc) {
   if (enc === 'hex') {
-    const [, table] = this._getOutputAddresses();
-    return Object.keys(table);
+    const [, table] = this._getOutputAddresses()
+    return Object.keys(table)
   }
 
-  const addrs = this.getOutputAddresses();
-  const hashes = [];
+  const addrs = this.getOutputAddresses()
+  const hashes = []
 
-  for (const addr of addrs)
-    hashes.push(addr.getHash());
+  for (const addr of addrs) hashes.push(addr.getHash())
 
-  return hashes;
-};
+  return hashes
+}
 
 /**
  * Get all address hashes.
@@ -1120,20 +1121,19 @@ AbstractStack.prototype.getOutputHashes = function getOutputHashes(enc) {
  * @returns {Hash[]} hashes
  */
 
-AbstractStack.prototype.getHashes = function getHashes(view, enc) {
+AbstractStack.prototype.getHashes = function getHashes (view, enc) {
   if (enc === 'hex') {
-    const [, table] = this._getAddresses(view);
-    return Object.keys(table);
+    const [, table] = this._getAddresses(view)
+    return Object.keys(table)
   }
 
-  const addrs = this.getAddresses(view);
-  const hashes = [];
+  const addrs = this.getAddresses(view)
+  const hashes = []
 
-  for (const addr of addrs)
-    hashes.push(addr.getHash());
+  for (const addr of addrs) hashes.push(addr.getHash())
 
-  return hashes;
-};
+  return hashes
+}
 
 /**
  * Test whether the transaction has
@@ -1142,17 +1142,15 @@ AbstractStack.prototype.getHashes = function getHashes(view, enc) {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.hasCoins = function hasCoins(view) {
-  if (this.inputs.length === 0)
-    return false;
+AbstractStack.prototype.hasCoins = function hasCoins (view) {
+  if (this.inputs.length === 0) return false
 
-  for (const {prevout} of this.inputs) {
-    if (!view.hasEntry(prevout))
-      return false;
+  for (const { prevout } of this.inputs) {
+    if (!view.hasEntry(prevout)) return false
   }
 
-  return true;
-};
+  return true
+}
 
 /**
  * Check finality of transaction by examining
@@ -1170,22 +1168,19 @@ AbstractStack.prototype.hasCoins = function hasCoins(view) {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.isFinal = function isFinal(height, time) {
-  const THRESHOLD = consensus.LOCKTIME_THRESHOLD;
+AbstractStack.prototype.isFinal = function isFinal (height, time) {
+  const THRESHOLD = consensus.LOCKTIME_THRESHOLD
 
-  if (this.locktime === 0)
-    return true;
+  if (this.locktime === 0) return true
 
-  if (this.locktime < (this.locktime < THRESHOLD ? height : time))
-    return true;
+  if (this.locktime < (this.locktime < THRESHOLD ? height : time)) return true
 
   for (const input of this.inputs) {
-    if (input.sequence !== 0xffffffff)
-      return false;
+    if (input.sequence !== 0xffffffff) return false
   }
 
-  return true;
-};
+  return true
+}
 
 /**
  * Verify the absolute locktime of a transaction.
@@ -1195,25 +1190,25 @@ AbstractStack.prototype.isFinal = function isFinal(height, time) {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.verifyLocktime = function verifyLocktime(index, predicate) {
-  const THRESHOLD = consensus.LOCKTIME_THRESHOLD;
-  const input = this.inputs[index];
+AbstractStack.prototype.verifyLocktime = function verifyLocktime (
+  index,
+  predicate
+) {
+  const THRESHOLD = consensus.LOCKTIME_THRESHOLD
+  const input = this.inputs[index]
 
-  assert(input, 'Input does not exist.');
-  assert(predicate >= 0, 'Locktime must be non-negative.');
+  assert(input, 'Input does not exist.')
+  assert(predicate >= 0, 'Locktime must be non-negative.')
 
   // Locktimes must be of the same type (blocks or seconds).
-  if ((this.locktime < THRESHOLD) !== (predicate < THRESHOLD))
-    return false;
+  if (this.locktime < THRESHOLD !== predicate < THRESHOLD) return false
 
-  if (predicate > this.locktime)
-    return false;
+  if (predicate > this.locktime) return false
 
-  if (input.sequence === 0xffffffff)
-    return false;
+  if (input.sequence === 0xffffffff) return false
 
-  return true;
-};
+  return true
+}
 
 /**
  * Verify the relative locktime of an input.
@@ -1223,61 +1218,55 @@ AbstractStack.prototype.verifyLocktime = function verifyLocktime(index, predicat
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.verifySequence = function verifySequence(index, predicate) {
-  const DISABLE_FLAG = consensus.SEQUENCE_DISABLE_FLAG;
-  const TYPE_FLAG = consensus.SEQUENCE_TYPE_FLAG;
-  const MASK = consensus.SEQUENCE_MASK;
-  const input = this.inputs[index];
+AbstractStack.prototype.verifySequence = function verifySequence (
+  index,
+  predicate
+) {
+  const DISABLE_FLAG = consensus.SEQUENCE_DISABLE_FLAG
+  const TYPE_FLAG = consensus.SEQUENCE_TYPE_FLAG
+  const MASK = consensus.SEQUENCE_MASK
+  const input = this.inputs[index]
 
-  assert(input, 'Input does not exist.');
-  assert(predicate >= 0, 'Locktime must be non-negative.');
+  assert(input, 'Input does not exist.')
+  assert(predicate >= 0, 'Locktime must be non-negative.')
 
   // For future softfork capability.
-  if (predicate & DISABLE_FLAG)
-    return true;
+  if (predicate & DISABLE_FLAG) return true
 
   // Version must be >=2.
-  if (this.version < 2)
-    return false;
+  if (this.version < 2) return false
 
   // Cannot use the disable flag without
   // the predicate also having the disable
   // flag (for future softfork capability).
-  if (input.sequence & DISABLE_FLAG)
-    return false;
+  if (input.sequence & DISABLE_FLAG) return false
 
   // Locktimes must be of the same type (blocks or seconds).
-  if ((input.sequence & TYPE_FLAG) !== (predicate & TYPE_FLAG))
-    return false;
+  if ((input.sequence & TYPE_FLAG) !== (predicate & TYPE_FLAG)) return false
 
-  if ((predicate & MASK) > (input.sequence & MASK))
-    return false;
+  if ((predicate & MASK) > (input.sequence & MASK)) return false
 
-  return true;
-};
+  return true
+}
 
 /**
  * Calculate legacy (inaccurate) sigop count.
  * @returns {Number} sigop count
  */
 
-AbstractStack.prototype.getLegacySigops = function getLegacySigops() {
-  if (this._sigops !== -1)
-    return this._sigops;
+AbstractStack.prototype.getLegacySigops = function getLegacySigops () {
+  if (this._sigops !== -1) return this._sigops
 
-  let total = 0;
+  let total = 0
 
-  for (const input of this.inputs)
-    total += input.script.getSigops(false);
+  for (const input of this.inputs) total += input.script.getSigops(false)
 
-  for (const output of this.outputs)
-    total += output.script.getSigops(false);
+  for (const output of this.outputs) total += output.script.getSigops(false)
 
-  if (!this.mutable)
-    this._sigops = total;
+  if (!this.mutable) this._sigops = total
 
-  return total;
-};
+  return total
+}
 
 /**
  * Calculate accurate sigop count, taking into account redeem scripts.
@@ -1285,27 +1274,25 @@ AbstractStack.prototype.getLegacySigops = function getLegacySigops() {
  * @returns {Number} sigop count
  */
 
-AbstractStack.prototype.getScripthashSigops = function getScripthashSigops(view) {
-  if (this.isCoinbase())
-    return 0;
+AbstractStack.prototype.getScripthashSigops = function getScripthashSigops (
+  view
+) {
+  if (this.isCoinbase()) return 0
 
-  let total = 0;
+  let total = 0
 
   for (const input of this.inputs) {
-    const coin = view.getOutputFor(input);
+    const coin = view.getOutputFor(input)
 
-    if (!coin)
-      continue;
+    if (!coin) continue
 
-    if (!coin.script.isScripthash())
-      continue;
+    if (!coin.script.isScripthash()) continue
 
-    total += coin.script.getScripthashSigops(input.script);
+    total += coin.script.getScripthashSigops(input.script)
   }
 
-  return total;
-};
-
+  return total
+}
 
 /**
  * Calculate sigops cost, taking into account witness programs.
@@ -1314,19 +1301,17 @@ AbstractStack.prototype.getScripthashSigops = function getScripthashSigops(view)
  * @returns {Number} sigop weight
  */
 
-AbstractStack.prototype.getSigopsCost = function getSigopsCost(view, flags) {
-  if (flags == null)
-    flags = Script.flags.STANDARD_VERIFY_FLAGS;
+AbstractStack.prototype.getSigopsCost = function getSigopsCost (view, flags) {
+  if (flags == null) flags = Script.flags.STANDARD_VERIFY_FLAGS
 
-  const scale = consensus.WITNESS_SCALE_FACTOR;
+  const scale = consensus.WITNESS_SCALE_FACTOR
 
-  let cost = this.getLegacySigops() * scale;
+  let cost = this.getLegacySigops() * scale
 
-  if (flags & Script.flags.VERIFY_P2SH)
-    cost += this.getScripthashSigops(view) * scale;
+  if (flags & Script.flags.VERIFY_P2SH) { cost += this.getScripthashSigops(view) * scale }
 
-  return cost;
-};
+  return cost
+}
 
 /**
  * Calculate virtual sigop count.
@@ -1335,10 +1320,10 @@ AbstractStack.prototype.getSigopsCost = function getSigopsCost(view, flags) {
  * @returns {Number} sigop count
  */
 
-AbstractStack.prototype.getSigops = function getSigops(view, flags) {
-  const scale = consensus.WITNESS_SCALE_FACTOR;
-  return (this.getSigopsCost(view, flags) + scale - 1) / scale | 0;
-};
+AbstractStack.prototype.getSigops = function getSigops (view, flags) {
+  const scale = consensus.WITNESS_SCALE_FACTOR
+  return ((this.getSigopsCost(view, flags) + scale - 1) / scale) | 0
+}
 
 /**
  * Non-contextual sanity checks for the transaction.
@@ -1347,10 +1332,10 @@ AbstractStack.prototype.getSigops = function getSigops(view, flags) {
  * @returns {Array} [result, reason, score]
  */
 
-AbstractStack.prototype.isSane = function isSane() {
-  const [valid] = this.checkSanity();
-  return valid;
-};
+AbstractStack.prototype.isSane = function isSane () {
+  const [valid] = this.checkSanity()
+  return valid
+}
 
 /**
  * Non-contextual sanity checks for the transaction.
@@ -1359,55 +1344,46 @@ AbstractStack.prototype.isSane = function isSane() {
  * @returns {Array} [valid, reason, score]
  */
 
-AbstractStack.prototype.checkSanity = function checkSanity() {
-  if (this.inputs.length === 0)
-    return [false, 'bad-txns-vin-empty', 100];
+AbstractStack.prototype.checkSanity = function checkSanity () {
+  if (this.inputs.length === 0) return [false, 'bad-txns-vin-empty', 100]
 
-  if (this.outputs.length === 0)
-    return [false, 'bad-txns-vout-empty', 100];
+  if (this.outputs.length === 0) return [false, 'bad-txns-vout-empty', 100]
 
-  if (this.getBaseSize() > consensus.MAX_BLOCK_SIZE)
-    return [false, 'bad-txns-oversize', 100];
+  if (this.getBaseSize() > consensus.MAX_BLOCK_SIZE) { return [false, 'bad-txns-oversize', 100] }
 
-  let total = 0;
+  let total = 0
 
   for (const output of this.outputs) {
-    if (output.value < 0)
-      return [false, 'bad-txns-vout-negative', 100];
+    if (output.value < 0) return [false, 'bad-txns-vout-negative', 100]
 
-    if (output.value > consensus.MAX_MONEY)
-      return [false, 'bad-txns-vout-toolarge', 100];
+    if (output.value > consensus.MAX_MONEY) { return [false, 'bad-txns-vout-toolarge', 100] }
 
-    total += output.value;
+    total += output.value
 
-    if (total < 0 || total > consensus.MAX_MONEY)
-      return [false, 'bad-txns-txouttotal-toolarge', 100];
+    if (total < 0 || total > consensus.MAX_MONEY) { return [false, 'bad-txns-txouttotal-toolarge', 100] }
   }
 
-  const prevout = new Set();
+  const prevout = new Set()
 
   for (const input of this.inputs) {
-    const key = input.prevout.toKey();
+    const key = input.prevout.toKey()
 
-    if (prevout.has(key))
-      return [false, 'bad-txns-inputs-duplicate', 100];
+    if (prevout.has(key)) return [false, 'bad-txns-inputs-duplicate', 100]
 
-    prevout.add(key);
+    prevout.add(key)
   }
 
   if (this.isCoinbase()) {
-    const size = this.inputs[0].script.getSize();
-    if (size < 2 || size > 100)
-      return [false, 'bad-cb-length', 100];
+    const size = this.inputs[0].script.getSize()
+    if (size < 2 || size > 100) return [false, 'bad-cb-length', 100]
   } else {
     for (const input of this.inputs) {
-      if (input.prevout.isNull())
-        return [false, 'bad-txns-prevout-null', 10];
+      if (input.prevout.isNull()) return [false, 'bad-txns-prevout-null', 10]
     }
   }
 
-  return [true, 'valid', 0];
-};
+  return [true, 'valid', 0]
+}
 
 /**
  * Non-contextual checks to determine whether the
@@ -1419,10 +1395,10 @@ AbstractStack.prototype.checkSanity = function checkSanity() {
  * @returns {Array} [valid, reason, score]
  */
 
-AbstractStack.prototype.isStandard = function isStandard() {
-  const [valid] = this.checkStandard();
-  return valid;
-};
+AbstractStack.prototype.isStandard = function isStandard () {
+  const [valid] = this.checkStandard()
+  return valid
+}
 
 /**
  * Non-contextual checks to determine whether the
@@ -1434,44 +1410,36 @@ AbstractStack.prototype.isStandard = function isStandard() {
  * @returns {Array} [valid, reason, score]
  */
 
-AbstractStack.prototype.checkStandard = function checkStandard() {
-  if (this.version < 1 || this.version > policy.MAX_TX_VERSION)
-    return [false, 'version', 0];
+AbstractStack.prototype.checkStandard = function checkStandard () {
+  if (this.version < 1 || this.version > policy.MAX_TX_VERSION) { return [false, 'version', 0] }
 
-  if (this.getWeight() >= policy.MAX_TX_WEIGHT)
-    return [false, 'tx-size', 0];
+  if (this.getWeight() >= policy.MAX_TX_WEIGHT) return [false, 'tx-size', 0]
 
   for (const input of this.inputs) {
-    if (input.script.getSize() > 1650)
-      return [false, 'scriptsig-size', 0];
+    if (input.script.getSize() > 1650) return [false, 'scriptsig-size', 0]
 
-    if (!input.script.isPushOnly())
-      return [false, 'scriptsig-not-pushonly', 0];
+    if (!input.script.isPushOnly()) return [false, 'scriptsig-not-pushonly', 0]
   }
 
-  let nulldata = 0;
+  let nulldata = 0
 
   for (const output of this.outputs) {
-    if (!output.script.isStandard())
-      return [false, 'scriptpubkey', 0];
+    if (!output.script.isStandard()) return [false, 'scriptpubkey', 0]
 
     if (output.script.isNulldata()) {
-      nulldata++;
-      continue;
+      nulldata++
+      continue
     }
 
-    if (output.script.isMultisig() && !policy.BARE_MULTISIG)
-      return [false, 'bare-multisig', 0];
+    if (output.script.isMultisig() && !policy.BARE_MULTISIG) { return [false, 'bare-multisig', 0] }
 
-    if (output.isDust(policy.MIN_RELAY))
-      return [false, 'dust', 0];
+    if (output.isDust(policy.MIN_RELAY)) return [false, 'dust', 0]
   }
 
-  if (nulldata > 1)
-    return [false, 'multi-op-return', 0];
+  if (nulldata > 1) return [false, 'multi-op-return', 0]
 
-  return [true, 'valid', 0];
-};
+  return [true, 'valid', 0]
+}
 
 /**
  * Perform contextual checks to verify coin and input
@@ -1482,37 +1450,31 @@ AbstractStack.prototype.checkStandard = function checkStandard() {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.hasStandardInputs = function hasStandardInputs(view) {
-  if (this.isCoinbase())
-    return true;
+AbstractStack.prototype.hasStandardInputs = function hasStandardInputs (view) {
+  if (this.isCoinbase()) return true
 
   for (const input of this.inputs) {
-    const coin = view.getOutputFor(input);
+    const coin = view.getOutputFor(input)
 
-    if (!coin)
-      return false;
+    if (!coin) return false
 
-    if (coin.script.isPubkeyhash())
-      continue;
+    if (coin.script.isPubkeyhash()) continue
 
     if (coin.script.isScripthash()) {
-      const redeem = input.script.getRedeem();
+      const redeem = input.script.getRedeem()
 
-      if (!redeem)
-        return false;
+      if (!redeem) return false
 
-      if (redeem.getSigops(true) > policy.MAX_P2SH_SIGOPS)
-        return false;
+      if (redeem.getSigops(true) > policy.MAX_P2SH_SIGOPS) return false
 
-      continue;
+      continue
     }
 
-    if (coin.script.isUnknown())
-      return false;
+    if (coin.script.isUnknown()) return false
   }
 
-  return true;
-};
+  return true
+}
 
 /**
  * Perform contextual checks to verify coin and witness standardness.
@@ -1521,114 +1483,93 @@ AbstractStack.prototype.hasStandardInputs = function hasStandardInputs(view) {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.hasStandardWitness = function hasStandardWitness(view) {
-  if (this.isCoinbase())
-    return true;
+AbstractStack.prototype.hasStandardWitness = function hasStandardWitness (view) {
+  if (this.isCoinbase()) return true
 
   for (const input of this.inputs) {
-    const witness = input.witness;
-    const coin = view.getOutputFor(input);
+    const witness = input.witness
+    const coin = view.getOutputFor(input)
 
-    if (!coin)
-      continue;
+    if (!coin) continue
 
-    if (witness.items.length === 0)
-      continue;
+    if (witness.items.length === 0) continue
 
-    let prev = coin.script;
+    let prev = coin.script
 
     if (prev.isScripthash()) {
-      prev = input.script.getRedeem();
-      if (!prev)
-        return false;
+      prev = input.script.getRedeem()
+      if (!prev) return false
     }
 
-    if (!prev.isProgram())
-      return false;
+    if (!prev.isProgram()) return false
 
     if (prev.isWitnessPubkeyhash()) {
-      if (witness.items.length !== 2)
-        return false;
+      if (witness.items.length !== 2) return false
 
-      if (witness.items[0].length > 73)
-        return false;
+      if (witness.items[0].length > 73) return false
 
-      if (witness.items[1].length > 65)
-        return false;
+      if (witness.items[1].length > 65) return false
 
-      continue;
+      continue
     }
 
     if (prev.isWitnessScripthash()) {
-      if (witness.items.length - 1 > policy.MAX_P2WSH_STACK)
-        return false;
+      if (witness.items.length - 1 > policy.MAX_P2WSH_STACK) return false
 
       for (let i = 0; i < witness.items.length - 1; i++) {
-        const item = witness.items[i];
-        if (item.length > policy.MAX_P2WSH_PUSH)
-          return false;
+        const item = witness.items[i]
+        if (item.length > policy.MAX_P2WSH_PUSH) return false
       }
 
-      const raw = witness.items[witness.items.length - 1];
+      const raw = witness.items[witness.items.length - 1]
 
-      if (raw.length > policy.MAX_P2WSH_SIZE)
-        return false;
+      if (raw.length > policy.MAX_P2WSH_SIZE) return false
 
-      const redeem = Script.fromRaw(raw);
+      const redeem = Script.fromRaw(raw)
 
       if (redeem.isPubkey()) {
-        if (witness.items.length - 1 !== 1)
-          return false;
+        if (witness.items.length - 1 !== 1) return false
 
-        if (witness.items[0].length > 73)
-          return false;
+        if (witness.items[0].length > 73) return false
 
-        continue;
+        continue
       }
 
       if (redeem.isPubkeyhash()) {
-        if (input.witness.items.length - 1 !== 2)
-          return false;
+        if (input.witness.items.length - 1 !== 2) return false
 
-        if (witness.items[0].length > 73)
-          return false;
+        if (witness.items[0].length > 73) return false
 
-        if (witness.items[1].length > 65)
-          return false;
+        if (witness.items[1].length > 65) return false
 
-        continue;
+        continue
       }
 
-      const [m] = redeem.getMultisig();
+      const [m] = redeem.getMultisig()
 
       if (m !== -1) {
-        if (witness.items.length - 1 !== m + 1)
-          return false;
+        if (witness.items.length - 1 !== m + 1) return false
 
-        if (witness.items[0].length !== 0)
-          return false;
+        if (witness.items[0].length !== 0) return false
 
         for (let i = 1; i < witness.items.length - 1; i++) {
-          const item = witness.items[i];
-          if (item.length > 73)
-            return false;
+          const item = witness.items[i]
+          if (item.length > 73) return false
         }
       }
 
-      continue;
+      continue
     }
 
-    if (witness.items.length > policy.MAX_P2WSH_STACK)
-      return false;
+    if (witness.items.length > policy.MAX_P2WSH_STACK) return false
 
     for (const item of witness.items) {
-      if (item.length > policy.MAX_P2WSH_PUSH)
-        return false;
+      if (item.length > policy.MAX_P2WSH_PUSH) return false
     }
   }
 
-  return true;
-};
+  return true
+}
 
 /**
  * Perform contextual checks to verify input, output,
@@ -1643,10 +1584,10 @@ AbstractStack.prototype.hasStandardWitness = function hasStandardWitness(view) {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.verifyInputs = function verifyInputs(view, height) {
-  const [fee] = this.checkInputs(view, height);
-  return fee !== -1;
-};
+AbstractStack.prototype.verifyInputs = function verifyInputs (view, height) {
+  const [fee] = this.checkInputs(view, height)
+  return fee !== -1
+}
 
 /**
  * Perform contextual checks to verify input, output,
@@ -1661,50 +1602,43 @@ AbstractStack.prototype.verifyInputs = function verifyInputs(view, height) {
  * @returns {Array} [fee, reason, score]
  */
 
-AbstractStack.prototype.checkInputs = function checkInputs(view, height) {
-  assert(typeof height === 'number');
+AbstractStack.prototype.checkInputs = function checkInputs (view, height) {
+  assert(typeof height === 'number')
 
-  let total = 0;
+  let total = 0
 
-  for (const {prevout} of this.inputs) {
-    const entry = view.getEntry(prevout);
+  for (const { prevout } of this.inputs) {
+    const entry = view.getEntry(prevout)
 
-    if (!entry)
-      return [-1, 'bad-txns-inputs-missingorspent', 0];
+    if (!entry) return [-1, 'bad-txns-inputs-missingorspent', 0]
 
     if (entry.coinbase) {
-      if (height - entry.height < consensus.COINBASE_MATURITY)
-        return [-1, 'bad-txns-premature-spend-of-coinbase', 0];
+      if (height - entry.height < consensus.COINBASE_MATURITY) { return [-1, 'bad-txns-premature-spend-of-coinbase', 0] }
     }
 
-    const coin = view.getOutput(prevout);
-    assert(coin);
+    const coin = view.getOutput(prevout)
+    assert(coin)
 
-    if (coin.value < 0 || coin.value > consensus.MAX_MONEY)
-      return [-1, 'bad-txns-inputvalues-outofrange', 100];
+    if (coin.value < 0 || coin.value > consensus.MAX_MONEY) { return [-1, 'bad-txns-inputvalues-outofrange', 100] }
 
-    total += coin.value;
+    total += coin.value
 
-    if (total < 0 || total > consensus.MAX_MONEY)
-      return [-1, 'bad-txns-inputvalues-outofrange', 100];
+    if (total < 0 || total > consensus.MAX_MONEY) { return [-1, 'bad-txns-inputvalues-outofrange', 100] }
   }
 
   // Overflows already checked in `isSane()`.
-  const value = this.getOutputValue();
+  const value = this.getOutputValue()
 
-  if (total < value)
-    return [-1, 'bad-txns-in-belowout', 100];
+  if (total < value) return [-1, 'bad-txns-in-belowout', 100]
 
-  const fee = total - value;
+  const fee = total - value
 
-  if (fee < 0)
-    return [-1, 'bad-txns-fee-negative', 100];
+  if (fee < 0) return [-1, 'bad-txns-fee-negative', 100]
 
-  if (fee > consensus.MAX_MONEY)
-    return [-1, 'bad-txns-fee-outofrange', 100];
+  if (fee > consensus.MAX_MONEY) return [-1, 'bad-txns-fee-outofrange', 100]
 
-  return [fee, 'valid', 0];
-};
+  return [fee, 'valid', 0]
+}
 
 /**
  * Calculate the modified size of the transaction. This
@@ -1714,18 +1648,16 @@ AbstractStack.prototype.checkInputs = function checkInputs(view, height) {
  * @returns {Number} Modified size.
  */
 
-AbstractStack.prototype.getModifiedSize = function getModifiedSize(size) {
-  if (size == null)
-    size = this.getVirtualSize();
+AbstractStack.prototype.getModifiedSize = function getModifiedSize (size) {
+  if (size == null) size = this.getVirtualSize()
 
   for (const input of this.inputs) {
-    const offset = 41 + Math.min(110, input.script.getSize());
-    if (size > offset)
-      size -= offset;
+    const offset = 41 + Math.min(110, input.script.getSize())
+    if (size > offset) size -= offset
   }
 
-  return size;
-};
+  return size
+}
 
 /**
  * Calculate the transaction priority.
@@ -1736,36 +1668,32 @@ AbstractStack.prototype.getModifiedSize = function getModifiedSize(size) {
  * @returns {Number}
  */
 
-AbstractStack.prototype.getPriority = function getPriority(view, height, size) {
-  assert(typeof height === 'number', 'Must pass in height.');
+AbstractStack.prototype.getPriority = function getPriority (view, height, size) {
+  assert(typeof height === 'number', 'Must pass in height.')
 
-  if (this.isCoinbase())
-    return 0;
+  if (this.isCoinbase()) return 0
 
-  if (size == null)
-    size = this.getVirtualSize();
+  if (size == null) size = this.getVirtualSize()
 
-  let sum = 0;
+  let sum = 0
 
-  for (const {prevout} of this.inputs) {
-    const coin = view.getOutput(prevout);
+  for (const { prevout } of this.inputs) {
+    const coin = view.getOutput(prevout)
 
-    if (!coin)
-      continue;
+    if (!coin) continue
 
-    const coinHeight = view.getHeight(prevout);
+    const coinHeight = view.getHeight(prevout)
 
-    if (coinHeight === -1)
-      continue;
+    if (coinHeight === -1) continue
 
     if (coinHeight <= height) {
-      const age = height - coinHeight;
-      sum += coin.value * age;
+      const age = height - coinHeight
+      sum += coin.value * age
     }
   }
 
-  return Math.floor(sum / size);
-};
+  return Math.floor(sum / size)
+}
 
 /**
  * Calculate the transaction's on-chain value.
@@ -1773,28 +1701,25 @@ AbstractStack.prototype.getPriority = function getPriority(view, height, size) {
  * @returns {Number}
  */
 
-AbstractStack.prototype.getChainValue = function getChainValue(view) {
-  if (this.isCoinbase())
-    return 0;
+AbstractStack.prototype.getChainValue = function getChainValue (view) {
+  if (this.isCoinbase()) return 0
 
-  let value = 0;
+  let value = 0
 
-  for (const {prevout} of this.inputs) {
-    const coin = view.getOutput(prevout);
+  for (const { prevout } of this.inputs) {
+    const coin = view.getOutput(prevout)
 
-    if (!coin)
-      continue;
+    if (!coin) continue
 
-    const height = view.getHeight(prevout);
+    const height = view.getHeight(prevout)
 
-    if (height === -1)
-      continue;
+    if (height === -1) continue
 
-    value += coin.value;
+    value += coin.value
   }
 
-  return value;
-};
+  return value
+}
 
 /**
  * Determine whether the transaction is above the
@@ -1809,10 +1734,10 @@ AbstractStack.prototype.getChainValue = function getChainValue(view) {
  * @returns {Boolean}
  */
 
-AbstractStack.prototype.isFree = function isFree(view, height, size) {
-  const priority = this.getPriority(view, height, size);
-  return priority > policy.FREE_THRESHOLD;
-};
+AbstractStack.prototype.isFree = function isFree (view, height, size) {
+  const priority = this.getPriority(view, height, size)
+  return priority > policy.FREE_THRESHOLD
+}
 
 /**
  * Calculate minimum fee in order for the transaction
@@ -1823,12 +1748,11 @@ AbstractStack.prototype.isFree = function isFree(view, height, size) {
  * @returns {Amount} fee
  */
 
-AbstractStack.prototype.getMinFee = function getMinFee(size, rate) {
-  if (size == null)
-    size = this.getVirtualSize();
+AbstractStack.prototype.getMinFee = function getMinFee (size, rate) {
+  if (size == null) size = this.getVirtualSize()
 
-  return policy.getMinFee(size, rate);
-};
+  return policy.getMinFee(size, rate)
+}
 
 /**
  * Calculate the minimum fee in order for the transaction
@@ -1840,12 +1764,11 @@ AbstractStack.prototype.getMinFee = function getMinFee(size, rate) {
  * @returns {Amount} fee
  */
 
-AbstractStack.prototype.getRoundFee = function getRoundFee(size, rate) {
-  if (size == null)
-    size = this.getVirtualSize();
+AbstractStack.prototype.getRoundFee = function getRoundFee (size, rate) {
+  if (size == null) size = this.getVirtualSize()
 
-  return policy.getRoundFee(size, rate);
-};
+  return policy.getRoundFee(size, rate)
+}
 
 /**
  * Calculate the transaction's rate based on size
@@ -1855,34 +1778,30 @@ AbstractStack.prototype.getRoundFee = function getRoundFee(size, rate) {
  * @returns {Rate}
  */
 
-AbstractStack.prototype.getRate = function getRate(view, size) {
-  const fee = this.getFee(view);
+AbstractStack.prototype.getRate = function getRate (view, size) {
+  const fee = this.getFee(view)
 
-  if (fee < 0)
-    return 0;
+  if (fee < 0) return 0
 
-  if (size == null)
-    size = this.getVirtualSize();
+  if (size == null) size = this.getVirtualSize()
 
-  return policy.getRate(size, fee);
-};
+  return policy.getRate(size, fee)
+}
 
 /**
  * Get all unique outpoint hashes.
  * @returns {Hash[]} Outpoint hashes.
  */
 
-AbstractStack.prototype.getPrevout = function getPrevout() {
-  if (this.isCoinbase())
-    return [];
+AbstractStack.prototype.getPrevout = function getPrevout () {
+  if (this.isCoinbase()) return []
 
-  const prevout = Object.create(null);
+  const prevout = Object.create(null)
 
-  for (const input of this.inputs)
-    prevout[input.prevout.hash] = true;
+  for (const input of this.inputs) prevout[input.prevout.hash] = true
 
-  return Object.keys(prevout);
-};
+  return Object.keys(prevout)
+}
 
 /**
  * Test a transaction against a bloom filter using
@@ -1895,97 +1814,93 @@ AbstractStack.prototype.getPrevout = function getPrevout() {
  * @returns {Boolean} True if the transaction matched.
  */
 
-AbstractStack.prototype.isWatched = function isWatched(filter) {
-  let found = false;
+AbstractStack.prototype.isWatched = function isWatched (filter) {
+  let found = false
 
   // 1. Test the tx hash
-  if (filter.test(this.hash()))
-    found = true;
+  if (filter.test(this.hash())) found = true
 
   // 2. Test data elements in output scripts
   //    (may need to update filter on match)
   for (let i = 0; i < this.outputs.length; i++) {
-    const output = this.outputs[i];
+    const output = this.outputs[i]
     // Test the output script
     if (output.script.test(filter)) {
       if (filter.update === Bloom.flags.ALL) {
-        const prevout = Outpoint.fromTX(this, i);
-        filter.add(prevout.toRaw());
+        const prevout = Outpoint.fromTX(this, i)
+        filter.add(prevout.toRaw())
       } else if (filter.update === Bloom.flags.PUBKEY_ONLY) {
         if (output.script.isPubkey() || output.script.isMultisig()) {
-          const prevout = Outpoint.fromTX(this, i);
-          filter.add(prevout.toRaw());
+          const prevout = Outpoint.fromTX(this, i)
+          filter.add(prevout.toRaw())
         }
       }
-      found = true;
+      found = true
     }
   }
 
-  if (found)
-    return found;
+  if (found) return found
 
   // 3. Test prev_out structure
   // 4. Test data elements in input scripts
   for (const input of this.inputs) {
-    const prevout = input.prevout;
+    const prevout = input.prevout
 
     // Test the COutPoint structure
-    if (filter.test(prevout.toRaw()))
-      return true;
+    if (filter.test(prevout.toRaw())) return true
 
     // Test the input script
-    if (input.script.test(filter))
-      return true;
+    if (input.script.test(filter)) return true
   }
 
   // 5. No match
-  return false;
-};
+  return false
+}
 
 /**
  * Get little-endian tx hash.
  * @returns {Hash}
  */
 
-AbstractStack.prototype.rhash = function rhash() {
-  return util.revHex(this.hash('hex'));
-};
+AbstractStack.prototype.rhash = function rhash () {
+  return util.revHex(this.hash('hex'))
+}
 
 /**
  * Get little-endian wtx hash.
  * @returns {Hash}
  */
 
-AbstractStack.prototype.rwhash = function rwhash() {
-  return true 
-};
+AbstractStack.prototype.rwhash = function rwhash () {
+  return true
+}
 
 /**
  * Get little-endian tx hash.
  * @returns {Hash}
  */
 
-AbstractStack.prototype.txid = function txid() {
-  return this.rhash();
-};
+AbstractStack.prototype.txid = function txid () {
+  return this.rhash()
+}
 
 /**
  * Get little-endian wtx hash.
  * @returns {Hash}
  */
 
-AbstractStack.prototype.wtxid = function wtxid() {
-  return this.rwhash();
-};
+AbstractStack.prototype.wtxid = function wtxid () {
+  return this.rwhash()
+}
 
 /**
  * Convert the tx to an inv item.
  * @returns {InvItem}
  */
 
-AbstractStack.prototype.toInv = function toInv() {
-  return new InvItem(InvItem.types.AbstractStack, this.hash('hex'));
-};
+AbstractStack.prototype.toInv = function toInv () {
+  return new InvItem(InvItem.types.AbstractStack, this.hash('hex'))
+}
 
 /**
  * Inspect the transaction and return a more
@@ -1993,9 +1908,9 @@ AbstractStack.prototype.toInv = function toInv() {
  * @returns {Object}
  */
 
-AbstractStack.prototype.inspect = function inspect() {
-  return this.format();
-};
+AbstractStack.prototype.inspect = function inspect () {
+  return this.format()
+}
 
 /**
  * Inspect the transaction and return a more
@@ -2006,32 +1921,30 @@ AbstractStack.prototype.inspect = function inspect() {
  * @returns {Object}
  */
 
-AbstractStack.prototype.format = function format(view, entry, index) {
-  let rate = 0;
-  let fee = 0;
-  let height = -1;
-  let block = null;
-  let time = 0;
-  let date = null;
+AbstractStack.prototype.format = function format (view, entry, index) {
+  let rate = 0
+  let fee = 0
+  let height = -1
+  let block = null
+  let time = 0
+  let date = null
 
   if (view) {
-    fee = this.getFee(view);
-    rate = this.getRate(view);
+    fee = this.getFee(view)
+    rate = this.getRate(view)
 
     // Rate can exceed 53 bits in testing.
-    if (!Number.isSafeInteger(rate))
-      rate = 0;
+    if (!Number.isSafeInteger(rate)) rate = 0
   }
 
   if (entry) {
-    height = entry.height;
-    block = util.revHex(entry.hash);
-    time = entry.time;
-    date = util.date(time);
+    height = entry.height
+    block = util.revHex(entry.hash)
+    time = entry.time
+    date = util.date(time)
   }
 
-  if (index == null)
-    index = -1;
+  if (index == null) index = -1
 
   return {
     hash: this.txid(),
@@ -2039,13 +1952,13 @@ AbstractStack.prototype.format = function format(view, entry, index) {
     virtualSize: this.getVirtualSize(),
     value: Amount.btc(this.getOutputValue()),
     index: index,
-    inputs: this.inputs.map((input) => {
-      const coin = view ? view.getOutputFor(input) : null;
-      return input.format(coin);
+    inputs: this.inputs.map(input => {
+      const coin = view ? view.getOutputFor(input) : null
+      return input.format(coin)
     }),
     outputs: this.outputs
-  };
-};
+  }
+}
 
 /**
  * Convert the transaction to an object suitable
@@ -2053,9 +1966,9 @@ AbstractStack.prototype.format = function format(view, entry, index) {
  * @returns {Object}
  */
 
-AbstractStack.prototype.toJSON = function toJSON() {
-  return this.getJSON();
-};
+AbstractStack.prototype.toJSON = function toJSON () {
+  return this.getJSON()
+}
 
 /**
  * Convert the transaction to an object suitable
@@ -2069,28 +1982,32 @@ AbstractStack.prototype.toJSON = function toJSON() {
  * @returns {Object}
  */
 
-AbstractStack.prototype.getJSON = function getJSON(network, view, entry, index) {
-  let rate, fee, height, block, time, date;
+AbstractStack.prototype.getJSON = function getJSON (
+  network,
+  view,
+  entry,
+  index
+) {
+  let rate, fee, height, block, time, date
 
   if (view) {
-    fee = this.getFee(view);
-    rate = this.getRate(view);
+    fee = this.getFee(view)
+    rate = this.getRate(view)
 
     // Rate can exceed 53 bits in testing.
-    if (!Number.isSafeInteger(rate))
-      rate = 0;
+    if (!Number.isSafeInteger(rate)) rate = 0
   }
 
   if (entry) {
-    height = entry.height;
-    block = util.revHex(entry.hash);
-    time = entry.time;
-    date = util.date(time);
+    height = entry.height
+    block = util.revHex(entry.hash)
+    time = entry.time
+    date = util.date(time)
   }
 
-  //network = Network.get(network);
+  // network = Network.get(network);
 
-  network = null;
+  network = null
   return {
     hash: this.txid(),
     fee: fee,
@@ -2102,17 +2019,17 @@ AbstractStack.prototype.getJSON = function getJSON(network, view, entry, index) 
     date: date,
     index: index,
     version: this.version,
-    inputs: this.inputs.map((input) => {
-      const coin = view ? view.getCoinFor(input) : null;
-      return input.getJSON(network, coin);
+    inputs: this.inputs.map(input => {
+      const coin = view ? view.getCoinFor(input) : null
+      return input.getJSON(network, coin)
     }),
-    outputs: this.outputs.map((output) => {
-      return output.getJSON(network);
+    outputs: this.outputs.map(output => {
+      return output.getJSON(network)
     }),
     locktime: this.locktime,
     hex: this.toRaw().toString('hex')
-  };
-};
+  }
+}
 
 /**
  * Inject properties from a json object.
@@ -2120,25 +2037,23 @@ AbstractStack.prototype.getJSON = function getJSON(network, view, entry, index) 
  * @param {Object} json
  */
 
-AbstractStack.prototype.fromJSON = function fromJSON(json) {
-  assert(json, 'TX data is required.');
-  assert(util.isU32(json.version), 'Version must be a uint32.');
-  assert(Array.isArray(json.inputs), 'Inputs must be an array.');
-  assert(Array.isArray(json.outputs), 'Outputs must be an array.');
-  assert(util.isU32(json.locktime), 'Locktime must be a uint32.');
+AbstractStack.prototype.fromJSON = function fromJSON (json) {
+  assert(json, 'TX data is required.')
+  assert(util.isU32(json.version), 'Version must be a uint32.')
+  assert(Array.isArray(json.inputs), 'Inputs must be an array.')
+  assert(Array.isArray(json.outputs), 'Outputs must be an array.')
+  assert(util.isU32(json.locktime), 'Locktime must be a uint32.')
 
-  this.version = json.version;
+  this.version = json.version
 
-  for (const input of json.inputs)
-    this.inputs.push(Input.fromJSON(input));
+  for (const input of json.inputs) this.inputs.push(Input.fromJSON(input))
 
-  for (const output of json.outputs)
-    this.outputs.push(Output.fromJSON(output));
+  for (const output of json.outputs) this.outputs.push(Output.fromJSON(output))
 
-  this.locktime = json.locktime;
+  this.locktime = json.locktime
 
-  return this;
-};
+  return this
+}
 
 /**
  * Instantiate a transaction from a
@@ -2147,9 +2062,9 @@ AbstractStack.prototype.fromJSON = function fromJSON(json) {
  * @returns {TX}
  */
 
-AbstractStack.fromJSON = function fromJSON(json) {
-  return new AbstractStack().fromJSON(json);
-};
+AbstractStack.fromJSON = function fromJSON (json) {
+  return new AbstractStack().fromJSON(json)
+}
 
 /**
  * Instantiate a transaction from a serialized Buffer.
@@ -2158,11 +2073,10 @@ AbstractStack.fromJSON = function fromJSON(json) {
  * @returns {TX}
  */
 
-AbstractStack.fromRaw = function fromRaw(data, enc) {
-  if (typeof data === 'string')
-    data = Buffer.from(data, enc);
-  return new AbstractStack().fromRaw(data);
-};
+AbstractStack.fromRaw = function fromRaw (data, enc) {
+  if (typeof data === 'string') data = Buffer.from(data, enc)
+  return new AbstractStack().fromRaw(data)
+}
 
 /**
  * Instantiate a transaction from a buffer reader.
@@ -2170,9 +2084,9 @@ AbstractStack.fromRaw = function fromRaw(data, enc) {
  * @returns {TX}
  */
 
-AbstractStack.fromReader = function fromReader(br) {
-  return new AbstractStack().fromReader(br);
-};
+AbstractStack.fromReader = function fromReader (br) {
+  return new AbstractStack().fromReader(br)
+}
 
 /**
  * Inject properties from serialized data.
@@ -2180,9 +2094,9 @@ AbstractStack.fromReader = function fromReader(br) {
  * @param {Buffer} data
  */
 
-AbstractStack.prototype.fromRaw = function fromRaw(data) {
-  return this.fromReader(new BufferReader(data));
-};
+AbstractStack.prototype.fromRaw = function fromRaw (data) {
+  return this.fromReader(new BufferReader(data))
+}
 
 /**
  * Inject properties from buffer reader.
@@ -2190,36 +2104,33 @@ AbstractStack.prototype.fromRaw = function fromRaw(data) {
  * @param {BufferReader} br
  */
 
-AbstractStack.prototype.fromReader = function fromReader(br) {
-  if (hasWitnessBytes(br))
-    return this.fromWitnessReader(br);
+AbstractStack.prototype.fromReader = function fromReader (br) {
+  if (hasWitnessBytes(br)) return this.fromWitnessReader(br)
 
-  br.start();
+  br.start()
 
-  this.version = br.readU32();
+  this.version = br.readU32()
 
-  const inCount = br.readVarint();
+  const inCount = br.readVarint()
 
-  for (let i = 0; i < inCount; i++)
-    this.inputs.push(Input.fromReader(br));
+  for (let i = 0; i < inCount; i++) this.inputs.push(Input.fromReader(br))
 
-  const outCount = br.readVarint();
+  const outCount = br.readVarint()
 
-  for (let i = 0; i < outCount; i++)
-    this.outputs.push(Output.fromReader(br));
+  for (let i = 0; i < outCount; i++) this.outputs.push(Output.fromReader(br))
 
-  this.locktime = br.readU32();
+  this.locktime = br.readU32()
 
   if (!this.mutable) {
-    this._raw = br.endData();
-    this._size = this._raw.length;
-    this._witness = 0;
+    this._raw = br.endData()
+    this._size = this._raw.length
+    this._witness = 0
   } else {
-    br.end();
+    br.end()
   }
 
-  return this;
-};
+  return this
+}
 
 /**
  * Inject properties from serialized
@@ -2228,65 +2139,60 @@ AbstractStack.prototype.fromReader = function fromReader(br) {
  * @param {BufferReader} br
  */
 
-AbstractStack.prototype.fromWitnessReader = function fromWitnessReader(br) {
-  br.start();
+AbstractStack.prototype.fromWitnessReader = function fromWitnessReader (br) {
+  br.start()
 
-  this.version = br.readU32();
+  this.version = br.readU32()
 
-  assert(br.readU8() === 0, 'Non-zero marker.');
+  assert(br.readU8() === 0, 'Non-zero marker.')
 
-  let flags = br.readU8();
+  let flags = br.readU8()
 
-  assert(flags !== 0, 'Flags byte is zero.');
+  assert(flags !== 0, 'Flags byte is zero.')
 
-  const inCount = br.readVarint();
+  const inCount = br.readVarint()
 
-  for (let i = 0; i < inCount; i++)
-    this.inputs.push(Input.fromReader(br));
+  for (let i = 0; i < inCount; i++) this.inputs.push(Input.fromReader(br))
 
-  const outCount = br.readVarint();
+  const outCount = br.readVarint()
 
-  for (let i = 0; i < outCount; i++)
-    this.outputs.push(Output.fromReader(br));
+  for (let i = 0; i < outCount; i++) this.outputs.push(Output.fromReader(br))
 
-  let witness = 0;
-  let hasWitness = false;
+  let witness = 0
+  let hasWitness = false
 
   if (flags & 1) {
-    flags ^= 1;
+    flags ^= 1
 
-    witness = br.offset;
+    witness = br.offset
 
     for (const input of this.inputs) {
-      input.witness.fromReader(br);
-      if (input.witness.items.length > 0)
-        hasWitness = true;
+      input.witness.fromReader(br)
+      if (input.witness.items.length > 0) hasWitness = true
     }
 
-    witness = (br.offset - witness) + 2;
+    witness = br.offset - witness + 2
   }
 
-  if (flags !== 0)
-    throw new Error('Unknown witness flag.');
+  if (flags !== 0) throw new Error('Unknown witness flag.')
 
   // We'll never be able to reserialize
   // this to get the regular txid, and
   // there's no way it's valid anyway.
-  if (this.inputs.length === 0 && this.outputs.length !== 0)
-    throw new Error('Zero input witness tx.');
+  if (this.inputs.length === 0 && this.outputs.length !== 0) { throw new Error('Zero input witness tx.') }
 
-  this.locktime = br.readU32();
+  this.locktime = br.readU32()
 
   if (!this.mutable && hasWitness) {
-    this._raw = br.endData();
-    this._size = this._raw.length;
-    this._witness = witness;
+    this._raw = br.endData()
+    this._size = this._raw.length
+    this._witness = witness
   } else {
-    br.end();
+    br.end()
   }
 
-  return this;
-};
+  return this
+}
 
 /**
  * Serialize transaction without witness.
@@ -2294,14 +2200,13 @@ AbstractStack.prototype.fromWitnessReader = function fromWitnessReader(br) {
  * @returns {RawTX}
  */
 
-AbstractStack.prototype.frameNormal = function frameNormal() {
-  const raw = this.getNormalSizes();
-  const bw = new StaticWriter(raw.size);
-  this.writeNormal(bw);
-  raw.data = bw.render();
-  return raw;
-};
-
+AbstractStack.prototype.frameNormal = function frameNormal () {
+  const raw = this.getNormalSizes()
+  const bw = new StaticWriter(raw.size)
+  this.writeNormal(bw)
+  raw.data = bw.render()
+  return raw
+}
 
 /**
  * Serialize transaction without witness.
@@ -2310,27 +2215,23 @@ AbstractStack.prototype.frameNormal = function frameNormal() {
  * @returns {RawTX}
  */
 
-AbstractStack.prototype.writeNormal = function writeNormal(bw) {
-  if (this.inputs.length === 0 && this.outputs.length !== 0)
-    throw new Error('Cannot serialize zero-input tx.');
+AbstractStack.prototype.writeNormal = function writeNormal (bw) {
+  if (this.inputs.length === 0 && this.outputs.length !== 0) { throw new Error('Cannot serialize zero-input tx.') }
 
-  bw.writeU32(this.version);
+  bw.writeU32(this.version)
 
-  bw.writeVarint(this.inputs.length);
+  bw.writeVarint(this.inputs.length)
 
-  for (const input of this.inputs)
-    input.toWriter(bw);
+  for (const input of this.inputs) input.toWriter(bw)
 
-  bw.writeVarint(this.outputs.length);
+  bw.writeVarint(this.outputs.length)
 
-  for (const output of this.outputs)
-    output.toWriter(bw);
+  for (const output of this.outputs) output.toWriter(bw)
 
-  bw.writeU32(this.locktime);
+  bw.writeU32(this.locktime)
 
-  return bw;
-};
-
+  return bw
+}
 
 /**
  * Calculate the real size of the transaction
@@ -2338,26 +2239,23 @@ AbstractStack.prototype.writeNormal = function writeNormal(bw) {
  * @returns {RawTX}
  */
 
-AbstractStack.prototype.getNormalSizes = function getNormalSizes() {
-  let base = 0;
+AbstractStack.prototype.getNormalSizes = function getNormalSizes () {
+  let base = 0
 
-  base += 4;
+  base += 4
 
-  base += encoding.sizeVarint(this.inputs.length);
+  base += encoding.sizeVarint(this.inputs.length)
 
-  for (const input of this.inputs)
-    base += input.getSize();
+  for (const input of this.inputs) base += input.getSize()
 
-  base += encoding.sizeVarint(this.outputs.length);
+  base += encoding.sizeVarint(this.outputs.length)
 
-  for (const output of this.outputs)
-    base += output.getSize();
+  for (const output of this.outputs) base += output.getSize()
 
-  base += 4;
+  base += 4
 
-  return new RawTX(base, 0);
-};
-
+  return new RawTX(base, 0)
+}
 
 /**
  * Test whether an object is a AbstractStack.
@@ -2365,30 +2263,28 @@ AbstractStack.prototype.getNormalSizes = function getNormalSizes() {
  * @returns {Boolean}
  */
 
-AbstractStack.isTX = function isTX(obj) {
-  return obj instanceof AbstractStack;
-};
+AbstractStack.isTX = function isTX (obj) {
+  return obj instanceof AbstractStack
+}
 
 /*
  * Helpers
  */
 
-function hasWitnessBytes(br) {
-  if (br.left() < 6)
-    return false;
+function hasWitnessBytes (br) {
+  if (br.left() < 6) return false
 
-  return br.data[br.offset + 4] === 0
-    && br.data[br.offset + 5] !== 0;
+  return br.data[br.offset + 4] === 0 && br.data[br.offset + 5] !== 0
 }
 
-function RawTX(size, witness) {
-  this.data = null;
-  this.size = size;
-  this.witness = witness;
+function RawTX (size, witness) {
+  this.data = null
+  this.size = size
+  this.witness = witness
 }
 
 /*
  * Expose
  */
 
-module.exports = AbstractStack;
+module.exports = AbstractStack

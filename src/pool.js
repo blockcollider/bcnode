@@ -5,44 +5,21 @@
  *
  */
 
-function Void(opts) {
-
-    if(opts != undefined){
-        
-    }
-
+function Void (opts) {
+  if (opts != undefined) {
+  }
 }
 
 Void.prototype = {
+  pushTransaction: function () {},
 
-    pushTransaction: function() {
+  pushCallback: function () {},
 
+  pushPromise: function () {},
 
-    },
+  popTransaction: function () {},
 
-    pushCallback: function() {
+  popCallback: function () {},
 
-
-    },
-
-    pushPromise: function() {
-
-
-    },
-
-    popTransaction: function() {
-
-
-    },
-
-    popCallback: function() {
-
-
-    },
-
-    popPromise: function() {
-
-
-    }
-
+  popPromise: function () {}
 }

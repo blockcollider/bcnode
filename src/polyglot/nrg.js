@@ -1,12 +1,5 @@
-
-class Nrg {
-    
-    generator(opts){
-
-
-    }
-
+class NRG {
+  generator () {}
 }
 
-
-module.exports = Nrg;
+module.exports = NRG

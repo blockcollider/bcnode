@@ -1,13 +1,9 @@
+const lisk = require('lisk-js')
 
+class Lisk {
+  generator () {}
 
-class Lsk {
-    
-    generator(opts){
-
-
-    }
-
+  createToken (opts) {}
 }
 
-
-module.exports = Lsk;
+module.exports = Lisk

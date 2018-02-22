@@ -1,4 +1,3 @@
-
 /*!
  * input.js - input object for bcoin
  * Copyright (c) 2014-2015, Fedor Indutny (MIT License)
@@ -6,23 +5,21 @@
  * https://github.com/bcoin-org/bcoin
  */
 
-'use strict';
+'use strict'
 
-const assert = require('assert');
-const util = require('../utils/util');
-const Script = require('../script/script');
-const Outpoint = require('./outpoint.js');
+const assert = require('assert')
+const util = require('../utils/util')
+const Script = require('../script/script')
+const Outpoint = require('./outpoint.js')
 
-function Input(options) {
-  if (!(this instanceof Input))
-    return new Input(options);
+function Input (options) {
+  if (!(this instanceof Input)) return new Input(options)
 
-  this.prevout = new Outpoint();
-  this.script = new Script();
-  this.sequence = 0xffffffff;
+  this.prevout = new Outpoint()
+  this.script = new Script()
+  this.sequence = 0xffffffff
 
-  if (options)
-    this.fromOptions(options);
+  if (options) this.fromOptions(options)
 }
 
 /**
@@ -31,22 +28,20 @@ function Input(options) {
  * @param {Object} options
  */
 
-Input.prototype.fromOptions = function fromOptions(options) {
-  assert(options, 'Input data is required.');
+Input.prototype.fromOptions = function fromOptions (options) {
+  assert(options, 'Input data is required.')
 
-  this.prevout.fromOptions(options.prevout);
+  this.prevout.fromOptions(options.prevout)
 
-  if (options.script)
-    this.script.fromOptions(options.script);
+  if (options.script) this.script.fromOptions(options.script)
 
   if (options.sequence != null) {
-    assert(util.isU32(options.sequence), 'Sequence must be a uint32.');
-    this.sequence = options.sequence;
+    assert(util.isU32(options.sequence), 'Sequence must be a uint32.')
+    this.sequence = options.sequence
   }
 
-
-  return this;
-};
+  return this
+}
 
 /**
  * Instantiate an Input from options object.
@@ -54,22 +49,22 @@ Input.prototype.fromOptions = function fromOptions(options) {
  * @returns {Input}
  */
 
-Input.fromOptions = function fromOptions(options) {
-  return new Input().fromOptions(options);
-};
+Input.fromOptions = function fromOptions (options) {
+  return new Input().fromOptions(options)
+}
 
 /**
  * Clone the input.
  * @returns {Input}
  */
 
-Input.prototype.clone = function clone() {
-  const input = new Input();
-  input.prevout = this.prevout;
-  input.script.inject(this.script);
-  input.sequence = this.sequence;
-  return input;
-};
+Input.prototype.clone = function clone () {
+  const input = new Input()
+  input.prevout = this.prevout
+  input.script.inject(this.script)
+  input.sequence = this.sequence
+  return input
+}
 
 /**
  * Test equality against another input.
@@ -77,10 +72,10 @@ Input.prototype.clone = function clone() {
  * @returns {Boolean}
  */
 
-Input.prototype.equals = function equals(input) {
-  assert(Input.isInput(input));
-  return this.prevout.equals(input.prevout);
-};
+Input.prototype.equals = function equals (input) {
+  assert(Input.isInput(input))
+  return this.prevout.equals(input.prevout)
+}
 
 /**
  * Compare against another input (BIP69).
@@ -88,10 +83,10 @@ Input.prototype.equals = function equals(input) {
  * @returns {Number}
  */
 
-Input.prototype.compare = function compare(input) {
-  assert(Input.isInput(input));
-  return this.prevout.compare(input.prevout);
-};
+Input.prototype.compare = function compare (input) {
+  assert(Input.isInput(input))
+  return this.prevout.compare(input.prevout)
+}
 
 /**
  * Get the previous output script type as a string.
@@ -101,19 +96,17 @@ Input.prototype.compare = function compare(input) {
  * @returns {ScriptType} type
  */
 
-Input.prototype.getType = function getType(coin) {
-  if (this.isCoinbase())
-    return 'coinbase';
+Input.prototype.getType = function getType (coin) {
+  if (this.isCoinbase()) return 'coinbase'
 
-  if (coin)
-    return coin.getType();
+  if (coin) return coin.getType()
 
-  let type;
+  let type
 
-      type = this.script.getInputType();
+  type = this.script.getInputType()
 
-  return Script.typesByVal[type].toLowerCase();
-};
+  return Script.typesByVal[type].toLowerCase()
+}
 
 /**
  * Get the redeem script. Will attempt to resolve nested
@@ -122,27 +115,25 @@ Input.prototype.getType = function getType(coin) {
  * @returns {Script?} Redeem script.
  */
 
-Input.prototype.getRedeem = function getRedeem(coin) {
-  if (this.isCoinbase())
-    return null;
+Input.prototype.getRedeem = function getRedeem (coin) {
+  if (this.isCoinbase()) return null
 
   if (!coin) {
-    if (this.script.isScripthashInput())
-      return this.script.getRedeem();
+    if (this.script.isScripthashInput()) return this.script.getRedeem()
 
-    return null;
+    return null
   }
 
-  let prev = coin.script;
-  let redeem = null;
+  let prev = coin.script
+  let redeem = null
 
   if (prev.isScripthash()) {
-    prev = this.script.getRedeem();
-    redeem = prev;
+    prev = this.script.getRedeem()
+    redeem = prev
   }
 
-  return redeem;
-};
+  return redeem
+}
 
 /**
  * Get the redeem script type.
@@ -150,19 +141,17 @@ Input.prototype.getRedeem = function getRedeem(coin) {
  * @returns {String} subtype
  */
 
-Input.prototype.getSubtype = function getSubtype(coin) {
-  if (this.isCoinbase())
-    return null;
+Input.prototype.getSubtype = function getSubtype (coin) {
+  if (this.isCoinbase()) return null
 
-  const redeem = this.getRedeem(coin);
+  const redeem = this.getRedeem(coin)
 
-  if (!redeem)
-    return null;
+  if (!redeem) return null
 
-  const type = redeem.getType();
+  const type = redeem.getType()
 
-  return Script.typesByVal[type].toLowerCase();
-};
+  return Script.typesByVal[type].toLowerCase()
+}
 
 /**
  * Get the previous output script's address. Will "guess"
@@ -172,16 +161,13 @@ Input.prototype.getSubtype = function getSubtype(coin) {
  * @returns {Address?} addr
  */
 
-Input.prototype.getAddress = function getAddress(coin) {
-  if (this.isCoinbase())
-    return null;
+Input.prototype.getAddress = function getAddress (coin) {
+  if (this.isCoinbase()) return null
 
-  if (coin)
-    return coin.getAddress();
+  if (coin) return coin.getAddress()
 
-
-  return this.script.getInputAddress();
-};
+  return this.script.getInputAddress()
+}
 
 /**
  * Get the address hash.
@@ -189,50 +175,49 @@ Input.prototype.getAddress = function getAddress(coin) {
  * @returns {Hash} hash
  */
 
-Input.prototype.getHash = function getHash(enc) {
-  const addr = this.getAddress();
+Input.prototype.getHash = function getHash (enc) {
+  const addr = this.getAddress()
 
-  if (!addr)
-    return null;
+  if (!addr) return null
 
-  return addr.getHash(enc);
-};
+  return addr.getHash(enc)
+}
 
 /**
  * Test to see if nSequence is equal to uint32max.
  * @returns {Boolean}
  */
 
-Input.prototype.isFinal = function isFinal() {
-  return this.sequence === 0xffffffff;
-};
+Input.prototype.isFinal = function isFinal () {
+  return this.sequence === 0xffffffff
+}
 
 /**
  * Test to see if nSequence is less than 0xfffffffe.
  * @returns {Boolean}
  */
 
-Input.prototype.isRBF = function isRBF() {
-  return this.sequence < 0xfffffffe;
-};
+Input.prototype.isRBF = function isRBF () {
+  return this.sequence < 0xfffffffe
+}
 
 /**
  * Test to see if outpoint is null.
  * @returns {Boolean}
  */
 
-Input.prototype.isCoinbase = function isCoinbase() {
-  return this.prevout.isNull();
-};
+Input.prototype.isCoinbase = function isCoinbase () {
+  return this.prevout.isNull()
+}
 
 /**
  * Convert the input to a more user-friendly object.
  * @returns {Object}
  */
 
-Input.prototype.inspect = function inspect() {
-  return this.format();
-};
+Input.prototype.inspect = function inspect () {
+  return this.format()
+}
 
 /**
  * Convert the input to a more user-friendly object.
@@ -240,7 +225,7 @@ Input.prototype.inspect = function inspect() {
  * @returns {Object}
  */
 
-Input.prototype.format = function format(coin) {
+Input.prototype.format = function format (coin) {
   return {
     type: this.getType(coin),
     subtype: this.getSubtype(coin),
@@ -250,8 +235,8 @@ Input.prototype.format = function format(coin) {
     sequence: this.sequence,
     prevout: this.prevout,
     coin: coin || null
-  };
-};
+  }
+}
 
 /**
  * Convert the input to an object suitable
@@ -259,9 +244,9 @@ Input.prototype.format = function format(coin) {
  * @returns {Object}
  */
 
-Input.prototype.toJSON = function toJSON(network, coin) {
-  return this.getJSON();
-};
+Input.prototype.toJSON = function toJSON (network, coin) {
+  return this.getJSON()
+}
 
 /**
  * Convert the input to an object suitable
@@ -273,14 +258,13 @@ Input.prototype.toJSON = function toJSON(network, coin) {
  * @returns {Object}
  */
 
-Input.prototype.getJSON = function getJSON(network, coin) {
-  network = Network.get(network);
+Input.prototype.getJSON = function getJSON (network, coin) {
+  network = Network.get(network)
 
-  let addr;
+  let addr
   if (!coin) {
-    addr = this.getAddress();
-    if (addr)
-      addr = addr.toString(network);
+    addr = this.getAddress()
+    if (addr) addr = addr.toString(network)
   }
 
   return {
@@ -289,8 +273,8 @@ Input.prototype.getJSON = function getJSON(network, coin) {
     sequence: this.sequence,
     address: addr,
     coin: coin ? coin.getJSON(network, true) : undefined
-  };
-};
+  }
+}
 
 /**
  * Inject properties from a JSON object.
@@ -298,14 +282,14 @@ Input.prototype.getJSON = function getJSON(network, coin) {
  * @param {Object} json
  */
 
-Input.prototype.fromJSON = function fromJSON(json) {
-  assert(json, 'Input data is required.');
-  assert(util.isU32(json.sequence), 'Sequence must be a uint32.');
-  this.prevout.fromJSON(json.prevout);
-  this.script.fromJSON(json.script);
-  this.sequence = json.sequence;
-  return this;
-};
+Input.prototype.fromJSON = function fromJSON (json) {
+  assert(json, 'Input data is required.')
+  assert(util.isU32(json.sequence), 'Sequence must be a uint32.')
+  this.prevout.fromJSON(json.prevout)
+  this.script.fromJSON(json.script)
+  this.sequence = json.sequence
+  return this
+}
 
 /**
  * Instantiate an Input from a jsonified input object.
@@ -313,18 +297,18 @@ Input.prototype.fromJSON = function fromJSON(json) {
  * @returns {Input}
  */
 
-Input.fromJSON = function fromJSON(json) {
-  return new Input().fromJSON(json);
-};
+Input.fromJSON = function fromJSON (json) {
+  return new Input().fromJSON(json)
+}
 
 /**
  * Calculate size of serialized input.
  * @returns {Number}
  */
 
-Input.prototype.getSize = function getSize() {
-  return 40 + this.script.getVarSize();
-};
+Input.prototype.getSize = function getSize () {
+  return 40 + this.script.getVarSize()
+}
 
 /**
  * Serialize the input.
@@ -332,22 +316,22 @@ Input.prototype.getSize = function getSize() {
  * @returns {Buffer|String}
  */
 
-Input.prototype.toRaw = function toRaw() {
-  const size = this.getSize();
-  return this.toWriter(new StaticWriter(size)).render();
-};
+Input.prototype.toRaw = function toRaw () {
+  const size = this.getSize()
+  return this.toWriter(new StaticWriter(size)).render()
+}
 
 /**
  * Write the input to a buffer writer.
  * @param {BufferWriter} bw
  */
 
-Input.prototype.toWriter = function toWriter(bw) {
-  this.prevout.toWriter(bw);
-  bw.writeVarBytes(this.script.toRaw());
-  bw.writeU32(this.sequence);
-  return bw;
-};
+Input.prototype.toWriter = function toWriter (bw) {
+  this.prevout.toWriter(bw)
+  bw.writeVarBytes(this.script.toRaw())
+  bw.writeU32(this.sequence)
+  return bw
+}
 
 /**
  * Inject properties from buffer reader.
@@ -355,24 +339,24 @@ Input.prototype.toWriter = function toWriter(bw) {
  * @param {BufferReader} br
  */
 
-Input.prototype.fromReader = function fromReader(br) {
-  console.log(this.prevout);
-  
-  //TODO: Correct this load
-  //this.prevout.fromReader(br);
-  this.script.fromRaw(br.readVarBytes());
-  this.sequence = br.readU32();
-  return this;
-};
+Input.prototype.fromReader = function fromReader (br) {
+  console.log(this.prevout)
+
+  // TODO: Correct this load
+  // this.prevout.fromReader(br);
+  this.script.fromRaw(br.readVarBytes())
+  this.sequence = br.readU32()
+  return this
+}
 
 /**
  * Inject properties from serialized data.
  * @param {Buffer} data
  */
 
-Input.prototype.fromRaw = function fromRaw(data) {
-  return this.fromReader(new BufferReader(data));
-};
+Input.prototype.fromRaw = function fromRaw (data) {
+  return this.fromReader(new BufferReader(data))
+}
 
 /**
  * Instantiate an input from a buffer reader.
@@ -380,9 +364,9 @@ Input.prototype.fromRaw = function fromRaw(data) {
  * @returns {Input}
  */
 
-Input.fromReader = function fromReader(br) {
-  return new Input().fromReader(br);
-};
+Input.fromReader = function fromReader (br) {
+  return new Input().fromReader(br)
+}
 
 /**
  * Instantiate an input from a serialized Buffer.
@@ -391,11 +375,10 @@ Input.fromReader = function fromReader(br) {
  * @returns {Input}
  */
 
-Input.fromRaw = function fromRaw(data, enc) {
-  if (typeof data === 'string')
-    data = Buffer.from(data, enc);
-  return new Input().fromRaw(data);
-};
+Input.fromRaw = function fromRaw (data, enc) {
+  if (typeof data === 'string') data = Buffer.from(data, enc)
+  return new Input().fromRaw(data)
+}
 
 /**
  * Inject properties from outpoint.
@@ -403,13 +386,13 @@ Input.fromRaw = function fromRaw(data, enc) {
  * @param {Outpoint} outpoint
  */
 
-Input.prototype.fromOutpoint = function fromOutpoint(outpoint) {
-  assert(typeof outpoint.hash === 'string');
-  assert(typeof outpoint.index === 'number');
-  this.prevout.hash = outpoint.hash;
-  this.prevout.index = outpoint.index;
-  return this;
-};
+Input.prototype.fromOutpoint = function fromOutpoint (outpoint) {
+  assert(typeof outpoint.hash === 'string')
+  assert(typeof outpoint.index === 'number')
+  this.prevout.hash = outpoint.hash
+  this.prevout.index = outpoint.index
+  return this
+}
 
 /**
  * Instantiate input from outpoint.
@@ -417,9 +400,9 @@ Input.prototype.fromOutpoint = function fromOutpoint(outpoint) {
  * @returns {Input}
  */
 
-Input.fromOutpoint = function fromOutpoint(outpoint) {
-  return new Input().fromOutpoint(outpoint);
-};
+Input.fromOutpoint = function fromOutpoint (outpoint) {
+  return new Input().fromOutpoint(outpoint)
+}
 
 /**
  * Inject properties from coin.
@@ -427,13 +410,13 @@ Input.fromOutpoint = function fromOutpoint(outpoint) {
  * @param {Coin} coin
  */
 
-Input.prototype.fromCoin = function fromCoin(coin) {
-  assert(typeof coin.hash === 'string');
-  assert(typeof coin.index === 'number');
-  this.prevout.hash = coin.hash;
-  this.prevout.index = coin.index;
-  return this;
-};
+Input.prototype.fromCoin = function fromCoin (coin) {
+  assert(typeof coin.hash === 'string')
+  assert(typeof coin.index === 'number')
+  this.prevout.hash = coin.hash
+  this.prevout.index = coin.index
+  return this
+}
 
 /**
  * Instantiate input from coin.
@@ -441,9 +424,9 @@ Input.prototype.fromCoin = function fromCoin(coin) {
  * @returns {Input}
  */
 
-Input.fromCoin = function fromCoin(coin) {
-  return new Input().fromCoin(coin);
-};
+Input.fromCoin = function fromCoin (coin) {
+  return new Input().fromCoin(coin)
+}
 
 /**
  * Inject properties from transaction.
@@ -452,14 +435,14 @@ Input.fromCoin = function fromCoin(coin) {
  * @param {Number} index
  */
 
-Input.prototype.fromTX = function fromTX(tx, index) {
-  assert(tx);
-  assert(typeof index === 'number');
-  assert(index >= 0 && index < tx.outputs.length);
-  this.prevout.hash = tx.hash('hex');
-  this.prevout.index = index;
-  return this;
-};
+Input.prototype.fromTX = function fromTX (tx, index) {
+  assert(tx)
+  assert(typeof index === 'number')
+  assert(index >= 0 && index < tx.outputs.length)
+  this.prevout.hash = tx.hash('hex')
+  this.prevout.index = index
+  return this
+}
 
 /**
  * Instantiate input from tx.
@@ -468,9 +451,9 @@ Input.prototype.fromTX = function fromTX(tx, index) {
  * @returns {Input}
  */
 
-Input.fromTX = function fromTX(tx, index) {
-  return new Input().fromTX(tx, index);
-};
+Input.fromTX = function fromTX (tx, index) {
+  return new Input().fromTX(tx, index)
+}
 
 /**
  * Test an object to see if it is an Input.
@@ -478,17 +461,12 @@ Input.fromTX = function fromTX(tx, index) {
  * @returns {Boolean}
  */
 
-Input.isInput = function isInput(obj) {
-  return obj instanceof Input;
-};
+Input.isInput = function isInput (obj) {
+  return obj instanceof Input
+}
 
 /*
  * Expose
  */
 
-module.exports = Input;
-
-
-
-
-
+module.exports = Input
