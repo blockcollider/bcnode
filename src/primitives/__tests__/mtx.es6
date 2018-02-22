@@ -1,4 +1,4 @@
-const MTX = require('../MTX')
+const MTX = require('../mtx')
 
 describe('MTX', () => {
   test('can create instance', () => {
