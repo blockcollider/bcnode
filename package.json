@@ -30,12 +30,14 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "jest": {
+    "moduleFileExtensions": ["js", "jsx", "json", "ts", "tsx", "es6"],
     "testPathIgnorePatterns": [
       "/node_modules/*.*",
       "node_modules/jest/node_modules/jest-cli/build/test_scheduler.js",
       "/lib/"
     ],
     "testEnvironment": "node",
+    "testMatch": [ "**/__tests__/**/*.(js|es6)" ],
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     }
