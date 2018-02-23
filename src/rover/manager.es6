@@ -10,7 +10,7 @@
 const logger = require('../logger').logger
 
 export default class RoverManager {
-  _logger: Object;
+  _logger: Object; // eslint-disable-line no-undef
 
   constructor (rovers: string[]) {
     this._logger = logger
