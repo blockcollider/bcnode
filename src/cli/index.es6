@@ -1,11 +1,10 @@
 // @flow
-
 const process = require('process')
-
 const program = require('commander')
 
+const { Hub } = require('iris')
+const logging = require('../logger')
 const Engine = require('../engine').default
-
 const pkg = require('../../package.json')
 
 const ROVERS = ['btc', 'eth', 'wav', 'lisk', 'neo']
@@ -26,7 +25,8 @@ export function main (args: Object) {
   }
 
   // Create instance of engine
-  const engine = new Engine()
+  const hub = new Hub()
+  const engine = new Engine(logging.logger, hub)
   const { rovers, rpc, ui, ws } = program
 
   process.on( 'SIGINT', () => {

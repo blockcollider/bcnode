@@ -7,11 +7,16 @@ const RoverManager = require('../rover/manager').default
 const Server = require('../server/index').default
 
 export default class Engine {
-  constructor () {
+  constructor (logger, hub) {
     this._rovers = null
     this._rpc = null
     this._server = null
     this._logger = logging.logger
+    this._subscriber = hub.addSubscriber('rover.*.newblock', this._consumeBlock.bind(this))
+  }
+
+  _consumeBlock (topic, block) { // eslint-disable-line
+    this._logger.info(`Engine: Got new block from ${topic}, block: ${block}`)
   }
 
   get rovers () {
