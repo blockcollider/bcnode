@@ -18,7 +18,7 @@ function get(url, cb) {
 
 function main(opts) {
   var waiting = true;
-  var socket = io(opts.roverBaseSocket);
+  var socket = io({ path: '/ws'});
   var cache = {}
 
   var colors = {
@@ -186,13 +186,15 @@ function main(opts) {
 function setup() {
   var options = {}
 
-  get("/roverBaseSocket", function(err, res){
-    if(err) return console.trace(err);
+  // get("/roverBaseSocket", function(err, res){
+  //   if(err) return console.trace(err);
+  //
+  //   options.roverBaseSocket = res.roverBaseSocket;
+  //   main(options);
+  //
+  // });
 
-    options.roverBaseSocket = res.roverBaseSocket;
-    main(options);
-
-  });
+  main(options);
 }
 
 setup();
