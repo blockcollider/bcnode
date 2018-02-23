@@ -31,7 +31,7 @@ export const logger = (function init () {
       new (winston.transports.DailyRotateFile)({
         filename: logPath,
         timestamp: tsFormat,
-        datePattern: '-yyyyMMddHHmm.log',
+        datePattern: '-yyyyMMddHH.log',
         json: false,
         formatter: format
       })
