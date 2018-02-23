@@ -4,6 +4,10 @@ const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
 const logger = require('../logger').logger
 
+const configDir = path.resolve(__dirname, '..', '..', 'config')
+const configPath = path.resolve(configDir, 'config.json')
+const config = require(configPath)
+
 const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
 
 // See http://www.programwitherik.com/getting-started-with-socket-io-node-js-and-express/
@@ -54,7 +58,7 @@ export default class Server {
     }
 
     // Listen for connections
-    const port = 3000
+    const port = config.server.port
     server.listen(port, () => {
       logger.info(`Server available at http://0.0.0.0:${port}`)
     })
