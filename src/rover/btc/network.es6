@@ -21,7 +21,7 @@ const DEFAULT_STATE = {
   }
 }
 
-type Peer = {
+type Peer = { // eslint-disable-line no-undef
   host: string,
   bestHeight: number,
   version: number,
@@ -30,8 +30,8 @@ type Peer = {
 }
 
 export default class Network {
-  _state: Object;
-  _logger: Object;
+  _state: Object; // eslint-disable-line no-undef
+  _logger: Object; // eslint-disable-line no-undef
 
   constructor (config: Object = {}) {
     this._logger = logging.logger

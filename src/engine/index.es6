@@ -32,8 +32,8 @@ export default class Engine {
     this._rovers = new RoverManager(rovers)
 
     rovers.forEach((name) => {
-      this._rovers.startRover(name);
-    });
+      this._rovers.startRover(name)
+    })
   }
 
   startRpc () {

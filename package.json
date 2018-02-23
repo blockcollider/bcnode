@@ -153,7 +153,6 @@
     "winston": "^2.4.0",
     "winston-daily-rotate-file": "^1.7.2",
     "xor-it": "^1.0.2",
-    "zmq": "^2.15.3",
     "zstd-codec": "0.0.7"
   },
   "devDependencies": {
