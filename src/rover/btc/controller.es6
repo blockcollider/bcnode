@@ -123,8 +123,8 @@ export default class Controller {
       this._logger.info('peer best height submitting block: ' + peer.bestHeight)
       this._logger.info('LAST BLOCK ' + network.state.bestHeight)
 
-      if (network.state.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
-        block.lastBlock = network.state.bestHeight
+      if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
+        block.lastBlock = network.bestHeight
         // TODO publish using _messagingHub
         if (block.lastBlock !== undefined && block.lastBlock !== false) {
           const _block = this._onNewBlock(peer, block)
