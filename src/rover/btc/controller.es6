@@ -121,7 +121,7 @@ export default class Controller {
 
       this._logger.info('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
       this._logger.info('peer best height submitting block: ' + peer.bestHeight)
-      this._logger.info('LAST BLOCK ' + network.state.bestHeight)
+      this._logger.info('LAST BLOCK ' + network.bestHeight)
 
       if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
         block.lastBlock = network.bestHeight
