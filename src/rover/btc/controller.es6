@@ -3,6 +3,7 @@ const { Messages } = require('bitcore-p2p')
 const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
+const process = require('process')
 const { swapOrder } = require('../../utils/strings')
 
 const NETWORK_TIMEOUT = 3000

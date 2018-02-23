@@ -1,5 +1,7 @@
 // @flow
 
+const process = require('process')
+
 const program = require('commander')
 
 const Engine = require('../engine').default
@@ -26,6 +28,13 @@ export function main (args: Object) {
   // Create instance of engine
   const engine = new Engine()
   const { rovers, rpc, ui, ws } = program
+
+  process.on( 'SIGINT', () => {
+    console.log( "\ngracefully shutting down from  SIGINT (Ctrl-C)" )
+
+    // wish this worked on Windows
+    process.exit( )
+  })
 
   // Should the Rover be started?
   if (rovers) {

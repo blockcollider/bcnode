@@ -21,7 +21,7 @@ export default class RoverManager {
 
   constructor (rovers: string[]) {
     this._logger = logger
-    this._logger.info('Instantiating RoverManager')
+    this._rovers = {}
   }
 
   startRover (roverName: string) {
