@@ -126,13 +126,14 @@ export default class Controller {
 
       if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
         block.lastBlock = network.bestHeight
-        // TODO publish using _messagingHub
         if (block.lastBlock !== undefined && block.lastBlock !== false) {
-          const _block = this._onNewBlock(peer, block)
-          const unifiedBlock = this._createUnifiedBlock(_block)
-          network.bestHeight = _block.blockNumber
+          const [isNew, _block] = this._onNewBlock(peer, block)
 
-          this._publisher.publish(unifiedBlock)
+          if (isNew) {
+            const unifiedBlock = this._createUnifiedBlock(_block)
+            network.bestHeight = _block.blockNumber
+            this._publisher.publish(unifiedBlock)
+          }
         }
       } else {
         try {
@@ -148,11 +149,11 @@ export default class Controller {
     }, 60000)
   }
 
-  _onNewBlock (height, block): Object {
+  _onNewBlock (height, block): [boolean, Object] {
     const { hash } = block.header
 
     if (this._blockCache.has(hash)) {
-      return
+      return [false, block]
     }
 
     this._blockCache.set(hash, true)
@@ -174,7 +175,7 @@ export default class Controller {
     })
     block.blockNumber = blockNumber
 
-    return block
+    return [true, block]
   }
 
   _onNewTx (tx, block) {
