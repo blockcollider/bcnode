@@ -9,6 +9,7 @@ var getos = require('getos');
 
 var log = global.log;
 
+// TODO: Move somewhere else
 function getDataDir(){
     switch(process.platform){
         case 'win32': return process.env.LOCALAPPDATA+"/.blockcollider";
@@ -22,11 +23,11 @@ function getDataDir(){
 function serializeNetworkInterface(active){
 
     /*
-         The signing parameter when available prepends the network key. 
+         The signing parameter when available prepends the network key.
 
          m = mac address
-         i = private ip/local ip  
-         b = browser  
+         i = private ip/local ip
+         b = browser
          t = testnet
 
          ex. "m-e3b98a4da31a127d4bde..." means MAC address was used in generation
@@ -59,7 +60,7 @@ function identity(opts){
 
     var self = this;
         self.identityFile = "identity.json";
-        self.identityPath = getDataDir(); 
+        self.identityPath = getDataDir();
 
         var platform = os.platform();
         var arch = os.arch();
@@ -76,7 +77,7 @@ function identity(opts){
             self[k] = opts[k];
         });
     }
-    
+
 }
 
 identity.prototype = {
@@ -89,7 +90,7 @@ identity.prototype = {
 
         obj.createdDate = time.now();
 
-        var str = JSON.stringify(obj);  
+        var str = JSON.stringify(obj);
 
         fs.writeFile(obj.identityPath+"/"+obj.identityFile, str, "utf8", function(err){
           if(err) { cb(err); } else {
@@ -114,7 +115,7 @@ identity.prototype = {
                     var key = serializeNetworkInterface(active);
 
                     if(currentIdentity.networkKey != undefined && currentIdentity.networkKey != key){
-                        log.warn("network key has changed "+currentIdentity.networkKey+" -> "+key); 
+                        log.warn("network key has changed "+currentIdentity.networkKey+" -> "+key);
                     }
 
                     currentIdentity.networkKey = key;
@@ -188,13 +189,13 @@ identity.prototype = {
 
                     if(err) { cb(err); } else {
 
-                        try { 
+                        try {
 
                             var d = JSON.parse(data);
 
                             self.finalizeSetup(d, cb);
 
-                        } catch(err) { 
+                        } catch(err) {
                             cb(err);
                         }
 
