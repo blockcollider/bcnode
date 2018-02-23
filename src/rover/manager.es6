@@ -9,15 +9,14 @@
 
 const logger = require('../logger').logger
 const child = require('child_process')
-const path = require('path'
-)
+const path = require('path')
 const rovers = {
   btc: path.resolve(__dirname, 'btc', 'rover.js')
 }
 
 export default class RoverManager {
-  _logger: Object; // eslint-disable-line no-undef
-  _rovers: Object; // eslint-disable-line no-undef
+  _logger: Object // eslint-disable-line no-undef
+  _rovers: Object // eslint-disable-line no-undef
 
   constructor (rovers: string[]) {
     this._logger = logger
@@ -25,19 +24,18 @@ export default class RoverManager {
   }
 
   startRover (roverName: string) {
-    const roverPath = rovers[roverName];
+    const roverPath = rovers[roverName]
 
     if (!roverPath) {
       this._logger.error(`Rover not implemented ${roverName}`)
-      return false;
+      return false
     }
 
     this._logger.info(`Starting rover '${roverName}'`)
 
-
     const rover = child.fork(roverPath)
     this._rovers[roverName] = rover
 
-    return true;
+    return true
   }
 }

@@ -72,6 +72,10 @@ export default class Server {
     io.on('connection', client => {
       logger.info('Client connected', client.handshake.address)
 
+      client.emit({
+        msg: 'test'
+      })
+
       client.on('join', function (data) {
         logger.log(data)
       })

@@ -29,18 +29,19 @@ export function main (args: Object) {
   const engine = new Engine(logging.logger, hub)
   const { rovers, rpc, ui, ws } = program
 
-  process.on( 'SIGINT', () => {
-    console.log( "\ngracefully shutting down from  SIGINT (Ctrl-C)" )
+  process.on('SIGINT', () => {
+    console.log('\ngracefully shutting down from  SIGINT (Ctrl-C)')
 
     // wish this worked on Windows
-    process.exit( )
+    process.exit()
   })
 
   // Should the Rover be started?
   if (rovers) {
-    const roversToStart = (rovers === 'all')
-          ? ROVERS
-          : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
+    const roversToStart =
+      rovers === 'all'
+        ? ROVERS
+        : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
     engine.startRovers(roversToStart)
   }
 
@@ -53,8 +54,8 @@ export function main (args: Object) {
   if (rpc || ui || ws) {
     engine.startServer({
       rpc, // Enable RPC - /rpc
-      ui,   // Enable UI - /
-      ws    // Enable WS - /ws
+      ui, // Enable UI - /
+      ws // Enable WS - /ws
     })
   }
 

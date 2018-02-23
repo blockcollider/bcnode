@@ -12,10 +12,14 @@ export default class Engine {
     this._rpc = null
     this._server = null
     this._logger = logging.logger
-    this._subscriber = hub.addSubscriber('rover.*.newblock', this._consumeBlock.bind(this))
+    this._subscriber = hub.addSubscriber(
+      'rover.*.newblock',
+      this._consumeBlock.bind(this)
+    )
   }
 
-  _consumeBlock (topic, block) { // eslint-disable-line
+  _consumeBlock (topic, block) {
+    // eslint-disable-line
     this._logger.info(`Engine: Got new block from ${topic}, block: ${block}`)
   }
 
@@ -36,7 +40,7 @@ export default class Engine {
 
     this._rovers = new RoverManager(rovers)
 
-    rovers.forEach((name) => {
+    rovers.forEach(name => {
       this._rovers.startRover(name)
     })
   }
