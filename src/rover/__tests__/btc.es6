@@ -3,7 +3,10 @@ const Network = require('../btc').Network
 
 describe('Controller', () => {
   it('can instantiate self', () => {
-    expect(new Controller()).toBeInstanceOf(Controller)
+    const mockHub = {
+      getPublisher: jest.fn()
+    }
+    expect(new Controller(jest.fn(), mockHub)).toBeInstanceOf(Controller)
   })
 })
 

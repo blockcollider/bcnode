@@ -63,7 +63,8 @@
       "afterEach",
       "it",
       "test",
-      "expect"
+      "expect",
+      "jest"
     ],
     "parser": "babel-eslint",
     "plugins": [
