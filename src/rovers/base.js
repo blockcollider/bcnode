@@ -1,12 +1,10 @@
-var fs = require('fs')
-var child = require('child_process')
-var time = require('../utils/time.js')
-var ee = require('events').EventEmitter
-var socket = require('socket.io')(6600)
-var events = new ee()
-var log = global.log
-var timeOffset = 0
-var blockCache = {}
+const child = require('child_process')
+const time = require('../utils/time.js')
+const EventEmitter = require('events').EventEmitter
+const socket = require('socket.io')(6600)
+const logger = require('../logger').logger;
+
+let timeOffset = 0
 
 global._RoverRestartDelay = 5000
 
@@ -33,40 +31,63 @@ socket.on('connection', function (client) {
 
   client.emit('setup', base)
 
+  // events.on('block', msg => {
+  //   broadcast('block', msg)
+  // })
+  //
+  // events.on('tx', msg => {
+  //   broadcast('tx', msg)
+  // })
+  //
+  // events.on('pow', msg => {
+  //   broadcast('pow', msg)
+  // })
+  //
+  // events.on('metric', msg => {
+  //   broadcast('metric', msg)
+  // })
 })
 
 var heart = setInterval(function () {
   socket.emit('ping', timeOffset)
 }, 5000)
 
-function updateSNTPOffset () {
-  time.offset(function (err, offset) {
-    if (err) {
-      console.trace(err)
-    } else {
-      timeOffset = offset
+export default class RoverBase {
+  constructor (opts) {
+    this._options = {
+      port: 6600
     }
-  })
-}
 
-function RoverBase (opts) {
-  var options = {
-    port: 6600
+    if (opts) {
+      Object.keys(opts).map(k => {
+        this._options[k] = opts[k]
+      })
+    }
+
+    this._events = new EventEmitter()
+
+    this._running = []
   }
 
-  if (opts != undefined) {
-    Object.keys(opts).map(function (k) {
-      options[k] = opts[k]
+  get events () {
+    return this._events
+  }
+
+  get options () {
+    return this._options
+  }
+
+  get running () {
+    return this._running
+  }
+
+  killAll () {
+    self.running.map(r => {
+      console.log(r)
     })
   }
 
-  this.running = []
-}
-
-RoverBase.prototype = {
-  events: events,
-
-  launchRover: function (roverId) {
+  launchRover (roverId) {
     var self = this
 
     var running = self.running.map(function (r) {
@@ -74,11 +95,11 @@ RoverBase.prototype = {
     })
 
     if (running.indexOf(roverId) > -1) {
-      log.info('rover ' + roverId + ' already started')
+      logger.info('rover ' + roverId + ' already started')
     } else {
-      log.info(roverId + ' rover leaving base')
+      logger.info(roverId + ' rover leaving base')
 
-      var n = child.fork(__dirname + '/' + roverId + '_rover.js')
+      var n = child.fork('./rovers/' + roverId + '_rover.js')
       var meta = {
         id: roverId,
         process: n
@@ -87,7 +108,6 @@ RoverBase.prototype = {
       n.on('message', function (msg) {
         var type = 'log'
         var id = 'coin'
-
         if (msg.type != undefined) {
           type = msg.type
           msg.utc = time.now()
@@ -104,8 +124,7 @@ RoverBase.prototype = {
       n.on('exit', function () {
         var restartSeconds = global._RoverRestartDelay / 1000
 
-        log.info(roverId + ' exited restarting in ' + restartSeconds + 's')
-
+        logger.info(roverId + ' exited restarting in ' + restartSeconds + 's')
         self.running = self.running.filter(function (r) {
           if (r.id != roverId) {
             return r
@@ -130,17 +149,17 @@ RoverBase.prototype = {
 
       return self.events
     }
-  },
-
-  killAll: function () {
-    var self = this
-
-    self.running.map(function (r) {
-      console.log(r)
-    })
   }
 }
 
-updateSNTPOffset()
+RoverBase.updateSNTPOffset = function updateSNTPOffset() {
+  time.offset((err, offset) => {
+    if (err) {
+      console.trace(err)
+    } else {
+      timeOffset = offset
+    }
+  })
+}
 
-module.exports = RoverBase
+RoverBase.updateSNTPOffset()
