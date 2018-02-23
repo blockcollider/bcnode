@@ -1,44 +1,62 @@
-const crypto = require('crypto')
+// @flow
+const { Networks } = require('bitcore-lib')
+const { Pool } = require('bitcore-p2p')
+const { merge } = require('ramda')
 
-export function getPrivateKey () {
-  return crypto.randomBytes(32)
+const logging = require('../../logger')
+const { getPrivateKey } = require('../utils')
+
+const DEFAULT_STATE = {
+  maximumPeers: 96,
+  discoveredPeers: 0,
+  lastBlock: false,
+  quorum: 31,
+  peers: {},
+  bestHeight: null,
+  peerData: {},
+  key: getPrivateKey(),
+  identity: {
+    // TODO: This should not be hardcoded
+    identityPath: '/Users/mtxodus1/Library/Application Support/.blockcollider'
+  }
+}
+
+type Peer = {
+  host: string,
+  bestHeight: number,
+  version: number,
+  subversion: number,
+  updated?: number
 }
 
 export default class Network {
-  constructor (config) {
-    if (config) {
-      Object.keys(config).map((k) => {
-        config[k] = options[k]
-      })
-    }
+  _state: Object;
+  _logger: Object;
 
-    const options = Network.options
-
-    Object.keys(options).map((k) => {
-      this[k] = options[k]
-    })
+  constructor (config: Object = {}) {
+    this._logger = logging.logger
+    this._state = merge(DEFAULT_STATE, config)
   }
 
-  removePeer (peer) {
-    var self = this
-
-    if (self.peerData[peer.host] != undefined) {
-      delete self.peerData[peer.host]
-    }
-
-    if (self.peers[peer.host] == undefined) {
-      return
-    }
-
-    delete self.peers[peer.host]
+  get quorum (): number {
+    return this._state.quorum
   }
 
-  indexPeer (peer) {
-    var self = this
+  get discoveredPeers (): number {
+    return this._state.discoveredPeers
+  }
 
-    // if(self.peers[peer.host] != undefined) return;
+  get lastBlock (): boolean {
+    return this._state.lastBlock
+  }
 
-    self.peers[peer.host] = {
+  hasQuorum () {
+    return this._state.discoveredPeers >= this._state.quorum
+  }
+
+  addPeer (peer: Peer) {
+    const { peers } = this._state
+    peers[peer.host] = {
       bestHeight: peer.bestHeight,
       version: peer.version,
       subversion: peer.subversion,
@@ -46,23 +64,33 @@ export default class Network {
     }
   }
 
-  setState (key) {
-    var self = this
+  removePeer (peer: Peer) {
+    const { peers, peerData } = this._state
 
-    var peers = Object.keys(self.peers).reduce(function (all, h) {
-      var a = self.peers[h]
+    if (peerData[peer.host] !== undefined) {
+      delete peerData[peer.host]
+    }
 
-      if (a != undefined) {
-        a.host = h
-        all.push(a)
+    if (peers[peer.host] === undefined) {
+      return
+    }
+
+    delete peers[peer.host]
+  }
+
+  setState () {
+    const newPeers = Object.keys(this._state.peers).reduce((all, host) => {
+      const address = this._state.peers[host]
+      if (address !== undefined) {
+        address.host = host
+        all.push(address)
       }
-
       return all
     }, [])
 
-    var report = peers.reduce(function (all, peer) {
+    const report = newPeers.reduce(function (all, peer) {
       var val = peer.bestHeight
-      if (all[val] == undefined) {
+      if (all[val] === undefined) {
         all[val] = 1
       } else {
         all[val]++
@@ -75,59 +103,41 @@ export default class Network {
       return false
     }
 
-    var ranks = Object.keys(report).sort(function (a, b) {
+    const ranks = Object.keys(report).sort(function (a, b) {
       if (report[a] > report[b]) {
         return -1
       }
-
       if (report[b] > report[a]) {
         return 1
       }
-
       return 0
     })
 
-    if (ranks == undefined || ranks.length < 1) return false
+    if (ranks === undefined || ranks.length < 1) {
+      return false
+    }
 
-    self.state.bestHeight = ranks[0]
+    this._state.bestHeight = ranks[0]
 
     return ranks[0]
   }
 
   connect () {
-    var self = this
-
-    var pool = new Pool({
+    const pool = new Pool({
       network: Networks.livenet,
-      maxSize: self.maximumPeers,
+      maxSize: this._state.maximumPeers,
       relay: false
     })
 
     // connect to the network
-
     try {
+      this._logger.debug('BTC: connected to network')
       pool.connect()
-
       return pool
     } catch (err) {
+      this._logger.error('BTC: error while connecting to network', err)
       pool.listen()
-
       return pool
     }
-  }
-}
-
-Network.options =  {
-  maximumPeers: 96,
-  discoveredPeers: 0,
-  lastBlock: false,
-  quorum: 31,
-  peers: {},
-  state: {},
-  peerData: {},
-  key: getPrivateKey(),
-  identity: {
-    // TODO: This should not be hardcoded
-    identityPath: '/Users/mtxodus1/Library/Application Support/.blockcollider'
   }
 }

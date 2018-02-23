@@ -29,7 +29,7 @@ export default class Engine {
   startRovers (rovers: string[]) {
     this._logger.info(`Starting rovers ${rovers}`)
     // this._rovers = new RoverBase()
-    this._rovers = new RoverManager()
+    this._rovers = new RoverManager(rovers)
   }
 
   startRpc () {

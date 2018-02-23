@@ -10,7 +10,11 @@
 const logger = require('../logger').logger
 
 export default class RoverManager {
-  constructor () {
-    logger.info('Instantiating RoverManager')
+  constructor (rovers: string[]) {
+    this._logger = logger
+    this._logger.info('Instantiating RoverManager')
+  }
+
+  _startRover (rover: string) {
   }
 }

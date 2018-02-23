@@ -1,10 +1,23 @@
-'use strict';
+const Network = require('./network').default
+const { Messages } = require('bitcore-p2p')
+const { Transaction } = require('btc-transaction')
+const LRUCache = require('lru-cache')
+const convBin = require('binstring')
+const { swapOrder } = require('../../utils/strings')
+
+const NETWORK_TIMEOUT = 3000
+const BLOCK_VERSION = 536870912
+const ID = 'btc'
 
 export default class Controller {
-  constructor () {
+  constructor (logger, hub) {
     this._dpt = false
-
     this._interfaces = []
+    this._logger = logger
+    this._publisher = hub.getPublisher('rover.btc.newblock')
+    this._blockCache = new LRUCache({ max: 110 })
+    this._blocksNumberCache = new LRUCache({ max: 110 })
+    this._txCache = new LRUCache({ max: 3000 })
   }
 
   get dpt () {
@@ -16,128 +29,222 @@ export default class Controller {
   }
 
   init (config) {
-    var network = new Network(config);
+    const network = new Network(config)
+    this._interfaces.push(network)
 
-    var pool = network.connect();
+    const pool = network.connect()
+    const poolTimeout = setTimeout(function () {
+      pool.disconnect().connect()
+    }, NETWORK_TIMEOUT)
 
-    var poolTimeout = setTimeout(function () {
-      pool.disconnect().connect();
-    }, 3000);
+    pool.on('peerready', (peer, addr) => {
+      clearTimeout(poolTimeout)
+      this._logger.info(`BTC rover: connected to pool v: ${peer.version}, s: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
 
-    pool.on('peerready', function (peer, addr) {
-      clearTimeout(poolTimeout);
-      // console.log("Connect: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
-
-      if (network.quorum != true && network.discoveredPeers >= network.quorum) {
+      if (network.hasQuorum()) {
         try {
-          network.quorum = true;
-          network.lastBlock = network.setState();
-          network.discoveredPeers++;
-          network.indexPeer(peer);
-          send('log', 'quorum established');
+          network.lastBlock = network.setState()
+          network.discoveredPeers++
+          network.addPeer(peer)
         } catch (err) {
-          log.error(err);
+          this._logger.error('BTC rover: error in peerready cb', err)
         }
-      } else if (network.quorum != true && peer.subversion.indexOf('/Satoshi:0.1') > -1) {
+      } else if (!network.hasQuorum() && peer.subversion.indexOf('/Satoshi:0.1') > -1) {
         try {
-          network.discoveredPeers++;
-          network.indexPeer(peer);
+          network.discoveredPeers++
+          network.addPeer(peer)
         } catch (err) {
-          if (peer != undefined && peer.status != undefined) {
-            peer.disconnect();
+          if (peer !== undefined && peer.status !== undefined) {
+            peer.disconnect()
           }
         }
       } else {
         try {
-          if (peer != undefined && peer.status != undefined) {
-            peer.disconnect();
+          if (peer !== undefined && peer.status !== undefined) {
+            peer.disconnect()
           }
         } catch (err) {
-          log.error(err);
+          this._logger.error('BTC rover: Could not disconnect from network', err)
         }
       }
-    });
+    })
 
     pool.on('peerdisconnect', function (peer, addr) {
-      network.removePeer(peer);
-    });
+      this._logger.debug(`Remove peer ${peer}, ${addr}`)
+      network.removePeer(peer)
+    })
 
     pool.on('peererror', function (peer, err) {
       // log.error("Peer Error");
       // log.error(err);
-    });
+    })
 
-    pool.on('seederror', function (err) {
-      log.error('Seed Error');
-      console.trace(err);
-    });
-
-    pool.on('peertimeout', function (err) {});
-
-    pool.on('timeout', function (err) {});
-
-    pool.on('error', function (err) {});
+    pool.on('seederror', (err) => {
+      this._logger.error('Seed Error', err)
+    })
+    pool.on('peertimeout', (err) => {
+      this._logger.error('Seed Error', err)
+    })
+    pool.on('timeout', (err) => {
+      this._logger.error('Seed Error', err)
+    })
+    pool.on('error', (err) => {
+      this._logger.error('Seed Error', err)
+    })
 
     // attach peer events
-    pool.on('peerinv', function (peer, message) {
+    pool.on('peerinv', (peer, message) => {
       try {
-        // console.log("PeerINV: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
+        this._logger.info(`PeerINV: ${peer.version}, ${peer.subversion}, ${peer.bestHeight}, ${peer.host}`)
 
-        if (peer.subversion != undefined && peer.subversion.indexOf('/Satoshi:') > -1) {
+        if (peer.subversion !== undefined && peer.subversion.indexOf('/Satoshi:') > -1) {
           try {
-            var peerMessage = new Messages().GetData(message.inventory);
-            peer.sendMessage(peerMessage);
+            var peerMessage = new Messages().GetData(message.inventory)
+            peer.sendMessage(peerMessage)
           } catch (err) {
-            log.error(err);
+            this._logger.error('BTC rover: error sening message', err)
 
             try {
-              pool._removePeer(peer);
+              pool._removePeer(peer)
             } catch (err) {
-              log.error(err);
+              this._logger.error('BTC rover: error removing peer', err)
             }
           }
         }
       } catch (err) {
-        console.trace(err);
+        this._logger.error('BTC rover: commoin peerinv handler error', err)
       }
-    });
+    })
 
-    pool.on('peerblock', function (peer, _ref) {
-      var net = _ref.net,
-        block = _ref.block;
+    pool.on('peerblock', (peer, _ref) => {
+      const { block } = _ref
 
-      // log.info("PeerBlock: " + peer.version, peer.subversion, peer.bestHeight, peer.host);
-      // console.log("peer best height submitting block: "+peer.bestHeight);
-      // console.log("LAST BLOCK "+network.state.bestHeight);
+      this._logger.info('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
+      this._logger.info('peer best height submitting block: ' + peer.bestHeight)
+      this._logger.info('LAST BLOCK ' + network.state.bestHeight)
 
-      if (network.state.bestHeight != undefined && block.header.version === BLOCK_VERSION) {
-        // if(network.state.bestHeight != undefined)  {
+      if (network.state.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
+        block.lastBlock = network.state.bestHeight
+        // TODO publish using _messagingHub
+        if (block.lastBlock !== undefined && block.lastBlock !== false) {
+          const _block = this._onNewBlock(peer, block)
+          const unifiedBlock = this._createUnifiedBlock(_block)
+          network.bestHeight = _block.blockNumber
 
-        block.lastBlock = network.state.bestHeight;
-
-        if (block.lastBlock != undefined && block.lastBlock != false) {
-          onNewBlock(peer, block, function (err, num) {
-            block.blockNumber = num;
-            network.state.bestHeight = num;
-          });
+          this._publisher.publisher(unifiedBlock)
         }
       } else {
         try {
-          pool._removePeer(peer);
+          pool._removePeer(peer)
         } catch (err) {
-          log.error(err);
+          this._logger.error('BTC rover: error removing peer', err)
         }
       }
-    });
+    })
 
-    setInterval(function () {
-      log.info(ID + ' rover peers ' + pool.numberConnected());
-    }, 60000);
+    setInterval(() => {
+      this._logger.info(ID + ' rover peers ' + pool.numberConnected())
+    }, 60000)
   }
 
+  _onNewBlock (height, block): Object {
+    const { hash } = block.header
+
+    if (this._blocksCache.has(hash)) {
+      return
+    }
+
+    this._blocksCache.set(hash, true)
+
+    const coinbaseTx = block.transactions[0]
+    // TODO probably pull to utils
+    const buffer = convBin(coinbaseTx.toString('hex'), { in: 'hex', out: 'buffer' })
+    const deserializedCoinbaseTx = Transaction.deserialize(buffer)
+    const blockNumber = deserializedCoinbaseTx.ins[0].script.getBlockHeight()
+
+    if (this._blocksNumberCache.has(blockNumber) === true) {
+      this._logger.warn('possible orphan conflict:  ' + blockNumber + ' ' + hash)
+    } else {
+      this._blocksNumberCache.set(blockNumber, true)
+    }
+
+    block.transactions.forEach(tx => {
+      this._onNewTx(tx, block)
+    })
+    block.blockNumber = blockNumber
+
+    return block
+  }
+
+  _onNewTx (tx, block) {
+    if (this._txCache.has(tx.hash)) {
+      return
+    }
+
+    this._txCache.set(tx.hash, true)
+    if (tx.isCoinbase() === true) {}
+    // this._handleTx(tx);
+  }
+
+  _createUnifiedBlock (block: Object) { // TODO specify block type
+    return {
+      blockNumber: block.blockNumber,
+      prevHash: swapOrder(block.header.prevHash.toString('hex')),
+      blockHash: block.header.hash,
+      root: block.header.merkleRoot,
+      timestamp: block.header.time,
+      nonce: block.header.nonce,
+      version: block.header.version,
+      difficulty: block.header.getDifficulty(),
+      transactions: block.transactions.reduce(function (all, t) {
+        const tx = {
+          txHash: t.hash,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        }
+        all.push(tx)
+        return all
+      }, [])
+    }
+  }
+
+  // _handleTx (tx) {
+  //   async.reduce(
+  //     tx.outputs,
+  //     {
+  //       utxos: new Array(),
+  //       keys: new Array(),
+  //       amount: 0,
+  //       n: 0
+  //     },
+  //     function (memo, out, next) {
+  //       if (out.script.isPublicKeyHashOut()) {
+  //         /// /db.get(out.script.toAddress(), function (err, result) {
+  //         /// /  if (!(err)) {
+  //         //    var key = new PrivateKey(result);
+  //         //    memo.keys.push(key);
+  //         //    var utxo = new Transaction.UnspentOutput({
+  //         //      "txid" : tx.transaction.id,
+  //         //      "vout" : memo.n,
+  //         //      "address" : out.script.toAddress(),
+  //         //      "script" : out.script,
+  //         //      "satoshis" : out.satoshis,
+  //         //      "output" : out
+  //         //    });
+  //         //    memo.utxos.push(utxo);
+  //         //    memo.amount += out.satoshis;
+  //         /// /  };
+  //         //  memo.n++;
+  //         //  next(null, memo);
+  //         /// /});
+  //       }
+  //     },
+  //     function (err, results) {}
+  //   )
+  // }
+
   close () {
-    this.interfaces.map((c) => {
-      c.close();
-    });
+    this.interfaces.map((network) => network.close())
   }
 }
