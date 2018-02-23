@@ -176,8 +176,7 @@ var strings = {
 		}
 
 		return result;
-		//return Bitcoin.convert.bytesToHex(Bitcoin.convert.stringToBytes(s));
-	}
+	},
 
 	randomHash: function(howMany, chars) {
 

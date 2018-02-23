@@ -5652,6 +5652,12 @@ mmap-object@^1.3.5:
     nan "^2.6.2"
     node-pre-gyp "^0.6.36"
 
+mnemonist@^0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/mnemonist/-/mnemonist-0.18.0.tgz#bb7888292beacf6bb7be0cb0c12594fab6bc19e4"
+  dependencies:
+    obliterator "^1.2.1"
+
 mock-fs@^4.1.0:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.4.2.tgz#09dec5313f97095a450be6aa2ad8ab6738d63d6b"
@@ -5999,6 +6005,10 @@ object.omit@^2.0.0:
   dependencies:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
+
+obliterator@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/obliterator/-/obliterator-1.2.1.tgz#31e0960bfce0ef23fa6c7e10eb60f974953f91ad"
 
 oboe@2.1.3:
   version "2.1.3"

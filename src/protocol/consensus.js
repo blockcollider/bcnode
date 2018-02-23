@@ -23,7 +23,6 @@
  */
 
 const assert = require('assert');
-const assert = require('assert');
 const BN = require('bn.js');
 const distance = require("../distance.js");
 
