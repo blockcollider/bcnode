@@ -151,11 +151,11 @@ export default class Controller {
   _onNewBlock (height, block): Object {
     const { hash } = block.header
 
-    if (this._blocksCache.has(hash)) {
+    if (this._blockCache.has(hash)) {
       return
     }
 
-    this._blocksCache.set(hash, true)
+    this._blockCache.set(hash, true)
 
     const coinbaseTx = block.transactions[0]
     // TODO probably pull to utils
