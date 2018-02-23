@@ -67,30 +67,38 @@ const outputChangeBox = new Output()
 /* Transfer the NRG from the Output TX to the Stack */
 const stackInput = new StackInput()
       stackInput.script.fromRaw(Convert.nrg(1000, "nrg").toBosons() + "BALANCE");
-	  output.stack.addInput(stackInput);
+	    output.stack.addInput(stackInput);
+
+/*
+ * blockHeight+aliceTxIdBtc aliceTxSig btcDepositAddress CHECKSIGCHAINBENEFACTOR
+ * 
+ *
+ */
+
+// SXF = 130   
 
 const stackOutputBTC = new StackOutput()
 
-	    stackOutputBTC.script.fromArray([
-            "DUP",
-            "PUSHDATA " + btcDepositPair.address,
-            "PUSHDATA " + Convert.btc().id,
-            "CHECKSIGCHAINBENEFACTOR", 
-            "PUSHDATA " + Convert.nrg().id,
-            "PUSHDATA 10", // 10 blocks of same kind in the block collider NRG chain  
-            "PUSHDATA 5" // 5 confirmations for  
-            "VERIFYBLOCKCHAINSEQGTE", // Ensures the txID provided is found in a number of blocks before it is redeemable 
-            "PUSHDATA 1000", // this means that for 1000 NRG
-            "BALANCEUNITS",
-            "PUSHDATA "+ Convert.eth().id,
-            "PUSHDATA "+ Convert.btc().id,
-            "SWITCH",  // forces the verified blockchains switch every other time 
-            "PUSHDATA "+Convert.btc().id,  
-            "VERFIYSIGCLAIM", // Makes sure the signature provided is of the correct chain
-            "PUSHDATA " + Convert.nrg().id,,
-            "PUSHDATA " + Convert.nrg(10, "nrg").toBosons(),
-            "VERIFYCLAIMBALANCE" // this is the amount that must be leased 
-        ]); 
+	  stackOutputBTC.script.fromArray([
+          "DUP",
+          "PUSHDATA " + btcDepositPair.address,
+          "PUSHDATA " + Convert.btc().id,
+          "CHECKSIGCHAINBENEFACTOR", 
+          "PUSHDATA " + Convert.nrg().id,
+          "PUSHDATA 10", // 10 blocks of same kind in the block collider NRG chain  
+          "PUSHDATA 5" // 5 confirmations for  
+          "VERIFYBLOCKCHAINSEQUENCEGTE", // Ensures the txID provided is found in a number of blocks before it is redeemable 
+          "PUSHDATA 1000", // this means that for 1000 NRG
+          "BALANCEUNITS",
+          "PUSHDATA "+ Convert.eth().id,
+          "PUSHDATA "+ Convert.btc().id,
+          "SWITCH",  // forces the verified blockchains switch every other time 
+          "PUSHDATA "+Convert.btc().id,  
+          "VERFIYSIGCLAIM", // Makes sure the signature provided is of the correct chain
+          "PUSHDATA " + Convert.nrg().id,
+          "PUSHDATA " + Convert.nrg(10, "nrg").toBosons(),
+          "VERIFYLEASEDBALANCE" // this is the amount that must be leased 
+      ]); 
 
       output.stack.addOutput(stackOutputBTC);
 
