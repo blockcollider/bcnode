@@ -69,7 +69,7 @@ export default class Controller {
       }
     })
 
-    pool.on('peerdisconnect', function (peer, addr) {
+    pool.on('peerdisconnect', (peer, addr) => {
       this._logger.debug(`Remove peer ${peer}, ${addr}`)
       network.removePeer(peer)
     })
