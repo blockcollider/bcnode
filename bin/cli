@@ -3,4 +3,4 @@
 const cli = require('../lib/cli')
 
 // Run main entry-point
-cli.main()
+cli.main(process.argv)

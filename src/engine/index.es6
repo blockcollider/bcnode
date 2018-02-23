@@ -1,4 +1,4 @@
-const logger = require('../logger').logger
+const logging = require('../logger')
 
 // const RoverBase = require('../rovers/base').default
 
@@ -11,6 +11,7 @@ export default class Engine {
     this._rovers = null
     this._rpc = null
     this._server = null
+    this._logger = logging.logger
   }
 
   get rovers () {
@@ -25,14 +26,14 @@ export default class Engine {
     return this._server
   }
 
-  // TODO: Pass which rovers should be started
-  startRovers () {
+  startRovers (rovers: string[]) {
+    this._logger.info(`Starting rovers ${rovers}`)
     // this._rovers = new RoverBase()
     this._rovers = new RoverManager()
   }
 
   startRpc () {
-    logger.info('Starting RPC')
+    this._logger.info('Starting RPC')
   }
 
   /**

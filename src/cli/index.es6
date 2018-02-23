@@ -6,15 +6,17 @@ const Engine = require('../engine').default
 
 const pkg = require('../../package.json')
 
+const ROVERS = ['btc', 'eth', 'wav', 'lisk', 'neo']
+
 // eslint-disable-next-line import/prefer-default-export
-export function main () {
+export function main (args: Object) {
   program
     .version(pkg.version)
-    .option('--rovers', 'Start Rover')
+    .option('--rovers [items]', 'Start Rover', 'all')
     .option('--rpc', 'Enable RPC')
     .option('--ui', 'Enable Web UI')
     .option('--ws', 'Enable WebSocket')
-    .parse(process.argv)
+    .parse(args)
 
   // Print help if no arguments were given
   if (process.argv.length < 3) {
@@ -23,23 +25,27 @@ export function main () {
 
   // Create instance of engine
   const engine = new Engine()
+  const { rovers, rpc, ui, ws } = program
 
   // Should the Rover be started?
-  if (program.rovers) {
-    engine.startRovers()
+  if (rovers) {
+    const roversToStart = (rovers === 'all')
+          ? ROVERS
+          : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
+    engine.startRovers(roversToStart)
   }
 
   // Should the RPC be started?
-  if (program.rpc) {
+  if (rpc) {
     engine.startRpc()
   }
 
   // Should the Server be started?
-  if (program.rpc || program.ui || program.ws) {
+  if (rpc || ui || ws) {
     engine.startServer({
-      rpc: program.rpc, // Enable RPC - /rpc
-      ui: program.ui,   // Enable UI - /
-      ws: program.ws    // Enable WS - /ws
+      rpc, // Enable RPC - /rpc
+      ui,   // Enable UI - /
+      ws    // Enable WS - /ws
     })
   }
 
