@@ -46,8 +46,24 @@ export default class Network {
     return this._state.discoveredPeers
   }
 
+  set discoveredPeers (count: number): void {
+    this._state.discoveredPeers = count
+  }
+
   get lastBlock (): boolean {
     return this._state.lastBlock
+  }
+
+  set lastBlock (lastBlock: Object) { // TODO not sure if Object
+    this._state.lastBlock = lastBlock
+  }
+
+  get bestHeight (): number {
+    return this._state.bestHeight
+  }
+
+  set bestHeight (height: number) {
+    this._state.bestHeight = height
   }
 
   hasQuorum () {
