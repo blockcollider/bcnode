@@ -1,15 +1,15 @@
-
 var moment = require('moment');
 var sntp = require("sntp");
 var big = require('big.js');
 
-var log = global.log;
-
-if(log === undefined){
-
-    var Log = require("./log.js");
-    log = new Log();
-}
+// TODO: Fix logger
+// var log = global.log;
+//
+// if(log === undefined){
+//
+//     var Log = require("./log.js");
+//     log = new Log();
+// }
 
 var time = {
 
@@ -29,16 +29,16 @@ var time = {
 
         sntp.time({}, function(err, t){
 
-            if(err) { 
+            if(err) {
 
                console.trace(err);
-               log.warn("unable to establish delta NTP time sync servers"); 
+               log.warn("unable to establish delta NTP time sync servers");
 
                cb(null, 1);
 
             } else {
 
-                try { 
+                try {
 
                 var offset = Math.abs(t.t);
 
@@ -48,9 +48,9 @@ var time = {
 
                 } catch(err){
 
-                    log.warn("unable to establish delta NTP time sync servers"); 
+                    log.warn("unable to establish delta NTP time sync servers");
 
-                    cb(null, 0); 
+                    cb(null, 0);
 
                 }
 
@@ -58,7 +58,7 @@ var time = {
 
         });
 
-    } 
+    }
 
 }
 
