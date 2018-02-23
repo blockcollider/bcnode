@@ -25,7 +25,7 @@ export function main () {
   const engine = new Engine()
 
   // Should the Rover be started?
-  if (program.rover) {
+  if (program.rovers) {
     engine.startRovers()
   }
 
