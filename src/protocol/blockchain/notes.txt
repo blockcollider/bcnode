@@ -1,0 +1,7 @@
+
+
+- 
+- is this a correctly formatted block
+- have I seen this block before
+- are transactions pending which I can now run based on this block
+

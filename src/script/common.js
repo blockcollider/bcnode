@@ -252,12 +252,12 @@ exports.opcodes = {
 
   /*
    * OP_VERIFYBLOCKCHAINSEQUENCEGTE 275
-   * Arguments: <txBitPattern> <blockchain> <length> <noOrphanDepth> 
+   * Arguments: <txBitPattern> <txBlockchain> <lengthblockchain> <length> <noOrphanDepth> 
    *
    * This is valid if the txBitPattern found in given blockchain has been referrenced in the Block Collider chain for length otherwise it is valid after the block was not orphaned from noOrphanDepth 
    *
    */ 
-  OP_VERIFYBLOCKCHAINSEQUENCEGTE: 0x10a,
+  OP_VERIFYBLOCKCHAINSEQGTE: 0x10a,
 
   /*
    * OP_CHECKSIGFROMCHAINBENEFACTOR 267 
@@ -266,7 +266,7 @@ exports.opcodes = {
    * INTPUT: <amount> <rawData> <chainSignature> <claimTXSignature> 
    * OUTPUT: OP_OVER OP_SWAP OP_VERIFYSIGCLAIM OP_DUP <chain> <filter/null> <benefactor> OP_CHECKSIGCHAINBENEFACTOR OP_VERIFYSIGCHAINTXID OP_DUP <unitAmount> OP_BALANCEUNITS <amount> OP_BALANCE 
    *
-   * Checks signature is from chain and sends value  can be null bits and filter can be null bits
+   * Checks signature is from chain sends value can be null, bits and filter can be null bits
    *
    *
    */ 
