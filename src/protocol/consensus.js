@@ -2,20 +2,33 @@
  * consensus.js - consensus constants and helpers for bcoin
  * Copyright (c) 2014-2015, Fedor Indutny (MIT License)
  * Copyright (c) 2014-2017, Christopher Jeffrey (MIT License).
+ * Copyright (c) 2017-2018, Block Collider (MIT License).
  * https://github.com/bcoin-org/bcoin
+ * https://github.com/blockcollider/bcnode
  */
 
 'use strict';
+
+/*
+ * Initial reward: 512 
+ * Final EST. NRG Supply: 9,886,117,450
+ * Reward decrease: 30% 
+ * Decrease interval (months): 12
+ * Block Speed: 5.45 seconds (decreases to theoretical 1.5 seconds)
+ * Units: 18
+ */
 
 /**
  * @module protocol/consensus
  */
 
 const assert = require('assert');
+const assert = require('assert');
 const BN = require('bn.js');
+const distance = require("../distance.js");
 
 /**
- * One NRG in sparks.
+ * One NRG in bosons.
  * @const {Amount}
  * @default
  */
@@ -23,13 +36,13 @@ const BN = require('bn.js');
 exports.COIN = 100000000000;
 
 /**
- * Maximum amount of money in sparks:
+ * Maximum amount of money in bosons:
  * `9.8billion * 1NRG` (consensus).
  * @const {Amount}
  * @default
  */
 
-exports.MAX_MONEY = 9849998928 * exports.COIN;
+exports.MAX_MONEY = 9886117450 * exports.COIN;
 
 /**
  * Defrag chain window 
@@ -45,15 +58,15 @@ exports.DEFRAG_RATE = 1000000;
  * @default
  */
 
-exports.BASE_REWARD = 100 * exports.COIN;
+exports.BASE_REWARD = 512 * exports.COIN;
 
 /**
- * Boson reward block subsidy 
+ * Higgs reward block subsidy 
  * @const {Amount}
  * @default
  */
 
-exports.BOSON_REWARD = 10000 * exports.COIN;
+exports.HIGGS_REWARD = 10000 * exports.COIN;
 
 /**
  * Reward halves every 50m blocks. 
@@ -74,24 +87,24 @@ exports.BASE_REWARD_INTERVAL = 50000000;
  * @default
  */
 
-exports.HALF_BASE_REWARD = Math.floor(exports.BASE_REWARD / 2);
+exports.THIRD_BASE_REWARD = Math.floor(exports.BASE_REWARD / 3);
 
 /**
- * Half base Boson block subsidy. 
+ * Half base Higgs block subsidy. 
  * @const {Amount}
  * @default
  */
 
-exports.HALF_BOSON_REWARD = Math.floor(exports.BOSON_REWARD / 2);
+exports.THIRD_HIGGS_REWARD = Math.floor(exports.HIGGS_REWARD / 2);
 
 /**
- * TODO: Refactor for Edit Distance Bonus
+ * TODO: Refactor for Distance Bonus
  */
 
 exports.MAX_BLOCK_SIZE = 1000000;
 
 /**
- * TODO: Refactor for Edit Distance Bonus 
+ * TODO: Refactor for Distance Bonus 
  * @const {Number}
  * @default
  */
@@ -99,7 +112,7 @@ exports.MAX_BLOCK_SIZE = 1000000;
 exports.MAX_RAW_BLOCK_SIZE = 4000000;
 
 /**
- * TODO: Refactor for Edit Distance Bonus 
+ * TODO: Refactor for Distance Bonus 
  * @const {Number}
  * @default
  */
@@ -150,7 +163,7 @@ exports.VERSION_TOP_MASK = 0xe0000000;
 exports.COINBASE_MATURITY = 500;
 
 /**
- * TODO: Remove
+ * TODO: Remove/Remove
  * @const {Number}
  * @default
  */
@@ -231,13 +244,14 @@ exports.MAX_SCRIPT_PUSH = 520;
 
 exports.MAX_SCRIPT_OPS = 201;
 
-/**
+/*
+ * NOTE: Adjusted from default value of 20 for space saving 
  * Max `n` value for multisig (consensus).
  * @const {Number}
  * @default
  */
 
-exports.MAX_MULTISIG_PUBKEYS = 20;
+exports.MAX_MULTISIG_PUBKEYS = 10;
 
 /**
  * The date bip16 (p2sh) was activated (consensus).
@@ -342,7 +356,7 @@ exports.verifyPOW = function verifyPOW(hash, bits) {
  * @returns {Boolean}
  */
 
-exports.verifyPOD = function verifyPOD(hash, bits) {
+exports.verifyPOD = function verifyPOD(hash, headers) {
   const target = exports.fromCompact(bits);
 
   if (target.isNeg() || target.isZero())

@@ -162,6 +162,23 @@ var strings = {
 		return decodedString;
 	},
 
+	s2hex: function(s) {
+		// http://stackoverflow.com/questions/6226189/how-to-convert-a-string-to-bytearray
+		var result = '';
+		for (var i = 0; i < s.length; i++) {
+				var charCode = s.charCodeAt(i);
+				var cLen = Math.ceil(Math.log(charCode) / Math.log(256));
+				for (var j = 0; j < cLen; j++) {
+						var octet = ((charCode << (j*8)) & 0xFF).toString(16);
+						if (octet.length === 1) { octet = '0' + octet; }
+						result += octet;
+				}
+		}
+
+		return result;
+		//return Bitcoin.convert.bytesToHex(Bitcoin.convert.stringToBytes(s));
+	}
+
 	randomHash: function(howMany, chars) {
 
 		chars = chars 
