@@ -8,7 +8,7 @@
  */
 
 const logger = require('../logger').logger
-const child = require('child_process')
+const { fork } = require('child_process')
 const path = require('path')
 
 export const rovers = {
@@ -34,7 +34,11 @@ export default class RoverManager {
 
     this._logger.info(`Starting rover '${roverName}'`)
 
-    const rover = child.fork(roverPath)
+    const rover = fork(roverPath)
+    rover.on('exit', (code, signal) => {
+      this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting`)
+      this.startRover(roverName)
+    })
     this._rovers[roverName] = rover
 
     return true
