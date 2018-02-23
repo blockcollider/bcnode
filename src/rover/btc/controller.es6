@@ -1,9 +1,19 @@
-const Network = require('./network').default
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @disable-flow
+ */
+
 const { Messages } = require('bitcore-p2p')
 const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
 const process = require('process')
+
+const Network = require('./network')
 const { swapOrder } = require('../../utils/strings')
 
 const NETWORK_TIMEOUT = 3000
@@ -37,6 +47,16 @@ export default class Controller {
     const poolTimeout = setTimeout(function () {
       pool.disconnect().connect()
     }, NETWORK_TIMEOUT)
+
+    process.on('disconnect', function () {
+      this._logger.info('parent exited')
+      process.exit()
+    })
+
+    process.on('uncaughtError', function (e) {
+      this._logger.error('Uncaught error', e)
+      process.exit(3)
+    })
 
     pool.on('peerready', (peer, addr) => {
       clearTimeout(poolTimeout)
@@ -97,6 +117,7 @@ export default class Controller {
     pool.on('peerinv', (peer, message) => {
       try {
         this._logger.info(`PeerINV: ${peer.version}, ${peer.subversion}, ${peer.bestHeight}, ${peer.host}`)
+        this._publisher.publish({msg: "test"})
 
         if (peer.subversion !== undefined && peer.subversion.indexOf('/Satoshi:') > -1) {
           try {

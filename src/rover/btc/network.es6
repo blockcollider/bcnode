@@ -1,4 +1,12 @@
-// @flow
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+
 const { Networks } = require('bitcore-lib')
 const { Pool } = require('bitcore-p2p')
 const { merge } = require('ramda')
@@ -54,7 +62,7 @@ export default class Network {
     return this._state.lastBlock
   }
 
-  set lastBlock (lastBlock: Object) { // TODO not sure if Object
+  set lastBlock (lastBlock: boolean) {
     this._state.lastBlock = lastBlock
   }
 
