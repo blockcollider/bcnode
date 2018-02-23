@@ -1,4 +1,3 @@
-const moment = require('moment')
 const path = require('path')
 const winston = require('winston')
 require('winston-daily-rotate-file')
@@ -7,7 +6,7 @@ const logDir = path.resolve(__dirname, '..', '..', 'logs')
 
 const logPath = `${logDir}/bcnode`
 
-const tsFormat = () => moment().utc().format('YYYYMMDDHHmmss')
+const tsFormat = () => (new Date()).toISOString()
 
 const format = (options) => {
   const ts = options.timestamp()
