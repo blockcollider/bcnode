@@ -132,7 +132,7 @@ export default class Controller {
           const unifiedBlock = this._createUnifiedBlock(_block)
           network.bestHeight = _block.blockNumber
 
-          this._publisher.publisher(unifiedBlock)
+          this._publisher.publish(unifiedBlock)
         }
       } else {
         try {
