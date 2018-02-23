@@ -4,8 +4,7 @@ const Controller = require('./controller').default
 
 const main = () => {
   const hub = new Hub()
-  console.log(Hub, hub)
-  console.log("LOGGER", logging)
+  process.title = 'bc-rover-btc'
   const controller = new Controller(logging.logger, hub)
   controller.init()
 }
