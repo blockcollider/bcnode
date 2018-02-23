@@ -1,4 +1,12 @@
-// @flow
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+
 const process = require('process')
 const program = require('commander')
 
@@ -32,6 +40,8 @@ export function main (args: Object) {
   process.on('SIGINT', () => {
     console.log('\ngracefully shutting down from  SIGINT (Ctrl-C)')
 
+    // TODO: Inform engine
+
     // wish this worked on Windows
     process.exit()
   })
@@ -42,6 +52,7 @@ export function main (args: Object) {
       rovers === 'all'
         ? ROVERS
         : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
+
     engine.startRovers(roversToStart)
   }
 
