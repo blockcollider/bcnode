@@ -4,6 +4,7 @@
   "description": "Block Collider with miners and rovers",
   "main": "lib/src/init.js",
   "scripts": {
+    "check": "yarn run dist",
     "doc": "./node_modules/.bin/esdoc",
     "lint:standard": "standard src/**/*.es6",
     "lint:flow": "flow",
@@ -31,16 +32,25 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "jest": {
-    "moduleFileExtensions": ["js", "jsx", "json", "ts", "tsx", "es6"],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json",
+      "ts",
+      "tsx",
+      "es6"
+    ],
     "testPathIgnorePatterns": [
       "/node_modules/*.*",
       "node_modules/jest/node_modules/jest-cli/build/test_scheduler.js",
       "/lib/"
     ],
     "testEnvironment": "node",
-    "testMatch": [ "**/__tests__/**/*.(js|es6)" ],
+    "testMatch": [
+      "**/__tests__/**/*.(js|es6)"
+    ],
     "transform": {
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.(js|es6)$": "babel-jest"
     }
   },
   "standard": {
@@ -141,6 +151,7 @@
     "winston": "^2.4.0",
     "winston-daily-rotate-file": "^1.7.2",
     "xor-it": "^1.0.2",
+    "zmq": "^2.15.3",
     "zstd-codec": "0.0.7"
   },
   "devDependencies": {
@@ -159,6 +170,7 @@
     "esdoc-standard-plugin": "^1.0.0",
     "eslint-config-standard": "^11.0.0-beta.0",
     "eslint-plugin-flowtype": "^2.44.0",
+    "eslint-plugin-prettier": "^2.6.0",
     "flow-bin": "^0.65.0",
     "install": "^0.10.4",
     "jest": "22.2.2",

@@ -1,6 +1,11 @@
 const moment = require('moment')
+const path = require('path')
 const winston = require('winston')
 require('winston-daily-rotate-file')
+
+const logDir = path.resolve(__dirname, '..', '..', 'logs')
+
+const logPath = `${logDir}/bcnode`
 
 const tsFormat = () => moment().utc().format('YYYYMMDDHHmmss')
 
@@ -25,7 +30,7 @@ export const logger = (function init () {
 
       // File
       new (winston.transports.DailyRotateFile)({
-        filename: 'logs/bcnode',
+        filename: logPath,
         timestamp: tsFormat,
         datePattern: '-yyyyMMddHHmm.log',
         json: false,
