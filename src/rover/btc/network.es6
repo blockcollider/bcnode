@@ -15,6 +15,7 @@ const logging = require('../../logger')
 const { getPrivateKey } = require('../utils')
 
 const DEFAULT_STATE = {
+  // TODO: Read from configs
   maximumPeers: 96,
   discoveredPeers: 0,
   lastBlock: false,

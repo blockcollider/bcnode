@@ -7,13 +7,18 @@
  * @flow
  */
 
+const process = require('process')
 const { Hub } = require('iris')
 const logging = require('../../logger')
 const Controller = require('./controller').default
 
+const ROVER_TITLE  = 'bc-rover-btc'
+
 const main = () => {
+  process.title = ROVER_TITLE
+
   const hub = new Hub()
-  process.title = 'bc-rover-btc'
+
   const controller = new Controller(logging.logger, hub)
   controller.init()
 }

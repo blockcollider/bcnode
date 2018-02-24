@@ -219,7 +219,7 @@ export default class Controller {
       nonce: block.header.nonce,
       version: block.header.version,
       difficulty: block.header.getDifficulty(),
-      transactions: block.transactions.reduce(function (all, t) {
+      transactions: block.transactions.reduce((all, t) => {
         const tx = {
           txHash: t.hash,
           // inputs: t.inputs,
