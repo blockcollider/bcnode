@@ -13,7 +13,7 @@ const LRUCache = require('lru-cache')
 const convBin = require('binstring')
 const process = require('process')
 
-const Network = require('./network')
+const Network = require('./network').default
 const { swapOrder } = require('../../utils/strings')
 
 const NETWORK_TIMEOUT = 3000
@@ -91,7 +91,7 @@ export default class Controller {
     })
 
     pool.on('peerdisconnect', (peer, addr) => {
-      this._logger.debug(`Remove peer ${peer}, ${addr}`)
+      this._logger.debug(`BTC rover: removing peer ${peer}, ${addr}`)
       network.removePeer(peer)
     })
 
