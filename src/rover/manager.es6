@@ -37,6 +37,7 @@ export default class RoverManager {
     const rover = fork(roverPath)
     rover.on('exit', (code, signal) => {
       this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting`)
+      delete this._rovers[roverName]
       this.startRover(roverName)
     })
     this._rovers[roverName] = rover
