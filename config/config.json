@@ -1,7 +1,6 @@
 {
-  "rover": {
-    "btc": {
-    }
+  "grpc": {
+    "port": 50051
   },
 
   "server": {
