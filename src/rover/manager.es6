@@ -30,13 +30,22 @@ export default class RoverManager {
     const roverPath = rovers[roverName]
 
     if (!roverPath) {
-      this._logger.error(`Rover not implemented ${roverName}`)
+      this._logger.error(`Rover is not implemented '${roverName}'`)
       return false
     }
 
     this._logger.info(`Starting rover '${roverName}'`)
 
-    const rover = fork(roverPath)
+    const rover = fork(
+      roverPath,
+      [],
+      {
+        execArgv: process.env.DEBUGGER ? ["--inspect-brk"] : []
+      }
+    )
+
+    this._rovers[roverName] = rover
+
     rover.on('exit', (code, signal) => {
       this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting in ${ROVER_RESTART_TIMEOUT / 1000}s`)
       // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
@@ -45,7 +54,6 @@ export default class RoverManager {
         this.startRover(roverName)
       }, ROVER_RESTART_TIMEOUT)
     })
-    this._rovers[roverName] = rover
 
     return true
   }
