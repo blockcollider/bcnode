@@ -11,6 +11,8 @@ const logger = require('../logger').logger
 const { fork } = require('child_process')
 const path = require('path')
 
+const ROVER_RESTART_TIMEOUT = 5000
+
 export const rovers = {
   btc: path.resolve(__dirname, 'btc', 'rover.js')
 }
@@ -36,8 +38,12 @@ export default class RoverManager {
 
     const rover = fork(roverPath)
     rover.on('exit', (code, signal) => {
-      this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting`)
-      this.startRover(roverName)
+      this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting in ${ROVER_RESTART_TIMEOUT / 1000}s`)
+      // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
+      setTimeout(() => {
+        delete this._rovers[roverName]
+        this.startRover(roverName)
+      }, ROVER_RESTART_TIMEOUT)
     })
     this._rovers[roverName] = rover
 
