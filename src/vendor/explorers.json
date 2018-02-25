@@ -1,0 +1,66 @@
+[
+	{ 
+	 "address": "https://chain.so",
+	 "type": "bitcoin" 
+	},
+	{ 
+	 "address": "https://chain.so",
+	 "type": "litecoin" 
+	},
+	{
+	"address": "http://dogechain.info",
+	"type":"dog"
+	},
+	{
+	"address": "http://etherscan.io",
+	"type":"ethereum"
+	},
+	{
+	"address": "http://node.cyber.fund",
+	"type":"ethereumclassic"
+	},
+	{
+	"address": "http://node2.cyber.fund",
+	"type":"steemit"
+	},
+	{
+	"address":"http://node.cyber.fund",
+	"type":"bitshares"
+	},
+	{
+	"address": "http://blockscan.com",
+	"type":"counterparty"
+	},
+	{
+	"address":"https://api.coinprism.com",
+	"type":"openassets"
+	},
+	{
+	"address":"https://api.ripple.com",
+	"type":"ripple"
+	},
+	{
+	"address":"http://omnichest.info",
+	"type":"omni"
+	},
+	{
+	"address": "http://node.cyber.fund",
+	"type":"nxt"
+	},
+	{
+	"address":"http://bigalice3.nem.ninja",
+	"type":"nem"
+	},
+	{
+	"address":"https://lisk.io",
+	"type":"lisk"
+	},
+	{
+	"address":"https://chainz.cryptoid.info",
+	"type":"dash"
+	},
+	{
+	"address":"https://chainz.cryptoid.info",
+	"type":"peercoin"
+	}
+]

@@ -30,14 +30,23 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "jest": {
-    "moduleFileExtensions": ["js", "jsx", "json", "ts", "tsx", "es6"],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json",
+      "ts",
+      "tsx",
+      "es6"
+    ],
     "testPathIgnorePatterns": [
       "/node_modules/*.*",
       "node_modules/jest/node_modules/jest-cli/build/test_scheduler.js",
       "/lib/"
     ],
     "testEnvironment": "node",
-    "testMatch": [ "**/__tests__/**/*.(js|es6)" ],
+    "testMatch": [
+      "**/__tests__/**/*.(js|es6)"
+    ],
     "transform": {
       "^.+\\.(js|es6)$": "babel-jest"
     }
@@ -137,6 +146,7 @@
     "web3": "^1.0.0-beta.30",
     "webcoin-bitcoin": "^3.1.4",
     "webcoin-bitcoin-testnet": "^1.1.1",
+    "winston": "^2.4.0",
     "winston-color": "^1.0.0",
     "xor-it": "^1.0.2",
     "zstd-codec": "0.0.7"

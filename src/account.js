@@ -1,3 +1,4 @@
+
 const pt = require('prompt')
 const Crypt = require('./crypt.js')
 const crypt = new Crypt()
@@ -10,13 +11,11 @@ const ICAP = require('ethereumjs-icap')
 const Log = require('./log.js')
 const Output = require('./primitives/output')
 
-let log
+let log = new Log();
 
 if (!global.log) {
-  log = new Log()
-} else {
-  log = global.log
-}
+  log = global.log; 
+} 
 
 function generateDirectAddress () {
   return crypt.createSecPrivateKey()
@@ -27,7 +26,7 @@ function Account (opts) {
     path: './',
     file: 'accounts.json'
   }
-  if (opts !== undefined) {
+  if (opts !== undefined && opts.constructor === Object) {
     Object.keys(opts).map(function (k) {
       this[k] = opts[k]
     })

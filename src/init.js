@@ -77,10 +77,8 @@ module.exports = function main (opts) {
             base.launchRover('eth')
             base.launchRover('neo')
             base.launchRover('wav')
+            base.launchRover("lsk")
           }
-
-          /* In Development */
-          // base.launchRover("lsk");
 
           /* Rover Base Monitor GUI */
           if (opts.roverbase) {
