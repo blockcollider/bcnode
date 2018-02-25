@@ -329,7 +329,7 @@ util.format = function format(args, color) {
       color = Boolean(process.stdout && process.stdout.isTTY);
     return util.inspectify(args[0], color);
   }
-  return util.fmt(...args);
+  return util.fmt(args);
 };
 
 /**
@@ -338,12 +338,12 @@ util.format = function format(args, color) {
  * @param {...String} args
  */
 
-util.log = function log(...args) {
+util.log = function log(args) {
   if (!process.stdout) {
     let msg;
     if (args.length > 0) {
       msg = typeof args[0] !== 'object'
-        ? util.fmt(...args)
+        ? util.fmt(args)
         : args[0];
     }
     console.log(msg);

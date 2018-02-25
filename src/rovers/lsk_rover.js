@@ -8,6 +8,15 @@ const lisk = require('lisk-js')
 const string = require('../utils/strings.js')
 const Log = require('../log.js')
 
+const liskOptions = {
+  ssl: true,
+  node: 'node01.lisk.io',
+  randomPeer: true,
+  testnet: false,
+  port: '443',
+  bannedPeers: []
+}
+
 const LRU = require('lru-cache'),
   options = {
     max: 500,
@@ -151,16 +160,19 @@ function onNewBlock (block, done) {
     blockId: block.id
   }
 
-  lisk.api().getTransactionsList(params, function (err, success, response) {
-    if (err) {
-      console.trace(err)
-      done()
-    } else {
-      block.transactions = response.transactions
-      transmitRoverBlock(block)
-      done()
-    }
-  })
+  try {
+    lisk
+      .api(liskOptions)
+      .sendRequest('transactions', params, function (response) {
+        // LISK.listTransactions(block.generatorPublicKey, 100, 0, function (err, success, response) {
+        block.transactions = response.transactions
+        transmitRoverBlock(block)
+        setTimeout(done, 2000)
+      })
+  } catch (err) {
+    console.trace(err)
+    setTimeout(done, 2000)
+  }
 }
 
 function Network (config) {
@@ -282,9 +294,8 @@ Network.prototype = {
 }
 
 function getLastHeight (cb) {
-  lisk.api().sendRequest('blocks/getHeight', function (response) {
+  lisk.api(liskOptions).sendRequest('blocks/getHeight', function (response) {
     // if(err) { cb(err); } else {
-    console.log(response)
     cb(null, response.height)
     // }
   })
@@ -300,61 +311,58 @@ var Controller = {
 
     function cycle () {
       getLastHeight(function (err, h) {
-        var params = {
-          height: h
-        }
-
-        lisk.api().getBlock(params, function (err, success, response) {
-          if (err) {
-            console.trace(err)
-            setTimeout(function () {
-              cycle()
-            }, 2000)
-          } else {
+        try {
+          lisk.api(liskOptions).getBlock(h, function (response) {
             var block = response.blocks.pop()
-
             if (blockCache.has(block.id) != true) {
               blockCache.set(block.id, true)
               onNewBlock(block, cycle)
             } else {
-              cycle()
+              setTimeout(function () {
+                cycle()
+              }, 2000)
             }
-          }
-        })
+          })
+        } catch (err) {
+          console.trace(err)
+          setTimeout(function () {
+            cycle()
+          }, 2000)
+        }
       })
     }
 
     cycle()
 
-    setInterval(function () {
-      liskAPI.getPeersList({}, function (error, success, response) {
-        if (error) {
-          console.trace(error)
-        } else {
-          var t = response.peers.reduce(function (all, a) {
-            if (all[a.height] == undefined) {
-              all[a.height] = 1
-            } else {
-              all[a.height]++
-            }
-            return all
-          }, {})
+    // setInterval(function () {
+    //  lisk.api(liskOptions).getPeersList({}, function (error, success, response) {
+    //    if (error) {
+    //      console.trace(error)
+    //    } else {
+    //      var t = response.peers.reduce(function (all, a) {
+    //        if (all[a.height] == undefined) {
+    //          all[a.height] = 1
+    //        } else {
+    //          all[a.height]++
+    //        }
+    //        return all
+    //      }, {})
 
-          var tp = Object.keys(t).sort(function (a, b) {
-            if (t[a] > t[b]) {
-              return -1
-            }
-            if (t[a] < t[b]) {
-              return 1
-            }
-            return 0
-          })
+    //      var tp = Object.keys(t).sort(function (a, b) {
+    //        if (t[a] > t[b]) {
+    //          return -1
+    //        }
+    //        if (t[a] < t[b]) {
+    //          return 1
+    //        }
+    //        return 0
+    //      })
 
-          log.info('peer sample: ' + response.peers.length)
-          log.info('probable lsk block heigh ' + tp[0])
-        }
-      })
-    }, 60000)
+    //      log.info('peer sample: ' + response.peers.length)
+    //      log.info('probable lsk block heigh ' + tp[0])
+    //    }
+    //  })
+    // }, 60000)
   },
 
   close: function () {
