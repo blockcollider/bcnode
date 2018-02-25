@@ -1,24 +1,18 @@
 const grpc = require('grpc')
-const { resolve } = require('path')
-
 const logging = require('../logger')
 const RoverManager = require('../rover/manager').default
 const Server = require('../server/index').default
-
-const configDir = resolve(__dirname, '..', '..', 'config')
-const configPath = resolve(configDir, 'config.json')
-const config = require(configPath)
-
-const { Block, BlockReply } = require('../protos/block_pb');
-const { CollectorService } = require('../protos/collector_grpc_pb');
+const config = require('../../config/config')
+const { BlockReply } = require('../protos/block_pb')
+const { CollectorService } = require('../protos/collector_grpc_pb')
 
 /**
  * Implements the collectBlock RPC method.
  */
-function collectBlock(call, callback) {
-  const reply = new BlockReply();
+function collectBlock (call, callback) {
+  const reply = new BlockReply()
   console.log('collectBlock()', call)
-  callback(null, reply);
+  callback(null, reply)
 }
 
 export default class Engine {
@@ -28,12 +22,12 @@ export default class Engine {
     this._server = null
     this._logger = logging.logger
 
-    this._grpc = new grpc.Server();
-    this._grpc.bind(`0.0.0.0:${config.grpc.port}`, grpc.ServerCredentials.createInsecure());
+    this._grpc = new grpc.Server()
+    this._grpc.bind(`0.0.0.0:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
     this._grpc.addService(CollectorService, {
       collectBlock: collectBlock
-    });
-    this._grpc.start();
+    })
+    this._grpc.start()
   }
 
   get rovers () {

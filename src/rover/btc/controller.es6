@@ -25,9 +25,7 @@ const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
 const ID = 'btc'
 
-const configDir = resolve(__dirname, '..', '..', '..', 'config')
-const configPath = resolve(configDir, 'config.json')
-const config = require(configPath)
+const config = require('../../../config/config')
 
 export default class Controller {
   constructor (logger) {

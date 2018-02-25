@@ -40,7 +40,7 @@ export default class RoverManager {
       roverPath,
       [],
       {
-        execArgv: process.env.DEBUGGER ? ["--inspect-brk"] : []
+        execArgv: process.env.DEBUGGER ? ['--inspect-brk'] : []
       }
     )
 

@@ -4,9 +4,7 @@ const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
 const logger = require('../logger').logger
 
-const configDir = path.resolve(__dirname, '..', '..', 'config')
-const configPath = path.resolve(configDir, 'config.json')
-const config = require(configPath)
+const config = require('../../config/config')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
 

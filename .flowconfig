@@ -3,6 +3,7 @@
 <PROJECT_ROOT>/node_modules/npm
 <PROJECT_ROOT>/node_modules/npmi
 <PROJECT_ROOT>/node_modules/oboe
+<PROJECT_ROOT>/node_modules/protobufjs
 
 [include]
 <PROJECT_ROOT>/src/.*
