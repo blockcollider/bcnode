@@ -54,11 +54,6 @@ export function main (args: Object) {
     engine.startRovers(roversToStart)
   }
 
-  // Should the RPC be started?
-  if (rpc) {
-    engine.startRpc()
-  }
-
   // Should the Server be started?
   if (rpc || ui || ws) {
     engine.startServer({

@@ -1,33 +1,14 @@
-const grpc = require('grpc')
 const logging = require('../logger')
 const RoverManager = require('../rover/manager').default
 const Server = require('../server/index').default
-const config = require('../../config/config')
-const { BlockReply } = require('../protos/block_pb')
-const { CollectorService } = require('../protos/collector_grpc_pb')
-
-/**
- * Implements the collectBlock RPC method.
- */
-function collectBlock (call, callback) {
-  const reply = new BlockReply()
-  console.log('collectBlock()', call)
-  callback(null, reply)
-}
+const { RpcServer } = require('../rpc/index')
 
 export default class Engine {
   constructor (logger) {
     this._rovers = null
-    this._rpc = null
     this._server = null
     this._logger = logging.logger
-
-    this._grpc = new grpc.Server()
-    this._grpc.bind(`0.0.0.0:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
-    this._grpc.addService(CollectorService, {
-      collectBlock: collectBlock
-    })
-    this._grpc.start()
+    this._rpc = new RpcServer(this)
   }
 
   get rovers () {
@@ -50,10 +31,6 @@ export default class Engine {
     rovers.forEach(name => {
       this._rovers.startRover(name)
     })
-  }
-
-  startRpc () {
-    this._logger.info('Starting RPC')
   }
 
   /**

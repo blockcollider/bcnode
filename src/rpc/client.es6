@@ -7,5 +7,7 @@
  * @flow
  */
 
-export { default as RpcClient } from './client'
-export { default as RpcServer } from './server'
+export default class RpcClient {
+  // constructor () {
+  // }
+}

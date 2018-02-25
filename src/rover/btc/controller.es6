@@ -36,7 +36,7 @@ export default class Controller {
     this._blocksNumberCache = new LRUCache({ max: 110 })
     this._txCache = new LRUCache({ max: 3000 })
 
-    this._service = new CollectorClient(`127.0.0.1:${config.grpc.port}`, grpc.credentials.createInsecure());
+    this._service = new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure());
 
     const msg = new Block();
     msg.setBlockchain("btc")
