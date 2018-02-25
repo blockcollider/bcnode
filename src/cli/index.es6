@@ -10,7 +10,6 @@
 const process = require('process')
 const program = require('commander')
 
-const { Hub } = require('iris')
 const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
@@ -33,12 +32,11 @@ export function main (args: Object) {
   }
 
   // Create instance of engine
-  const hub = new Hub()
-  const engine = new Engine(logging.logger, hub)
+  const engine = new Engine(logging.logger)
   const { rovers, rpc, ui, ws } = program
 
   process.on('SIGINT', () => {
-    console.log('\ngracefully shutting down from  SIGINT (Ctrl-C)')
+    console.log('Gracefully shutting down from  SIGINT (Ctrl-C)')
 
     // TODO: Inform engine
 

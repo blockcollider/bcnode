@@ -12,23 +12,41 @@ const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
 const process = require('process')
+const { resolve } = require('path')
+const grpc = require('grpc')
 
 const Network = require('./network').default
 const { swapOrder } = require('../../utils/strings')
+
+const { Block } = require('../../protos/block_pb');
+const { CollectorClient } = require('../../protos/collector_grpc_pb');
 
 const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
 const ID = 'btc'
 
+const configDir = resolve(__dirname, '..', '..', '..', 'config')
+const configPath = resolve(configDir, 'config.json')
+const config = require(configPath)
+
 export default class Controller {
-  constructor (logger, hub) {
+  constructor (logger) {
     this._dpt = false
     this._interfaces = []
     this._logger = logger
-    this._publisher = hub.getPublisher('rover.btc.newblock')
     this._blockCache = new LRUCache({ max: 110 })
     this._blocksNumberCache = new LRUCache({ max: 110 })
     this._txCache = new LRUCache({ max: 3000 })
+
+    this._service = new CollectorClient(`127.0.0.1:${config.grpc.port}`, grpc.credentials.createInsecure());
+
+    const msg = new Block();
+    msg.setBlockchain("btc")
+    msg.setHash("0123456789")
+
+    this._service.collectBlock(msg, (err, response) => {
+      console.log('Greeting:', response);
+    });
   }
 
   get dpt () {
@@ -117,8 +135,6 @@ export default class Controller {
     pool.on('peerinv', (peer, message) => {
       try {
         this._logger.info(`PeerINV: ${peer.version}, ${peer.subversion}, ${peer.bestHeight}, ${peer.host}`)
-        this._publisher.publish({msg: "test"})
-
         if (peer.subversion !== undefined && peer.subversion.indexOf('/Satoshi:') > -1) {
           try {
             var peerMessage = new Messages().GetData(message.inventory)
@@ -153,7 +169,7 @@ export default class Controller {
           if (isNew) {
             const unifiedBlock = this._createUnifiedBlock(_block)
             network.bestHeight = _block.blockNumber
-            this._publisher.publish(unifiedBlock)
+            // TODO: this._publisher.publish(unifiedBlock)
           }
         }
       } else {
