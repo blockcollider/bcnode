@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package bc;
+
+import "block.proto";
+
+service Collector {
+    // Sends a greeting
+    rpc CollectBlock (Block) returns (BlockReply) {}
+}
