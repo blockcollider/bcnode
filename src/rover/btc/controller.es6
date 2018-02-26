@@ -12,14 +12,11 @@ const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
 const process = require('process')
-const { resolve } = require('path')
-const grpc = require('grpc')
-
-const Network = require('./network').default
-const { swapOrder } = require('../../utils/strings')
 
 const { Block } = require('../../protos/block_pb');
-const { CollectorClient } = require('../../protos/collector_grpc_pb');
+const { RpcClient } = require('../../rpc')
+const Network = require('./network').default
+const { swapOrder } = require('../../utils/strings')
 
 const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
@@ -36,15 +33,7 @@ export default class Controller {
     this._blocksNumberCache = new LRUCache({ max: 110 })
     this._txCache = new LRUCache({ max: 3000 })
 
-    this._service = new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure());
-
-    const msg = new Block();
-    msg.setBlockchain("btc")
-    msg.setHash("0123456789")
-
-    this._service.collectBlock(msg, (err, response) => {
-      console.log('Greeting:', response);
-    });
+    this._rpc = new RpcClient()
   }
 
   get dpt () {
@@ -76,7 +65,7 @@ export default class Controller {
 
     pool.on('peerready', (peer, addr) => {
       clearTimeout(poolTimeout)
-      this._logger.info(`BTC rover: connected to pool v: ${peer.version}, s: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
+      this._logger.info(`BTC rover: connected to pool version: ${peer.version}, subversion: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
 
       if (network.hasQuorum()) {
         try {
@@ -167,7 +156,10 @@ export default class Controller {
           if (isNew) {
             const unifiedBlock = this._createUnifiedBlock(_block)
             network.bestHeight = _block.blockNumber
-            // TODO: this._publisher.publish(unifiedBlock)
+
+            this._rpc.collector.collectBlock(unifiedBlock, (err, response) => {
+              console.log('Greeting:', response);
+            });
           }
         }
       } else {
@@ -224,26 +216,32 @@ export default class Controller {
   }
 
   _createUnifiedBlock (block: Object) { // TODO specify block type
-    return {
-      blockNumber: block.blockNumber,
-      prevHash: swapOrder(block.header.prevHash.toString('hex')),
-      blockHash: block.header.hash,
-      root: block.header.merkleRoot,
-      timestamp: block.header.time,
-      nonce: block.header.nonce,
-      version: block.header.version,
-      difficulty: block.header.getDifficulty(),
-      transactions: block.transactions.reduce((all, t) => {
-        const tx = {
-          txHash: t.hash,
-          // inputs: t.inputs,
-          // outputs: t.outputs,
-          marked: false
-        }
-        all.push(tx)
-        return all
-      }, [])
-    }
+    // return {
+    //   blockNumber: block.blockNumber,
+    //   prevHash: swapOrder(block.header.prevHash.toString('hex')),
+    //   blockHash: block.header.hash,
+    //   root: block.header.merkleRoot,
+    //   timestamp: block.header.time,
+    //   nonce: block.header.nonce,
+    //   version: block.header.version,
+    //   difficulty: block.header.getDifficulty(),
+    //   transactions: block.transactions.reduce((all, t) => {
+    //     const tx = {
+    //       txHash: t.hash,
+    //       // inputs: t.inputs,
+    //       // outputs: t.outputs,
+    //       marked: false
+    //     }
+    //     all.push(tx)
+    //     return all
+    //   }, [])
+    // }
+
+    const msg = new Block()
+    msg.setBlockchain("btc")
+    msg.setHash(block.header.hash)
+
+    return msg
   }
 
   // _handleTx (tx) {

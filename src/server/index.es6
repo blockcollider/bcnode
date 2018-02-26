@@ -10,9 +10,8 @@ const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
 
 // See http://www.programwitherik.com/getting-started-with-socket-io-node-js-and-express/
 export default class Server {
-  constructor (opts) {
-    this._opts = opts
-
+  constructor () {
+    this._opts = null
     this._app = null
     this._io = null
     this._server = null
@@ -34,7 +33,9 @@ export default class Server {
     return this._server
   }
 
-  run () {
+  run (opts) {
+    this._opts = opts
+
     logger.info('Starting Server for Web UI')
 
     // Create express app instance

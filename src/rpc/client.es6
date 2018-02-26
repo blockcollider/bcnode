@@ -6,8 +6,20 @@
  *
  * @flow
  */
+const grpc = require('grpc')
+
+const { CollectorClient } = require('../protos/collector_grpc_pb');
+
+const config = require('../../config/config')
 
 export default class RpcClient {
-  // constructor () {
-  // }
+  _collector: Object;
+
+  constructor () {
+    this._collector = new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure());
+  }
+
+  get collector (): Object {
+    return this._collector
+  }
 }

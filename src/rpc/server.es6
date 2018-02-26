@@ -22,9 +22,12 @@ export default class RpcServer {
 
     this._rpcServer = new grpc.Server()
     this._rpcServer.bind(`${config.grpc.host}:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
+
+    // TODO: Register dynamically service/**/*.es6
     this._rpcServer.addService(CollectorService, {
       collectBlock: this.collectBlock.bind(this)
     })
+
     this._rpcServer.start()
   }
 
