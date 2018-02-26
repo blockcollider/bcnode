@@ -14,7 +14,8 @@ const path = require('path')
 const ROVER_RESTART_TIMEOUT = 5000
 
 export const rovers = {
-  btc: path.resolve(__dirname, 'btc', 'rover.js')
+  btc: path.resolve(__dirname, 'btc', 'rover.js'),
+  lsk: path.resolve(__dirname, 'lsk', 'rover.js')
 }
 
 export default class RoverManager {
