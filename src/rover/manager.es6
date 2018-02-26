@@ -21,7 +21,7 @@ export default class RoverManager {
   _logger: Object // eslint-disable-line no-undef
   _rovers: Object // eslint-disable-line no-undef
 
-  constructor (rovers: string[]) {
+  constructor () {
     this._logger = logger
     this._rovers = {}
   }
