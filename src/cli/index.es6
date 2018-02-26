@@ -21,6 +21,7 @@ export function main (args: Object) {
   program
     .version(pkg.version)
     .option('--rovers [items]', 'Start Rover', 'all')
+    .option('-R, --no-rovers', 'Do not start any rover')
     .option('--rpc', 'Enable RPC')
     .option('--ui', 'Enable Web UI')
     .option('--ws', 'Enable WebSocket')
