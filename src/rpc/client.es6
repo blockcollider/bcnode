@@ -8,18 +8,24 @@
  */
 const grpc = require('grpc')
 
-const { CollectorClient } = require('../protos/collector_grpc_pb');
+const { CollectorClient } = require('../protos/collector_grpc_pb')
 
 const config = require('../../config/config')
 
 export default class RpcClient {
-  _collector: Object;
+  _services: Object; // eslint-disable-line no-undef
 
   constructor () {
-    this._collector = new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure());
+    this._services = {
+      collector: new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure())
+    }
+  }
+
+  service (name: string): Object {
+    return this._services[name]
   }
 
   get collector (): Object {
-    return this._collector
+    return this.service('collector')
   }
 }

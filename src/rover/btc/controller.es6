@@ -158,7 +158,7 @@ export default class Controller {
             network.bestHeight = _block.blockNumber
 
             this._rpc.collector.collectBlock(unifiedBlock, (err, response) => {
-              console.log('Greeting:', response);
+              console.log('Collector Response:', response);
             });
           }
         }
