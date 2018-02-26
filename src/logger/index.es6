@@ -36,7 +36,8 @@ export const logger = (function init () {
       new winston.transports.Console({
         colorize: true,
         timestamp: tsFormat,
-        formatter: format
+        formatter: format,
+        level: (process.stdout.isTTY || 'DEBUG' in process.env) ? 'debug' : 'info'
       }),
 
       // File
