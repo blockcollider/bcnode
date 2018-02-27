@@ -125,13 +125,14 @@ export default class Controller {
         this._logger.debug(`LSK rover: got lastHeight: "${lastHeight}"`)
 
         getBlock(lastHeight).then(lastBlock => {
-          this._logger.debug(`LSK rover: got lastBlock: "${inspect(lastHeight)}"`)
+          this._logger.debug(`LSK rover: collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
-            this._logger.debug(`LSK rover: collected new block with id: ${inspect(lastBlock.id)}`)
+            this._logger.debug(`LSK rover: unseen block with id: ${inspect(lastBlock.id)} => using for BC chain`)
 
             getTransactionsForBlock(lastBlock.id).then(transactions => {
+              // TODO decide if we want to use block with no transactions, there are such
               lastBlock.transactions = transactions
               this._logger.debug(`LSK rover: successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
 
