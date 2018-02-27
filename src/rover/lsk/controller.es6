@@ -7,7 +7,7 @@
  * @flow
  */
 import type { Logger } from 'winston'
-const { inspect, promisify } = require('util')
+const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
 const grpc = require('grpc')
@@ -15,15 +15,6 @@ const grpc = require('grpc')
 const string = require('../../utils/strings.js')
 const { Block } = require('../../protos/block_pb')
 const { CollectorClient } = require('../../protos/collector_grpc_pb')
-const config = require('../../../config/config')
-
-const LISK_OPTIONS = {
-  ssl: true,
-  randomPeer: true,
-  testnet: false,
-  port: '443',
-  bannedPeers: []
-}
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -44,17 +35,17 @@ type LiskBlock = { // eslint-disable-line no-undef
 
 const getMerkleRoot = (txs) => txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
 
-const getLastHeight = (): Promise<number> => {
-  const response = lisk.api(LISK_OPTIONS).sendRequest('blocks/getHeight')
+const getLastHeight = (api: Object): Promise<number> => {
+  const response = api.sendRequest('blocks/getHeight')
   return response.then(d => d.height)
 }
 
-const getBlock = (height: number): Promise<LiskBlock> => { // TODO type for block
-  return lisk.api(LISK_OPTIONS).sendRequest('blocks', { height }).then(response => response.blocks.pop())
+const getBlock = (api: Object, height: number): Promise<LiskBlock> => { // TODO type for block
+  return api.sendRequest('blocks', { height }).then(response => response.blocks.pop())
 }
 
-const getTransactionsForBlock = (blockId: string): Promise<Object[]> => {
-  return lisk.api(LISK_OPTIONS).sendRequest('transactions', { blockId }).then(response => response.transactions)
+const getTransactionsForBlock = (api: Object, blockId: string): Promise<Object[]> => {
+  return api.sendRequest('transactions', { blockId }).then(response => response.transactions)
 }
 
 const _createUnifiedBlock = (block): Block => {
@@ -91,47 +82,45 @@ const _createUnifiedBlock = (block): Block => {
 
 export default class Controller {
   /* eslint-disable no-undef */
-  _dpt: bool;
-  _interfaces: Object[];
   _blockCache: LRUCache;
   _otherCache: LRUCache;
   _service: CollectorClient;
   _logger: Logger;
-  _runLoop: boolean;
   _intervalDescriptor: IntervalID;
+  _config: Object;
+  _liskApi: Object;
   /* eslint-enable */
 
-  constructor (logger: Logger) {
-    this._dpt = false
-    this._interfaces = []
+  constructor (logger: Logger, config: Object) {
+    this._config = config
     this._logger = logger
     this._blockCache = new LRUCache({
       max: 500,
       maxAge: 1000 * 60 * 60
     })
     this._otherCache = new LRUCache(50)
-    this._runLoop = true
+    this._liskApi = lisk.api(config.rovers.lsk)
 
-    this._service = new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure())
+    this._service = new CollectorClient(`${this._config.grpc.host}:${this._config.grpc.port}`, grpc.credentials.createInsecure())
   }
 
-  init (config: Object) {
+  init () {
     this._logger.debug('LSK rover: initialized')
 
     const cycle = () => {
       this._logger.info('LSK rover: trying to get new block')
 
-      return getLastHeight().then(lastHeight => {
+      return getLastHeight(this._liskApi).then(lastHeight => {
         this._logger.debug(`LSK rover: got lastHeight: "${lastHeight}"`)
 
-        getBlock(lastHeight).then(lastBlock => {
+        getBlock(this._liskApi, lastHeight).then(lastBlock => {
           this._logger.debug(`LSK rover: collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
             this._logger.debug(`LSK rover: unseen block with id: ${inspect(lastBlock.id)} => using for BC chain`)
 
-            getTransactionsForBlock(lastBlock.id).then(transactions => {
+            getTransactionsForBlock(this._liskApi, lastBlock.id).then(transactions => {
               // TODO decide if we want to use block with no transactions, there are such
               lastBlock.transactions = transactions
               this._logger.debug(`LSK rover: successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)

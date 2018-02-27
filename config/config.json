@@ -6,5 +6,15 @@
 
   "server": {
     "port": 3000
+  },
+
+  "rovers": {
+    "lsk": {
+      "ssl": true,
+      "randomPeer": true,
+      "testnet": false,
+      "port": "443",
+      "bannedPeers": []
+    }
   }
 }
