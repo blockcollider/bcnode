@@ -54,6 +54,20 @@ $ ./bin/cli --roverbase --rovers wav,eth
 npm run watch
 ```
 
+## Documenation
+
+### Generate documentation
+
+```
+$ yarn run doc
+```
+
+### Open generated documentation
+
+```
+$ open ./docs/index.html
+```
+
 ## Index
 * init.js - startup file
 * time.js - ntp offset, local UTC and UNIX timestamps
