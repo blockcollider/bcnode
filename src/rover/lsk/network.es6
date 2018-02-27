@@ -8,6 +8,7 @@
  */
 import type Logger from 'winston'
 const { merge } = require('ramda')
+const logging = require('../../logger')
 const DEFAULT_STATE = {}
 
 // XXX this is intentionally left almost blank - module exists just for
@@ -16,8 +17,8 @@ export default class Network { // TODO extract btc/Network common functionality 
   _state: Object; // eslint-disable-line no-undef
   _logger: Logger; // eslint-disable-line no-undef
 
-  constructor (logger: Logger, config: Object = {}) {
-    this._logger = logger
+  constructor (config: Object = {}) {
+    this._logger = logging.getLogger('rover.lsk.network')
     this._state = merge(DEFAULT_STATE, config)
   }
 }

@@ -9,15 +9,14 @@
  */
 
 const process = require('process')
-const logging = require('../../logger')
 const Controller = require('./controller').default
 
-const ROVER_TITLE  = 'bc-rover-btc'
+const ROVER_TITLE = 'bc-rover-btc'
 
 const main = () => {
   process.title = ROVER_TITLE
 
-  const controller = new Controller(logging.logger)
+  const controller = new Controller()
   controller.init()
 }
 

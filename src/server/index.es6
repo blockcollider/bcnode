@@ -2,7 +2,7 @@ const path = require('path')
 const express = require('express')
 const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
-const logger = require('../logger').logger
+const logging = require('../logger')
 
 const config = require('../../config/config')
 
@@ -15,6 +15,7 @@ export default class Server {
     this._app = null
     this._io = null
     this._server = null
+    this._logger = logging.getLogger('server')
   }
 
   get app () {
@@ -36,7 +37,7 @@ export default class Server {
   run (opts) {
     this._opts = opts
 
-    logger.info('Starting Server for Web UI')
+    this._logger.info('Starting Server for Web UI')
 
     // Create express app instance
     this._app = express()
@@ -59,7 +60,7 @@ export default class Server {
     // Listen for connections
     const port = config.server.port
     server.listen(port, () => {
-      logger.info(`Server available at http://0.0.0.0:${port}`)
+      this._logger.info(`Server available at http://0.0.0.0:${port}`)
     })
   }
 

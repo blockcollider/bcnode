@@ -21,7 +21,7 @@ export default class Engine {
   constructor (logger: Object) {
     this._rovers = new RoverManager()
     this._server = new Server()
-    this._logger = logging.logger
+    this._logger = logging.getLogger('engine')
     this._rpc = new RpcServer(this)
   }
 

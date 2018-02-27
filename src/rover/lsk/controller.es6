@@ -11,6 +11,7 @@ const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
 
+const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
 const string = require('../../utils/strings.js')
 const { Block } = require('../../protos/block_pb')
@@ -90,9 +91,9 @@ export default class Controller {
   _liskApi: Object;
   /* eslint-enable */
 
-  constructor (logger: Logger, config: Object) {
+  constructor (config: Object) {
     this._config = config
-    this._logger = logger
+    this._logger = logging.getLogger('rover.lsk.controller')
     this._blockCache = new LRUCache({
       max: 500,
       maxAge: 1000 * 60 * 60
@@ -103,48 +104,48 @@ export default class Controller {
   }
 
   init () {
-    this._logger.debug('LSK rover: initialized')
+    this._logger.debug('initialized')
 
     const cycle = () => {
-      this._logger.info('LSK rover: trying to get new block')
+      this._logger.info('trying to get new block')
 
       return getLastHeight(this._liskApi).then(lastHeight => {
-        this._logger.debug(`LSK rover: got lastHeight: "${lastHeight}"`)
+        this._logger.debug(`got lastHeight: "${lastHeight}"`)
 
         getBlock(this._liskApi, lastHeight).then(lastBlock => {
-          this._logger.debug(`LSK rover: collected new block with id: ${inspect(lastBlock.id)}`)
+          this._logger.debug(`collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
-            this._logger.debug(`LSK rover: unseen block with id: ${inspect(lastBlock.id)} => using for BC chain`)
+            this._logger.debug(`unseen block with id: ${inspect(lastBlock.id)} => using for BC chain`)
 
             getTransactionsForBlock(this._liskApi, lastBlock.id).then(transactions => {
               // TODO decide if we want to use block with no transactions, there are such
               lastBlock.transactions = transactions
-              this._logger.debug(`LSK rover: successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
+              this._logger.debug(`successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
 
               const unifiedBlock = _createUnifiedBlock(lastBlock)
-              this._logger.debug(`LSK rover: created unified block: ${inspect(unifiedBlock, {depth: 0})}`)
+              this._logger.debug(`created unified block: ${inspect(unifiedBlock, {depth: 0})}`)
               // TODO remove after following is uncommented
-              this._logger.info(`LSK rover: publishing new block to engine`)
+              this._logger.info(`publishing new block to engine`)
               // TODO uncomment after Block proto msg is stabilized
               // promisify(this._rpc.collector.collectBlock)(unifiedBlock).then((response) => {
-              //   this._logger.info(`LSK rover: publishing new block to engine`)
+              //   this._logger.info(`publishing new block to engine`)
               // }, (err) => {
-              //   this._logger.error(`LSK rover: could not publish new block to engine, err: ${inspect(err)}`)
+              //   this._logger.error(`could not publish new block to engine, err: ${inspect(err)}`)
               // })
             })
           }
         })
       }).catch(e => {
-        this._logger.error(`LSK rover: error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
       })
     }
 
-    this._logger.info('LSK rover tick')
+    this._logger.debug('tick')
     this._intervalDescriptor = setInterval(() => {
       cycle().then(() => {
-        this._logger.info('LSK rover tick')
+        this._logger.debug('tick')
       })
     }, 2000)
 

@@ -33,7 +33,7 @@ export function main (args: Object) {
   }
 
   // Create instance of engine
-  const engine = new Engine(logging.logger)
+  const engine = new Engine()
   const { rovers, rpc, ui, ws } = program
 
   process.on('SIGINT', () => {

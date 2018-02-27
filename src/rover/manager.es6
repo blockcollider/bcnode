@@ -7,7 +7,7 @@
  * @flow
  */
 
-const logger = require('../logger').logger
+const logging = require('../logger')
 const { fork } = require('child_process')
 const path = require('path')
 
@@ -23,7 +23,7 @@ export default class RoverManager {
   _rovers: Object // eslint-disable-line no-undef
 
   constructor () {
-    this._logger = logger
+    this._logger = logging.getLogger('rover.manager')
     this._rovers = {}
   }
 
