@@ -1,8 +1,25 @@
 {
-  "source": "./src/**/*.es6",
+  "source": "./src",
   "destination": "./docs",
+  "includes": [
+    ".*\\.es6$"
+  ],
   "plugins": [
-    {"name": "esdoc-standard-plugin"}
+    {
+      "name": "esdoc-standard-plugin"
+    },
+    {
+      "name": "esdoc-ecmascript-proposal-plugin",
+      "option": {
+        "all": true
+      }
+    },
+    {
+      "name": "esdoc-flow-type-plugin",
+      "option": {
+        "enable": true
+      }
+    }
   ]
 }
 
