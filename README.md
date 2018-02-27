@@ -36,10 +36,24 @@ $ npm run dist
 
 ### Run From Command Line
 
-#### Startup node with default rovers
+#### Show the help
 
 ```
-$ ./bin/cli 
+$ ./bin/cli -h
+
+  Usage: cli [options]
+
+
+  Options:
+
+    -V, --version     output the version number
+    --rovers [items]  Start Rover (default: all)
+    -R, --no-rovers   Do not start any rover
+    --rpc             Enable RPC
+    --ui              Enable Web UI
+    --ws              Enable WebSocket
+    -h, --help        output usage information
+
 ```
 
 #### Startup node with rover GUI & BTC & LSK rovers
