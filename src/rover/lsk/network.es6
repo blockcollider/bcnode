@@ -18,7 +18,7 @@ export default class Network { // TODO extract btc/Network common functionality 
   _logger: Logger; // eslint-disable-line no-undef
 
   constructor (config: Object = {}) {
-    this._logger = logging.getLogger('rover.lsk.network')
+    this._logger = logging.getLogger(__filename)
     this._state = merge(DEFAULT_STATE, config)
   }
 }

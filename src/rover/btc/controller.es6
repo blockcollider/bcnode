@@ -28,7 +28,7 @@ export default class Controller {
   constructor () {
     this._dpt = false
     this._interfaces = []
-    this._logger = logging.getLogger('rover.btc.controller')
+    this._logger = logging.getLogger(__filename)
     this._blockCache = new LRUCache({ max: 110 })
     this._blocksNumberCache = new LRUCache({ max: 110 })
     this._txCache = new LRUCache({ max: 3000 })

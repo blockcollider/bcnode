@@ -7,12 +7,12 @@
  * @flow
  */
 import type Logger from 'winston'
-const path = require('path')
+const { resolve, sep } = require('path')
 const winston = require('winston')
 const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
-const logDir = path.resolve(__dirname, '..', '..', 'logs')
+const logDir = resolve(__dirname, '..', '..', 'logs')
 
 const logPath = `${logDir}/bcnode`
 
@@ -62,6 +62,12 @@ const logger = new winston.Logger({
     // })
   ]
 })
+
+const pathToLogPrefix = (path, topLevelDir = 'lib') => {
+  const parts = path.split(sep)
+  const sliceAt = parts.indexOf(topLevelDir)
+  return parts.slice(sliceAt + 1, parts.length).join('.').replace(/^\.|\.js$/g, '').toLowerCase()
+}
 
 class LoggingContext {
   /* eslint-disable no-undef */
@@ -115,6 +121,6 @@ class LoggingContext {
   }
 }
 
-export const getLogger = (prefix: string, meta: ?Object) => {
-  return new LoggingContext(logger, prefix, meta)
+export const getLogger = (path: string, meta: ?Object) => {
+  return new LoggingContext(logger, pathToLogPrefix(path), meta)
 }

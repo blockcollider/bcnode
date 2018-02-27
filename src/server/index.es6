@@ -15,7 +15,7 @@ export default class Server {
     this._app = null
     this._io = null
     this._server = null
-    this._logger = logging.getLogger('server')
+    this._logger = logging.getLogger(__filename)
   }
 
   get app () {

@@ -93,7 +93,7 @@ export default class Controller {
 
   constructor (config: Object) {
     this._config = config
-    this._logger = logging.getLogger('rover.lsk.controller')
+    this._logger = logging.getLogger(__filename)
     this._blockCache = new LRUCache({
       max: 500,
       maxAge: 1000 * 60 * 60

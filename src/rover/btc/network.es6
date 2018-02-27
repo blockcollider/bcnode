@@ -43,7 +43,7 @@ export default class Network {
   _logger: Object; // eslint-disable-line no-undef
 
   constructor (config: Object = {}) {
-    this._logger = logging.getLogger('rover.btc.network')
+    this._logger = logging.getLogger(__filename)
     this._state = merge(DEFAULT_STATE, config)
   }
 

@@ -23,7 +23,7 @@ export default class RoverManager {
   _rovers: Object // eslint-disable-line no-undef
 
   constructor () {
-    this._logger = logging.getLogger('rover.manager')
+    this._logger = logging.getLogger(__filename)
     this._rovers = {}
   }
 
