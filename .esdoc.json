@@ -1,6 +1,8 @@
 {
-  "source": "./src/logger/**/*.es6",
+  "source": "./src/**/*.es6",
   "destination": "./docs",
-  "plugins": [{"name": "esdoc-standard-plugin"}]
+  "plugins": [
+    {"name": "esdoc-standard-plugin"}
+  ]
 }
 

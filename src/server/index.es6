@@ -70,18 +70,18 @@ export default class Server {
     }))
 
     io.on('connection', client => {
-      logger.info('Client connected', client.handshake.address)
+      this._logger.info('Client connected', client.handshake.address)
 
       client.emit({
         msg: 'test'
       })
 
       client.on('join', function (data) {
-        logger.log(data)
+        this._logger.log(data)
       })
 
       client.on('disconnect', reason => {
-        logger.info(
+        this._logger.info(
           'Client disconnected',
           client.request.connection.remoteAddress
         )

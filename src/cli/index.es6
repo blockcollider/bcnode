@@ -10,6 +10,7 @@
 const process = require('process')
 const program = require('commander')
 
+const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
 
@@ -32,7 +33,7 @@ export function main (args: Object) {
   }
 
   // Create instance of engine
-  const engine = new Engine()
+  const engine = new Engine(logging.getLogger(__filename))
   const { rovers, rpc, ui, ws } = program
 
   process.on('SIGINT', () => {
