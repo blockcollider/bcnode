@@ -37,10 +37,13 @@ $ npm run dist
 ### Run From Command Line
 
 #### Startup node with default rovers
+
 ```
 $ ./bin/cli 
 ```
-#### Startup node with rover GUI & NEO & Ethereum rovers 
+
+#### Startup node with rover GUI & NEO & Ethereum rovers
+
 ```
 $ ./bin/cli --roverbase --rovers wav,eth 
 ```
