@@ -42,10 +42,10 @@ $ npm run dist
 $ ./bin/cli 
 ```
 
-#### Startup node with rover GUI & NEO & Ethereum rovers
+#### Startup node with rover GUI & BTC & LSK rovers
 
 ```
-$ ./bin/cli --roverbase --rovers wav,eth 
+$ ./bin/cli --ui --rovers btc,lsk 
 ```
 
 ### Development
