@@ -10,11 +10,10 @@ import type { Logger } from 'winston'
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
-const grpc = require('grpc')
 
+const { RpcClient } = require('../../rpc')
 const string = require('../../utils/strings.js')
 const { Block } = require('../../protos/block_pb')
-const { CollectorClient } = require('../../protos/collector_grpc_pb')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -84,7 +83,7 @@ export default class Controller {
   /* eslint-disable no-undef */
   _blockCache: LRUCache;
   _otherCache: LRUCache;
-  _service: CollectorClient;
+  _rpc: RpcClient;
   _logger: Logger;
   _intervalDescriptor: IntervalID;
   _config: Object;
@@ -100,8 +99,7 @@ export default class Controller {
     })
     this._otherCache = new LRUCache(50)
     this._liskApi = lisk.api(config.rovers.lsk)
-
-    this._service = new CollectorClient(`${this._config.grpc.host}:${this._config.grpc.port}`, grpc.credentials.createInsecure())
+    this._rpc = new RpcClient()
   }
 
   init () {
@@ -130,8 +128,10 @@ export default class Controller {
               // TODO remove after following is uncommented
               this._logger.info(`LSK rover: publishing new block to engine`)
               // TODO uncomment after Block proto msg is stabilized
-              // promisify(this._service.collectBlock)(unifiedBlock).then(() => {
+              // promisify(this._rpc.collector.collectBlock)(unifiedBlock).then((response) => {
               //   this._logger.info(`LSK rover: publishing new block to engine`)
+              // }, (err) => {
+              //   this._logger.error(`LSK rover: could not publish new block to engine, err: ${inspect(err)}`)
               // })
             })
           }
