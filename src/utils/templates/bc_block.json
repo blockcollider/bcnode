@@ -1,1 +1,22 @@
-{}
+{
+  "blockNumber": 488150,
+  "timestamp": 1507048536,
+  "version": 1,
+  "blockchainsSet": "ef03d61ee6-fce2fc4e6-826ccbb",
+  "prevHash": "ead6ef03d61ee60c533d6d450c50a1e559a8a37f6b796a4094cd0dac6b744428",
+  "blockHash": "b5ce50a86313f1a85343f71d2419ee937c9347ff4ad82b87f6ade75271238d2f",
+  "work": "",
+  "distance": 4893449323,
+  "txdistance": 0, 
+  "steradian": "",
+  "ntwrs": 1,
+  "nblobkchains": 1,
+  "ntws": 0,
+  "tws": [], 
+  "blockchains": [
+    ...
+  ], 
+  "transactions": [
+    ...
+  ]
+}
