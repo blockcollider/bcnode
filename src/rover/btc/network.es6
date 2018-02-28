@@ -43,7 +43,7 @@ export default class Network {
   _logger: Object; // eslint-disable-line no-undef
 
   constructor (config: Object = {}) {
-    this._logger = logging.logger
+    this._logger = logging.getLogger(__filename)
     this._state = merge(DEFAULT_STATE, config)
   }
 
@@ -156,11 +156,11 @@ export default class Network {
 
     // connect to the network
     try {
-      this._logger.debug('BTC: connected to network')
+      this._logger.debug('connected to network')
       pool.connect()
       return pool
     } catch (err) {
-      this._logger.error('BTC: error while connecting to network', err)
+      this._logger.error('error while connecting to network', err)
       pool.listen()
       return pool
     }

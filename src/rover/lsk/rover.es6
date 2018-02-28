@@ -7,17 +7,17 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-
 const process = require('process')
-const logging = require('../../logger')
+
 const Controller = require('./controller').default
+const config = require('../../../config/config')
 
 const ROVER_TITLE = 'bc-rover-lsk'
 
 const main = () => {
   process.title = ROVER_TITLE
 
-  const controller = new Controller(logging.logger)
+  const controller = new Controller(config)
   controller.init()
 }
 

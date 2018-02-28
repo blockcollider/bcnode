@@ -3076,11 +3076,19 @@ esdoc-coverage-plugin@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/esdoc-coverage-plugin/-/esdoc-coverage-plugin-1.1.0.tgz#3869869cd7f87891f972625787695a299aece45c"
 
+esdoc-ecmascript-proposal-plugin@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/esdoc-ecmascript-proposal-plugin/-/esdoc-ecmascript-proposal-plugin-1.0.0.tgz#390dc5656ba8a2830e39dba3570d79138df2ffd9"
+
 esdoc-external-ecmascript-plugin@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/esdoc-external-ecmascript-plugin/-/esdoc-external-ecmascript-plugin-1.0.0.tgz#78f565d4a0c5185ac63152614dce1fe1a86688db"
   dependencies:
     fs-extra "1.0.0"
+
+esdoc-flow-type-plugin@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/esdoc-flow-type-plugin/-/esdoc-flow-type-plugin-1.0.1.tgz#0813951c6868a728be6baadf0278e5d070851479"
 
 esdoc-integrate-manual-plugin@^1.0.0:
   version "1.0.0"

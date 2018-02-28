@@ -12,6 +12,7 @@ const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
 const process = require('process')
+const logging = require('../../logger')
 
 const { Block } = require('../../protos/block_pb');
 const { RpcClient } = require('../../rpc')
@@ -20,15 +21,14 @@ const { swapOrder } = require('../../utils/strings')
 
 const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
-const ID = 'btc'
 
 const config = require('../../../config/config')
 
 export default class Controller {
-  constructor (logger) {
+  constructor () {
     this._dpt = false
     this._interfaces = []
-    this._logger = logger
+    this._logger = logging.getLogger(__filename)
     this._blockCache = new LRUCache({ max: 110 })
     this._blocksNumberCache = new LRUCache({ max: 110 })
     this._txCache = new LRUCache({ max: 3000 })
@@ -65,7 +65,7 @@ export default class Controller {
 
     pool.on('peerready', (peer, addr) => {
       clearTimeout(poolTimeout)
-      this._logger.info(`BTC rover: connected to pool version: ${peer.version}, subversion: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
+      this._logger.info(`connected to pool version: ${peer.version}, subversion: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
 
       if (network.hasQuorum()) {
         try {
@@ -73,7 +73,7 @@ export default class Controller {
           network.discoveredPeers++
           network.addPeer(peer)
         } catch (err) {
-          this._logger.error('BTC rover: error in peerready cb', err)
+          this._logger.error('error in peerready cb', err)
         }
       } else if (!network.hasQuorum() && peer.subversion.indexOf('/Satoshi:0.1') > -1) {
         try {
@@ -90,13 +90,13 @@ export default class Controller {
             peer.disconnect()
           }
         } catch (err) {
-          this._logger.error('BTC rover: Could not disconnect from network', err)
+          this._logger.error('Could not disconnect from network', err)
         }
       }
     })
 
     pool.on('peerdisconnect', (peer, addr) => {
-      this._logger.debug(`BTC rover: removing peer ${peer}, ${addr}`)
+      this._logger.debug(`removing peer ${peer}, ${addr}`)
       network.removePeer(peer)
     })
 
@@ -127,17 +127,17 @@ export default class Controller {
             var peerMessage = new Messages().GetData(message.inventory)
             peer.sendMessage(peerMessage)
           } catch (err) {
-            this._logger.error('BTC rover: error sening message', err)
+            this._logger.error('error sening message', err)
 
             try {
               pool._removePeer(peer)
             } catch (err) {
-              this._logger.error('BTC rover: error removing peer', err)
+              this._logger.error('error removing peer', err)
             }
           }
         }
       } catch (err) {
-        this._logger.error('BTC rover: commoin peerinv handler error', err)
+        this._logger.error('commoin peerinv handler error', err)
       }
     })
 
@@ -166,13 +166,13 @@ export default class Controller {
         try {
           pool._removePeer(peer)
         } catch (err) {
-          this._logger.error('BTC rover: error removing peer', err)
+          this._logger.error('error removing peer', err)
         }
       }
     })
 
     setInterval(() => {
-      this._logger.info(ID + ' rover peers ' + pool.numberConnected())
+      this._logger.info('rover peers ' + pool.numberConnected())
     }, 60000)
   }
 
@@ -238,7 +238,7 @@ export default class Controller {
     // }
 
     const msg = new Block()
-    msg.setBlockchain("btc")
+    msg.setBlockchain('btc')
     msg.setHash(block.header.hash)
 
     return msg
