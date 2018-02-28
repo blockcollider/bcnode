@@ -6,3 +6,10 @@
  *
  * @flow
  */
+
+/**
+ * Unified persistence interface
+ */
+export default class Persistence {
+
+}
