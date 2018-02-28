@@ -9,6 +9,9 @@
 
 const crypto = require('crypto')
 
+/**
+ * Generate private key using random bytes
+ */
 export function getPrivateKey () {
   return crypto.randomBytes(32)
 }
