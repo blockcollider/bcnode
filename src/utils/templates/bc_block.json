@@ -13,10 +13,6 @@
   "nblobkchains": 1,
   "ntws": 0,
   "tws": [], 
-  "blockchains": [
-    ...
-  ], 
-  "transactions": [
-    ...
-  ]
+  "blockchains": [], 
+  "transactions": []
 }
