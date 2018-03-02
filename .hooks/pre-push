@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Run dist checks
+exec yarn run dist
