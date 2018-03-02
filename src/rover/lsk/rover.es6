@@ -14,6 +14,9 @@ const config = require('../../../config/config')
 
 const ROVER_TITLE = 'bc-rover-lsk'
 
+/**
+ * LSK Rover entrypoint
+ */
 const main = () => {
   process.title = ROVER_TITLE
 

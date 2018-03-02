@@ -80,6 +80,9 @@ const _createUnifiedBlock = (block): Block => {
   return obj
 }
 
+/**
+ * LSK Controller
+ */
 export default class Controller {
   /* eslint-disable no-undef */
   _blockCache: LRUCache;
