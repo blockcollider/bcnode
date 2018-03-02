@@ -10,6 +10,7 @@ addons:
     - libzmq-dev
 
 node_js:
+  - "6"
   - "7"
   - "8"
 
