@@ -6,7 +6,12 @@
   ],
   "plugins": [
     {
-      "name": "esdoc-standard-plugin"
+      "name": "esdoc-standard-plugin",
+      "option": {
+        "lint": {"enable": true},
+        "coverage": {"enable": true},
+        "typeInference": {"enable": true}
+      }
     },
     {
       "name": "esdoc-ecmascript-proposal-plugin",
