@@ -1,17 +1,19 @@
 {
     "version": "1",
-    "txid": "",
-    "hash": "a1a76ca9427d08e5ac0a92762f5d80221cd8da3089d55ce57ae87c4fb2d699f2",
-    "work": "",
-    "distance": "44",
-    "fpk": 22,
-    "steradian": 0,
+    "txId": "",
+    "txHash": "a1a76ca9427d08e5ac0a92762f5d80221cd8da3089d55ce57ae87c4fb2d699f2",
+    "txMinerAddress": "",
+    "txWork": "",
+    "txDistance": "44",
+    "feePerKilobyte": 22,
+    "txMinerFeeAlloc": 0,
+    "steradian": [],
     "ninputs": "1",
     "noutputs": "2",
     "inputs": [{
         "prev": { 
-            "hash": "584780fa230b514d1bf0a4e2faa312c486073acc7cf20a285452d9eb6e12e02c",
-            "index": 0
+            "txId": "584780fa230b514d1bf0a4e2faa312c486073acc7cf20a285452d9eb6e12e02c",
+            "outputIndex": 0
         },
         "expire": 340903,
         "signature": "3045022100d2f1b79095b185c618ee2823f10ccea32d9fc01ee3347f668adf80f0eb5f3a0f022078d8b4c19ac4e9d11a3f48d151b38ca4495c46ea395e6979b44320d4d688966901 03299a481c1ca84fe1d86b5b9d088cf56aac890279fc5a244c40d4c800ab4d421f"
@@ -27,8 +29,8 @@
         "nsoutputs": 2, 
         "stackinputs": [{
             "prev": {
-                "hash":"212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
-                "index": 0
+                "stackTxId":"212605b1683aabbaddd59b2943b43f326c472b7983e3225dcf41d2a218494df2",
+                "stackOutputIndex": 0
             },
             "signature": "3045022100d2f1b79095b185c618ee2823f10ccea32d9fc01ee3347f668adf80f0eb5f3a0f022078d8b4c19ac4e9d11a3f48d151b38ca4495c46ea395e6979b44320d4d68896690103299a481c1ca84fe1d86b5b9d088cf56aac890279fc5a244c40d4c800ab4d421f"
         }],
