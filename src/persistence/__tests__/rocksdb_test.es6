@@ -1,12 +1,12 @@
-const Persistence = require('../').default
+const { RocksDb } = require('../')
 
 describe('RocksDb', () => {
   it('can instantiate self', () => {
-    expect(new Persistence()).toBeInstanceOf(Persistence)
+    expect(new RocksDb()).toBeInstanceOf(RocksDb)
   })
 
   test('put', () => {
-    const db = new Persistence('_data_test')
+    const db = new RocksDb('_data_test')
 
     db.open()
       .then(() => {
@@ -17,6 +17,9 @@ describe('RocksDb', () => {
       })
       .then((value) => {
         expect(value.toString()).toEqual('hello')
+      })
+      .catch((err) => {
+        expect(err).toEqual(null)
       })
   })
 })
