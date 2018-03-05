@@ -1,25 +1,31 @@
 const path = require('path')
 
 /**
- * Absoulute path of config dir
+ * Absolute path of config dir
+ *
+ * @type {string}
  */
-export const configDir = path.resolve(__dirname, '..', '..', 'config')
+export const configDir: string = path.resolve(__dirname, '..', '..', 'config')
 
 /**
  * Name of config file
  * @type {string}
  */
-export const configFile = 'config.json'
+export const configFile: string = 'config.json'
 
 /**
  * Full path to config file
+ *
+ * @type {string}
  */
-export const configPath = path.resolve(configDir, configFile)
+export const configPath: string = path.resolve(configDir, configFile)
 
 /**
  * Parsed config data
+ *
+ * @type {Object}
  */
-const configData = require(configPath)
+const configData: Object = require(configPath)
 
 /**
  * Get config
