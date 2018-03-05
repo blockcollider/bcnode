@@ -4,11 +4,20 @@
     "port": 50051
   },
 
-  "server": {
-    "port": 3000
+  "persistence": {
+    "path": "_data"
   },
 
   "rovers": {
+    "eth": {
+      "altBootNodes": [
+        {
+          "address": "52.74.57.123",
+          "udpPort": 30303
+        }
+      ]
+    },
+
     "lsk": {
       "ssl": true,
       "randomPeer": true,
@@ -16,5 +25,9 @@
       "port": "443",
       "bannedPeers": []
     }
+  },
+
+  "server": {
+    "port": 3000
   }
 }
