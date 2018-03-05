@@ -45,7 +45,13 @@ export async function main (args: string[]) {
 
   // Create instance of engine
   const engine = new Engine(logging.getLogger(__filename))
-  await engine.init()
+
+  try {
+    await engine.init()
+  } catch (e) {
+    console.log(e)
+    return -1
+  }
 
   const { rovers, rpc, ui, ws } = program
 
