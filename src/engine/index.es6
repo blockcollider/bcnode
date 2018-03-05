@@ -10,6 +10,7 @@
 const config = require('../../config/config')
 const logging = require('../logger')
 const RoverManager = require('../rover/manager').default
+const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
@@ -31,10 +32,17 @@ export default class Engine {
 
   /**
    * Initialize engine internals
+   *
+   * - Open database
+   * - Store name of available rovers as Buffer
    */
   // FIXME: Handle possible error
   async init () {
+    const roverNames = Buffer.from(JSON.stringify(Object.keys(rovers)))
+
     await this._persistence.open()
+      .then(() => this.persistence.put('rovers', roverNames))
+
     this._logger.info('Engine initialized')
   }
 
