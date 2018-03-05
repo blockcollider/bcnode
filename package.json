@@ -8,12 +8,12 @@
     "doc": "./node_modules/.bin/esdoc",
     "lint:standard": "standard src/**/*.es6",
     "lint:flow": "flow",
-    "ncu": "./node_modules/npm-check-updates/bin/ncu --packageFile package.json",
     "proto": "./node_modules/grpc-tools/bin/protoc.js --proto_path=protos --js_out=import_style=commonjs,binary:src/protos protos/*.proto --grpc_out=src/protos --plugin=protoc-gen-grpc=./node_modules/grpc-tools/bin/grpc_node_plugin",
     "transpile": "babel src --config-file ./.babelrc --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "test": "jest",
     "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files ",
-    "dist": "yarn && yarn run build && yarn test --ci && yarn run nsp check --threshold 7 --preprocessor yarn && yarn run ncu",
+    "dist": "yarn && yarn run build && yarn test --ci && yarn run nsp check --threshold 7 --preprocessor yarn && yarn run outdated",
+    "outdated": "yarn outdated",
     "watch:lint": "onchange src/**/*.es6 -- yarn run lint:standard",
     "watch:transpile": "onchange src/**/*.es6 -- babel {{changed}} --config-file ./.babelrc --out-dir lib --ignore lib,node_modules",
     "watch:test": "jest --watch",
@@ -54,7 +54,8 @@
     ],
     "transform": {
       "^.+\\.(js|es6)$": "babel-jest"
-    }
+    },
+    "collectCoverage": true
   },
   "standard": {
     "globals": [
@@ -189,7 +190,6 @@
     "grpc-tools": "^1.6.6",
     "install": "^0.10.4",
     "jest": "22.4.2",
-    "npm-check-updates": "^2.14.1",
     "nsp": "3.2.1",
     "nsp-preprocessor-yarn": "1.0.1",
     "nyc": "^11.4.1",
