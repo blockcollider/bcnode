@@ -8,10 +8,10 @@
  */
 
 const grpc = require('grpc')
-const { BlockReply } = require('../protos/block_pb')
-const { CollectorService } = require('../protos/collector_grpc_pb')
-
 const config = require('../../config/config')
+
+const { CollectorService } = require('../protos/collector_grpc_pb')
+const { CollectorServiceImpl } = require('./service')
 
 export default class RpcServer {
   _engine: Object // eslint-disable-line no-undef
@@ -23,24 +23,17 @@ export default class RpcServer {
     this._rpcServer = new grpc.Server()
     this._rpcServer.bind(`${config.grpc.host}:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
 
-    // TODO: Register dynamically service/**/*.es6
-    this._rpcServer.addService(CollectorService, {
-      collectBlock: this.collectBlock.bind(this)
-    })
+    // Register services
+    this._rpcServer.addService(CollectorService, new CollectorServiceImpl(this))
 
     this._rpcServer.start()
   }
 
-  get engine () : Object {
-    return this._engine
+  get server () : Object {
+    return this._rpcServer
   }
 
-  /**
-   * Implements the collectBlock RPC method.
-   */
-  collectBlock (call: Object, callback: Function) {
-    const reply = new BlockReply()
-    console.log('collectBlock()', call)
-    callback(null, reply)
+  get engine () : Object {
+    return this._engine
   }
 }

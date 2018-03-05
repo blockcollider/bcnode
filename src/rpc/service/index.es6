@@ -6,3 +6,5 @@
  *
  * @flow
  */
+
+export { default as CollectorServiceImpl } from './collector'
