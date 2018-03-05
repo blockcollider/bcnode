@@ -68,7 +68,7 @@ export default class PersistenceRocksDb {
    * @param value
    * @param opts
    */
-  put (key: string, value: string, opts: Object = {}): Promise<*> {
+  put (key: string, value: string | Buffer, opts: Object = {}): Promise<*> {
     return new Promise((resolve, reject) => {
       this.db.put(key, value, opts, (err) => {
         if (err) {
@@ -85,7 +85,7 @@ export default class PersistenceRocksDb {
    * @param key
    * @param opts
    */
-  get (key: string, opts: Object = {}): Promise<*> {
+  get (key: string, opts: Object = {}): Promise<string | Buffer> {
     return new Promise((resolve, reject) => {
       this.db.get(key, opts, (err, value) => {
         if (err) {
