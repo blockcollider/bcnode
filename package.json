@@ -12,7 +12,7 @@
     "transpile": "babel src --config-file ./.babelrc --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "test": "jest",
     "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files ",
-    "dist": "yarn && yarn run build && yarn test --ci && yarn run nsp check --threshold 7 --preprocessor yarn && yarn run outdated",
+    "dist": "yarn && yarn run build && yarn test --ci && yarn run nsp check --threshold 7 --preprocessor yarn && yarn run outdated && yarn run doc",
     "outdated": "yarn outdated",
     "watch:lint": "onchange src/**/*.es6 -- yarn run lint:standard",
     "watch:transpile": "onchange src/**/*.es6 -- babel {{changed}} --config-file ./.babelrc --out-dir lib --ignore lib,node_modules",
