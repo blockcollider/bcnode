@@ -7,6 +7,8 @@
  * @disable-flow
  */
 
+// const { inspect } = require('util')
+
 const { Messages } = require('bitcore-p2p')
 const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
@@ -96,7 +98,7 @@ export default class Controller {
     })
 
     pool.on('peerdisconnect', (peer, addr) => {
-      this._logger.debug(`removing peer ${peer}, ${addr}`)
+      this._logger.debug(`removing peer ${peer.host}, ${addr}`)
       network.removePeer(peer)
     })
 
@@ -157,7 +159,7 @@ export default class Controller {
             const unifiedBlock = this._createUnifiedBlock(_block)
             network.bestHeight = _block.blockNumber
 
-            this._rpc.collector.collectBlock(unifiedBlock, (err, response) => {
+            this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               console.log('Collector Response:', response);
             });
           }

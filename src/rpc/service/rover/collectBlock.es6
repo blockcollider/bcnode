@@ -10,7 +10,15 @@
 const { Null } = require('../../../protos/core_pb')
 
 export default function(context: Object, call: Object, callback: Function) {
-  // console.log(context, call, callback)
+  const blockchain = call.request.array[0];
+  const hash = call.request.array[1];
+  const key = `${blockchain}.block.latest`
 
-  callback(null, Null)
+  console.log("NEW BLOCK", blockchain, hash, key)
+
+  // TODO: Store block not just hash
+  context.server.engine.persistence.put(key, hash)
+    .then(() => {
+      callback(null, Null)
+    })
 }

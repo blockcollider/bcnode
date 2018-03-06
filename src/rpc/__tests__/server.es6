@@ -6,7 +6,11 @@ describe('RpcServer', () => {
   let server = null
 
   beforeAll(() => {
-    server = new RpcServer({})
+    server = new RpcServer({
+      persistence: {
+        put: (key, value) => Promise.resolve(true)
+      }
+    })
   })
 
   afterAll((done) => {
