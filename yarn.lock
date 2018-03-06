@@ -8434,9 +8434,9 @@ trim@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/trim/-/trim-0.0.1.tgz#5858547f6b290757ee95cccc666fb50084c460dd"
 
-ts-api-validator@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/ts-api-validator/-/ts-api-validator-2.0.0.tgz#02ef7d3fe4c6bca42513dc84243614b84f323d4e"
+ts-api-validator@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/ts-api-validator/-/ts-api-validator-2.1.0.tgz#139b74868607fd1d44390bb52d1c374a025760e1"
   dependencies:
     dts-gen "^0.5.6"
     dts-generator "^2.1.0"
@@ -8743,14 +8743,14 @@ watch@~0.18.0:
     exec-sh "^0.2.0"
     minimist "^1.2.0"
 
-waves-api@^0.22.0:
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/waves-api/-/waves-api-0.22.0.tgz#e2c56217df00a1ee7673c1a35026afda19b3c0cd"
+waves-api@^0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/waves-api/-/waves-api-0.23.0.tgz#04da029346609b2f7fadd5edaebcc3ac77ea1fba"
   dependencies:
     bignumber.js "^4.1.0"
     crypto-js "^3.1.9-1"
     node-fetch "^1.7.3"
-    ts-api-validator "^2.0.0"
+    ts-api-validator "^2.1.0"
     ts-utils "^5.3.0"
 
 web3-bzz@1.0.0-beta.30:
