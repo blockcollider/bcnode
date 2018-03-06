@@ -2,9 +2,10 @@ syntax = "proto3";
 
 package bc;
 
+import "core.proto";
 import "block.proto";
 
 service Collector {
     // Sends a greeting
-    rpc CollectBlock (Block) returns (BlockReply) {}
+    rpc CollectBlock (Block) returns (Null) {}
 }

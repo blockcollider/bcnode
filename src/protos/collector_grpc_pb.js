@@ -2,6 +2,7 @@
 
 'use strict';
 var grpc = require('grpc');
+var core_pb = require('./core_pb.js');
 var block_pb = require('./block_pb.js');
 
 function serialize_bc_Block(arg) {
@@ -15,15 +16,15 @@ function deserialize_bc_Block(buffer_arg) {
   return block_pb.Block.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_bc_BlockReply(arg) {
-  if (!(arg instanceof block_pb.BlockReply)) {
-    throw new Error('Expected argument of type bc.BlockReply');
+function serialize_bc_Null(arg) {
+  if (!(arg instanceof core_pb.Null)) {
+    throw new Error('Expected argument of type bc.Null');
   }
   return new Buffer(arg.serializeBinary());
 }
 
-function deserialize_bc_BlockReply(buffer_arg) {
-  return block_pb.BlockReply.deserializeBinary(new Uint8Array(buffer_arg));
+function deserialize_bc_Null(buffer_arg) {
+  return core_pb.Null.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 
@@ -34,11 +35,11 @@ var CollectorService = exports.CollectorService = {
     requestStream: false,
     responseStream: false,
     requestType: block_pb.Block,
-    responseType: block_pb.BlockReply,
+    responseType: core_pb.Null,
     requestSerialize: serialize_bc_Block,
     requestDeserialize: deserialize_bc_Block,
-    responseSerialize: serialize_bc_BlockReply,
-    responseDeserialize: deserialize_bc_BlockReply,
+    responseSerialize: serialize_bc_Null,
+    responseDeserialize: deserialize_bc_Null,
   },
 };
 

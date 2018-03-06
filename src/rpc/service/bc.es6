@@ -7,9 +7,12 @@
  * @flow
  */
 
-const { Stats } = require('../../protos/core_pb')
-
 const RpcServer = require('../server').default
+
+const {
+  help,
+  stats
+} = require('./bc/index')
 
 export default class BcServiceImpl {
   _server: RpcServer; // eslint-disable-line no-undef
@@ -23,12 +26,26 @@ export default class BcServiceImpl {
   }
 
   /**
-   * Implements the stats RPC method.
+   * Help
    */
-  statistic (call: Object, callback: Function) {
-    console.log('statistic()', call.request.array)
+  help (call: Object, callback: Function) {
+    console.log('help()', call.request.array)
 
-    const reply = new Stats()
-    callback(null, reply)
+    help(this._getContext(), call, callback)
+  }
+
+  /**
+   * Statistics
+   */
+  stats (call: Object, callback: Function) {
+    console.log('stats()', call.request.array)
+
+    stats(this._getContext(), call, callback)
+  }
+
+  _getContext () : Object {
+    return {
+      server: this._server
+    }
   }
 }

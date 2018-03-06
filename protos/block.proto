@@ -7,4 +7,3 @@ message Block {
     string hash = 2;
 }
 
-message BlockReply {}
