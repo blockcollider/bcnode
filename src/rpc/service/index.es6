@@ -7,4 +7,5 @@
  * @flow
  */
 
+export { default as BcServiceImpl } from './bc'
 export { default as CollectorServiceImpl } from './collector'

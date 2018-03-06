@@ -2,4 +2,7 @@ syntax = "proto3";
 
 package bc;
 
+message Null {}
+
 message EmptyReply {}
+

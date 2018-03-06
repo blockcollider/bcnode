@@ -10,6 +10,9 @@
 const grpc = require('grpc')
 const config = require('../../config/config')
 
+const { BcService } = require('../protos/bc_grpc_pb')
+const { BcServiceImpl } = require('./service')
+
 const { CollectorService } = require('../protos/collector_grpc_pb')
 const { CollectorServiceImpl } = require('./service')
 
@@ -24,6 +27,7 @@ export default class RpcServer {
     this._rpcServer.bind(`${config.grpc.host}:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
 
     // Register services
+    this._rpcServer.addService(BcService, new BcServiceImpl(this))
     this._rpcServer.addService(CollectorService, new CollectorServiceImpl(this))
 
     this._rpcServer.start()

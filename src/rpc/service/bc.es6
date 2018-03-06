@@ -7,6 +7,28 @@
  * @flow
  */
 
-/**
- * See https://docs.google.com/document/d/1EZZ-wGvBoV59QDiS6ZN-atH48bDFI7GOvjF_SX5VQiI/edit
- */
+const { Stats } = require('../../protos/core_pb')
+
+const RpcServer = require('../server').default
+
+export default class BcServiceImpl {
+  _server: RpcServer; // eslint-disable-line no-undef
+
+  constructor (server: RpcServer) {
+    this._server = server
+  }
+
+  get server () : RpcServer {
+    return this._server
+  }
+
+  /**
+   * Implements the stats RPC method.
+   */
+  statistic (call: Object, callback: Function) {
+    console.log('statistic()', call.request.array)
+
+    const reply = new Stats()
+    callback(null, reply)
+  }
+}
