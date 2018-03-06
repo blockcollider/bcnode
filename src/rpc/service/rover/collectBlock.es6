@@ -7,7 +7,7 @@
  * @flow
  */
 
-const { Null } = require('../../../protos/block_pb')
+const { Null } = require('../../../protos/core_pb')
 
 export default function(context: Object, call: Object, callback: Function) {
   // console.log(context, call, callback)
