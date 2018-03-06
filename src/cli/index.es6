@@ -14,10 +14,21 @@ const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
 
-const ROVERS = ['btc', 'eth', 'wav', 'lisk', 'neo']
+const ROVERS = [
+  'btc',
+  'eth',
+  'lsk',
+  'neo',
+  'wav'
+]
 
+/**
+ * Application entry point
+ *
+ * @param args Command line arguments
+ */
 // eslint-disable-next-line import/prefer-default-export
-export function main (args: Object) {
+export async function main (args: string[]) {
   program
     .version(pkg.version)
     .option('--rovers [items]', 'Start Rover', 'all')
@@ -34,6 +45,14 @@ export function main (args: Object) {
 
   // Create instance of engine
   const engine = new Engine(logging.getLogger(__filename))
+
+  try {
+    await engine.init()
+  } catch (e) {
+    console.log(e)
+    return -1
+  }
+
   const { rovers, rpc, ui, ws } = program
 
   process.on('SIGINT', () => {

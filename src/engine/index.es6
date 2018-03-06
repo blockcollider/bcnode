@@ -7,45 +7,74 @@
  * @flow
  */
 
+const config = require('../../config/config')
 const logging = require('../logger')
 const RoverManager = require('../rover/manager').default
+const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
+const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
 
 export default class Engine {
-  _rovers: Object; // eslint-disable-line no-undef
-  _server: Object; // eslint-disable-line no-undef
   _logger: Object; // eslint-disable-line no-undef
-  _rpc: Object; // eslint-disable-line no-undef
+  _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
+  _rovers: RoverManager; // eslint-disable-line no-undef
+  _rpc: RpcServer; // eslint-disable-line no-undef
+  _server: Server; // eslint-disable-line no-undef
 
   constructor (logger: Object) {
-    this._rovers = new RoverManager()
-    this._server = new Server()
     this._logger = logging.getLogger(__filename)
+    this._persistence = new PersistenceRocksDb(config.persistence.path)
+    this._rovers = new RoverManager()
     this._rpc = new RpcServer(this)
+    this._server = new Server()
+  }
+
+  /**
+   * Initialize engine internals
+   *
+   * - Open database
+   * - Store name of available rovers as Buffer
+   */
+  // FIXME: Handle possible error
+  async init () {
+    const roverNames = Buffer.from(JSON.stringify(Object.keys(rovers)))
+
+    await this._persistence.open()
+      .then(() => this.persistence.put('rovers', roverNames))
+
+    this._logger.info('Engine initialized')
+  }
+
+  /**
+   * Get persistence
+   * @return {Persistence}
+   */
+  get persistence (): PersistenceRocksDb {
+    return this._persistence
   }
 
   /**
    * Get rovers manager
-   * @returns {null|*}
+   * @returns RoverManager
    */
-  get rovers (): Object {
+  get rovers (): RoverManager {
     return this._rovers
   }
 
   /**
    * Get instance of RpcServer
-   * @returns {RpcServer|_require.RpcServer}
+   * @returns RpcServer
    */
-  get rpc (): Object {
+  get rpc (): RpcServer {
     return this._rpc
   }
 
   /**
    * Get instance of Server (Express on steroids)
-   * @returns {null|*}
+   * @returns Server
    */
-  get server (): Object {
+  get server (): Server {
     return this._server
   }
 
@@ -64,10 +93,11 @@ export default class Engine {
   }
 
   /**
+   * Start Server
    *
    * @param opts Options to start server with
    */
   startServer (opts: Object) {
-    this.server.run()
+    this.server.run(opts)
   }
 }
