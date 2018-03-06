@@ -136,7 +136,7 @@
     "ms": "^2.1.1",
     "n64": "^0.1.0",
     "network": "^0.4.1",
-    "node-forge": "^0.7.2",
+    "node-forge": "^0.7.3",
     "node-uuid": "^1.4.8",
     "node-zstd": "^2.0.1",
     "portscanner": "^2.1.1",
