@@ -8,4 +8,4 @@
  */
 
 export { default as BcServiceImpl } from './bc'
-export { default as CollectorServiceImpl } from './collector'
+export { default as RoverServiceImpl } from './rover'

@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package bc;
-
-message Block {
-    string blockchain = 1;
-    string hash = 2;
-}
-

@@ -1,7 +1,6 @@
-import RpcClient from '../client'
-import RpcServer from '../server'
+const { RpcClient, RpcServer } = require('../index')
 
-const { Block } = require('../../protos/block_pb')
+const { Block } = require('../../protos/core_pb')
 
 describe('RpcServer', () => {
   let server = null
@@ -24,7 +23,7 @@ describe('RpcServer', () => {
     msg.setBlockchain('abc')
     msg.setHash('123456')
 
-    client.collector.collectBlock(msg, (err, response) => {
+    client.rover.collectBlock(msg, (err, response) => {
       expect(1).toEqual(1)
       done()
     })

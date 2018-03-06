@@ -9,7 +9,7 @@
 
 const RpcServer = require('../server').default
 
-const { collectBlock } = require('./collector/index')
+const { collectBlock } = require('./rover/index')
 
 export default class CollectorServiceImpl {
   _server: RpcServer; // eslint-disable-line no-undef
