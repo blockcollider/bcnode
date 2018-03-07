@@ -2,18 +2,19 @@ syntax = "proto3";
 
 package bc;
 
+enum JsType {
+    NULL = 0;
+    BOOLEAN = 1;
+    NUMBER = 2;
+    STRING = 3;
+    OBJECT = 4;
+    BUFFER = 5;
+    PROTO = 6;
+}
+
 // Represents value stored in key/value database
 // User provided value is automatically (de)serialized
 message DbValue {
-    enum Type {
-        NULL = 0;
-        BOOLEAN = 1;
-        NUMBER = 2;
-        STRING = 3;
-        OBJECT = 4;
-        BUFFER = 5;
-    }
-
-    Type type = 1;
+    JsType type = 1;
     bytes data = 2;
 }
