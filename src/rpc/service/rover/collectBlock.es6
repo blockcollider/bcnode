@@ -14,7 +14,7 @@ export default function(context: Object, call: Object, callback: Function) {
   const hash = call.request.array[1];
   const key = `${blockchain}.block.latest`
 
-  console.log("NEW BLOCK", blockchain, hash, key)
+  // console.log("NEW BLOCK", blockchain, hash, key)
 
   // TODO: Store block not just hash
   context.server.engine.persistence.put(key, hash)

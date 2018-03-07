@@ -29,8 +29,6 @@ export default class BcServiceImpl {
    * Help
    */
   help (call: Object, callback: Function) {
-    console.log('help()', call.request.array)
-
     help(this._getContext(), call, callback)
   }
 
@@ -38,8 +36,6 @@ export default class BcServiceImpl {
    * Statistics
    */
   stats (call: Object, callback: Function) {
-    console.log('stats()', call.request.array)
-
     stats(this._getContext(), call, callback)
   }
 

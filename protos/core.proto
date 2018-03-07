@@ -4,8 +4,6 @@ package bc;
 
 message Null {}
 
-message EmptyReply {}
-
 message Block {
     string blockchain = 1;
     string hash = 2;

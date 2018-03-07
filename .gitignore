@@ -1,6 +1,9 @@
 # IntelliJ Idea Project
 .idea/
 
+# Temp data
+_data/
+
 # Generated doc
 docs/
 
