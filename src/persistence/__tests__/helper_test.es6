@@ -7,8 +7,7 @@
  * @flow-disable
  */
 
-const { JsType } = require('../../protos/core_pb');
-const { DbValue } = require('../../protos/db_pb');
+const { JsType, DbValue } = require('../../protos/db_pb');
 
 const { serialize, deserialize } = require('../helper')
 
