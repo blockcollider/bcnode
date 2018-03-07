@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package bc;
+
+import "core.proto";
+
+message GetLatestBlocksResponse {
+    repeated Block blocks = 1;
+}
+
+message HelpResponse {
+    string help_text = 1;
+}
+
+message StatsResponse {
+    int64 calls = 1;
+}
+
+service Bc {
+    rpc GetLatestBlocks(Null) returns (GetLatestBlocksResponse) {}
+    rpc Help (Null) returns (HelpResponse) {}
+    rpc Stats (Null) returns (StatsResponse) {}
+}

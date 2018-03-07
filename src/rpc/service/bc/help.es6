@@ -7,5 +7,9 @@
  * @flow
  */
 
-export { default as BcServiceImpl } from './bc'
-export { default as RoverServiceImpl } from './rover'
+const { HelpResponse } = require('../../../protos/bc_pb')
+
+export default function(context: Object, call: Object, callback: Function) {
+  const reply = new HelpResponse(['Hi there!'])
+  callback(null, reply)
+}

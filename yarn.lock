@@ -369,7 +369,7 @@ async-eventemitter@^0.2.2:
   dependencies:
     async "^2.4.0"
 
-"async-eventemitter@github:ahultgren/async-eventemitter#fa06e39e56786ba541c180061dbf2c0a5bbf951c":
+async-eventemitter@ahultgren/async-eventemitter#fa06e39e56786ba541c180061dbf2c0a5bbf951c:
   version "0.2.3"
   resolved "https://codeload.github.com/ahultgren/async-eventemitter/tar.gz/fa06e39e56786ba541c180061dbf2c0a5bbf951c"
   dependencies:
@@ -1065,7 +1065,7 @@ backo2@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
 
-"bagpipe@github:Ivshti/bagpipe#ae11730ef59364b20868287fb3ce0970a87dc8c8":
+bagpipe@Ivshti/bagpipe#ae11730ef59364b20868287fb3ce0970a87dc8c8:
   version "0.3.7"
   resolved "https://codeload.github.com/Ivshti/bagpipe/tar.gz/ae11730ef59364b20868287fb3ce0970a87dc8c8"
   dependencies:
@@ -1480,7 +1480,7 @@ bn.js@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-2.2.0.tgz#12162bc2ae71fc40a5626c33438f3a875cd37625"
 
-body-parser@1.18.2, body-parser@^1.16.0:
+body-parser@1.18.2, body-parser@^1.16.0, body-parser@^1.18.2:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.18.2.tgz#87678a19d84b47d859b83199bd59bce222b10454"
   dependencies:
@@ -1749,7 +1749,7 @@ buffer@^5.0.5:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-"buffers@github:bitpay/node-buffers#v0.1.2-bitpay":
+buffers@bitpay/node-buffers#v0.1.2-bitpay:
   version "0.1.1"
   resolved "https://codeload.github.com/bitpay/node-buffers/tar.gz/04f4c4264e0d105db2b99b786843ed64f23230d8"
 
@@ -1827,8 +1827,8 @@ camelcase@^4.1.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
 
 caniuse-lite@^1.0.30000792:
-  version "1.0.30000812"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000812.tgz#d173b686b49bc941fa18ff2e7e533048e20ed92c"
+  version "1.0.30000811"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000811.tgz#0b6e40f2efccc27bd3cb52f91ee7ca4673d77d10"
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -2617,8 +2617,8 @@ detective@^4.3.1:
     defined "^1.0.0"
 
 diff@^3.2.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-3.4.0.tgz#b1d85507daf3964828de54b37d0d73ba67dda56c"
 
 diffie-hellman@^5.0.0:
   version "5.0.2"
@@ -2879,8 +2879,8 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
 electron-to-chromium@^1.3.30:
-  version "1.3.35"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.35.tgz#693c17cfb93841d38cb59b8df019d17e356985f0"
+  version "1.3.34"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.34.tgz#d93498f40391bb0c16a603d8241b9951404157ed"
 
 elliptic@6.4.0, elliptic@^6.0.0, elliptic@^6.2.3, elliptic@^6.4.0:
   version "6.4.0"
@@ -3411,6 +3411,13 @@ ethereumjs-icap@^0.3.1:
 ethereumjs-tx@^1.2.2, ethereumjs-tx@^1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/ethereumjs-tx/-/ethereumjs-tx-1.3.3.tgz#ece051d3efdbe771ad2a518d61632ca2ab75ecbb"
+  dependencies:
+    ethereum-common "^0.0.18"
+    ethereumjs-util "^5.0.0"
+
+ethereumjs-tx@^1.3.4:
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/ethereumjs-tx/-/ethereumjs-tx-1.3.4.tgz#c2304912f6c07af03237ad8675ac036e290dad48"
   dependencies:
     ethereum-common "^0.0.18"
     ethereumjs-util "^5.0.0"
@@ -4444,7 +4451,7 @@ inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.0, i
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
-inherits@2.0.1, inherits@=2.0.1:
+inherits@=2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.1.tgz#b17d08d326b4423e568eff719f91b0b1cbdf69f1"
 
@@ -5074,9 +5081,9 @@ js-beautify@^1.5.4:
     mkdirp "~0.5.0"
     nopt "~3.0.1"
 
-"js-nacl@github:liskhq/js-nacl#6dc1417":
+js-nacl@LiskHQ/js-nacl#6dc1417:
   version "1.2.1"
-  resolved "https://codeload.github.com/liskhq/js-nacl/tar.gz/6dc1417057cd81381d332b370e82ceab1f2416af"
+  resolved "https://codeload.github.com/LiskHQ/js-nacl/tar.gz/6dc1417057cd81381d332b370e82ceab1f2416af"
 
 js-sha3@^0.3.1:
   version "0.3.1"
@@ -5087,8 +5094,8 @@ js-tokens@^3.0.0, js-tokens@^3.0.2:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.2.tgz#9866df395102130e38f7f996bceb65443209c25b"
 
 js-yaml@^3.7.0, js-yaml@^3.9.1:
-  version "3.11.0"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.11.0.tgz#597c1a8bd57152f26d622ce4117851a51f5ebaef"
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.10.0.tgz#2e78441646bd4682e963f22b6e92823c309c62dc"
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
@@ -6140,7 +6147,7 @@ node-fetch@^1.0.1, node-fetch@^1.7.3:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
-node-forge@^0.7.2:
+node-forge@^0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.7.3.tgz#03188af9dd2401c55e040150ba3c708575678e1a"
 
@@ -8434,9 +8441,9 @@ trim@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/trim/-/trim-0.0.1.tgz#5858547f6b290757ee95cccc666fb50084c460dd"
 
-ts-api-validator@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/ts-api-validator/-/ts-api-validator-2.0.0.tgz#02ef7d3fe4c6bca42513dc84243614b84f323d4e"
+ts-api-validator@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/ts-api-validator/-/ts-api-validator-2.1.0.tgz#139b74868607fd1d44390bb52d1c374a025760e1"
   dependencies:
     dts-gen "^0.5.6"
     dts-generator "^2.1.0"
@@ -8486,8 +8493,8 @@ type-is@~1.6.15:
     mime-types "~2.1.18"
 
 typedarray-to-buffer@^3.1.2:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/typedarray-to-buffer/-/typedarray-to-buffer-3.1.4.tgz#010b582f7366b351ea7cadcb052f1a5e2d4c6e9f"
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/typedarray-to-buffer/-/typedarray-to-buffer-3.1.2.tgz#1017b32d984ff556eba100f501589aba1ace2e04"
   dependencies:
     is-typedarray "^1.0.0"
 
@@ -8626,13 +8633,7 @@ util.promisify@^1.0.0:
     define-properties "^1.1.2"
     object.getownpropertydescriptors "^2.0.3"
 
-util@^0.10.3:
-  version "0.10.3"
-  resolved "https://registry.yarnpkg.com/util/-/util-0.10.3.tgz#7afb1afe50805246489e3db7fe0ed379336ac0f9"
-  dependencies:
-    inherits "2.0.1"
-
-"util@github:Ivshti/node-util":
+util@Ivshti/node-util, util@^0.10.3:
   version "0.10.3"
   resolved "https://codeload.github.com/Ivshti/node-util/tar.gz/97b6beed8e0e478cd4184965ac94bf316f94e5f5"
   dependencies:
@@ -8749,14 +8750,14 @@ watch@~0.18.0:
     exec-sh "^0.2.0"
     minimist "^1.2.0"
 
-waves-api@^0.22.0:
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/waves-api/-/waves-api-0.22.0.tgz#e2c56217df00a1ee7673c1a35026afda19b3c0cd"
+waves-api@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/waves-api/-/waves-api-0.24.0.tgz#8901b636d0eb057d6f55bad71a10e05fcec4ec4e"
   dependencies:
     bignumber.js "^4.1.0"
     crypto-js "^3.1.9-1"
     node-fetch "^1.7.3"
-    ts-api-validator "^2.0.0"
+    ts-api-validator "^2.1.0"
     ts-utils "^5.3.0"
 
 web3-bzz@1.0.0-beta.30:

@@ -2,4 +2,10 @@ syntax = "proto3";
 
 package bc;
 
-message EmptyReply {}
+message Null {}
+
+message Block {
+    string blockchain = 1;
+    string hash = 2;
+}
+
