@@ -29,8 +29,19 @@ function deserialize_bc_Stats(buffer_arg) {
 
 
 var BcService = exports.BcService = {
-  statistic: {
-    path: '/bc.Bc/statistic',
+  help: {
+    path: '/bc.Bc/help',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_pb.Null,
+    responseType: core_pb.Null,
+    requestSerialize: serialize_bc_Null,
+    requestDeserialize: deserialize_bc_Null,
+    responseSerialize: serialize_bc_Null,
+    responseDeserialize: deserialize_bc_Null,
+  },
+  stats: {
+    path: '/bc.Bc/stats',
     requestStream: false,
     responseStream: false,
     requestType: core_pb.Null,

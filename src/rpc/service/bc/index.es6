@@ -7,5 +7,5 @@
  * @flow
  */
 
-export { default as BcServiceImpl } from './bc'
-export { default as RoverServiceImpl } from './rover'
+export { default as help } from './help'
+export { default as stats } from './stats'

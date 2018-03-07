@@ -11,5 +11,5 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var block_pb = require('./block_pb.js');
+var core_pb = require('./core_pb.js');
 goog.object.extend(exports, proto.bc);

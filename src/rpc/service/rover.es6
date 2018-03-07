@@ -7,9 +7,9 @@
  * @flow
  */
 
-const { BlockReply } = require('../../protos/block_pb')
-
 const RpcServer = require('../server').default
+
+const { collectBlock } = require('./rover/index')
 
 export default class CollectorServiceImpl {
   _server: RpcServer; // eslint-disable-line no-undef
@@ -28,7 +28,12 @@ export default class CollectorServiceImpl {
   collectBlock (call: Object, callback: Function) {
     console.log('collectBlock()', call.request.array)
 
-    const reply = new BlockReply()
-    callback(null, reply)
+    collectBlock(this._getContext(), call, callback)
+  }
+
+  _getContext () : Object {
+    return {
+      server: this._server
+    }
   }
 }

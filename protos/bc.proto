@@ -9,5 +9,6 @@ message Stats {
 }
 
 service Bc {
-    rpc statistic (Null) returns (Stats) {}
+    rpc help (Null) returns (Null) {}
+    rpc stats (Null) returns (Stats) {}
 }

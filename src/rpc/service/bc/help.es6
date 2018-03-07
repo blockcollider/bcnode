@@ -7,5 +7,8 @@
  * @flow
  */
 
-export { default as BcServiceImpl } from './bc'
-export { default as RoverServiceImpl } from './rover'
+const { Null } = require('../../../protos/core_pb')
+
+export default function(context: Object, call: Object, callback: Function) {
+  callback(null, Null)
+}

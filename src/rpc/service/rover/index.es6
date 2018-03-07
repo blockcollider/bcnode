@@ -7,5 +7,4 @@
  * @flow
  */
 
-export { default as BcServiceImpl } from './bc'
-export { default as RoverServiceImpl } from './rover'
+export { default as collectBlock } from './collectBlock'

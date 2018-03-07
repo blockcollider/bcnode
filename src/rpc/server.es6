@@ -13,8 +13,8 @@ const config = require('../../config/config')
 const { BcService } = require('../protos/bc_grpc_pb')
 const { BcServiceImpl } = require('./service')
 
-const { CollectorService } = require('../protos/collector_grpc_pb')
-const { CollectorServiceImpl } = require('./service')
+const { RoverService } = require('../protos/rover_grpc_pb')
+const { RoverServiceImpl } = require('./service')
 
 export default class RpcServer {
   _engine: Object // eslint-disable-line no-undef
@@ -28,7 +28,7 @@ export default class RpcServer {
 
     // Register services
     this._rpcServer.addService(BcService, new BcServiceImpl(this))
-    this._rpcServer.addService(CollectorService, new CollectorServiceImpl(this))
+    this._rpcServer.addService(RoverService, new RoverServiceImpl(this))
 
     this._rpcServer.start()
   }
