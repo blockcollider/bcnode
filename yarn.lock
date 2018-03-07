@@ -1480,7 +1480,7 @@ bn.js@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-2.2.0.tgz#12162bc2ae71fc40a5626c33438f3a875cd37625"
 
-body-parser@1.18.2, body-parser@^1.16.0:
+body-parser@1.18.2, body-parser@^1.16.0, body-parser@^1.18.2:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.18.2.tgz#87678a19d84b47d859b83199bd59bce222b10454"
   dependencies:
