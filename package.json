@@ -55,7 +55,7 @@
     "transform": {
       "^.+\\.(js|es6)$": "babel-jest"
     },
-    "collectCoverage": true
+    "collectCoverage": false
   },
   "standard": {
     "globals": [
@@ -155,7 +155,7 @@
     "tar": "^4.4.0",
     "terminate": "^2.1.0",
     "tx-builder": "^0.13.1",
-    "waves-api": "^0.23.0",
+    "waves-api": "^0.23.1",
     "web3": "^1.0.0-beta.30",
     "webcoin-bitcoin": "^3.1.4",
     "webcoin-bitcoin-testnet": "^1.1.1",
