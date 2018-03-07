@@ -4,15 +4,20 @@ package bc;
 
 import "core.proto";
 
-message Stats {
-    int64 calls = 1;
+message GetLatestBlocksResponse {
+    repeated Block blocks = 1;
 }
 
-message HelpReply {
+message HelpResponse {
     string help_text = 1;
 }
 
+message StatsResponse {
+    int64 calls = 1;
+}
+
 service Bc {
-    rpc help (Null) returns (HelpReply) {}
-    rpc stats (Null) returns (Stats) {}
+    rpc GetLatestBlocks(Null) returns (GetLatestBlocksResponse) {}
+    rpc Help (Null) returns (HelpResponse) {}
+    rpc Stats (Null) returns (StatsResponse) {}
 }

@@ -7,5 +7,6 @@
  * @flow
  */
 
+export { default as getLatestBlocks } from './getLatestBlocks'
 export { default as help } from './help'
 export { default as stats } from './stats'
