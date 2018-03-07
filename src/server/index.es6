@@ -1,10 +1,14 @@
 const path = require('path')
+
+const bodyParser = require('body-parser')
 const express = require('express')
 const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
-const logging = require('../logger')
 
+const logging = require('../logger')
 const config = require('../../config/config')
+const { Null } = require('../protos/core_pb')
+const { RpcClient } = require('../rpc')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
 
@@ -14,6 +18,7 @@ export default class Server {
     this._opts = null
     this._app = null
     this._io = null
+    this._rpcClient = new RpcClient()
     this._server = null
     this._logger = logging.getLogger(__filename)
   }
@@ -30,6 +35,10 @@ export default class Server {
     return this._opts
   }
 
+  get rpcClient () {
+    return this._rpcClient
+  }
+
   get server () {
     return this._server
   }
@@ -41,6 +50,15 @@ export default class Server {
 
     // Create express app instance
     this._app = express()
+
+    this._app.use(bodyParser.json())
+
+    // TODO: Generate automagically
+    const mapping = {
+      help: Null
+    }
+
+    this._app.use(jsonRpcMiddleware(mapping))
 
     // Create http server
     const server = (this._server = require('http').Server(this.app))
@@ -91,8 +109,21 @@ export default class Server {
 
   initRpc () {
     this.app.post('/rpc', (req, res) => {
-      res.json({
-        msg: 'Not implemented yet!'
+      console.log('/rpc, req: ', req.body)
+
+      const { MsgType, params, method } = req.rpcBody
+      const msg = new MsgType(params)
+
+      this.rpcClient.bc[method](msg, (err, response) => {
+        this._logger.error(err)
+
+        if (err) {
+          return res.json({
+            error: err
+          })
+        }
+
+        res.json(response.toObject())
       })
     })
   }
@@ -105,5 +136,76 @@ export default class Server {
         icons: true
       })
     )
+  }
+}
+
+/**
+ * Converts incoming json body to rpc body using mapping provided
+ *
+ *  Mapping
+ *
+ *  ```
+ *  {
+ *    subtract: Object
+ *  }
+ *  ```
+ *
+ * Incoming JSON body
+ *
+ * ```
+ * {
+ *   jsonrpc: '2.0',
+ *   method: 'subtract',
+ *   params: [ 42, 23 ],
+ *   id: 1
+ * }
+ * ```
+ *
+ * Fabricated (output) RPC message
+ *
+ * ```
+ * {
+ *   method: 'subtract',
+ *   params: [42, 23],
+ *   msgType: Object
+ * }
+ * ```
+ *
+ * @param mappings
+ * @return {Function}
+ */
+// TODO: Order named params to params array
+// TODO: Handle RPC call batch
+export function jsonRpcMiddleware (mappings) {
+  function validRequest (rpc) {
+    return rpc.jsonrpc === '2.0' &&
+      (typeof rpc.id === 'number' || typeof rpc.id === 'string') &&
+      typeof rpc.method === 'string'
+  }
+
+  return function (req, res, next) {
+    if (!validRequest(req.body)) {
+      var body = JSON.stringify({
+        error: 'Invalid request'
+      })
+
+      res.writeHead(400, {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      })
+
+      res.end(body)
+
+      return
+    }
+
+    const { method, params } = req.body
+    req.rpcBody = {
+      method,
+      params, // Handle named params
+      msgType: mappings[req.body.method]
+    }
+
+    next()
   }
 }

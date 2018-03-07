@@ -26,8 +26,6 @@ export default class CollectorServiceImpl {
    * Implements the collectBlock RPC method.
    */
   collectBlock (call: Object, callback: Function) {
-    console.log('collectBlock()', call.request.array)
-
     collectBlock(this._getContext(), call, callback)
   }
 

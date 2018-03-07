@@ -7,8 +7,10 @@
  * @flow
  */
 
+const { HelpReply } = require('../../../protos/bc_pb')
 const { Null } = require('../../../protos/core_pb')
 
 export default function(context: Object, call: Object, callback: Function) {
-  callback(null, Null)
+  const reply = new HelpReply(['Hi there!'])
+  callback(null, reply)
 }
