@@ -2,10 +2,14 @@ syntax = "proto3";
 
 package bc;
 
-message Null {}
-
-message Block {
-    string blockchain = 1;
-    string hash = 2;
+enum JsType {
+    NULL = 0;
+    BOOLEAN = 1;
+    NUMBER = 2;
+    STRING = 3;
+    OBJECT = 4;
+    BUFFER = 5;
+    PROTO = 6;
 }
 
+message EmptyReply {}
