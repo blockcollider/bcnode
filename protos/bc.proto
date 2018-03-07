@@ -8,7 +8,11 @@ message Stats {
     int64 calls = 1;
 }
 
+message HelpReply {
+    string help_text = 1;
+}
+
 service Bc {
-    rpc help (Null) returns (Null) {}
+    rpc help (Null) returns (HelpReply) {}
     rpc stats (Null) returns (Stats) {}
 }
