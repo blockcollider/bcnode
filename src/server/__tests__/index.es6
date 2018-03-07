@@ -19,7 +19,7 @@ describe('jsonRpcMiddleware', () => {
         jsonrpc: '2.0',
         method: 'subtract',
         params: [ 42, 23 ],
-        id: 1
+        id: 42
       }
     }
 
@@ -29,7 +29,8 @@ describe('jsonRpcMiddleware', () => {
     expect(req.rpcBody).toEqual({
       method: 'subtract',
       params: [42, 23],
-      msgType: Object
+      MsgType: Object,
+      id: 42
     })
   })
 
@@ -39,17 +40,15 @@ describe('jsonRpcMiddleware', () => {
         jsonrpc: '3.0',
         method: 'subtract',
         params: [ 42, 23 ],
-        id: 1
+        id: 42
       }
     }
     // This function sets req.rpcBody
     const mockRes = {
-      writeHead: jest.fn(),
-      end: jest.fn()
+      json: jest.fn(),
     }
     middleware(req, mockRes, jest.fn())
 
-    expect(mockRes.writeHead).toBeCalledWith(400, {"Content-Length": 27, "Content-Type": "application/json"})
-    expect(mockRes.end).toBeCalledWith('{"error":"Invalid request"}')
+    expect(mockRes.json).toBeCalledWith({code: -32600, message: 'Invalid Request'})
   })
 })

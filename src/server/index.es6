@@ -55,6 +55,7 @@ export default class Server {
 
     // TODO: Generate automagically
     const mapping = {
+      getLatestBlocks: Null,
       help: Null
     }
 
@@ -111,7 +112,17 @@ export default class Server {
     this.app.post('/rpc', (req, res) => {
       console.log('/rpc, req: ', req.body)
 
-      const { MsgType, params, method } = req.rpcBody
+      const { method } = req.rpcBody
+
+      // Handle error state as described - http://www.jsonrpc.org/specification#error_object
+      if (!this.rpcClient.bc[method]) {
+        return res.json({
+          code: -32601,
+          message: 'Method not found'
+        })
+      }
+
+      const { MsgType, params, id } = req.rpcBody
       const msg = new MsgType(params)
 
       this.rpcClient.bc[method](msg, (err, response) => {
@@ -123,7 +134,11 @@ export default class Server {
           })
         }
 
-        res.json(response.toObject())
+        res.json({
+          jsonrpc: '2.0',
+          result: response.toObject(),
+          id
+        })
       })
     })
   }
@@ -177,6 +192,7 @@ export default class Server {
 // TODO: Order named params to params array
 // TODO: Handle RPC call batch
 export function jsonRpcMiddleware (mappings) {
+  // TODO: Report why is the request invalid
   function validRequest (rpc) {
     return rpc.jsonrpc === '2.0' &&
       (typeof rpc.id === 'number' || typeof rpc.id === 'string') &&
@@ -185,16 +201,10 @@ export function jsonRpcMiddleware (mappings) {
 
   return function (req, res, next) {
     if (!validRequest(req.body)) {
-      var body = JSON.stringify({
-        error: 'Invalid request'
+      res.json({
+        code: -32600,
+        message: 'Invalid Request'
       })
-
-      res.writeHead(400, {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
-      })
-
-      res.end(body)
 
       return
     }
@@ -203,7 +213,8 @@ export function jsonRpcMiddleware (mappings) {
     req.rpcBody = {
       method,
       params, // Handle named params
-      msgType: mappings[req.body.method]
+      MsgType: mappings[req.body.method],
+      id: req.body.id
     }
 
     next()

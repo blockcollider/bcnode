@@ -8750,9 +8750,9 @@ watch@~0.18.0:
     exec-sh "^0.2.0"
     minimist "^1.2.0"
 
-waves-api@^0.23.0:
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/waves-api/-/waves-api-0.23.0.tgz#04da029346609b2f7fadd5edaebcc3ac77ea1fba"
+waves-api@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/waves-api/-/waves-api-0.24.0.tgz#8901b636d0eb057d6f55bad71a10e05fcec4ec4e"
   dependencies:
     bignumber.js "^4.1.0"
     crypto-js "^3.1.9-1"
