@@ -17,7 +17,6 @@ const app = require("../init.js");
 module.exports = function main () {
    program
     .version(pkg.version)
-    .option('--norovers', 'Disable Rovers')
     .option('--nolog', 'Disable log printing to console')
     .option('--reset', 'Deletes all local data including accounts, databases')
     .parse(process.argv)
