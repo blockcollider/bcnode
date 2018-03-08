@@ -14,13 +14,7 @@ const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
 
-const ROVERS = [
-  'btc',
-  'eth',
-  'lsk',
-  'neo',
-  'wav'
-]
+const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 /**
  * Application entry point
@@ -31,7 +25,7 @@ const ROVERS = [
 export async function main (args: string[]) {
   program
     .version(pkg.version)
-    .option('--rovers [items]', 'Start Rover', 'all')
+    .option('--rovers [items]', 'Start Rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'Do not start any rover')
     .option('--rpc', 'Enable RPC')
     .option('--ui', 'Enable Web UI')

@@ -5,8 +5,6 @@ describe('jsonRpcMiddleware', () => {
     subtract: Object
   }
 
-
-
   let middleware = null
 
   beforeEach(() =>  {
