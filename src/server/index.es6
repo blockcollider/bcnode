@@ -183,7 +183,7 @@ export default class Server {
  * {
  *   method: 'subtract',
  *   params: [42, 23],
- *   msgType: Object
+ *   MsgType: Object
  * }
  * ```
  *
