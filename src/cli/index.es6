@@ -25,11 +25,11 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 export async function main (args: string[]) {
   program
     .version(pkg.version)
-    .option('--rovers [items]', 'Start Rover', ROVERS.join(', '))
-    .option('-R, --no-rovers', 'Do not start any rover')
-    .option('--rpc', 'Enable RPC')
-    .option('--ui', 'Enable Web UI')
-    .option('--ws', 'Enable WebSocket')
+    .option('--rovers [items]', 'start Rover', ROVERS.join(', '))
+    .option('-R, --no-rovers', 'do not start any rover')
+    .option('--rpc', 'enable RPC')
+    .option('--ui', 'enable Web UI')
+    .option('--ws', 'enable WebSocket')
     .parse(args)
 
   // Print help if no arguments were given
