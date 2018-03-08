@@ -11,10 +11,10 @@ const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
 
+const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
 const string = require('../../utils/strings.js')
-const { Block } = require('../../protos/core_pb')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -77,7 +77,13 @@ const _createUnifiedBlock = (block): Block => {
     return all
   }, [])
 
-  return obj
+  // return obj
+
+  const msg = new Block()
+  msg.setBlockchain('lsk')
+  msg.setHash(obj.blockHash)
+
+  return msg
 }
 
 /**
@@ -129,14 +135,10 @@ export default class Controller {
 
               const unifiedBlock = _createUnifiedBlock(lastBlock)
               this._logger.debug(`created unified block: ${inspect(unifiedBlock, {depth: 0})}`)
-              // TODO remove after following is uncommented
-              this._logger.info(`publishing new block to engine`)
-              // TODO uncomment after Block proto msg is stabilized
-              // promisify(this._rpc.collector.collectBlock)(unifiedBlock).then((response) => {
-              //   this._logger.info(`publishing new block to engine`)
-              // }, (err) => {
-              //   this._logger.error(`could not publish new block to engine, err: ${inspect(err)}`)
-              // })
+
+              this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
+                console.log('Collector Response:', response);
+              });
             })
           }
         })
