@@ -16,7 +16,7 @@ const convBin = require('binstring')
 const process = require('process')
 const logging = require('../../logger')
 
-const { Block } = require('../../protos/core_pb');
+const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
 const { swapOrder } = require('../../utils/strings')
