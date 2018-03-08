@@ -36,10 +36,10 @@ export default class Engine {
    * - Open database
    * - Store name of available rovers as Buffer
    */
-  // FIXME: Handle possible error
   async init () {
     const roverNames = Buffer.from(JSON.stringify(Object.keys(rovers)))
 
+    // FIXME: Handle possible error
     await this._persistence.open()
       .then(() => this.persistence.put('rovers', roverNames))
 
