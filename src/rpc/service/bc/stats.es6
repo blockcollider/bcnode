@@ -9,7 +9,7 @@
 
 const { Stats } = require('../../../protos/core_pb')
 
-export default function(context: Object, call: Object, callback: Function) {
+export default function stats(context: Object, call: Object, callback: Function) {
   const reply = new Stats()
   callback(null, reply)
 }

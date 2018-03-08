@@ -12,7 +12,7 @@ const { GetLatestBlocksResponse } = require('../../../protos/bc_pb')
 
 const rovers = require('../../../rover/manager').rovers
 
-export default function(context: Object, call: Object, callback: Function) {
+export default function getLatestBlocks(context: Object, call: Object, callback: Function) {
   const keys = Object.keys(rovers).map((rover) => {
     return `${rover}.block.latest`
   })
