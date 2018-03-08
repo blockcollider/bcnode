@@ -2,6 +2,7 @@ const path = require('path')
 
 const bodyParser = require('body-parser')
 const express = require('express')
+const responseTime = require('response-time')
 const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
 
@@ -50,7 +51,7 @@ export default class Server {
 
     // Create express app instance
     this._app = express()
-
+    this._app.use(responseTime())
     this._app.use(bodyParser.json())
 
     // TODO: Generate automagically
@@ -110,7 +111,7 @@ export default class Server {
 
   initRpc () {
     this.app.post('/rpc', (req, res) => {
-      console.log('/rpc, req: ', req.body)
+      // console.log('/rpc, req: ', req.body)
 
       const { method } = req.rpcBody
 
@@ -126,9 +127,9 @@ export default class Server {
       const msg = new MsgType(params)
 
       this.rpcClient.bc[method](msg, (err, response) => {
-        this._logger.error(err)
-
         if (err) {
+          this._logger.error(err)
+
           return res.json({
             error: err
           })

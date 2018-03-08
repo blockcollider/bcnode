@@ -89,7 +89,7 @@ export default class PersistenceRocksDb {
     return new Promise((resolve, reject) => {
       this.db.get(key, opts, (err, value) => {
         if (err) {
-          throw new Error(`${err.message} - ${key}`)
+          return reject(new Error(`${err.message} - ${key}`))
         }
 
         return resolve(value)
