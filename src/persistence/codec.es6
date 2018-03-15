@@ -21,6 +21,20 @@ const BC_MESSAGES_MAP = {
 }
 
 /**
+ * Provides functions for serializing plain JS types and BC protobuf messages to a Buffer
+ * suitable for saving to persistence (currently RocksDB) and deserializing the buffer from persistence
+ * back to either BC protobuf message or plain JS value.
+ *
+ * Buffer returned by serialize reprents DbValue protobuf message which wraps the payload and rememebers metadata about it
+ * (namely type, version - for possibility of migrations in the future and the payload itself). The payload itself is
+ *  - in case of plain JS object = json stringified value
+ *  - in case of BC proto msg = Uint8Array of bytes from message internal serialization process
+ *
+ * Deserialize always takes Buffer as input because intended use with RocksDB and handles conversion
+ * to Uint8Array for Protobuf internal deserialization itself
+ */
+
+/**
  * Serializes value into Buffer
  *
  * @param val Value to be serialized
