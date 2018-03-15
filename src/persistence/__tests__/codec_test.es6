@@ -8,7 +8,7 @@
  */
 
 const { Block } = require('../../protos/core_pb')
-const { serialize, deserialize } = require('../helper')
+const { serialize, deserialize } = require('../codec')
 
 describe('codec', () => {
   describe('works with plain javascript values', () => {
