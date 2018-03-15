@@ -45,7 +45,7 @@ export function serialize (val: Object): Buffer {
     ])
   }
 
-  return dbValue.serializeBinary()
+  return Buffer.from(dbValue.serializeBinary())
 }
 
 /**
@@ -55,7 +55,11 @@ export function serialize (val: Object): Buffer {
  * @return {{}}
  */
 export function deserialize (bytes: Buffer): Object|Error {
-  const dbValue = DbValue.deserializeBinary(bytes)
+  let raw = bytes
+  if (!(raw instanceof Uint8Array)) {
+    raw = new Uint8Array(raw)
+  }
+  const dbValue = DbValue.deserializeBinary(raw)
 
   if (dbValue.getIsNative()) {
     return JSON.parse(Buffer.from(dbValue.getData_asB64(), 'base64').toString())
@@ -65,7 +69,7 @@ export function deserialize (bytes: Buffer): Object|Error {
     return BC_MESSAGES_MAP[dbValue.getType()].deserializeBinary(dbValue.getData())
   } catch (e) {
     if (e instanceof TypeError) {
-      throw new TypeError(`Could not find ${dbValue.getType()} in BC_MESSAGES_MAP`)
+      throw new TypeError(`Could not find '${dbValue.getType()}' in BC_MESSAGES_MAP`)
     }
 
     throw e

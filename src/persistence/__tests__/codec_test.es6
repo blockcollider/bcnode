@@ -11,6 +11,12 @@ const { Block } = require('../../protos/core_pb')
 const { serialize, deserialize } = require('../codec')
 
 describe('codec', () => {
+  describe('type checks', () => {
+    it('serialize returns buffer', () => {
+      const payload = serialize({})
+      expect(payload).toBeInstanceOf(Buffer)
+    })
+  })
   describe('works with plain javascript values', () => {
     it('can serialize null', () => {
       const serialized = serialize(null)
