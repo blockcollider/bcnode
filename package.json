@@ -62,9 +62,9 @@
     "globals": [
       "describe",
       "context",
-      "before",
+      "beforeAll",
       "beforeEach",
-      "after",
+      "afterAll",
       "afterEach",
       "it",
       "test",
