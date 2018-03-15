@@ -28,7 +28,7 @@ proto.bc.Null = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.bc.Null, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
+if (true || goog.DEBUG && !COMPILED) {
   proto.bc.Null.displayName = 'proto.bc.Null';
 }
 
@@ -144,7 +144,7 @@ proto.bc.Block = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.bc.Block, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
+if (true || goog.DEBUG && !COMPILED) {
   proto.bc.Block.displayName = 'proto.bc.Block';
 }
 
