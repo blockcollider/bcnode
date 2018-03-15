@@ -9,6 +9,8 @@
 
 const RocksDb = require('rocksdb')
 
+const { serialize, deserialize } = require('./codec')
+
 /**
  * Unified persistence interface
  */
@@ -68,9 +70,10 @@ export default class PersistenceRocksDb {
    * @param value
    * @param opts
    */
-  put (key: string, value: string | Buffer, opts: Object = {}): Promise<*> {
+  put (key: string, value: Object, opts: Object = {}): Promise<*> {
+    const serialized = serialize(value)
     return new Promise((resolve, reject) => {
-      this.db.put(key, value, opts, (err) => {
+      this.db.put(key, serialized, opts, (err) => {
         if (err) {
           return reject(err)
         }
@@ -85,14 +88,19 @@ export default class PersistenceRocksDb {
    * @param key
    * @param opts
    */
-  get (key: string, opts: Object = {}): Promise<string | Buffer> {
+  get (key: string, opts: Object = {}): Promise<Object> {
     return new Promise((resolve, reject) => {
       this.db.get(key, opts, (err, value) => {
         if (err) {
           return reject(new Error(`${err.message} - ${key}`))
         }
 
-        return resolve(value)
+        try {
+          const deserialized = deserialize(value)
+          return resolve(deserialized)
+        } catch (e) {
+          return reject(new Error(`Could not deserialize value`))
+        }
       })
     })
   }

@@ -21,14 +21,14 @@ describe('RocksDb', () => {
   test('put', done => {
     const db = new RocksDb(dataDir)
 
-    const key = 'msg';
+    const key = 'msg'
     const value = 'hello'
 
     db.open()
       .then(() => db.put(key, value))
       .then(() => db.get(key))
       .then((res) => {
-        expect(res.toString()).toEqual(value)
+        expect(res).toEqual(value)
         return db.del(key)
       })
       .then((res) => {
@@ -49,4 +49,3 @@ describe('RocksDb', () => {
     })
   })
 })
-
