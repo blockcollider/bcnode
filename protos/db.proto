@@ -5,15 +5,8 @@ package bc;
 // Represents value stored in key/value database
 // User provided value is automatically (de)serialized
 message DbValue {
-    enum Type {
-        NULL = 0;
-        BOOLEAN = 1;
-        NUMBER = 2;
-        STRING = 3;
-        OBJECT = 4;
-        BUFFER = 5;
-    }
-
-    Type type = 1;
+    string type = 1;
     bytes data = 2;
+    int32 version = 3;
+    bool is_native = 4;
 }

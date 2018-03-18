@@ -30,7 +30,7 @@ proto.bc.GetLatestBlocksResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, proto.bc.GetLatestBlocksResponse.repeatedFields_, null);
 };
 goog.inherits(proto.bc.GetLatestBlocksResponse, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
+if (true || goog.DEBUG && !COMPILED) {
   proto.bc.GetLatestBlocksResponse.displayName = 'proto.bc.GetLatestBlocksResponse';
 }
 /**
@@ -198,7 +198,7 @@ proto.bc.HelpResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.bc.HelpResponse, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
+if (true || goog.DEBUG && !COMPILED) {
   proto.bc.HelpResponse.displayName = 'proto.bc.HelpResponse';
 }
 
@@ -340,7 +340,7 @@ proto.bc.StatsResponse = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.bc.StatsResponse, jspb.Message);
-if (goog.DEBUG && !COMPILED) {
+if (true || goog.DEBUG && !COMPILED) {
   proto.bc.StatsResponse.displayName = 'proto.bc.StatsResponse';
 }
 
