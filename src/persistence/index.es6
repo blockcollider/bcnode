@@ -6,3 +6,6 @@
  *
  * @flow
  */
+
+// export { default as LevelDb } from './leveldb'
+export { default as RocksDb } from './rocksdb'

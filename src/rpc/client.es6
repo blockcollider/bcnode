@@ -8,7 +8,8 @@
  */
 const grpc = require('grpc')
 
-const { CollectorClient } = require('../protos/collector_grpc_pb')
+const { BcClient } = require('../protos/bc_grpc_pb')
+const { RoverClient } = require('../protos/rover_grpc_pb')
 
 const config = require('../../config/config')
 
@@ -17,7 +18,8 @@ export default class RpcClient {
 
   constructor () {
     this._services = {
-      collector: new CollectorClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure())
+      bc: new BcClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure()),
+      rover: new RoverClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure())
     }
   }
 
@@ -25,7 +27,11 @@ export default class RpcClient {
     return this._services[name]
   }
 
-  get collector (): Object {
-    return this.service('collector')
+  get bc (): Object {
+    return this.service('bc')
+  }
+
+  get rover (): Object {
+    return this.service('rover')
   }
 }

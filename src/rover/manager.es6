@@ -13,11 +13,22 @@ const path = require('path')
 
 const ROVER_RESTART_TIMEOUT = 5000
 
+/**
+ * Rover lookup table
+ *
+ * Gets the rover path by name of it
+ *
+ * @type {{btc: *, eth: *, lsk: *}}
+ */
 export const rovers = {
   btc: path.resolve(__dirname, 'btc', 'rover.js'),
+  eth: path.resolve(__dirname, 'eth', 'rover.js'),
   lsk: path.resolve(__dirname, 'lsk', 'rover.js')
 }
 
+/**
+ * Rover manager
+ */
 export default class RoverManager {
   _logger: Object // eslint-disable-line no-undef
   _rovers: Object // eslint-disable-line no-undef
@@ -27,6 +38,11 @@ export default class RoverManager {
     this._rovers = {}
   }
 
+  /**
+   * Start rover
+   * @param roverName Name of rover to start
+   * @returns {boolean} result
+   */
   startRover (roverName: string) {
     const roverPath = rovers[roverName]
 

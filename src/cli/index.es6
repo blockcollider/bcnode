@@ -14,17 +14,22 @@ const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
 
-const ROVERS = ['btc', 'eth', 'wav', 'lisk', 'neo']
+const ROVERS = Object.keys(require('../rover/manager').rovers)
 
+/**
+ * Application entry point
+ *
+ * @param args Command line arguments
+ */
 // eslint-disable-next-line import/prefer-default-export
-export function main (args: Object) {
+export async function main (args: string[]) {
   program
     .version(pkg.version)
-    .option('--rovers [items]', 'Start Rover', 'all')
-    .option('-R, --no-rovers', 'Do not start any rover')
-    .option('--rpc', 'Enable RPC')
-    .option('--ui', 'Enable Web UI')
-    .option('--ws', 'Enable WebSocket')
+    .option('--rovers [items]', 'start Rover', ROVERS.join(', '))
+    .option('-R, --no-rovers', 'do not start any rover')
+    .option('--rpc', 'enable RPC')
+    .option('--ui', 'enable Web UI')
+    .option('--ws', 'enable WebSocket')
     .parse(args)
 
   // Print help if no arguments were given
@@ -34,6 +39,14 @@ export function main (args: Object) {
 
   // Create instance of engine
   const engine = new Engine(logging.getLogger(__filename))
+
+  try {
+    await engine.init()
+  } catch (e) {
+    console.log(e)
+    return -1
+  }
+
   const { rovers, rpc, ui, ws } = program
 
   process.on('SIGINT', () => {

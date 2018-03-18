@@ -1,13 +1,36 @@
 const path = require('path')
 
-export const configDir = path.resolve(__dirname, '..', '..', 'config')
+/**
+ * Absolute path of config dir
+ *
+ * @type {string}
+ */
+export const configDir: string = path.resolve(__dirname, '..', '..', 'config')
 
-export const configFile = 'config.json'
+/**
+ * Name of config file
+ * @type {string}
+ */
+export const configFile: string = 'config.json'
 
-export const configPath = path.resolve(configDir, configFile)
+/**
+ * Full path to config file
+ *
+ * @type {string}
+ */
+export const configPath: string = path.resolve(configDir, configFile)
 
-const configData = require(configPath)
+/**
+ * Parsed config data
+ *
+ * @type {Object}
+ */
+const configData: Object = require(configPath)
 
+/**
+ * Get config
+ * @returns {*}
+ */
 export default function config () {
   return configData
 }

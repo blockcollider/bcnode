@@ -7,6 +7,56 @@
  * @flow
  */
 
-/**
- * See https://docs.google.com/document/d/1EZZ-wGvBoV59QDiS6ZN-atH48bDFI7GOvjF_SX5VQiI/edit
- */
+import type { Logger } from 'winston'
+
+const { getLogger } = require('../../logger')
+
+const RpcServer = require('../server').default
+
+const {
+  getLatestBlocks,
+  help,
+  stats
+} = require('./bc/index')
+
+export default class BcServiceImpl {
+  _logger: Logger; // eslint-disable-line no-undef
+  _server: RpcServer; // eslint-disable-line no-undef
+
+  constructor (server: RpcServer) {
+    this._server = server
+    this._logger = getLogger(__filename)
+  }
+
+  get server () : RpcServer {
+    return this._server
+  }
+
+  /**
+   * GetLatestBlocks
+   */
+  getLatestBlocks (call: Object, callback: Function) {
+    getLatestBlocks(this._getContext(), call, callback)
+  }
+
+  /**
+   * Help
+   */
+  help (call: Object, callback: Function) {
+    help(this._getContext(), call, callback)
+  }
+
+  /**
+   * Statistics
+   */
+  stats (call: Object, callback: Function) {
+    stats(this._getContext(), call, callback)
+  }
+
+  _getContext () : Object {
+    return {
+      logger: this._logger,
+      server: this._server
+    }
+  }
+}
