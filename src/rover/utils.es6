@@ -8,23 +8,10 @@
  */
 
 const crypto = require('crypto')
-const { execSync } = require('child_process')
 
 /**
  * Generate private key using random bytes
  */
 export function getPrivateKey (length: number = 32) {
   return crypto.randomBytes(length)
-}
-
-/**
- * Detect java jre presence in the system
- */
-export function javaJreAvailable (): boolean {
-  try {
-    execSync('javaa -version 2>&1')
-    return true
-  } catch (e) {
-    return false
-  }
 }

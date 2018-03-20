@@ -13,7 +13,6 @@ const program = require('commander')
 const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
-const { javaJreAvailable } = require('../rover/utils')
 
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
@@ -36,12 +35,6 @@ export async function main (args: string[]) {
   // Print help if no arguments were given
   if (process.argv.length < 3) {
     return program.help()
-  }
-
-  // Test for java in the system
-  if (!javaJreAvailable()) {
-    console.error('You have to have JRE v >= 1.8.0 available for user running bcnode')
-    return process.exit(1)
   }
 
   // Create instance of engine
