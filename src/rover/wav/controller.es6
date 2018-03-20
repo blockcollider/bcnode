@@ -127,7 +127,7 @@ export default class Controller {
         this._logger.debug(`Got last height '${height}`)
         getBlock(this._wavesApi, height).then(lastBlock => {
           if (!this._blockCache.has(lastBlock.reference)) {
-            this._logger.info(`Got new block ${inspect(lastBlock)}`)
+            this._logger.info(`Unseen new block '${lastBlock.reference}', height: ${height}`)
             this._blockCache.set(lastBlock.reference)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
