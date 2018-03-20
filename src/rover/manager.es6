@@ -23,7 +23,8 @@ const ROVER_RESTART_TIMEOUT = 5000
 export const rovers = {
   btc: path.resolve(__dirname, 'btc', 'rover.js'),
   eth: path.resolve(__dirname, 'eth', 'rover.js'),
-  lsk: path.resolve(__dirname, 'lsk', 'rover.js')
+  lsk: path.resolve(__dirname, 'lsk', 'rover.js'),
+  wav: path.resolve(__dirname, 'wav', 'rover.js')
 }
 
 /**

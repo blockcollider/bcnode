@@ -19,6 +19,6 @@ export default function(context: Object, call: Object, callback: Function) {
   // TODO: Store block not just hash
   context.server.engine.persistence.put(key, hash)
     .then(() => {
-      callback(null, Null)
+      callback(null, new Null())
     })
 }
