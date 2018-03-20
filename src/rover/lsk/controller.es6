@@ -137,8 +137,12 @@ export default class Controller {
               this._logger.debug(`created unified block: ${inspect(unifiedBlock, {depth: 0})}`)
 
               this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
-                console.log('Collector Response:', response);
-              });
+                if (err) {
+                  this._logger.error(`Error while collecting block ${inspect(err)}`)
+                  return
+                }
+                this._logger.debug(`Collector Response ${inspect(response)}`)
+              })
             })
           }
         })
@@ -187,8 +191,5 @@ export default class Controller {
 
   close () {
     this._intervalDescriptor && clearInterval(this._intervalDescriptor)
-    // this._interfaces.map(function (c) {
-    //   c.close()
-    // })
   }
 }
