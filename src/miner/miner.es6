@@ -4,9 +4,10 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow-disabled
+ * @flow
  */
 
+// $FlowFixMe
 const native = require('../../native/index.node')
 
 const { BlockIn, BlockOut } = require('../protos/miner_pb')
