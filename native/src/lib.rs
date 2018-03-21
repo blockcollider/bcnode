@@ -41,12 +41,12 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
     });
 
     // Construct result block
-    let mut block = Block::new();
-    block.set_hash(String::from("123456"));
-    block.set_blockchain(in_block.unwrap().get_blockchain().to_string());
+    let mut out_block = Block::new();
+    out_block.set_hash(String::from("123456"));
+    out_block.set_blockchain(in_block.unwrap().get_blockchain().to_string());
 
     // Serialize output
-    let serialized = block.write_to_bytes().unwrap();
+    let serialized = out_block.write_to_bytes().unwrap();
     let scope = call.scope;
     let mut buffer = try!(JsBuffer::new(scope, serialized.len() as u32));
     buffer.grab(|mut contents| {
