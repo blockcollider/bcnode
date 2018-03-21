@@ -124,7 +124,7 @@ export default class Controller {
 
     const cycle = () => {
       return getLastHeight(this._wavesApi).then(height => {
-        this._logger.debug(`Got last height '${height}`)
+        this._logger.debug(`Got last height '${height}'`)
         getBlock(this._wavesApi, height).then(lastBlock => {
           if (!this._blockCache.has(lastBlock.reference)) {
             this._logger.info(`Unseen new block '${lastBlock.reference}', height: ${height}`)
