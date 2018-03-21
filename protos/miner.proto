@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package bc;
+
+// Miner block input
+message BlockIn {
+    string blockchain = 1;
+    string hash = 2;
+}
+
+// Miner block output
+message BlockOut {
+    string blockchain = 1;
+    string hash = 2;
+}

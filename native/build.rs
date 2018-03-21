@@ -22,6 +22,7 @@ fn main() {
             "../protos/bc.proto",
             "../protos/core.proto",
             "../protos/db.proto",
+            "../protos/miner.proto",
             "../protos/rover.proto",
         ],
         includes: &["../protos"],
