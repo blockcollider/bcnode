@@ -14,7 +14,6 @@ const { Block } = require('../protos/core_pb')
 export default class Miner {
   mine (blocks: Object) {
     const buf = blocks.serializeBinary()
-
     const raw = native.mine(buf)
     return Block.deserializeBinary(new Uint8Array(raw))
   }

@@ -1,7 +1,15 @@
+extern crate crypto;
 #[macro_use]
 extern crate neon;
 extern crate grpc;
+
+#[macro_use]
+extern crate log;
+
+extern crate num_cpus;
 extern crate protobuf;
+extern crate rand;
+extern crate strsim;
 extern crate tls_api;
 
 use neon::vm::{Call, JsResult, Lock};
@@ -11,6 +19,7 @@ use neon::mem::Handle;
 
 use protobuf::Message;
 
+pub mod miner;
 pub mod protos;
 
 fn hello(call: Call) -> JsResult<JsString> {
@@ -28,6 +37,7 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
         println!("{:?}", &slice);
     });
 
+    // Construct result block
     let mut block = protos::core::Block::new();
     block.set_hash(String::from("123456"));
     block.set_blockchain(String::from("bc"));
