@@ -9,12 +9,12 @@
 
 const native = require('../../native/index.node')
 
-const { Block } = require('../protos/core_pb')
+const { BlockIn, BlockOut } = require('../protos/miner_pb')
 
 export default class Miner {
-  mine (blocks: Object) {
-    const buf = blocks.serializeBinary()
+  mine (block: BlockIn) : BlockOut {
+    const buf = block.serializeBinary()
     const raw = native.mine(buf)
-    return Block.deserializeBinary(new Uint8Array(raw))
+    return BlockOut.deserializeBinary(new Uint8Array(raw))
   }
 }

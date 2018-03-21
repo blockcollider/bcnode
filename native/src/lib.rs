@@ -23,7 +23,7 @@ use protobuf::Message;
 pub mod miner;
 pub mod protos;
 
-use protos::core::Block;
+use protos::miner::{BlockIn, BlockOut};
 
 fn hello(call: Call) -> JsResult<JsString> {
     let scope = call.scope;
@@ -37,11 +37,11 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
     let mut buffer: Handle<JsBuffer> = call.arguments.require(call.scope, 0)?.check::<JsBuffer>()?;
     let in_block = buffer.grab(|mut contents| {
         let slice = contents.as_slice();
-        parse_from_bytes::<Block>(&slice)
+        parse_from_bytes::<BlockIn>(&slice)
     });
 
     // Construct result block
-    let mut out_block = Block::new();
+    let mut out_block = BlockOut::new();
     out_block.set_hash(String::from("123456"));
     out_block.set_blockchain(in_block.unwrap().get_blockchain().to_string());
 

@@ -1,7 +1,7 @@
 const Miner = require('../').Miner
 
 
-const { Block } = require('../../protos/core_pb')
+const { BlockIn } = require('../../protos/miner_pb')
 
 describe('Miner', () => {
   it('can instantiate self', () => {
@@ -9,13 +9,13 @@ describe('Miner', () => {
   })
 
   test('mine()', () => {
-    const msg = new Block()
-    msg.setBlockchain('btc')
-    msg.setHash('123456')
+    const blockIn = new BlockIn()
+    blockIn.setBlockchain('btc')
+    blockIn.setHash('123456')
 
     const miner = new Miner();
-    const block = miner.mine(msg)
+    const blockOut = miner.mine(blockIn)
 
-    expect(block.getBlockchain()).toEqual('btc')
+    expect(blockOut.getBlockchain()).toEqual('btc')
   })
 })
