@@ -17,10 +17,13 @@ use neon::js::JsString;
 use neon::js::binary::JsBuffer;
 use neon::mem::Handle;
 
+use protobuf::core::parse_from_bytes;
 use protobuf::Message;
 
 pub mod miner;
 pub mod protos;
+
+use protos::core::Block;
 
 fn hello(call: Call) -> JsResult<JsString> {
     let scope = call.scope;
@@ -28,19 +31,19 @@ fn hello(call: Call) -> JsResult<JsString> {
 }
 
 fn mine(call: Call) -> JsResult<JsBuffer> {
-    println!("mine()");
+    debug!("mine()");
 
     // Deserialize input
     let mut buffer: Handle<JsBuffer> = call.arguments.require(call.scope, 0)?.check::<JsBuffer>()?;
-    buffer.grab(|mut contents| {
+    let in_block = buffer.grab(|mut contents| {
         let slice = contents.as_slice();
-        println!("{:?}", &slice);
+        parse_from_bytes::<Block>(&slice)
     });
 
     // Construct result block
-    let mut block = protos::core::Block::new();
+    let mut block = Block::new();
     block.set_hash(String::from("123456"));
-    block.set_blockchain(String::from("bc"));
+    block.set_blockchain(in_block.unwrap().get_blockchain().to_string());
 
     // Serialize output
     let serialized = block.write_to_bytes().unwrap();

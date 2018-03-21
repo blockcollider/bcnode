@@ -16,6 +16,6 @@ describe('Miner', () => {
     const miner = new Miner();
     const block = miner.mine(msg)
 
-    expect(block.getBlockchain()).toEqual("bc")
+    expect(block.getBlockchain()).toEqual('btc')
   })
 })
