@@ -13,6 +13,9 @@ crate-type = ["dylib"]
 neon-build = "0.1.22"
 protoc-rust-grpc = "0.2.1"
 
+[dev-dependencies]
+clippy = { version = "*" }
+
 [dependencies]
 bitcrust = { git = "https://github.com/tomasvdw/bitcrust" }
 bytes = "0.4"

@@ -1,3 +1,6 @@
+#![cfg_attr(test, feature(plugin))]
+#![cfg_attr(test, plugin(clippy))]
+
 extern crate crypto;
 #[macro_use]
 extern crate neon;
