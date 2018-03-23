@@ -13,6 +13,14 @@ lib/**/*.js
 lib/**/*.js.map
 lib/**/*.json
 
+# Native rust
+native/target/
+native/artifacts.json
+native/index.node
+
+# Rust stuff
+target/
+
 # Logs
 logs/
 *.log

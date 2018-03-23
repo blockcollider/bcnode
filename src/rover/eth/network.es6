@@ -394,6 +394,7 @@ export default class Network {
   }
 
   handlePeerError (dpt: Object, peer: Object, err: Error) {
+    // $FlowFixMe
     if (err.code === 'ECONNRESET') {
       return
     }

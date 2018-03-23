@@ -1,0 +1,32 @@
+[package]
+name = "bcnode-native"
+version = "0.1.0"
+authors = ["Tomas Korcak <korczis@gmail.com>"]
+license = "MIT"
+build = "build.rs"
+
+[lib]
+name = "bcnode_native"
+crate-type = ["dylib"]
+
+[build-dependencies]
+neon-build = "0.1.22"
+protoc-rust-grpc = "0.2.1"
+
+[dev-dependencies]
+clippy = { version = "*" }
+
+[dependencies]
+bitcrust = { git = "https://github.com/tomasvdw/bitcrust" }
+bytes = "0.4"
+futures  = "0.1"
+futures-cpupool = "0.1"
+grpc = "0.2"
+log = "0.3"
+neon = "0.1"
+num_cpus = "1.7"
+protobuf = "1.4"
+rand = "0.4"
+rust-crypto = "0.2"
+strsim = "0.6"
+tls-api = "0.1"
