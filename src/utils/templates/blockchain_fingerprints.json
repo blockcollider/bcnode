@@ -1,0 +1,48 @@
+[
+  {
+    "name":"btc",
+    "description":"Bitcoin",
+    "hash": "390fcf5ffdfedca732c19e2571e367230895725bed88e53f92d43762c14e3d57",
+    "version": 1,
+    "fingerprint": [
+       {
+          "hash": "000000000000a89a2c06f66c5aa3e278b53a19d094026be17c9c5a6bbae32e6b",
+          "data": "61e3853d4c4441ccafe91f722734d9fd7ab94e50025454519c77b7ce144d79e8",
+          "height": 74690 
+       },
+       {
+          "hash": "00000000005c22d199706df1c38b38d76f8401920dcbe91edf3417f8847da707",
+          "data": "40c7f718052b1e3540374482b9f2329b163c8044512a7f15447245a1adc6d895",
+          "height": 74691 
+       },
+       {
+          "hash": "00000000000c4df039d8ba791eead74ca301e27d806bd6559c1087abf25c9b1f",
+          "data": "10ad2d4d40a763d8dcd118d3d6494a986c43c28fab8fae23d795d3271af14083",
+          "height": 74692 
+       }
+    ]
+  },
+  {
+    "name":"eth",
+    "description":"Ethereum",
+    "hash": "bbe5c469c469cec1f8c0b01de640df724f3d9053c23b19c6ed1bc6ee0faf5160",
+    "version": 1,
+    "fingerprint": [
+       {
+          "hash": "a218e2c611f21232d857e3c8cecdcdf1f65f25a4477f98f6f47e4063807f2308",
+          "data": "62382916183238",
+          "height": 1919999 
+       },
+       {
+          "hash": "4985f5ca3d2afbec36529aa96f74de3cc10a2a4a6c44f2157a57d2c6059a11bb",
+          "data": "62413376722602",
+          "height": 1920000 
+       },
+       {
+          "hash": "87b2bc3f12e3ded808c6d4b9b528381fa2a7e95ff2368ba93191a9495daa7f50",
+          "data": "62321951008868",
+          "height": 1920001 
+       }
+    ]
+  }
+]
