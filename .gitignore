@@ -1,9 +1,6 @@
 # IntelliJ Idea Project
 .idea/
 
-# Native bindings 
-native/
-
 # Temp data
 _data/
 
