@@ -18,4 +18,3 @@ exports.ScriptError = require('./scripterror');
 exports.ScriptNum = require('./scriptnum');
 exports.sigcache = require('./sigcache');
 exports.Stack = require('./stack');
-exports.Witness = require('./witness');
