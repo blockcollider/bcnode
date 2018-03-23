@@ -1357,7 +1357,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         break;
       }
-      case opcodes.OP_CHECKSIGCHAIN: {
+      case opcodes.OP_CHECKSIGFROMCHAIN: {
 
         if (stack.length < 2)
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
@@ -1402,6 +1402,9 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         break;
       }
+      case opcodes.OP_RFBAND: {
+        break;
+      }
       case opcodes.OP_HASHSCHNORR: {
 
         if (stack.length < 2)
@@ -1412,7 +1415,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         const r = stack.get(-2);
         const data = stack.get(-1);
-		const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
+		    const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
 
         stack.pop();
         stack.pop();
@@ -1430,7 +1433,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
 
         const data = stack.get(-1);
-		const hash = hashes.blake2bb(data).toString("hex");
+		    const hash = hashes.blake2bb(data).toString("hex");
 
         stack.pop();
 
@@ -1438,11 +1441,10 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         break;
       }
-      case opcodes.OP_CHECKSTACK: {
+      case opcodes.OP_CHECKSIGFROMCHAIN: {
 
         if (!tx)
           throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
-
 
 		// Lookup the stackId and ensure it is valid
 
@@ -1453,7 +1455,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
 
         const data = stack.get(-1);
-		const hash = hashes.blake2bb(data).toString("hex");
+		    const hash = hashes.blake2bb(data).toString("hex");
 
         stack.pop();
 
