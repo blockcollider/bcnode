@@ -1,4 +1,6 @@
 class NEO {
+  constructor () {}
+
   generator () {}
 
   createToken (opts) {}
