@@ -23,6 +23,7 @@ before_install:
   - export PATH=$HOME/.yarn/bin:$PATH
   # Install rustup and rust
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
+  - export PYTHON=python2.7
   - export PATH=$HOME/.cargo/bin:$PATH
   - rustup update
   - rustc -Vv
