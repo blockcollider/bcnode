@@ -10,6 +10,7 @@ addons:
   apt:
     packages:
       - graphviz
+      - libboost-all-dev
 
 before_install:
   # Install protobuf - 3
