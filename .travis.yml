@@ -1,6 +1,6 @@
 language: node_js
 
-sudo: true
+sudo: false
 
 dist: trusty
 
@@ -14,9 +14,6 @@ addons:
       - graphviz
 
 before_install:
-  - sudo add-apt-repository ppa:nschloe/boost-nightly -y
-  - sudo apt-get update -q
-  - sudo apt-get install libboost1.64-all-dev
   # Install protobuf - 3
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -OL https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then unzip protoc-3.5.1-linux-x86_64.zip -d $HOME/protoc3; fi
