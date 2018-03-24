@@ -1,3 +1,5 @@
+const Message = require("bitcore-message");
+
 class Bitcoin {
   constructor (opts) {
 
@@ -15,25 +17,25 @@ class Bitcoin {
 
   validSignature (addr, msg, signature) {
 
-        if(Buffer.isBuffer(msg) === false){
-             msg = new Buffer(msg);
+        if(Buffer.isBuffer(addr) === true){
+             addr = addr.toString();
         }
 
-        const sig = ethUtils.fromRpcSig(signature);
-        const prefix = new Buffer("\x19Ethereum Signed Message:\n");
-        const prefixedMsg = ethUtils.sha3(
-            Buffer.concat([prefix, new Buffer(String(msg.length)), msg])
-            );
-        const pub = ethUtils.ecrecover(prefixedMsg, sig.v, sig.r, sig.s);
-        const addrBuf = ethUtils.pubToAddress(pub);
-        const derivedPubAddr  = ethUtils.bufferToHex(addrBuf);
+        if(Buffer.isBuffer(msg) === true){
+             msg = msg.toString();
+        }
+        
+        if(Buffer.isBuffer(signature) === true){
+             signature = signature.toString();
+        }
 
-        console.log("derived: "+derivedPubAddr);
+        try { 
+          return Message(msg).verify(addr, signature);
+        } catch(err) { 
+          console.trace(err);
+          return Message(msg).verify(addr, signature);
+        }
 
-    if(addr === derivedPubAddr){
-      return true;
-    } 
-    return false;
   }
 }
 

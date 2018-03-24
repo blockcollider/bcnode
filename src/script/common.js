@@ -166,14 +166,10 @@ exports.opcodes = {
 
   /*
    * OP_CHECKSIGFROMCHAIN 257 
-   * Arguments <sig> <chain> 
+   * Arguments <sig> <address> <data> <chain> 
    * Confirms given signture is valid from given chain 
    *
    * chain here likely includes a version bit 
-   *
-   * Ex. Valid only if signature is of the specified chain and compiles with the specified chain 
-   * Output == OP_DUP OP_HASHBLAKE <chain> OP_VERIFYEQUAL OP_CHECKSIGFROMCHAIN 
-   * Signature == OP_PUSHDATA <sig> OP_PUSHDATA <chain> 
    *
    */ 
   OP_CHECKSIGFROMCHAIN: 0x101,

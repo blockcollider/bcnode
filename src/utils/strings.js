@@ -70,7 +70,6 @@ var strings = {
         return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.BP).toString("hex").slice(88, 128);
     },
 
-
     blake2bBuffer: function(buf){
         return avon.sumBuffer(buf, avon.ALGORITHMS.B).toString("hex");
     },

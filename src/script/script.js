@@ -28,6 +28,9 @@ const encoding = require('../utils/encoding');
 const secp256k1 = require('../crypto/secp256k1');
 const hashes = require("../crypto/hashes");
 const Address = require('../primitives/address');
+const Polyglot = require('../polyglot');
+const Fingerprints = require('../primitives/fingerprints');
+const FingerprintsData = require('../utils/templates/blockchain_fingerprints.json');
 const opcodes = common.opcodes;
 const scriptTypes = common.types;
 const EMPTY_BUFFER = Buffer.alloc(0);
@@ -1357,51 +1360,6 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         break;
       }
-      case opcodes.OP_CHECKSIGFROMCHAIN: {
-
-        if (stack.length < 2)
-          throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
-
-        if (version !== 0) 
-          throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
-
-        //const sig = stack.get(-2);
-        //const key = stack.get(-1);
-
-        //const subscript = this.getSubscript(lastSep);
-
-        //if (version === 0)
-        //  subscript.findAndDelete(sig);
-
-        //validateSignature(sig, flags);
-        //validateKey(key, flags, version);
-
-        //let res = false;
-
-        //if (sig.length > 0) {
-        //  const type = sig[sig.length - 1];
-        //  const hash = tx.signatureHash(index, subscript, value, type, version);
-        //  res = checksig(hash, sig, key);
-        //}
-
-        //if (!res && (flags & Script.flags.VERIFY_NULLFAIL)) {
-        //  if (sig.length !== 0)
-        //    throw new ScriptError('NULLFAIL', op, ip);
-        //}
-
-        //stack.pop();
-        //stack.pop();
-
-        //stack.pushBool(res);
-
-        //if (op.value === opcodes.OP_CHECKSIGVERIFY) {
-        //  if (!res)
-        //    throw new ScriptError('CHECKSIGVERIFY', op, ip);
-        //  stack.pop();
-        //}
-
-        break;
-      }
       case opcodes.OP_RFBAND: {
         break;
       }
@@ -1415,7 +1373,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         const r = stack.get(-2);
         const data = stack.get(-1);
-            const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
+        const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
 
         stack.pop();
         stack.pop();
@@ -1433,7 +1391,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
 
         const data = stack.get(-1);
-            const hash = hashes.blake2bb(data).toString("hex");
+        const hash = hashes.blake2bb(data).toString("hex");
 
         stack.pop();
 
@@ -1443,23 +1401,40 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
       }
       case opcodes.OP_CHECKSIGFROMCHAIN: {
 
-        if (!tx)
-          throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
-
         // Lookup the stackId and ensure it is valid
-
-        if (stack.length < 1)
+        if (stack.length < 4)
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
 
         if (version !== 0) 
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
 
-        const data = stack.get(-1);
-            const hash = hashes.blake2bb(data).toString("hex");
+        const address = stack.get(-4);
+        const sig = stack.get(-3);
+        const data = stack.get(-2);
+        let chain = stack.get(-1);
+
+        if(Buffer.isBuffer(chain) === true){
+          chain = chain.toString();    
+        }
+
+        const fp = new Fingerprints(chain) 
+
+        if (!fp) 
+          throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+        const poly = new Polyglot(fp.name);
+        const valid = poly[fp.name].validSignature(address, data, sig);
 
         stack.pop();
+        stack.pop();
+        stack.pop();
+        stack.pop();
 
-        stack.pushString(hash);
+        if(valid){
+          stack.pushInt(1);
+        } else {
+          stack.pushInt(0);
+        }
 
         break;
       }

@@ -2,6 +2,7 @@
   {
     "name":"btc",
     "description":"Bitcoin",
+    "pubHash": "a0b9c921b22727693f74c6e79dc74b730f95a24a",
     "hash": "390fcf5ffdfedca732c19e2571e367230895725bed88e53f92d43762c14e3d57",
     "electionStartBlock": "",
     "electionEndBlock": "",
@@ -31,6 +32,7 @@
   {
     "name":"eth",
     "description":"Ethereum",
+    "pubHash": "56129986ed2b773198195a800e66c63be4091163",
     "hash": "bbe5c469c469cec1f8c0b01de640df724f3d9053c23b19c6ed1bc6ee0faf5160",
     "genesisBlockchainSignature": "",
     "electionStartBlock": "",
@@ -60,6 +62,7 @@
   {
     "name":"wav",
     "description":"Waves",
+    "pubHash": "95650910a78f025d7e5d2ffe6bc2be675139e00f",
     "hash": "3bc516a4f96b1c08a5ccc19acc3ce643929c040ca3319c08480bfd784538333b",
     "electionStartBlock": "",
     "electionEndBlock": "",
@@ -89,6 +92,7 @@
   {
     "name":"neo",
     "description":"NEO",
+    "pubHash": "29f29f4575fbd12f4cf8ab7759b4c459486bd637",
     "hash": "2d37e680ed8d737499b65ee55245577df9fb0cf603c33bdb2f98fafafcd95fab",
     "electionStartBlock": "",
     "electionEndBlock": "",
@@ -118,6 +122,7 @@
   {
     "name":"lsk",
     "description":"Lisk",
+    "pubHash": "8ab56916dfa8291a33cd08fc9d579750eea9f972",
     "hash": "1ce956a5687e7ad5c40c0cb91f88a03a2abbc6ff12c4d87cb568fa86a0c07fe9",
     "electionStartBlock": "",
     "electionEndBlock": "",

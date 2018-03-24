@@ -89,6 +89,8 @@
     "bitcoin-net": "^5.0.0",
     "bitcoin-script": "^0.1.1",
     "bitcoinjs-lib": "^3.3.2",
+    "bitcore-lib": "^0.15.0",
+    "bitcore-message": "^1.0.4",
     "bitcore-p2p": "^1.1.2",
     "bitpony": "0.0.1",
     "blockchain-download": "^1.1.1",

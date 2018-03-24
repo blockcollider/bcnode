@@ -30,15 +30,21 @@ function Fingerprints(name, file) {
     assert(typeof data === 'array', 'Fingerprints data must be an array');
   }
 
+  if(Buffer.isBuffer(name) === true){
+    name = name.toString();
+  }
+
   if (name != null) {
 
     const key = name.toLowerCase();
     const query = data.reduce(function(result, fingerprint){
 
        if(result === false){
-          if(fingerprint.key === key){
+          if(fingerprint.hash === key){
               result = fingerprint; 
           } else if(fingerprint.name === key){
+              result = fingerprint;
+          } else if(fingerprint.pubHash === key){
               result = fingerprint;
           }
         }
@@ -52,7 +58,7 @@ function Fingerprints(name, file) {
       if(query) {
         for (let k in query) { this[k] = query[k]; }
       } else {
-        throw new Error("Unable to find fingerprint by name or key for '"+name+"'"); 
+        return false; 
       }
 
   } 
