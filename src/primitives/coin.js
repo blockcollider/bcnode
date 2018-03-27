@@ -2,6 +2,7 @@
  * coin.js - coin object for bcoin
  * Copyright (c) 2014-2015, Fedor Indutny (MIT License)
  * Copyright (c) 2014-2017, Christopher Jeffrey (MIT License).
+ * Copyright (c) 2018-, Block Collider Foundation (MIT License).
  * https://github.com/bcoin-org/bcoin
  */
 

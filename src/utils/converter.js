@@ -38,5 +38,5 @@ class Converter {
 }
 
 
-module.exports = Converter();
+module.exports = new Converter();
 

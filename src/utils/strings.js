@@ -61,6 +61,20 @@ var strings = {
         return avon.sumBuffer(new Buffer(str), avon.ALGORITHMS.BP).toString("hex").slice(64, 128);
     },
 
+    blake2blBuffer: function(str){
+
+		/// here should set some hard flag for if machine architecture is 64 bit / multi core
+		// avon.ALGORITHMS.B  // avon.ALGORITHMS.BP 
+        return new Buffer(avon.sumBuffer(str, avon.ALGORITHMS.BP).toString("hex").slice(64, 128));
+    },
+
+    blake2blsBuffer: function(str){
+
+		/// here should set some hard flag for if machine architecture is 64 bit / multi core
+		// avon.ALGORITHMS.B  // avon.ALGORITHMS.BP 
+        return new Buffer(avon.sumBuffer(str, avon.ALGORITHMS.BP).toString("hex").slice(88, 128));
+    },
+
     blake2bls: function(str){
 
 		// blake 2b-light, sha1
@@ -71,7 +85,7 @@ var strings = {
     },
 
     blake2bBuffer: function(buf){
-        return avon.sumBuffer(buf, avon.ALGORITHMS.B).toString("hex");
+        return new Buffer(avon.sumBuffer(buf, avon.ALGORITHMS.B).toString("hex"));
     },
 
     blake2s: function(str){

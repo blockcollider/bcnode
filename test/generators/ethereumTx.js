@@ -40,7 +40,3 @@ const eth = new Ethereum()
 const stx = eth.getSerializedTx()
 
 const sstx = eth.getSignedSerializedTx()
-
-console.log(stx)
-console.log('---')
-console.log(sstx)

@@ -32,7 +32,7 @@ const distance = require("../distance.js");
  * @default
  */
 
-exports.COIN = 100000000000;
+exports.COIN = 100000000;
 
 /**
  * Maximum amount of money in bosons:
@@ -41,10 +41,10 @@ exports.COIN = 100000000000;
  * @default
  */
 
-exports.MAX_MONEY = 9886117450 * exports.COIN;
+exports.MAX_MONEY = 9800000000 * exports.COIN;
 
 /**
- * Defrag chain window 
+ * Defrag chain window (depcreated to Spectrum Release)  
  * @const {Amount}
  * @default
  */

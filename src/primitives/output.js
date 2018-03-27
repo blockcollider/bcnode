@@ -9,10 +9,13 @@
 
 const assert = require('assert');
 const util = require('../utils/util');
-const Amount = require('../utils/amount');
+const strings = require('../utils/strings');
+const Converter = require('../utils/converter');
 const Script = require('../script/script');
+const Opcode = require('../script/opcode');
 const Address = require('./address');
 const Stack = require("./stack");
+const Amount = Converter.nrg;
 
 /**
  * Represents a transaction output.
@@ -27,9 +30,11 @@ function Output(options) {
   if (!(this instanceof Output))
     return new Output(options);
 
+  this.version = 1;
   this.value = 0;
-  this.stack = new Stack();
   this.script = new Script();
+  //this.stack = new Stack();
+  this.stack = false; 
 
   if (options)
     this.fromOptions(options);
@@ -43,9 +48,14 @@ function Output(options) {
 
 Output.prototype.fromOptions = function fromOptions(options) {
   assert(options, 'Output data is required.');
+  if (options.version) {
+    this.version = options.version;
+  }
 
   if (options.value) {
-    assert(util.isU64(options.value), 'Value must be a uint64.');
+    //TODO: Review implications of change.
+    // uint64 limit removed for 9.8 billion
+    //assert(util.isU64(options.value), 'Value must be a uint64.');
     this.value = options.value;
   }
 
@@ -69,6 +79,29 @@ Output.prototype.fromOptions = function fromOptions(options) {
 
 Output.fromOptions = function fromOptions(options) {
   return new Output().fromOptions(options);
+};
+
+/**
+ * Add one or more stacks to a give transaction 
+ * @private
+ * @param {NakedOutput} options
+ */
+
+Output.prototype.setStack = function setStack(stack) {
+  assert(stack, 'Stack data is required');
+
+  if(!(stack instanceof Stack)){ 
+    this.stack = new Stack(stack);
+  } else {
+    this.stack = stack;
+  }
+
+  this.script.pushOp("hashblake");
+  this.script.pushData(strings.blake2blBuffer(this.stack.hash()));
+  this.script.pushOp("verifystack");
+
+  return this;
+
 };
 
 /**
@@ -99,8 +132,16 @@ Output.prototype.format = function format(coin) {
   if(this.stack && this.stack.outputs.length > 0) {
       return {
         type: this.getType(),
-        value: Amount.btc(this.value),
+        value: Amount(this.value).toNRG(),
         stack: this.stack.format(),
+        script: this.script,
+        address: this.getAddress()
+      }
+  } else if(this.stack == false) {
+      return {
+        type: this.getType(),
+        value: Amount(this.value).toNRG(),
+        stack: new Stack(),
         script: this.script,
         address: this.getAddress()
       }
@@ -202,7 +243,7 @@ Output.prototype.getHash = function getHash(enc) {
 Output.prototype.inspect = function inspect() {
   return {
     type: this.getType(),
-    value: Amount.btc(this.value),
+    value: Amount(this.value).toNRG(),
     stack: this.stack,
     script: this.script,
     address: this.getAddress()
@@ -258,6 +299,7 @@ Output.prototype.getDustThreshold = function getDustThreshold(rate) {
   let size = this.getSize();
 
   if (this.script.isProgram()) {
+    // TODO: Adjust to factor in read costs of stacks
     // 75% segwit discount applied to script size.
     size += 32 + 4 + 1 + (107 / scale | 0) + 4;
   } else {

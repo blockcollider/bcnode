@@ -91,6 +91,10 @@ AbstractStack.prototype.fromOptions = function fromOptions (options) {
     this.locktime = options.locktime
   }
 
+  if (options.parentOutput != null) {
+    this.parentOutput = options.parentOutput
+  }
+
   return this
 }
 
@@ -159,6 +163,7 @@ AbstractStack.prototype.refresh = function refresh () {
  */
 
 AbstractStack.prototype.hash = function hash (enc) {
+
   let h = this._hash
 
   if (!h) {
@@ -2240,6 +2245,7 @@ AbstractStack.prototype.writeNormal = function writeNormal (bw) {
  */
 
 AbstractStack.prototype.getNormalSizes = function getNormalSizes () {
+
   let base = 0
 
   base += 4

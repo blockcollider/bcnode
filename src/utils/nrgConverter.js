@@ -98,7 +98,7 @@ Amount.prototype.toMNRG = function toMNRG(num) {
  */
 
 Amount.prototype.toNRG = function toNRG(num) {
-  return Amount.encode(this.value, 8, num);
+  return Amount.encode(this.value, 10, num);
 };
 
 /**
@@ -141,7 +141,8 @@ Amount.prototype.toString = function toString() {
  */
 
 Amount.prototype.fromValue = function fromValue(value) {
-  assert(util.isI64(value), 'Value must be an int64.');
+  //TODO: Look for side effects of releasing int64
+  //assert(util.isI64(value), 'Value must be an int64.');
   this.value = value;
   return this;
 };
@@ -190,7 +191,7 @@ Amount.prototype.fromMNRG = function fromMNRG(value) {
  */
 
 Amount.prototype.fromNRG = function fromNRG(value) {
-  this.value = Amount.decode(value, 8);
+  this.value = Amount.decode(value, 10);
   return this;
 };
 
@@ -311,7 +312,7 @@ Amount.nrg = function nrg(value, num) {
   if (typeof value === 'string')
     return value;
 
-  return Amount.encode(value, 8, num);
+  return Amount.encode(value, 10, num);
 };
 
 /**
@@ -325,7 +326,7 @@ Amount.value = function value(str) {
   if (typeof str === 'number')
     return str;
 
-  return Amount.decode(str, 8);
+  return Amount.decode(str, 10);
 };
 
 /**

@@ -862,9 +862,10 @@ util.memoryUsage = function memoryUsage() {
 
 util.toFixed = function toFixed(num, exp) {
   assert(typeof num === 'number');
-  assert(Number.isSafeInteger(num), 'Invalid integer value.');
+  //assert(Number.isSafeInteger(num), 'Invalid integer value.');
 
   let sign = '';
+
 
   if (num < 0) {
     num = -num;
@@ -1008,6 +1009,10 @@ function pow10(exp) {
       return 10000000;
     case 8:
       return 100000000;
+    case 9:
+      return 1000000000;
+    case 10:
+      return 10000000000;
   }
   throw new Error('Exponent is too large.');
 }

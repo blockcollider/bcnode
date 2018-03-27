@@ -151,25 +151,6 @@ StackInput.prototype.getRedeem = function getRedeem(coin) {
   return redeem;
 };
 
-/**
- * Get the redeem script type.
- * @param {Coin?} coin
- * @returns {String} subtype
- */
-
-StackInput.prototype.getSubtype = function getSubtype(coin) {
-  if (this.isCoinbase())
-    return null;
-
-  const redeem = this.getRedeem(coin);
-
-  if (!redeem)
-    return null;
-
-  const type = redeem.getType();
-
-  return Script.typesByVal[type].toLowerCase();
-};
 
 /**
  * Get the previous output script's address. Will "guess"
@@ -250,7 +231,6 @@ StackInput.prototype.inspect = function inspect() {
 StackInput.prototype.format = function format(coin) {
   return {
     type: this.getType(coin),
-    subtype: this.getSubtype(coin),
     address: this.getAddress(coin),
     script: this.script,
     redeem: this.getRedeem(coin),

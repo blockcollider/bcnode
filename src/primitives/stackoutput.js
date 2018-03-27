@@ -9,9 +9,10 @@
 
 const assert = require('assert');
 const util = require('../utils/util');
-const Amount = require('../utils/amount');
+const Converter = require('../utils/converter');
 const Script = require('../script/script');
 const Address = require('./address');
+const Amount = Converter.nrg; 
 
 /**
  * Represents a transaction output.
@@ -43,7 +44,7 @@ Output.prototype.fromOptions = function fromOptions(options) {
   assert(options, 'Output data is required.');
 
   if (options.value) {
-    assert(util.isU64(options.value), 'Value must be a uint64.');
+    //assert(util.isU64(options.value), 'Value must be a uint64.');
     this.value = options.value;
   }
 
@@ -150,7 +151,7 @@ Output.prototype.compare = function compare(output) {
 Output.prototype.getType = function getType() {
   const type = Script.typesByVal[this.script.getType()].toLowerCase();
   if(type == "nonstandard")
-        return "subnonstandard"
+        return "stacknonstandard"
   return type 
 };
 
@@ -186,7 +187,7 @@ Output.prototype.getHash = function getHash(enc) {
 Output.prototype.inspect = function inspect() {
   return {
     type: this.getType(),
-    value: Amount.btc(this.value),
+    value: Amount(this.value).toNRG(),
     script: this.script,
     address: this.getAddress()
   };

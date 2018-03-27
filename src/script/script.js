@@ -216,8 +216,9 @@ Script.prototype.fromArray = function fromArray(code) {
 
   this.clear();
 
-  for (const op of code)
-    this.push(op);
+  for (const op of code) {
+   	this.push(op);
+	}
 
   return this.compile();
 };
@@ -548,6 +549,992 @@ Script.prototype.removeSeparators = function removeSeparators() {
 
   return script.compile();
 };
+
+/**
+ * Execute and interpret the script (promise)
+ * @param {Stack} stack - Script execution stack.
+ * @param {Number?} flags - Script standard flags.
+ * @param {TX?} tx - Transaction being verified.
+ * @param {Number?} index - Index of input being verified.
+ * @param {Amount?} value - Previous output value.
+ * @param {Number?} version - Signature hash version (0=legacy, 1=segwit).
+ * @throws {ScriptError} Will be thrown on VERIFY failures, among other things.
+ */
+
+Script.prototype.executeAsync = function execute(stack, flags, tx, index, value, version, block) {
+
+  if (flags == null)
+    flags = Script.flags.STANDARD_VERIFY_FLAGS;
+
+  if (version == null)
+    version = 0;
+
+  if (this.raw.length > consensus.MAX_SCRIPT_SIZE)
+    throw new ScriptError('SCRIPT_SIZE');
+
+  const state = [];
+  const alt = [];
+
+  let lastSep = 0;
+  let opCount = 0;
+  let negate = 0;
+  let minimal = false;
+
+  if (flags & Script.flags.VERIFY_MINIMALDATA)
+    minimal = true;
+
+  function compile(code, cb) { 
+
+    let ip = 0;
+
+    (function next() {
+
+      ip++;
+
+      if(code.length === 0){
+
+        cb(null, stack);
+        
+      } else {
+
+        const op = code.shift();
+
+        if (op.value === -1)
+          throw new ScriptError('BAD_OPCODE', op, ip);
+
+        if (op.data && op.data.length > consensus.MAX_SCRIPT_PUSH)
+          throw new ScriptError('PUSH_SIZE', op, ip);
+
+        if (op.value > opcodes.OP_16 && ++opCount > consensus.MAX_SCRIPT_OPS)
+          throw new ScriptError('OP_COUNT', op, ip);
+
+        if (op.isDisabled()) {
+          throw new ScriptError('DISABLED_OPCODE', op, ip);
+        }
+
+        if (negate && !op.isBranch()) {
+          if (stack.length + alt.length > consensus.MAX_SCRIPT_STACK)
+            throw new ScriptError('STACK_SIZE', op, ip);
+          return next();
+
+        }
+
+        if (op.data) {
+          if (minimal && !op.isMinimal())
+            throw new ScriptError('MINIMALDATA', op, ip);
+
+          stack.push(op.data);
+
+          if (stack.length + alt.length > consensus.MAX_SCRIPT_STACK)
+            throw new ScriptError('STACK_SIZE', op, ip);
+
+          return next();
+
+        }
+
+        switch (op.value) {
+          case opcodes.OP_0: {
+            stack.pushInt(0);
+            break;
+          }
+          case opcodes.OP_1NEGATE: {
+            stack.pushInt(-1);
+            break;
+          }
+          case opcodes.OP_1:
+          case opcodes.OP_2:
+          case opcodes.OP_3:
+          case opcodes.OP_4:
+          case opcodes.OP_5:
+          case opcodes.OP_6:
+          case opcodes.OP_7:
+          case opcodes.OP_8:
+          case opcodes.OP_9:
+          case opcodes.OP_10:
+          case opcodes.OP_11:
+          case opcodes.OP_12:
+          case opcodes.OP_13:
+          case opcodes.OP_14:
+          case opcodes.OP_15:
+          case opcodes.OP_16: {
+            stack.pushInt(op.value - 0x50);
+            break;
+          }
+          case opcodes.OP_NOP: {
+            break;
+          }
+          case opcodes.OP_CHECKLOCKTIMEVERIFY: {
+            // OP_CHECKLOCKTIMEVERIFY = OP_NOP2
+            if (!(flags & Script.flags.VERIFY_CHECKLOCKTIMEVERIFY)) {
+              if (flags & Script.flags.VERIFY_DISCOURAGE_UPGRADABLE_NOPS)
+                throw new ScriptError('DISCOURAGE_UPGRADABLE_NOPS', op, ip);
+              break;
+            }
+
+            if (!tx)
+              throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
+
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const num = stack.getNum(-1, minimal, 5);
+
+            if (num.isNeg())
+              throw new ScriptError('NEGATIVE_LOCKTIME', op, ip);
+
+            const locktime = num.toDouble();
+
+            if (!tx.verifyLocktime(index, locktime))
+              throw new ScriptError('UNSATISFIED_LOCKTIME', op, ip);
+
+            break;
+          }
+          case opcodes.OP_CHECKSEQUENCEVERIFY: {
+            // OP_CHECKSEQUENCEVERIFY = OP_NOP3
+            if (!(flags & Script.flags.VERIFY_CHECKSEQUENCEVERIFY)) {
+              if (flags & Script.flags.VERIFY_DISCOURAGE_UPGRADABLE_NOPS)
+                throw new ScriptError('DISCOURAGE_UPGRADABLE_NOPS', op, ip);
+              break;
+            }
+
+            if (!tx)
+              throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
+
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const num = stack.getNum(-1, minimal, 5);
+
+            if (num.isNeg())
+              throw new ScriptError('NEGATIVE_LOCKTIME', op, ip);
+
+            const locktime = num.toDouble();
+
+            if (!tx.verifySequence(index, locktime))
+              throw new ScriptError('UNSATISFIED_LOCKTIME', op, ip);
+
+            break;
+          }
+          case opcodes.OP_NOP1:
+          case opcodes.OP_NOP4:
+          case opcodes.OP_NOP5:
+          case opcodes.OP_NOP6:
+          case opcodes.OP_NOP7:
+          case opcodes.OP_NOP8:
+          case opcodes.OP_NOP9:
+          case opcodes.OP_NOP10: {
+            if (flags & Script.flags.VERIFY_DISCOURAGE_UPGRADABLE_NOPS)
+              throw new ScriptError('DISCOURAGE_UPGRADABLE_NOPS', op, ip);
+            break;
+          }
+          case opcodes.OP_IF:
+          case opcodes.OP_NOTIF: {
+            let val = false;
+
+            if (!negate) {
+              if (stack.length < 1)
+                throw new ScriptError('UNBALANCED_CONDITIONAL', op, ip);
+
+              if (version === 1 && (flags & Script.flags.VERIFY_MINIMALIF)) {
+                const item = stack.get(-1);
+
+                if (item.length > 1)
+                  throw new ScriptError('MINIMALIF');
+
+                if (item.length === 1 && item[0] !== 1)
+                  throw new ScriptError('MINIMALIF');
+              }
+
+              val = stack.getBool(-1);
+
+              if (op.value === opcodes.OP_NOTIF)
+                val = !val;
+
+              stack.pop();
+            }
+
+            state.push(val);
+
+            if (!val)
+              negate += 1;
+
+            break;
+          }
+          case opcodes.OP_ELSE: {
+            if (state.length === 0)
+              throw new ScriptError('UNBALANCED_CONDITIONAL', op, ip);
+
+            state[state.length - 1] = !state[state.length - 1];
+
+            if (!state[state.length - 1])
+              negate += 1;
+            else
+              negate -= 1;
+
+            break;
+          }
+          case opcodes.OP_ENDIF: {
+            if (state.length === 0)
+              throw new ScriptError('UNBALANCED_CONDITIONAL', op, ip);
+
+            if (!state.pop())
+              negate -= 1;
+
+            break;
+          }
+          case opcodes.OP_VERIFY: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (!stack.getBool(-1))
+              throw new ScriptError('VERIFY', op, ip);
+
+            stack.pop();
+
+            break;
+          }
+          case opcodes.OP_RETURN: {
+            throw new ScriptError('OP_RETURN', op, ip);
+          }
+          case opcodes.OP_TOALTSTACK: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            alt.push(stack.pop());
+            break;
+          }
+          case opcodes.OP_FROMALTSTACK: {
+            if (alt.length === 0)
+              throw new ScriptError('INVALID_ALTSTACK_OPERATION', op, ip);
+
+            stack.push(alt.pop());
+            break;
+          }
+          case opcodes.OP_2DROP: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.pop();
+            stack.pop();
+            break;
+          }
+          case opcodes.OP_2DUP: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const v1 = stack.get(-2);
+            const v2 = stack.get(-1);
+
+            stack.push(v1);
+            stack.push(v2);
+            break;
+          }
+          case opcodes.OP_3DUP: {
+            if (stack.length < 3)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const v1 = stack.get(-3);
+            const v2 = stack.get(-2);
+            const v3 = stack.get(-1);
+
+            stack.push(v1);
+            stack.push(v2);
+            stack.push(v3);
+            break;
+          }
+          case opcodes.OP_2OVER: {
+            if (stack.length < 4)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const v1 = stack.get(-4);
+            const v2 = stack.get(-3);
+
+            stack.push(v1);
+            stack.push(v2);
+            break;
+          }
+          case opcodes.OP_2ROT: {
+            if (stack.length < 6)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const v1 = stack.get(-6);
+            const v2 = stack.get(-5);
+
+            stack.erase(-6, -4);
+            stack.push(v1);
+            stack.push(v2);
+            break;
+          }
+          case opcodes.OP_2SWAP: {
+            if (stack.length < 4)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.swap(-4, -2);
+            stack.swap(-3, -1);
+            break;
+          }
+          case opcodes.OP_IFDUP: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (stack.getBool(-1)) {
+              const val = stack.get(-1);
+              stack.push(val);
+            }
+
+            break;
+          }
+          case opcodes.OP_DEPTH: {
+            stack.pushInt(stack.length);
+            break;
+          }
+          case opcodes.OP_DROP: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.pop();
+            break;
+          }
+          case opcodes.OP_DUP: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(stack.get(-1));
+            break;
+          }
+          case opcodes.OP_NIP: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.remove(-2);
+            break;
+          }
+          case opcodes.OP_OVER: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(stack.get(-2));
+            break;
+          }
+          case opcodes.OP_PICK:
+          case opcodes.OP_ROLL: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const num = stack.getInt(-1, minimal, 4);
+            stack.pop();
+
+            if (num < 0 || num >= stack.length)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const val = stack.get(-num - 1);
+
+            if (op.value === opcodes.OP_ROLL)
+              stack.remove(-num - 1);
+
+            stack.push(val);
+            break;
+          }
+          case opcodes.OP_ROT: {
+            if (stack.length < 3)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.swap(-3, -2);
+            stack.swap(-2, -1);
+            break;
+          }
+          case opcodes.OP_SWAP: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.swap(-2, -1);
+            break;
+          }
+          case opcodes.OP_TUCK: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.insert(-2, stack.get(-1));
+            break;
+          }
+          case opcodes.OP_SIZE: {
+            if (stack.length < 1)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.pushInt(stack.get(-1).length);
+            break;
+          }
+          case opcodes.OP_EQUAL:
+          case opcodes.OP_EQUALVERIFY: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const v1 = stack.get(-2);
+            const v2 = stack.get(-1);
+
+            const res = v1.equals(v2);
+
+            stack.pop();
+            stack.pop();
+
+            stack.pushBool(res);
+
+            if (op.value === opcodes.OP_EQUALVERIFY) {
+              if (!res)
+                throw new ScriptError('EQUALVERIFY', op, ip);
+              stack.pop();
+            }
+
+            break;
+          }
+          case opcodes.OP_1ADD:
+          case opcodes.OP_1SUB:
+          case opcodes.OP_NEGATE:
+          case opcodes.OP_ABS:
+          case opcodes.OP_NOT:
+          case opcodes.OP_0NOTEQUAL: {
+            if (stack.length < 1)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            let num = stack.getNum(-1, minimal, 4);
+            let cmp;
+
+            switch (op.value) {
+              case opcodes.OP_1ADD:
+                num.iaddn(1);
+                break;
+              case opcodes.OP_1SUB:
+                num.isubn(1);
+                break;
+              case opcodes.OP_NEGATE:
+                num.ineg();
+                break;
+              case opcodes.OP_ABS:
+                num.iabs();
+                break;
+              case opcodes.OP_NOT:
+                cmp = num.isZero();
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_0NOTEQUAL:
+                cmp = !num.isZero();
+                num = ScriptNum.fromBool(cmp);
+                break;
+              default:
+                assert(false, 'Fatal script error.');
+                break;
+            }
+
+            stack.pop();
+            stack.pushNum(num);
+
+            break;
+          }
+          case opcodes.OP_ADD:
+          case opcodes.OP_SUB:
+          case opcodes.OP_BOOLAND:
+          case opcodes.OP_BOOLOR:
+          case opcodes.OP_NUMEQUAL:
+          case opcodes.OP_NUMEQUALVERIFY:
+          case opcodes.OP_NUMNOTEQUAL:
+          case opcodes.OP_LESSTHAN:
+          case opcodes.OP_GREATERTHAN:
+          case opcodes.OP_LESSTHANOREQUAL:
+          case opcodes.OP_GREATERTHANOREQUAL:
+          case opcodes.OP_MIN:
+          case opcodes.OP_MAX: {
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const n1 = stack.getNum(-2, minimal, 4);
+            const n2 = stack.getNum(-1, minimal, 4);
+            let num, cmp;
+
+            switch (op.value) {
+              case opcodes.OP_ADD:
+                num = n1.iadd(n2);
+                break;
+              case opcodes.OP_SUB:
+                num = n1.isub(n2);
+                break;
+              case opcodes.OP_BOOLAND:
+                cmp = n1.toBool() && n2.toBool();
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_BOOLOR:
+                cmp = n1.toBool() || n2.toBool();
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_NUMEQUAL:
+                cmp = n1.eq(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_NUMEQUALVERIFY:
+                cmp = n1.eq(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_NUMNOTEQUAL:
+                cmp = !n1.eq(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_LESSTHAN:
+                cmp = n1.lt(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_GREATERTHAN:
+                cmp = n1.gt(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_LESSTHANOREQUAL:
+                cmp = n1.lte(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_GREATERTHANOREQUAL:
+                cmp = n1.gte(n2);
+                num = ScriptNum.fromBool(cmp);
+                break;
+              case opcodes.OP_MIN:
+                num = ScriptNum.min(n1, n2);
+                break;
+              case opcodes.OP_MAX:
+                num = ScriptNum.max(n1, n2);
+                break;
+              default:
+                assert(false, 'Fatal script error.');
+                break;
+            }
+
+            stack.pop();
+            stack.pop();
+            stack.pushNum(num);
+
+            if (op.value === opcodes.OP_NUMEQUALVERIFY) {
+              if (!stack.getBool(-1))
+                throw new ScriptError('NUMEQUALVERIFY', op, ip);
+              stack.pop();
+            }
+
+            break;
+          }
+          case opcodes.OP_WITHIN: {
+            if (stack.length < 3)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const n1 = stack.getNum(-3, minimal, 4);
+            const n2 = stack.getNum(-2, minimal, 4);
+            const n3 = stack.getNum(-1, minimal, 4);
+
+            const val = n2.lte(n1) && n1.lt(n3);
+
+            stack.pop();
+            stack.pop();
+            stack.pop();
+
+            stack.pushBool(val);
+            break;
+          }
+          case opcodes.OP_RIPEMD160: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(digest.ripemd160(stack.pop()));
+            break;
+          }
+          case opcodes.OP_SHA1: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(digest.sha1(stack.pop()));
+            break;
+          }
+          case opcodes.OP_SHA256: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(digest.sha256(stack.pop()));
+            break;
+          }
+          case opcodes.OP_HASH160: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(digest.hash160(stack.pop()));
+            break;
+          }
+          case opcodes.OP_HASH256: {
+            if (stack.length === 0)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            stack.push(digest.hash256(stack.pop()));
+            break;
+          }
+          case opcodes.OP_CODESEPARATOR: {
+            lastSep = ip + 1;
+            break;
+          }
+          case opcodes.OP_CHECKSIG:
+          case opcodes.OP_CHECKSIGVERIFY: {
+            if (!tx)
+              throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
+
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const sig = stack.get(-2);
+            const key = stack.get(-1);
+
+            const subscript = this.getSubscript(lastSep);
+
+            if (version === 0)
+              subscript.findAndDelete(sig);
+
+            validateSignature(sig, flags);
+            validateKey(key, flags, version);
+
+            let res = false;
+
+            if (sig.length > 0) {
+              const type = sig[sig.length - 1];
+              const hash = tx.signatureHash(index, subscript, value, type, version);
+              res = checksig(hash, sig, key);
+            }
+
+            if (!res && (flags & Script.flags.VERIFY_NULLFAIL)) {
+              if (sig.length !== 0)
+                throw new ScriptError('NULLFAIL', op, ip);
+            }
+
+            stack.pop();
+            stack.pop();
+
+            stack.pushBool(res);
+
+            if (op.value === opcodes.OP_CHECKSIGVERIFY) {
+              if (!res)
+                throw new ScriptError('CHECKSIGVERIFY', op, ip);
+              stack.pop();
+            }
+
+            break;
+          }
+          case opcodes.OP_CHECKMULTISIG:
+          case opcodes.OP_CHECKMULTISIGVERIFY: {
+            if (!tx)
+              throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
+
+            let i = 1;
+            if (stack.length < i)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            let n = stack.getInt(-i, minimal, 4);
+            let okey = n + 2;
+            let ikey, isig;
+
+            if (n < 0 || n > consensus.MAX_MULTISIG_PUBKEYS)
+              throw new ScriptError('PUBKEY_COUNT', op, ip);
+
+            opCount += n;
+
+            if (opCount > consensus.MAX_SCRIPT_OPS)
+              throw new ScriptError('OP_COUNT', op, ip);
+
+            i += 1;
+            ikey = i;
+            i += n;
+
+            if (stack.length < i)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            let m = stack.getInt(-i, minimal, 4);
+
+            if (m < 0 || m > n)
+              throw new ScriptError('SIG_COUNT', op, ip);
+
+            i += 1;
+            isig = i;
+            i += m;
+
+            if (stack.length < i)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const subscript = this.getSubscript(lastSep);
+
+            for (let j = 0; j < m; j++) {
+              const sig = stack.get(-isig - j);
+              if (version === 0)
+                subscript.findAndDelete(sig);
+            }
+
+            let res = true;
+            while (res && m > 0) {
+              const sig = stack.get(-isig);
+              const key = stack.get(-ikey);
+
+              validateSignature(sig, flags);
+              validateKey(key, flags, version);
+
+              if (sig.length > 0) {
+                const type = sig[sig.length - 1];
+                const hash = tx.signatureHash(
+                  index,
+                  subscript,
+                  value,
+                  type,
+                  version
+                );
+
+                if (checksig(hash, sig, key)) {
+                  isig += 1;
+                  m -= 1;
+                }
+              }
+
+              ikey += 1;
+              n -= 1;
+
+              if (m > n)
+                res = false;
+            }
+
+            while (i > 1) {
+              if (!res && (flags & Script.flags.VERIFY_NULLFAIL)) {
+                if (okey === 0 && stack.get(-1).length !== 0)
+                  throw new ScriptError('NULLFAIL', op, ip);
+              }
+
+              if (okey > 0)
+                okey -= 1;
+
+              stack.pop();
+
+              i -= 1;
+            }
+
+            if (stack.length < 1)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (flags & Script.flags.VERIFY_NULLDUMMY) {
+              if (stack.get(-1).length !== 0)
+                throw new ScriptError('SIG_NULLDUMMY', op, ip);
+            }
+
+            stack.pop();
+
+            stack.pushBool(res);
+
+            if (op.value === opcodes.OP_CHECKMULTISIGVERIFY) {
+              if (!res)
+                throw new ScriptError('CHECKMULTISIGVERIFY', op, ip);
+              stack.pop();
+            }
+
+            break;
+          }
+          /*
+           *  CHECKFIBER
+           *
+           */
+          case opcodes.OP_CHECKFIBER: {
+            if (!tx)
+              throw new ScriptError('UNKNOWN_ERROR', 'No TX passed in.');
+
+            //if (stack.length < 2)
+            //  throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            //const sig = stack.get(-2);
+            //const key = stack.get(-1);
+
+            //const subscript = this.getSubscript(lastSep);
+
+            //if (version === 0)
+            //  subscript.findAndDelete(sig);
+
+            //validateSignature(sig, flags);
+            //validateKey(key, flags, version);
+
+            //let res = false;
+
+            //if (sig.length > 0) {
+            //  const type = sig[sig.length - 1];
+            //  const hash = tx.signatureHash(index, subscript, value, type, version);
+            //  res = checksig(hash, sig, key);
+            //}
+
+            //if (!res && (flags & Script.flags.VERIFY_NULLFAIL)) {
+            //  if (sig.length !== 0)
+            //    throw new ScriptError('NULLFAIL', op, ip);
+            //}
+
+            //stack.pop();
+            //stack.pop();
+
+            //stack.pushBool(res);
+
+            //if (op.value === opcodes.OP_CHECKSIGVERIFY) {
+            //  if (!res)
+            //    throw new ScriptError('CHECKSIGVERIFY', op, ip);
+            //  stack.pop();
+            //}
+
+            break;
+          }
+          case opcodes.OP_RFBAND: {
+            break;
+          }
+          case opcodes.OP_HASHSCHNORR: {
+
+            if (stack.length < 2)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (version !== 0) 
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const r = stack.get(-2);
+            const data = stack.get(-1);
+            const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
+
+            stack.pop();
+            stack.pop();
+
+            stack.pushString(hash);
+
+            break;
+          }
+          case opcodes.OP_HASHBLAKE: {
+
+            if (stack.length < 1)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (version !== 0) 
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const data = stack.get(-1);
+            const hash = hashes.blake2bb(data).toString("hex");
+
+            stack.pop();
+
+            stack.pushString(hash);
+
+            break;
+          }
+          case opcodes.OP_CHECKSIGFROMCHAIN: {
+
+            // Lookup the stackId and ensure it is valid
+            // TODO: Input data needs to be typed and validated
+
+            if (stack.length < 4)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (version !== 0) 
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const address = stack.get(-4);
+            const sig = stack.get(-3);
+            const data = stack.get(-2);
+
+            let chain = stack.get(-1);
+
+            if(Buffer.isBuffer(chain) === true){
+              chain = chain.toString();    
+            }
+
+            const fp = new Fingerprints(chain) 
+
+            if (!fp) 
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+						// TODO: Offload this so that while validating or synchronizing a Polyglot loads once
+            const poly = new Polyglot(fp.name);
+            const valid = poly[fp.name].validSignature(address, data, sig);
+
+            stack.pop();
+            stack.pop();
+            stack.pop();
+            stack.pop();
+
+            if(valid){
+              stack.pushInt(1);
+            } else {
+              stack.pushInt(0);
+            }
+
+            break;
+          }
+          case opcodes.OP_VERIFYSTACK: {
+
+						// A stackId is provided as an argument and validated in the transaction. 
+
+            if (stack.length < 4)
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            if (version !== 0) 
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+            const address = stack.get(-4);
+            const sig = stack.get(-3);
+            const data = stack.get(-2);
+
+            let chain = stack.get(-1);
+
+            if(Buffer.isBuffer(chain) === true){
+              chain = chain.toString();    
+            }
+
+            const fp = new Fingerprints(chain) 
+
+            if (!fp) 
+              throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
+
+						// TODO: Offload this so that while validating or synchronizing a Polyglot loads once
+            const poly = new Polyglot(fp.name);
+            const valid = poly[fp.name].validSignature(address, data, sig);
+
+            stack.pop();
+            stack.pop();
+            stack.pop();
+            stack.pop();
+
+            if(valid){
+              stack.pushInt(1);
+            } else {
+              stack.pushInt(0);
+            }
+
+            break;
+          }
+          default: {
+            throw new ScriptError('BAD_OPCODE', op, ip);
+          }
+        }
+
+        if (stack.length + alt.length > consensus.MAX_SCRIPT_STACK)
+          throw new ScriptError('STACK_SIZE', op, ip);
+
+        return next();
+
+      }
+
+    })();
+
+  }
+
+  const code = new Array().concat(this.code);
+
+  if (state.length !== 0) {
+    throw new ScriptError('UNBALANCED_CONDITIONAL');
+  } 
+
+  return new Promise(function(resolve, reject){
+
+    compile(code, function(err, data){
+        if(err) { reject(err); } else {
+          resolve(stack);
+        }
+    });
+
+  });
+
+}
 
 /**
  * Execute and interpret the script. MARK
@@ -1373,7 +2360,7 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
 
         const r = stack.get(-2);
         const data = stack.get(-1);
-        const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
+            const hash = schnorr.hash(data, new BN(Buffer(r))).toString("hex");
 
         stack.pop();
         stack.pop();
@@ -1391,50 +2378,11 @@ Script.prototype.execute = function execute(stack, flags, tx, index, value, vers
           throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
 
         const data = stack.get(-1);
-        const hash = hashes.blake2bb(data).toString("hex");
+            const hash = hashes.blake2bb(data).toString("hex");
 
         stack.pop();
 
         stack.pushString(hash);
-
-        break;
-      }
-      case opcodes.OP_CHECKSIGFROMCHAIN: {
-
-        // Lookup the stackId and ensure it is valid
-        if (stack.length < 4)
-          throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
-
-        if (version !== 0) 
-          throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
-
-        const address = stack.get(-4);
-        const sig = stack.get(-3);
-        const data = stack.get(-2);
-        let chain = stack.get(-1);
-
-        if(Buffer.isBuffer(chain) === true){
-          chain = chain.toString();    
-        }
-
-        const fp = new Fingerprints(chain) 
-
-        if (!fp) 
-          throw new ScriptError('INVALID_STACK_OPERATION', op, ip);
-
-        const poly = new Polyglot(fp.name);
-        const valid = poly[fp.name].validSignature(address, data, sig);
-
-        stack.pop();
-        stack.pop();
-        stack.pop();
-        stack.pop();
-
-        if(valid){
-          stack.pushInt(1);
-        } else {
-          stack.pushInt(0);
-        }
 
         break;
       }
@@ -2765,7 +3713,11 @@ Script.prototype.setOp = function setOp(index, value) {
 };
 
 Script.prototype.pushOp = function pushOp(value) {
-  return this.push(Opcode.fromOp(value));
+  if(typeof value !== 'number'){
+    return this.push(Opcode.fromSymbol(value));
+  } else {
+    return this.push(Opcode.fromOp(value));
+  }
 };
 
 Script.prototype.unshiftOp = function unshiftOp(value) {

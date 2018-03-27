@@ -18,7 +18,8 @@ const Outpoint = require('./stackoutpoint');
 const encoding = require('../utils/encoding');
 const consensus = require('../protocol/consensus');
 const policy = require('../protocol/policy');
-const Amount = require('../utils/amount');
+const Converter = require('../utils/converter');
+const Amount = Converter.nrg; 
 
 /**
  * A mutable transaction object.
@@ -62,6 +63,11 @@ Object.setPrototypeOf(Stack.prototype, AbstractStack.prototype);
  */
 
 Stack.prototype.fromOptions = function fromOptions(options) {
+
+  if (options.parentHash != null) {
+    this.parentHash = options.parentHash; 
+  }
+
   if (options.version != null) {
     assert(util.isU32(options.version), 'Version must a be uint32.');
     this.version = options.version;
@@ -215,6 +221,8 @@ Stack.prototype.addOutput = function addOutput(script, value) {
     output = Output.fromScript(script, value);
   } else if(script instanceof Script){
     output = Output.fromOptions(script);
+  } else if(!(script instanceof Output)){
+    output = new Output(script);
   } else {
     output = script;
   }
@@ -1549,6 +1557,7 @@ function CoinSelector(tx, options) {
 }
 
 /**
+ * TODO: Update this to reflect different types
  * Default fee rate
  * for coin selection.
  * @const {Amount}
@@ -1904,8 +1913,8 @@ function FundingError(msg, available, required) {
   this.requiredFunds = -1;
 
   if (available != null) {
-    this.message += ` (available=${Amount.btc(available)},`;
-    this.message += ` required=${Amount.btc(required)})`;
+    this.message += ` (available=${Amount.nrg(available)},`;
+    this.message += ` required=${Amount.nrg(required)})`;
     this.availableFunds = available;
     this.requiredFunds = required;
   }

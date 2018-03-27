@@ -20,8 +20,9 @@ const Outpoint = require('./outpoint')
 const encoding = require('../utils/encoding')
 const consensus = require('../protocol/consensus')
 const policy = require('../protocol/policy')
-const Amount = require('../utils/amount')
+const Converter = require('../utils/converter')
 const Stack = require('../script/stack')
+const Amount = Converter.nrg; 
 
 /**
  * A mutable transaction object.
@@ -416,6 +417,7 @@ MTX.prototype.checkInputs = function checkInputs (height) {
 }
 
 /**
+ * TODO: Remove this  
  * Build input script (or witness) templates (with
  * OP_0 in place of signatures).
  * @param {Number} index - Input index.
@@ -1843,8 +1845,8 @@ function FundingError (msg, available, required) {
   this.requiredFunds = -1
 
   if (available != null) {
-    this.message += ` (available=${Amount.btc(available)},`
-    this.message += ` required=${Amount.btc(required)})`
+    this.message += ` (available=${Amount(available).toNRG()},`
+    this.message += ` required=${Amount(required).toNRG()})`
     this.availableFunds = available
     this.requiredFunds = required
   }
