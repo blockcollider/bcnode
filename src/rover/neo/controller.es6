@@ -1,0 +1,157 @@
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+import type { Logger } from 'winston'
+const profiles = require('@cityofzion/neo-js/dist/common/profiles')
+const NeoMesh = require('@cityofzion/neo-js/dist/node/mesh')
+const NeoNode = require('@cityofzion/neo-js/dist/node/node')
+const { inspect } = require('util')
+const LRUCache = require('lru-cache')
+
+const { Block } = require('../../protos/core_pb')
+const logging = require('../../logger')
+const { RpcClient } = require('../../rpc')
+
+type NeoBlock = { // eslint-disable-line no-undef
+  hash: string,
+  size: number,
+  version: number,
+  previousblockhash: string,
+  merkleroot: string,
+  time: number,
+  index: number,
+  nonce: string,
+  nextconsensus: string,
+  script: {
+    invocation: string,
+    verification: string,
+  },
+  tx: [{
+    txid: string,
+    size: number,
+    type: string,
+    version: number,
+    attributes: any[],
+    vin: any[],
+    vout: any[],
+    sys_fee: number,
+    net_fee: number,
+    scripts: any[],
+    nonce: number
+  }],
+  confirmations: number,
+  nextblockhash: string
+}
+
+const _createUnifiedBlock = (block: NeoBlock): Block => {
+  const obj = {}
+
+  obj.blockNumber = block.index
+  obj.prevHash = block.previousblockhash
+  obj.blockHash = block.hash
+  obj.root = block.merkleroot
+  obj.size = block.size
+  obj.nonce = block.nonce
+  obj.nextConsensus = block.nextconsensus
+  obj.timestamp = block.time
+  obj.version = block.version
+  obj.transactions = block.tx.reduce(function (all, t) {
+    const tx = {
+      txHash: t.txid,
+      // inputs: t.inputs,
+      // outputs: t.outputs,
+      marked: false
+    }
+    all.push(tx)
+    return all
+  }, [])
+
+  // return obj
+
+  const msg = new Block()
+  msg.setBlockchain('neo')
+  msg.setHash(obj.blockHash)
+
+  return msg
+}
+
+/**
+ * NEO Controller
+ */
+export default class Controller {
+  /* eslint-disable no-undef */
+  _blockCache: LRUCache;
+  _rpc: RpcClient;
+  _logger: Logger;
+  _config: Object;
+  _neoMesh: Object;
+  _intervalDescriptor: IntervalID;
+  /* eslint-enable */
+
+  constructor (config: Object) {
+    this._config = config
+    this._logger = logging.getLogger(__filename)
+    this._blockCache = new LRUCache({
+      max: 500,
+      maxAge: 1000 * 60 * 60
+    })
+    this._neoMesh = new NeoMesh(profiles.rpc.mainnet.endpoints.map(endpoint => {
+      return new NeoNode({
+        domain: endpoint.domain,
+        port: endpoint.port
+      })
+    }))
+    this._rpc = new RpcClient()
+  }
+
+  init () {
+    this._logger.debug('initialized')
+
+    const cycle = () => {
+      this._logger.info('trying to get new block')
+      // maybe better getRandomNode?
+      const node = this._neoMesh.getNodeWithBlock(-1, 'latency', false)
+
+      return node.rpc.getBestBlockHash().then(bestBlockHash => {
+        this._logger.debug(`got best block: "${bestBlockHash}"`)
+        if (!this._blockCache.has(bestBlockHash)) {
+          this._blockCache.set(bestBlockHash, true)
+          this._logger.debug(`unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
+
+          node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
+            this._logger.debug(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
+
+            const unifiedBlock = _createUnifiedBlock(lastBlock)
+            this._logger.debug(`created unified block: ${inspect(unifiedBlock, {depth: 0})}`)
+
+            this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
+              if (err) {
+                this._logger.error(`Error while collecting block ${inspect(err)}`)
+                return
+              }
+              this._logger.debug(`Collector Response ${inspect(response)}`)
+            })
+          })
+        }
+      }).catch(e => {
+        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+      })
+    }
+
+    this._logger.debug('tick')
+    this._intervalDescriptor = setInterval(() => {
+      cycle().then(() => {
+        this._logger.debug('tick')
+      })
+    }, 2000)
+  }
+
+  close () {
+    this._intervalDescriptor && clearInterval(this._intervalDescriptor)
+  }
+}
