@@ -99,13 +99,13 @@ export default class Network {
       .then((port) => {
         this.run(port)
       })
-      .catch((err) => {
+      .catch(() => {
         this._logger.error('unable to find local network interface to listen on')
         process.exit(3)
-      });
+      })
   }
 
-  handleMessage(rlpx: Object, code: string, payload: Buffer) {
+  handleMessage (rlpx: Object, code: string, payload: Buffer) {
     console.log('message.code', code)
     // console.log('message.payload', payload)
 
