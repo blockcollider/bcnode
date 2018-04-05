@@ -91,8 +91,8 @@ const _createUnifiedBlock = (block): Block => {
  */
 export default class Controller {
   /* eslint-disable no-undef */
-  _blockCache: LRUCache;
-  _otherCache: LRUCache;
+  _blockCache: LRUCache<string, bool>;
+  _otherCache: LRUCache<string, bool>;
   _rpc: RpcClient;
   _logger: Logger;
   _intervalDescriptor: IntervalID;
@@ -107,7 +107,7 @@ export default class Controller {
       max: 500,
       maxAge: 1000 * 60 * 60
     })
-    this._otherCache = new LRUCache(50)
+    this._otherCache = new LRUCache({ max: 50 })
     this._liskApi = lisk.api(config.rovers.lsk)
     this._rpc = new RpcClient()
   }

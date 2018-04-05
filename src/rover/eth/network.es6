@@ -51,8 +51,8 @@ export default class Network {
   _minimumPeers: number; // eslint-disable-line no-undef
   _peers: string[]; // eslint-disable-line no-undef
   _rlpx: ?devp2p.RLPx; // eslint-disable-line no-undef
-  _txCache: LRUCache; // eslint-disable-line no-undef
-  _blocksCache: LRUCache; // eslint-disable-line no-undef
+  _txCache: LRUCache<string, boolean>; // eslint-disable-line no-undef
+  _blocksCache: LRUCache<string, boolean>; // eslint-disable-line no-undef
 
   constructor () {
     this._logger = logging.getLogger(__filename)
@@ -62,7 +62,6 @@ export default class Network {
     this._key = getPrivateKey()
     this._txCache = new LRUCache({ max: 2000 })
     this._blocksCache = new LRUCache({ max: 118 })
-
   }
 
   get peers (): string[] {

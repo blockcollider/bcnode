@@ -54,7 +54,7 @@ export async function main (args: string[]) {
     return -1
   }
 
-  const { rovers, rpc, ui, ws } = program
+  const { rovers, rpc, ui, ws } = program.opts()
 
   process.on('SIGINT', () => {
     console.log('Gracefully shutting down from  SIGINT (Ctrl-C)')
