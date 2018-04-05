@@ -2,6 +2,7 @@ const path = require('path')
 
 const bodyParser = require('body-parser')
 const express = require('express')
+const expressWinston = require('express-winston')
 const responseTime = require('response-time')
 const serveIndex = require('serve-index')
 const socketIo = require('socket.io')
@@ -11,7 +12,7 @@ const config = require('../../config/config')
 const { Null } = require('../protos/core_pb')
 const { RpcClient } = require('../rpc')
 
-const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
+const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'apps')
 
 // See http://www.programwitherik.com/getting-started-with-socket-io-node-js-and-express/
 export default class Server {
@@ -51,6 +52,7 @@ export default class Server {
 
     // Create express app instance
     this._app = express()
+    this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
     this._app.use(responseTime())
     this._app.use(bodyParser.json())
 
@@ -60,7 +62,7 @@ export default class Server {
       help: Null
     }
 
-    this._app.use(jsonRpcMiddleware(mapping))
+    this._app.use('/rpc', jsonRpcMiddleware(mapping))
 
     // Create http server
     const server = (this._server = require('http').Server(this.app))
