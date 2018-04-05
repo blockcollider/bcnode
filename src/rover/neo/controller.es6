@@ -85,7 +85,7 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
  */
 export default class Controller {
   /* eslint-disable no-undef */
-  _blockCache: LRUCache;
+  _blockCache: LRUCache<string, bool>;
   _rpc: RpcClient;
   _logger: Logger;
   _config: Object;
