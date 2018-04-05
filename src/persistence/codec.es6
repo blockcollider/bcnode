@@ -17,7 +17,7 @@ const _getBCConstructorName = (type: string) => BC_MESSAGE_TYPE_REGEX.exec(type)
 const DB_VALUES_VERSION = 1
 
 const BC_MESSAGES_MAP = {
-  'proto.bc.Block': Block
+  'Block': Block
 }
 
 /**
