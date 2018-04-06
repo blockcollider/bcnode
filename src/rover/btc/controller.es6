@@ -55,12 +55,12 @@ export default class Controller {
       pool.disconnect().connect()
     }, NETWORK_TIMEOUT)
 
-    process.on('disconnect', function () {
+    process.on('disconnect', () => {
       this._logger.info('parent exited')
       process.exit()
     })
 
-    process.on('uncaughtError', function (e) {
+    process.on('uncaughtError', (e) => {
       this._logger.error('Uncaught error', e)
       process.exit(3)
     })

@@ -119,9 +119,20 @@ export default class Controller {
   }
 
   init () {
-    this._logger.info('Trying to get new block')
+    this._logger.info('initialized')
+
+    process.on('disconnect', () => {
+      this._logger.info('parent exited')
+      process.exit()
+    })
+
+    process.on('uncaughtError', (e) => {
+      this._logger.error('Uncaught error', e)
+      process.exit(3)
+    })
 
     const cycle = () => {
+      this._logger.debug('Trying to get new block')
       return getLastHeight(this._wavesApi).then(height => {
         this._logger.debug(`Got last height '${height}'`)
         getBlock(this._wavesApi, height).then(lastBlock => {

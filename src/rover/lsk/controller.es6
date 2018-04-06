@@ -115,6 +115,16 @@ export default class Controller {
   init () {
     this._logger.debug('initialized')
 
+    process.on('disconnect', () => {
+      this._logger.info('parent exited')
+      process.exit()
+    })
+
+    process.on('uncaughtError', (e) => {
+      this._logger.error('Uncaught error', e)
+      process.exit(3)
+    })
+
     const cycle = () => {
       this._logger.info('trying to get new block')
 
