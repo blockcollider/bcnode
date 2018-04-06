@@ -9,6 +9,7 @@
 
 const config = require('../../config/config')
 const logging = require('../logger')
+const { Node } = require('../p2p')
 const RoverManager = require('../rover/manager').default
 const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
@@ -17,6 +18,7 @@ const { RpcServer } = require('../rpc/index')
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
+  _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _rovers: RoverManager; // eslint-disable-line no-undef
   _rpc: RpcServer; // eslint-disable-line no-undef
@@ -24,6 +26,7 @@ export default class Engine {
 
   constructor (logger: Object) {
     this._logger = logging.getLogger(__filename)
+    this._node = new Node(this)
     this._persistence = new PersistenceRocksDb(config.persistence.path)
     this._rovers = new RoverManager()
     this._rpc = new RpcServer(this)
@@ -44,6 +47,14 @@ export default class Engine {
       .then(() => this.persistence.put('rovers', roverNames))
 
     this._logger.info('Engine initialized')
+  }
+
+  /**
+   * Get node
+   * @return {Node}
+   */
+  get node (): Node {
+    return this._node
   }
 
   /**
@@ -76,6 +87,16 @@ export default class Engine {
    */
   get server (): Server {
     return this._server
+  }
+
+  /**
+   * Start Server
+   *
+   * @param opts Options to start server with
+   */
+  startNode () {
+    this._logger.info('Starting P2P node')
+    this.node.start()
   }
 
   /**

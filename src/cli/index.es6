@@ -25,7 +25,8 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 export async function main (args: string[]) {
   program
     .version(pkg.version)
-    .option('--rovers [items]', 'start Rover', ROVERS.join(', '))
+    .option('-n, --node', 'Start P2P node')
+    .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')
     .option('--rpc', 'enable RPC')
     .option('--ui', 'enable Web UI')
@@ -47,7 +48,7 @@ export async function main (args: string[]) {
     return -1
   }
 
-  const { rovers, rpc, ui, ws } = program
+  const { node, rovers, rpc, ui, ws } = program
 
   process.on('SIGINT', () => {
     console.log('Gracefully shutting down from  SIGINT (Ctrl-C)')
@@ -57,6 +58,10 @@ export async function main (args: string[]) {
     // wish this worked on Windows
     process.exit()
   })
+
+  if (node) {
+    engine.startNode()
+  }
 
   // Should the Rover be started?
   if (rovers) {
