@@ -5604,9 +5604,9 @@ var App = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
-      var blocks = (0, _ramda.take)(20, this.state.blocks).sort(function (a, b) {
+      var blocks = (0, _ramda.take)(20, this.state.blocks.sort(function (a, b) {
         return b.timestamp - a.timestamp;
-      }).map(function (block) {
+      })).map(function (block) {
         return _react2.default.createElement(_Block2.default, _extends({}, block, { key: block.data.hash }));
       });
       return _react2.default.createElement(
@@ -32982,8 +32982,8 @@ exports.default = function (_ref) {
 
   return _react2.default.createElement(
     'div',
-    { className: 'card', style: { width: '9rem', margin: '0.4em' } },
-    _react2.default.createElement('img', { className: 'card-img-top', style: { width: '6rem', height: '6rem', margin: '0.6em' }, src: getBlockIcon(blockchain), alt: blockchain }),
+    { className: 'card', style: { width: '9rem' } },
+    _react2.default.createElement('img', { className: 'card-img-top', style: { width: '6rem', height: '6rem', marginTop: '0.6em' }, src: getBlockIcon(blockchain), alt: blockchain }),
     _react2.default.createElement(
       'div',
       { className: 'card-body' },

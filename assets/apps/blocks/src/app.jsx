@@ -35,7 +35,7 @@ export default class App extends Component<*, State> {
   }
 
   render () {
-    const blocks = take(20, this.state.blocks).sort((a, b) => b.timestamp - a.timestamp).map(block => {
+    const blocks = take(20, this.state.blocks.sort((a, b) => b.timestamp - a.timestamp)).map(block => {
       return <Block {...block} key={block.data.hash} />
     })
     return (
