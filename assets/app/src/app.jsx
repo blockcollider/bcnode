@@ -27,14 +27,14 @@ export default class App extends Component<*, State> {
   _run () {
     this._socket = new WebSocket(`ws://${location.hostname}:${location.port}/ws`) // eslint-disable-line
     this._socket.onopen = () => {
-      this.setState(merge(this.state, { connected: true }))
+      this.setState(merge(this.state, { connected: true, blocks: [] }))
     }
     this._socket.onmessage = (data) => {
       // $FlowFixMe
       this.setState(merge(this.state, { blocks: concat(this.state.blocks, [JSON.parse(data.data)]) }))
     }
     this._socket.onclose = () => {
-      this.setState(merge(this.state, { connected: false, blocks: [] }))
+      this.setState(merge(this.state, { connected: false }))
       window.setTimeout(this._run.bind(this), 1000)
     }
   }

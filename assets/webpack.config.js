@@ -2,10 +2,10 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  entry: './apps/blocks/src/app.jsx',
+  entry: './app/src/app.jsx',
 
   output: {
-    path: path.resolve(__dirname, 'apps', 'blocks', 'js'),
+    path: path.resolve(__dirname, 'dist', 'js'),
     filename: 'app-blocks.bundle.js'
   },
 

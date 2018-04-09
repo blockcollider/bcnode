@@ -24,7 +24,7 @@ const config = require('../../config/config')
 const { Null } = require('../protos/core_pb')
 const { RpcClient, RpcServer } = require('../rpc')
 
-const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'apps')
+const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'dist')
 
 type Opts = {|
   ws: bool,

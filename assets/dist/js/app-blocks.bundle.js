@@ -5593,14 +5593,14 @@ var App = function (_Component) {
 
       this._socket = new WebSocket('ws://' + location.hostname + ':' + location.port + '/ws'); // eslint-disable-line
       this._socket.onopen = function () {
-        _this2.setState((0, _ramda.merge)(_this2.state, { connected: true }));
+        _this2.setState((0, _ramda.merge)(_this2.state, { connected: true, blocks: [] }));
       };
       this._socket.onmessage = function (data) {
         // $FlowFixMe
         _this2.setState((0, _ramda.merge)(_this2.state, { blocks: (0, _ramda.concat)(_this2.state.blocks, [JSON.parse(data.data)]) }));
       };
       this._socket.onclose = function () {
-        _this2.setState((0, _ramda.merge)(_this2.state, { connected: false, blocks: [] }));
+        _this2.setState((0, _ramda.merge)(_this2.state, { connected: false }));
         window.setTimeout(_this2._run.bind(_this2), 1000);
       };
     }

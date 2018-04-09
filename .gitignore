@@ -85,6 +85,7 @@ typings/
 
 # Generated files
 dist/
+!assets/dist/
 
 # Block Collider specific data directories
 data
