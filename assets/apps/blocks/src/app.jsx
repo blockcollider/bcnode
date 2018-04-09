@@ -8,26 +8,39 @@
  */
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
-import { concat, take } from 'ramda'
+import { merge, concat, take } from 'ramda'
 
 import Block from './Block.jsx'
 
 type State = {
-  blocks: Object[]
+  blocks: Object[],
+  connected: bool
 }
 export default class App extends Component<*, State> {
   _socket: any
 
   constructor () {
     super()
-    this.state = { blocks: [] }
+    this.state = { blocks: [], connected: false }
+  }
+
+  _run () {
     this._socket = new WebSocket(`ws://${location.hostname}:${location.port}/ws`) // eslint-disable-line
+    this._socket.onopen = () => {
+      this.setState(merge(this.state, { connected: true }))
+    }
+    this._socket.onmessage = (data) => {
+      // $FlowFixMe
+      this.setState(merge(this.state, { blocks: concat(this.state.blocks, [JSON.parse(data.data)]) }))
+    }
+    this._socket.onclose = () => {
+      this.setState(merge(this.state, { connected: false, blocks: [] }))
+      window.setTimeout(this._run.bind(this), 1000)
+    }
   }
 
   componentDidMount () {
-    this._socket.onmessage = (data) => {
-      this.setState({ blocks: concat(this.state.blocks, [JSON.parse(data.data)]) })
-    }
+    this._run()
   }
 
   componentWillUnmount () {
@@ -42,14 +55,25 @@ export default class App extends Component<*, State> {
       <div className='container'>
         <h1>Blockcollider</h1>
         <div className='container'>
-          <h2>Collected blocks (last 20)</h2>
+          <h2>Collected blocks (last 20) <ConnectionState connected={this.state.connected} /></h2>
           <div className='d-flex flex-wrap flex-row'>
-            {blocks}
+            {this.state.connected &&
+              blocks}
+            {!this.state.connected &&
+              <div>Disconnected</div>}
           </div>
         </div>
       </div>
     )
   }
+}
+
+const ConnectionState = ({ connected }) => {
+  const statusClass = connected ? 'badge-success' : 'badge-warning'
+
+  return (
+    <span className={`badge ${statusClass}`}>{connected ? 'CONNECTED' : 'DICONNECTED'}</span>
+  )
 }
 
 const appEl = document.getElementById('app')

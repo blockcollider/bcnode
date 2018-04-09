@@ -5582,19 +5582,32 @@ var App = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
-    _this.state = { blocks: [] };
-    _this._socket = new WebSocket('ws://' + location.hostname + ':' + location.port + '/ws'); // eslint-disable-line
+    _this.state = { blocks: [], connected: false };
     return _this;
   }
 
   _createClass(App, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
+    key: '_run',
+    value: function _run() {
       var _this2 = this;
 
-      this._socket.onmessage = function (data) {
-        _this2.setState({ blocks: (0, _ramda.concat)(_this2.state.blocks, [JSON.parse(data.data)]) });
+      this._socket = new WebSocket('ws://' + location.hostname + ':' + location.port + '/ws'); // eslint-disable-line
+      this._socket.onopen = function () {
+        _this2.setState((0, _ramda.merge)(_this2.state, { connected: true }));
       };
+      this._socket.onmessage = function (data) {
+        // $FlowFixMe
+        _this2.setState((0, _ramda.merge)(_this2.state, { blocks: (0, _ramda.concat)(_this2.state.blocks, [JSON.parse(data.data)]) }));
+      };
+      this._socket.onclose = function () {
+        _this2.setState((0, _ramda.merge)(_this2.state, { connected: false, blocks: [] }));
+        window.setTimeout(_this2._run.bind(_this2), 1000);
+      };
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this._run();
     }
   }, {
     key: 'componentWillUnmount',
@@ -5623,12 +5636,18 @@ var App = function (_Component) {
           _react2.default.createElement(
             'h2',
             null,
-            'Collected blocks (last 20)'
+            'Collected blocks (last 20) ',
+            _react2.default.createElement(ConnectionState, { connected: this.state.connected })
           ),
           _react2.default.createElement(
             'div',
             { className: 'd-flex flex-wrap flex-row' },
-            blocks
+            this.state.connected && blocks,
+            !this.state.connected && _react2.default.createElement(
+              'div',
+              null,
+              'Disconnected'
+            )
           )
         )
       );
@@ -5640,6 +5659,18 @@ var App = function (_Component) {
 
 exports.default = App;
 
+
+var ConnectionState = function ConnectionState(_ref) {
+  var connected = _ref.connected;
+
+  var statusClass = connected ? 'badge-success' : 'badge-warning';
+
+  return _react2.default.createElement(
+    'span',
+    { className: 'badge ' + statusClass },
+    connected ? 'CONNECTED' : 'DICONNECTED'
+  );
+};
 
 var appEl = document.getElementById('app');
 if (appEl) {
