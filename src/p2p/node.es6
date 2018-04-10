@@ -130,7 +130,11 @@ export default class Node {
 
       node.on('peer:discovery', (peer) => {
         this._logger.info(`Discovered: ${peer.id.toB58String()}`)
-        node.dial(peer, () => {})
+        node.dial(peer, (err) => {
+          if (err) {
+            this._logger.warn(`Error while dialing discovered peer ${peer.id.toB58String()}`)
+          }
+        })
       })
 
       node.on('peer:connect', (peer) => {
