@@ -27,7 +27,7 @@ export default class Engine {
     this._persistence = new PersistenceRocksDb(config.persistence.path)
     this._rovers = new RoverManager()
     this._rpc = new RpcServer(this)
-    this._server = new Server()
+    this._server = new Server(this._rpc)
   }
 
   /**

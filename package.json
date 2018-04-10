@@ -116,6 +116,7 @@
     "ethereumjs-vm": "^2.3.3",
     "ethjs-provider-http": "^0.1.6",
     "express": "^4.16.2",
+    "express-winston": "2.5.0",
     "fs-extra": "^5.0.0",
     "gauge": "^2.7.4",
     "getos": "^3.1.0",
