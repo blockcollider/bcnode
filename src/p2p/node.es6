@@ -82,6 +82,7 @@ export default class Node {
         peerInfo.multiaddrs.add(config.p2p.rendezvous)
 
         node = new Bundle(peerInfo)
+        this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
         node.start(cb)
 
         node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
