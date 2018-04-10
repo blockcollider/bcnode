@@ -14,6 +14,7 @@ const SECIO = require('libp2p-secio')
 const WStar = require('libp2p-webrtc-star')
 const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
+const pull = require('pull-stream')
 
 const logging = require('../logger')
 
@@ -62,6 +63,14 @@ export default class Node {
 
         node = new Bundle(peerInfo)
         node.start(cb)
+
+        node.handle('/bc', (protocol, conn) => {
+          pull(
+            conn,
+            pull.map((v) => v.toString()),
+            pull.log()
+          )
+        })
       }
     ], (err) => {
       if (err) {
@@ -71,13 +80,19 @@ export default class Node {
 
       node.on('peer:discovery', (peer) => {
         console.log('Discovered:', peer.id.toB58String())
+
         node.dial(peer, () => {
-          // peer.sendMessage('aaa')
+
         })
       })
 
       node.on('peer:connect', (peer) => {
         console.log('Connection established:', peer.id.toB58String())
+
+        node.dialProtocol(peer, '/bc', (err, conn) => {
+          if (err) { throw err }
+          pull(pull.values(['my own protocol, wow!']), conn)
+        })
       })
 
       node.on('peer:disconnect', (peer) => {
