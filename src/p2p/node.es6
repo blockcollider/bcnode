@@ -15,6 +15,7 @@ const WStar = require('libp2p-webrtc-star')
 const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
+const PeerId = require('peer-id')
 
 const logging = require('../logger')
 
@@ -80,28 +81,22 @@ export default class Node {
           pull(
             conn,
             pull.collect((err, wireData) => {
-              let remoteProtocolVersion
               if (err) {
                 this._logger.warn('Error while processing status')
                 return
               }
               try {
                 const data = JSON.parse(wireData.toString())
-                remoteProtocolVersion = data.protocolVersion
-                if (remoteProtocolVersion !== PROTOCOL_VERSION) {
-                  throw new Error(`Protocol mismatch`)
+                const { protocolVersion, peerId } = data
+                if (protocolVersion !== PROTOCOL_VERSION) {
+                  this._logger.warn(`Disconnecting peer ${peerId} - protocol mismatch ${protocolVersion} / ${PROTOCOL_VERSION}`)
+                  node.hangUp(new PeerId(peerId), () => {
+                    this._logger.info(`${peerId} disconnected`)
+                  })
                 }
               } catch (e) {
-                conn.getPeerInfo((err, peer) => {
-                  if (err) {
-                    this._logger.error('Error while getting peerInfo when disconnecting after protocol mismatch')
-                    return
-                  }
-                  this._logger.warn(`Disconnecting peer ${peer.id.toB58String()} - protocol mismatch ${remoteProtocolVersion} / ${PROTOCOL_VERSION}`)
-                  node.hangUp(peer, () => {
-                    this._logger.info(`${peer.id.toB58String()} disconnected`)
-                  })
-                })
+                this._logger.error('Error while parsing data')
+                return
               }
               this._logger.info('Status handled successfuly')
             })
@@ -132,7 +127,9 @@ export default class Node {
               console.log(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
             })
           }
-          pull(pull.values([JSON.stringify(this._statusMsg)]), conn)
+          const msg = this._statusMsg
+          msg.peerId = peer.id.toB58String()
+          pull(pull.values([JSON.stringify(msg)]), conn)
         })
       })
 
