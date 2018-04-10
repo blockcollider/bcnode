@@ -14,9 +14,9 @@ describe('Node', () => {
     expect(new Node()).toBeInstanceOf(Node)
   })
 
-  it('can start', () => {
-    const node = new Node()
-    const res = node.start()
-    expect(res).toEqual(true)
-  })
+  // it('can start', () => {
+  //   const node = new Node()
+  //   const res = node.start()
+  //   expect(res).toEqual(true)
+  // })
 })
