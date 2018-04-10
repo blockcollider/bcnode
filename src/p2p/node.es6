@@ -63,7 +63,7 @@ export default class Node {
     waterfall([
       (cb) => PeerInfo.create(cb),
       (peerInfo, cb) => {
-        peerInfo.multiaddrs.add('/dns4/46.101.138.77/tcp/9090/ws/p2p-webrtc-star/')
+        peerInfo.multiaddrs.add('/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star/')
 
         node = new Bundle(peerInfo)
         node.start(cb)
