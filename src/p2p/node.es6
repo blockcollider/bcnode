@@ -114,9 +114,7 @@ export default class Node {
       node.on('peer:discovery', (peer) => {
         console.log('Discovered:', peer.id.toB58String())
 
-        node.dial(peer, () => {
-
-        })
+        node.dial(peer, () => {})
       })
 
       node.on('peer:connect', (peer) => {
