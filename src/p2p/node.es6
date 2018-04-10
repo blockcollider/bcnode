@@ -92,9 +92,12 @@ export default class Node {
                 conn.getPeerInfo((err, peer) => {
                   if (err) {
                     this._logger.error('Error while getting peerInfo when disconnecting after protocol mismatch')
+                    return
                   }
                   this._logger.warn(`Disconnecting peer ${peer.id.toB58String()} - protocol mismatch ${remoteProtocolVersion} / ${PROTOCOL_VERSION}`)
-                  node.hangUp(peer)
+                  node.hangUp(peer, () => {
+                    this._logger.info(`${peer.id.toB58String()} disconnected`)
+                  })
                 })
               }
             }
