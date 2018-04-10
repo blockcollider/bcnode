@@ -5,8 +5,8 @@ After=network.target
 [Service]
 User=ubuntu
 Group=ubuntu
-WorkingDirectory=/home/ubuntu/dev/js-libp2p-webrtc-star
-ExecStart=/home/ubuntu/.nvm/versions/node/v9.11.1/bin/node ./node_modules/.bin/star-signal --port=9090" --host=0.0.0.0
+WorkingDirectory=/home/ubuntu/
+ExecStart=/home/ubuntu/.nvm/versions/node/v9.11.1/bin/node /home/ubuntu/.nvm/versions/node/v9.11.1/bin/star-signal --port=9090 --host=0.0.0.0
 Restart=always
 RestartSec=5
 StandardOutput=syslog
