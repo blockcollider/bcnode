@@ -79,11 +79,14 @@ export default class Node {
         node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
           pull(
             conn,
-            pull.map(v => v.toString()),
-            (wireData) => {
+            pull.collect((err, wireData) => {
               let remoteProtocolVersion
+              if (err) {
+                this._logger.warn('Error while processing status')
+                return
+              }
               try {
-                const data = JSON.parse(wireData)
+                const data = JSON.parse(wireData.toString())
                 remoteProtocolVersion = data.protocolVersion
                 if (remoteProtocolVersion !== PROTOCOL_VERSION) {
                   throw new Error(`Protocol mismatch`)
@@ -100,7 +103,7 @@ export default class Node {
                   })
                 })
               }
-            }
+            })
           )
         })
       }
