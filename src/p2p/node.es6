@@ -7,46 +7,15 @@
  * @flow
  */
 
-const wrtc = require('wrtc')
-const libp2p = require('libp2p')
-const Mplex = require('libp2p-mplex')
-const SECIO = require('libp2p-secio')
-const WStar = require('libp2p-webrtc-star')
+const PeerId = require('peer-id')
 const PeerInfo = require('peer-info')
+const PeerBook = require('peer-book')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
-const PeerId = require('peer-id')
-const PeerBook = require('peer-book')
 
 const logging = require('../logger')
 const config = require('../../config/config')
-
-class Bundle extends libp2p {
-  constructor (peerInfo) {
-    const ws = new WStar({
-      wrtc: wrtc
-    })
-
-    const modules = {
-      transport: [
-        ws
-      ],
-      connection: {
-        muxer: [
-          Mplex
-        ],
-        crypto: [
-          SECIO
-        ]
-      },
-      discovery: [
-        ws.discovery
-      ]
-    }
-
-    super(modules, peerInfo)
-  }
-}
+const Bundle = require('./bundle').default
 
 const PROTOCOL_VERSION = '0.0.1'
 const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
@@ -76,7 +45,7 @@ export default class Node {
   start () {
     let node: Bundle
 
-    waterfall([
+    const pipeline = [
       (cb) => PeerInfo.create(cb),
       (peerInfo, cb) => {
         peerInfo.multiaddrs.add(config.p2p.rendezvous)
@@ -85,83 +54,100 @@ export default class Node {
         this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
         node.start(cb)
 
-        node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
-          pull(
-            conn,
-            pull.map((v) => v.toString()),
-            pull.log() // TODO store to persistence
-          )
-        })
-
-        node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
-          pull(
-            conn,
-            pull.collect((err, wireData) => {
-              if (err) {
-                this._logger.warn('Error while processing status')
-                return
-              }
-              try {
-                const data = JSON.parse(wireData.toString())
-                const { networkId, peerId } = data
-                if (networkId !== NETWORK_ID) {
-                  this._logger.warn(`Disconnecting peer ${peerId} - network id mismatch ${networkId} / ${NETWORK_ID}`)
-                  node.hangUp(new PeerId(peerId), () => {
-                    this._logger.info(`${peerId} disconnected`)
-                  })
-                  return
-                }
-              } catch (e) {
-                this._logger.error('Error while parsing data')
-                return
-              }
-              conn.getPeerInfo((err, peer) => {
-                if (err) {
-                  this._logger.error(`Cannot get peer info ${err}`)
-                  return
-                }
-                this._peers.put(peer)
-                this._logger.info(`Status handled successfuly, added peer ${peer.id.toB58String()}`)
-              })
-            })
-          )
-        })
+        this._registerMessageHandlers(node)
       }
-    ], (err) => {
+    ]
+
+    waterfall(pipeline, (err) => {
       if (err) {
         this._logger.error(err)
         throw err
       }
 
-      node.on('peer:discovery', (peer) => {
-        this._logger.info(`Discovered: ${peer.id.toB58String()}`)
-        node.dial(peer, (err) => {
-          if (err) {
-            this._logger.warn(`Error while dialing discovered peer ${peer.id.toB58String()}`)
-          }
-        })
-      })
-
-      node.on('peer:connect', (peer) => {
-        this._logger.info('Connection established:', peer.id.toB58String())
-        node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
-          if (err) {
-            node.hangUp(peer, () => {
-              this._logger.error(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
-            })
-          }
-          const msg = this._statusMsg
-          msg.peerId = peer.id.toB58String()
-          pull(pull.values([JSON.stringify(msg)]), conn)
-        })
-      })
-
-      node.on('peer:disconnect', (peer) => {
-        this._peers.remove(peer)
-        this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
-      })
+      this._registerEventHandlers(node)
     })
 
     return true
+  }
+
+  _handleEventPeerConnect (node: Object, peer: Object) {
+    this._logger.info('Connection established:', peer.id.toB58String())
+    node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
+      if (err) {
+        node.hangUp(peer, () => {
+          this._logger.error(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
+        })
+      }
+      const msg = this._statusMsg
+      msg.peerId = peer.id.toB58String()
+      pull(pull.values([JSON.stringify(msg)]), conn)
+    })
+  }
+
+  _handleEventPeerDisconnect (peer: Object) {
+    this._peers.remove(peer)
+    this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
+  }
+
+  _handleEventPeerDiscovery (node: Object, peer: Object) {
+    this._logger.info(`Discovered: ${peer.id.toB58String()}`)
+    node.dial(peer, (err) => {
+      if (err) {
+        this._logger.warn(`Error while dialing discovered peer ${peer.id.toB58String()}`)
+      }
+    })
+  }
+
+  _handleMessageNewBlock (protocol: Object, conn: Object) {
+    pull(
+      conn,
+      pull.map((v) => v.toString()),
+      pull.log() // TODO store to persistence
+    )
+  }
+
+  _handleMessageStatus (node: Object, protocol: Object, conn: Object) {
+    pull(
+      conn,
+      pull.collect((err, wireData) => {
+        if (err) {
+          this._logger.warn('Error while processing status')
+          return
+        }
+        try {
+          const data = JSON.parse(wireData.toString())
+          const { networkId, peerId } = data
+          if (networkId !== NETWORK_ID) {
+            this._logger.warn(`Disconnecting peer ${peerId} - network id mismatch ${networkId} / ${NETWORK_ID}`)
+            node.hangUp(new PeerId(peerId), () => {
+              this._logger.info(`${peerId} disconnected`)
+            })
+            return
+          }
+        } catch (e) {
+          this._logger.error('Error while parsing data')
+          return
+        }
+        conn.getPeerInfo((err, peer) => {
+          if (err) {
+            this._logger.error(`Cannot get peer info ${err}`)
+            return
+          }
+          this._peers.put(peer)
+          this._logger.info(`Status handled successfuly, added peer ${peer.id.toB58String()}`)
+        })
+      })
+    )
+  }
+
+  _registerEventHandlers (node: Object) {
+    node.on('peer:discovery', (peer) => this._handleEventPeerDiscovery(node, peer))
+    node.on('peer:connect', (peer) => this._handleEventPeerConnect(node, peer))
+    node.on('peer:disconnect', (peer) => this._handleEventPeerDisconnect(peer))
+  }
+
+  _registerMessageHandlers (node: Object) {
+    node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => this._handleMessageNewBlock(protocol, conn))
+    node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => this._handleMessageStatus(node, protocol, conn))
   }
 }

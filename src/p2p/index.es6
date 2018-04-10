@@ -7,4 +7,5 @@
  * @flow
  */
 
+export { default as Bundle } from './bundle'
 export { default as Node } from './node'
