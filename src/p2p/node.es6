@@ -45,7 +45,8 @@ class Bundle extends libp2p {
   }
 }
 
-const protocolPath = '/bc/0.0.1'
+const PROTOCOL_VERSION = '0.0.1'
+const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
 
 export default class Node {
   _logger: Object; // eslint-disable-line no-undef
@@ -53,6 +54,7 @@ export default class Node {
 
   constructor (engine: Object) {
     this._logger = logging.getLogger(__filename)
+    this._statusMsg = { protocolVersion: PROTOCOL_VERSION }
   }
 
   start () {
@@ -63,15 +65,39 @@ export default class Node {
       (peerInfo, cb) => {
         peerInfo.multiaddrs.add('/dns4/46.101.138.77/tcp/9090/ws/p2p-webrtc-star/')
 
-
         node = new Bundle(peerInfo)
         node.start(cb)
 
-        node.handle(protocolPath, (protocol, conn) => {
+        node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
           pull(
             conn,
             pull.map((v) => v.toString()),
-            pull.log()
+            pull.log() // TODO store to persistence
+          )
+        })
+
+        node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
+          pull(
+            conn,
+            pull.map(v => v.toString()),
+            (wireData) => {
+              let remoteProtocolVersion
+              try {
+                const data = JSON.parse(wireData)
+                remoteProtocolVersion = data.protocolVersion
+                if (remoteProtocolVersion !== PROTOCOL_VERSION) {
+                  throw new Error(`Protocol mismatch`)
+                }
+              } catch (e) {
+                conn.getPeerInfo((err, peer) => {
+                  if (err) {
+                    this._logger.error('Error while getting peerInfo when disconnecting after protocol mismatch')
+                  }
+                  this._logger.warn(`Disconnecting peer ${peer.id.toB58String()} - protocol mismatch ${remoteProtocolVersion} / ${PROTOCOL_VERSION}`)
+                  node.hangUp(peer)
+                })
+              }
+            }
           )
         })
       }
@@ -93,13 +119,13 @@ export default class Node {
         console.log('Connection established:', peer.id.toB58String())
 
         console.log(peer)
-        node.dialProtocol(peer, protocolPath, (err, conn) => {
+        node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
           if (err) {
             node.hangUp(peer, () => {
               console.log(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
             })
           }
-          pull(pull.values([JSON.stringify({msg: 'This is test'})]), conn)
+          pull(pull.values([JSON.stringify(this._statusMsg)]), conn)
         })
       })
 
