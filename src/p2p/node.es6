@@ -16,6 +16,7 @@ const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 const PeerId = require('peer-id')
+const PeerBook = require('peer-book')
 
 const logging = require('../logger')
 const config = require('../../config/config')
@@ -48,16 +49,24 @@ class Bundle extends libp2p {
 }
 
 const PROTOCOL_VERSION = '0.0.1'
-const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
+const PROTOCOL_PREFIX = `/bc/`
+const NETWORK_ID = 1
+
+type StatusMsg = {
+  protocolVersion: string,
+  peerId: ?string,
+}
 
 export default class Node {
-  _logger: Object; // eslint-disable-line no-undef
+  _logger: Object // eslint-disable-line no-undef
   _engine: Object // eslint-disable-line no-undef
-  _statusMsg: Object // eslint-disable-line no-undef
+  _statusMsg: StatusMsg // eslint-disable-line no-undef
+  _peers: PeerBook // eslint-disable-line no-undef
 
   constructor (engine: Object) {
     this._logger = logging.getLogger(__filename)
-    this._statusMsg = { protocolVersion: PROTOCOL_VERSION }
+    this._statusMsg = { networkId: NETWORK_ID, peerId: null }
+    this._peers = new PeerBook()
   }
 
   start () {
@@ -71,7 +80,7 @@ export default class Node {
         node = new Bundle(peerInfo)
         node.start(cb)
 
-        node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
+        node.handle(`${PROTOCOL_PREFIX}/newblock/${PROTOCOL_VERSION}`, (protocol, conn) => {
           pull(
             conn,
             pull.map((v) => v.toString()),
@@ -79,7 +88,7 @@ export default class Node {
           )
         })
 
-        node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
+        node.handle(`${PROTOCOL_PREFIX}/status/${PROTOCOL_VERSION}`, (protocol, conn) => {
           pull(
             conn,
             pull.collect((err, wireData) => {
@@ -89,18 +98,26 @@ export default class Node {
               }
               try {
                 const data = JSON.parse(wireData.toString())
-                const { protocolVersion, peerId } = data
-                if (protocolVersion !== PROTOCOL_VERSION) {
-                  this._logger.warn(`Disconnecting peer ${peerId} - protocol mismatch ${protocolVersion} / ${PROTOCOL_VERSION}`)
+                const { networkId, peerId } = data
+                if (networkId !== NETWORK_ID) {
+                  this._logger.warn(`Disconnecting peer ${peerId} - network id mismatch ${networkId} / ${NETWORK_ID}`)
                   node.hangUp(new PeerId(peerId), () => {
                     this._logger.info(`${peerId} disconnected`)
                   })
+                  return
                 }
               } catch (e) {
                 this._logger.error('Error while parsing data')
                 return
               }
-              this._logger.info('Status handled successfuly')
+              conn.getPeerInfo((err, peer) => {
+                if (err) {
+                  this._logger.error(`Cannot get peer info ${err}`)
+                  return
+                }
+                this._peers.put(peer)
+                this._logger.info(`Status handled successfuly, added peers ${peer.id.toB58String()}`)
+              })
             })
           )
         })
@@ -113,13 +130,12 @@ export default class Node {
 
       node.on('peer:discovery', (peer) => {
         console.log('Discovered:', peer.id.toB58String())
-
-        node.dial(peer, () => {})
+        // node.dial(peer, () => {})
       })
 
       node.on('peer:connect', (peer) => {
         console.log('Connection established:', peer.id.toB58String())
-        node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
+        node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status/${PROTOCOL_VERSION}`, (err, conn) => {
           if (err) {
             node.hangUp(peer, () => {
               console.log(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
@@ -132,7 +148,8 @@ export default class Node {
       })
 
       node.on('peer:disconnect', (peer) => {
-        console.log('Connection closed:', peer.id.toB58String())
+        this._peers.remove(peer)
+        this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
       })
     })
 

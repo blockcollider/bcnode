@@ -2256,6 +2256,10 @@ circular-json@^0.3.1:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.3.tgz#815c99ea84f6809529d2f45791bdf82711352d66"
 
+class-is@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/class-is/-/class-is-1.1.0.tgz#9d3c0fba0440d211d843cec3dedfa48055005825"
+
 class-utils@^0.3.5:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
@@ -6790,6 +6794,12 @@ mafmt@^4.0.0:
   dependencies:
     multiaddr "^3.0.2"
 
+mafmt@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/mafmt/-/mafmt-6.0.0.tgz#ec13f8761253354c23420ae3903c837b6649caa6"
+  dependencies:
+    multiaddr "^4.0.0"
+
 make-dir@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-1.2.0.tgz#6d6a49eead4aae296c53bbf3a1a008bd6c89469b"
@@ -7205,6 +7215,19 @@ multiaddr@^3.0.1, multiaddr@^3.0.2, multiaddr@^3.1.0:
   dependencies:
     bs58 "^4.0.1"
     ip "^1.1.5"
+    lodash.filter "^4.6.0"
+    lodash.map "^4.6.0"
+    varint "^5.0.0"
+    xtend "^4.0.1"
+
+multiaddr@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/multiaddr/-/multiaddr-4.0.0.tgz#70a8857c4f737350bc2c56914a70f1263889db33"
+  dependencies:
+    bs58 "^4.0.1"
+    class-is "^1.1.0"
+    ip "^1.1.5"
+    ip-address "^5.8.9"
     lodash.filter "^4.6.0"
     lodash.map "^4.6.0"
     varint "^5.0.0"
@@ -8045,6 +8068,14 @@ peek-stream@^1.1.0:
     duplexify "^3.5.0"
     through2 "^2.0.3"
 
+peer-book@0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/peer-book/-/peer-book-0.7.0.tgz#1b9ce0bba24605abd152cee07b39f5b55d9856fc"
+  dependencies:
+    bs58 "^4.0.1"
+    peer-id "^0.10.7"
+    peer-info "^0.14.0"
+
 peer-book@~0.5.4:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/peer-book/-/peer-book-0.5.4.tgz#d3d8fe2507aa08306acb328be81f973a8785e704"
@@ -8075,7 +8106,7 @@ peer-exchange@^2.0.0:
     through2 "^2.0.1"
     websocket-stream "^3.1.0"
 
-peer-id@^0.10.5, peer-id@^0.10.6, peer-id@~0.10.1, peer-id@~0.10.5, peer-id@~0.10.6:
+peer-id@0.10.7, peer-id@^0.10.5, peer-id@^0.10.6, peer-id@^0.10.7, peer-id@~0.10.1, peer-id@~0.10.5, peer-id@~0.10.6, peer-id@~0.10.7:
   version "0.10.7"
   resolved "https://registry.yarnpkg.com/peer-id/-/peer-id-0.10.7.tgz#6c12634636fc90a0e7bc76360c95f73564461fdd"
   dependencies:
@@ -8091,6 +8122,15 @@ peer-info@^0.11.6, peer-info@~0.11.0, peer-info@~0.11.6:
     lodash.uniqby "^4.7.0"
     multiaddr "^3.0.2"
     peer-id "~0.10.5"
+
+peer-info@^0.14.0:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/peer-info/-/peer-info-0.14.1.tgz#ac5aec421e9965f7b0e7576d717941bb25676134"
+  dependencies:
+    lodash.uniqby "^4.7.0"
+    mafmt "^6.0.0"
+    multiaddr "^4.0.0"
+    peer-id "~0.10.7"
 
 pem-jwk@^1.5.1:
   version "1.5.1"
