@@ -1,0 +1,18 @@
+[Unit]
+Description=BlockCollider Rendezvous Server
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/dev/js-libp2p-webrtc-star
+ExecStart=/home/ubuntu/.nvm/versions/node/v9.11.1/bin/node ./node_modules/.bin/star-signal --port=9090" --host=0.0.0.0
+Restart=always
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=rendezvous
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target
