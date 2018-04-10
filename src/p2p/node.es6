@@ -53,7 +53,7 @@ const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
 const NETWORK_ID = 1
 
 type StatusMsg = {
-  protocolVersion: string,
+  networkId: number,
   peerId: ?string,
 }
 
@@ -65,7 +65,10 @@ export default class Node {
 
   constructor (engine: Object) {
     this._logger = logging.getLogger(__filename)
-    this._statusMsg = { networkId: NETWORK_ID, peerId: null }
+    this._statusMsg = {
+      networkId: NETWORK_ID,
+      peerId: null
+    }
     this._peers = new PeerBook()
   }
 
@@ -124,7 +127,7 @@ export default class Node {
       }
     ], (err) => {
       if (err) {
-        console.log(err)
+        this._logger.error(err)
         throw err
       }
 
@@ -138,11 +141,11 @@ export default class Node {
       })
 
       node.on('peer:connect', (peer) => {
-        console.log('Connection established:', peer.id.toB58String())
+        this._logger.info('Connection established:', peer.id.toB58String())
         node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
           if (err) {
             node.hangUp(peer, () => {
-              console.log(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
+              this._logger.error(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
             })
           }
           const msg = this._statusMsg
