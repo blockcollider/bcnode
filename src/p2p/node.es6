@@ -17,6 +17,7 @@ const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
 const logging = require('../logger')
+const config = require('../../config/config')
 
 class Bundle extends libp2p {
   constructor (peerInfo) {
@@ -51,6 +52,7 @@ const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
 export default class Node {
   _logger: Object; // eslint-disable-line no-undef
   _engine: Object // eslint-disable-line no-undef
+  _statusMsg: Object // eslint-disable-line no-undef
 
   constructor (engine: Object) {
     this._logger = logging.getLogger(__filename)
@@ -63,7 +65,7 @@ export default class Node {
     waterfall([
       (cb) => PeerInfo.create(cb),
       (peerInfo, cb) => {
-        peerInfo.multiaddrs.add('/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star/')
+        peerInfo.multiaddrs.add(config.p2p.rendezvous)
 
         node = new Bundle(peerInfo)
         node.start(cb)
@@ -124,8 +126,6 @@ export default class Node {
 
       node.on('peer:connect', (peer) => {
         console.log('Connection established:', peer.id.toB58String())
-
-        console.log(peer)
         node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
           if (err) {
             node.hangUp(peer, () => {
