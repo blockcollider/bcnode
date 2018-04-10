@@ -105,7 +105,7 @@ class LoggingContext {
 
     this._parent.log.apply(this._parent, [level, this._prefix + name]
       .concat(nonMeta)
-      .concat([merge({}, meta, this._metadata), callback]))
+      .concat([merge(meta, this._metadata), callback]))
   }
 }
 

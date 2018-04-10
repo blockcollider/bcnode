@@ -106,23 +106,33 @@ export default class Controller {
   _config: Object;
   _logger: Logger;
   _wavesApi: Object;
-  _blocksCache: LRUCache;
   _rpc: RpcClient;
   _intervalDescriptor: IntervalID;
-  _blockCache: LRUCache;
+  _blockCache: LRUCache<string, bool>;
   /* eslint-enable */
   constructor (config: Object) {
     this._config = config
     this._logger = getLogger(__filename)
     this._wavesApi = WavesApi.create(WavesApi.MAINNET_CONFIG)
     this._rpc = new RpcClient()
-    this._blockCache = new LRUCache()
+    this._blockCache = new LRUCache({ max: 500 })
   }
 
   init () {
-    this._logger.info('Trying to get new block')
+    this._logger.info('initialized')
+
+    process.on('disconnect', () => {
+      this._logger.info('parent exited')
+      process.exit()
+    })
+
+    process.on('uncaughtError', (e) => {
+      this._logger.error('Uncaught error', e)
+      process.exit(3)
+    })
 
     const cycle = () => {
+      this._logger.debug('Trying to get new block')
       return getLastHeight(this._wavesApi).then(height => {
         this._logger.debug(`Got last height '${height}'`)
         getBlock(this._wavesApi, height).then(lastBlock => {

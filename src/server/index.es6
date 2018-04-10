@@ -1,56 +1,78 @@
-const path = require('path')
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+import type { Logger } from 'winston'
+import type { $Request, $Response, NextFunction } from 'express'
 
+const { inspect } = require('util')
+const path = require('path')
+const http = require('http')
 const bodyParser = require('body-parser')
 const express = require('express')
+const expressWinston = require('express-winston')
 const responseTime = require('response-time')
 const serveIndex = require('serve-index')
-const socketIo = require('socket.io')
+const WebSocket = require('ws')
 
 const logging = require('../logger')
 const config = require('../../config/config')
 const { Null } = require('../protos/core_pb')
-const { RpcClient } = require('../rpc')
+const { RpcClient, RpcServer } = require('../rpc')
 
-const assetsDir = path.resolve(__dirname, '..', '..', 'assets')
+const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'dist')
+
+type Opts = {|
+  ws: bool,
+  rpc: bool,
+  ui: bool
+|}
 
 // See http://www.programwitherik.com/getting-started-with-socket-io-node-js-and-express/
 export default class Server {
-  constructor () {
-    this._opts = null
-    this._app = null
-    this._io = null
+  _opts: Opts
+  _app: express$Application // eslint-disable-line
+  _wsServer: any
+  _rpcClient: RpcClient
+  _rpcServer: RpcServer
+  _server: any
+  _logger: Logger
+
+  constructor (rpcServer: RpcServer) {
+    // Create express app instance
+    this._app = express()
     this._rpcClient = new RpcClient()
+    this._rpcServer = rpcServer
     this._server = null
     this._logger = logging.getLogger(__filename)
   }
 
-  get app () {
+  get app (): express$Application { // eslint-disable-line
     return this._app
   }
 
-  get io () {
-    return this._io
-  }
-
-  get opts () {
+  get opts (): Opts {
     return this._opts
   }
 
-  get rpcClient () {
+  get rpcClient (): RpcClient {
     return this._rpcClient
   }
 
-  get server () {
+  get server (): any {
     return this._server
   }
 
-  run (opts) {
+  run (opts: Opts) {
     this._opts = opts
 
     this._logger.info('Starting Server for Web UI')
 
-    // Create express app instance
-    this._app = express()
+    this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
     this._app.use(responseTime())
     this._app.use(bodyParser.json())
 
@@ -60,10 +82,11 @@ export default class Server {
       help: Null
     }
 
-    this._app.use(jsonRpcMiddleware(mapping))
+    this._app.use('/rpc', jsonRpcMiddleware(mapping))
 
     // Create http server
-    const server = (this._server = require('http').Server(this.app))
+    // $FlowFixMe see https://github.com/facebook/flow/issues/5113
+    const server = (this._server = http.Server(this.app))
 
     if (this.opts.ws) {
       this.initWebSocket()
@@ -85,32 +108,48 @@ export default class Server {
   }
 
   initWebSocket () {
-    const io = (this._io = socketIo(this.server, {
-      path: '/ws'
-    }))
+    this._wsServer = new WebSocket.Server({ server: this._server, path: '/ws' })
 
-    io.on('connection', client => {
-      this._logger.info('Client connected', client.handshake.address)
+    // setup relaying events from rpc server to websockets
+    this._rpcServer.emitter.on('message', ({ name, data }) => {
+      this._wsServer.clients.forEach(c => {
+        if (c.readyState === WebSocket.OPEN) {
+          this._logger.debug(name)
+          this._logger.debug(inspect(data))
 
-      client.emit({
-        msg: 'test'
+          try {
+            c.send(JSON.stringify({ timestamp: Date.now(), name, data }), e => {
+              if (e) {
+                this._logger.error(`Could not send\n ${e}`)
+                c.terminate()
+              }
+            })
+          } catch (e) {
+            this._logger.error(`Could not send\n ${e.stack}`)
+            c.terminate()
+          }
+        }
+      })
+    })
+    this._wsServer.on('connection', (client, req) => {
+      // this._logger.info('Client connected', client)
+
+      // client.on('join', function (data) {
+      //   this._logger.log(data)
+      // })
+
+      client.on('close', reason => {
+        this._logger.info('Client connection closed', req.connection.remoteAddress)
       })
 
-      client.on('join', function (data) {
-        this._logger.log(data)
-      })
-
-      client.on('disconnect', reason => {
-        this._logger.info(
-          'Client disconnected',
-          client.request.connection.remoteAddress
-        )
+      client.on('error', error => {
+        this._logger.warn(`Client exited with error\n${error.stack}`)
       })
     })
   }
 
   initRpc () {
-    this.app.post('/rpc', (req, res) => {
+    this.app.post('/rpc', (req, res: $Response, next: NextFunction) => {
       // console.log('/rpc, req: ', req.body)
 
       const { method } = req.rpcBody
@@ -192,15 +231,18 @@ export default class Server {
  */
 // TODO: Order named params to params array
 // TODO: Handle RPC call batch
-export function jsonRpcMiddleware (mappings) {
+export function jsonRpcMiddleware (mappings: any) {
   // TODO: Report why is the request invalid
   function validRequest (rpc) {
+    // $FlowFixMe
     return rpc.jsonrpc === '2.0' &&
+      // $FlowFixMe
       (typeof rpc.id === 'number' || typeof rpc.id === 'string') &&
+      // $FlowFixMe
       typeof rpc.method === 'string'
   }
 
-  return function (req, res, next) {
+  return function (req: $Request, res: $Response, next: NextFunction) {
     if (!validRequest(req.body)) {
       res.json({
         code: -32600,
@@ -210,11 +252,15 @@ export function jsonRpcMiddleware (mappings) {
       return
     }
 
+    // $FlowFixMe
     const { method, params } = req.body
+    // $FlowFixMe
     req.rpcBody = {
       method,
       params, // Handle named params
+      // $FlowFixMe
       MsgType: mappings[req.body.method],
+      // $FlowFixMe
       id: req.body.id
     }
 

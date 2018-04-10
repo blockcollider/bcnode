@@ -6,16 +6,18 @@
  *
  * @flow
  */
-
+import type EventEmitter from 'events'
 const RpcServer = require('../server').default
 
 const { collectBlock } = require('./rover/index')
 
 export default class CollectorServiceImpl {
   _server: RpcServer; // eslint-disable-line no-undef
+  _emitter: EventEmitter
 
-  constructor (server: RpcServer) {
+  constructor (server: RpcServer, emitter: EventEmitter) {
     this._server = server
+    this._emitter = emitter
   }
 
   get server () : RpcServer {
@@ -31,7 +33,8 @@ export default class CollectorServiceImpl {
 
   _getContext () : Object {
     return {
-      server: this._server
+      server: this._server,
+      emitter: this._emitter
     }
   }
 }

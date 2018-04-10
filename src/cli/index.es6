@@ -16,6 +16,13 @@ const pkg = require('../../package.json')
 
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
+const globalLog = logging.getLogger(__filename)
+// setup logging of unhandled rejections
+process.on('unhandledRejection', (err) => {
+  // $FlowFixMe
+  globalLog.error(`Rejected promise, trace:\n${err.stack}`)
+})
+
 /**
  * Application entry point
  *
@@ -48,7 +55,7 @@ export async function main (args: string[]) {
     return -1
   }
 
-  const { node, rovers, rpc, ui, ws } = program
+  const { node, rovers, rpc, ui, ws } = program.opts()
 
   process.on('SIGINT', () => {
     console.log('Gracefully shutting down from  SIGINT (Ctrl-C)')
@@ -66,7 +73,7 @@ export async function main (args: string[]) {
   // Should the Rover be started?
   if (rovers) {
     const roversToStart =
-      rovers === 'all'
+      rovers === true
         ? ROVERS
         : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
 

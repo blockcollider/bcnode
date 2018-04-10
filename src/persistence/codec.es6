@@ -17,7 +17,7 @@ const _getBCConstructorName = (type: string) => BC_MESSAGE_TYPE_REGEX.exec(type)
 const DB_VALUES_VERSION = 1
 
 const BC_MESSAGES_MAP = {
-  'proto.bc.Block': Block
+  'Block': Block
 }
 
 /**
@@ -48,7 +48,7 @@ export function serialize (val: Object): Buffer {
   let valueType = path(['constructor', 'displayName'], val)
 
   // Serialize BC protobuf messages
-  if (valueType && _isBCMessageType(type)) {
+  if (valueType && _isBCMessageType(valueType)) {
     dbValue = new DbValue([_getBCConstructorName(valueType), val.serializeBinary(), DB_VALUES_VERSION, false])
   } else { // Serialize native JS types
     valueType = type(val)

@@ -6,6 +6,7 @@
  *
  * @flow
  */
+const { EventEmitter } = require('events')
 
 const grpc = require('grpc')
 const config = require('../../config/config')
@@ -19,18 +20,24 @@ const { RoverServiceImpl } = require('./service')
 export default class RpcServer {
   _engine: Object // eslint-disable-line no-undef
   _rpcServer: Object // eslint-disable-line no-undef
+  _emitter: any
 
   constructor (engine: Object) {
     this._engine = engine
+    this._emitter = new EventEmitter()
 
     this._rpcServer = new grpc.Server()
     this._rpcServer.bind(`${config.grpc.host}:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
 
     // Register services
     this._rpcServer.addService(BcService, new BcServiceImpl(this))
-    this._rpcServer.addService(RoverService, new RoverServiceImpl(this))
+    this._rpcServer.addService(RoverService, new RoverServiceImpl(this, this._emitter))
 
     this._rpcServer.start()
+  }
+
+  get emitter (): EventEmitter {
+    return this._emitter
   }
 
   get server () : Object {
