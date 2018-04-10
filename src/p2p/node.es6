@@ -49,7 +49,7 @@ class Bundle extends libp2p {
 }
 
 const PROTOCOL_VERSION = '0.0.1'
-const PROTOCOL_PREFIX = `/bc/`
+const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
 const NETWORK_ID = 1
 
 type StatusMsg = {
@@ -80,7 +80,7 @@ export default class Node {
         node = new Bundle(peerInfo)
         node.start(cb)
 
-        node.handle(`${PROTOCOL_PREFIX}/newblock/${PROTOCOL_VERSION}`, (protocol, conn) => {
+        node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
           pull(
             conn,
             pull.map((v) => v.toString()),
@@ -88,7 +88,7 @@ export default class Node {
           )
         })
 
-        node.handle(`${PROTOCOL_PREFIX}/status/${PROTOCOL_VERSION}`, (protocol, conn) => {
+        node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
           pull(
             conn,
             pull.collect((err, wireData) => {
@@ -135,7 +135,7 @@ export default class Node {
 
       node.on('peer:connect', (peer) => {
         console.log('Connection established:', peer.id.toB58String())
-        node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status/${PROTOCOL_VERSION}`, (err, conn) => {
+        node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
           if (err) {
             node.hangUp(peer, () => {
               console.log(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
