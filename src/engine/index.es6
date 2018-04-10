@@ -91,8 +91,6 @@ export default class Engine {
 
   /**
    * Start Server
-   *
-   * @param opts Options to start server with
    */
   startNode () {
     this._logger.info('Starting P2P node')

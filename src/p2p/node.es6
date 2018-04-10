@@ -64,6 +64,7 @@ export default class Node {
   _peers: PeerBook // eslint-disable-line no-undef
 
   constructor (engine: Object) {
+    this._engine = engine
     this._logger = logging.getLogger(__filename)
     this._statusMsg = {
       networkId: NETWORK_ID,
