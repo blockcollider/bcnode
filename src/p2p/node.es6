@@ -103,6 +103,7 @@ export default class Node {
                   })
                 })
               }
+              this._logger.info('Status handled successfuly')
             })
           )
         })
