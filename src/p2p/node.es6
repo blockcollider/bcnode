@@ -45,6 +45,8 @@ class Bundle extends libp2p {
   }
 }
 
+const protocolPath = '/bc/0.0.1'
+
 export default class Node {
   _logger: Object; // eslint-disable-line no-undef
   _engine: Object // eslint-disable-line no-undef
@@ -61,10 +63,11 @@ export default class Node {
       (peerInfo, cb) => {
         peerInfo.multiaddrs.add('/dns4/46.101.138.77/tcp/9090/ws/p2p-webrtc-star/')
 
+
         node = new Bundle(peerInfo)
         node.start(cb)
 
-        node.handle('/bc', (protocol, conn) => {
+        node.handle(protocolPath, (protocol, conn) => {
           pull(
             conn,
             pull.map((v) => v.toString()),
@@ -89,9 +92,14 @@ export default class Node {
       node.on('peer:connect', (peer) => {
         console.log('Connection established:', peer.id.toB58String())
 
-        node.dialProtocol(peer, '/bc', (err, conn) => {
-          if (err) { throw err }
-          pull(pull.values(['my own protocol, wow!']), conn)
+        console.log(peer)
+        node.dialProtocol(peer, protocolPath, (err, conn) => {
+          if (err) {
+            node.hangUp(peer, () => {
+              console.log(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
+            })
+          }
+          pull(pull.values([JSON.stringify({msg: 'This is test'})]), conn)
         })
       })
 
