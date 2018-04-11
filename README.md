@@ -122,5 +122,5 @@ Helpful community tools will be added: [https://github.com/blockcollider/awesome
 
 ## Help & Support
 * [Documentation](https://docs.blockcollider.org/docs)
-# [Blog](https://blog.blockcollider.org/latest)
+* [Blog](https://blog.blockcollider.org/latest)
 * hello [at] blockcollider.org
