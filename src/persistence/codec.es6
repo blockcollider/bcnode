@@ -80,7 +80,7 @@ export function deserialize (bytes: Buffer): Object|Error {
 
     return BC_MESSAGES_MAP[dbValue.getType()].deserializeBinary(dbValue.getData())
   } catch (e) {
-    if (e instanceof TypeError) {
+    if (e instanceof TypeError && dbValue) {
       throw new TypeError(`Could not find '${dbValue.getType()}' in BC_MESSAGES_MAP`)
     }
 

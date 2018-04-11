@@ -15,6 +15,9 @@ const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
 
+// $FlowFixMe
+const native = require('../native/index.node')
+
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const globalLog = logging.getLogger(__filename)
@@ -48,6 +51,9 @@ export async function main (args: string[]) {
   if (process.argv.length < 3) {
     return program.help()
   }
+
+  // Initialize rust logger
+  native.initLogger()
 
   // Create instance of engine
   const engine = new Engine(logging.getLogger(__filename))

@@ -70,7 +70,7 @@ export default class PersistenceRocksDb {
    * @param value
    * @param opts
    */
-  put (key: string, value: Object, opts: Object = {}): Promise<*> {
+  put (key: string, value: any, opts: Object = {}): Promise<*> {
     const serialized = serialize(value)
     return new Promise((resolve, reject) => {
       this.db.put(key, serialized, opts, (err) => {

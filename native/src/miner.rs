@@ -7,7 +7,7 @@ use num_cpus;
 use strsim::jaro_winkler;
 use rand;
 
-pub fn mine(input: &[&str], threshold: f32) -> Result<(String, Vec<f64>), String> {
+pub fn mine(input: &Vec<String>, threshold: f32) -> Result<(String, Vec<f64>), String> {
     debug!("mine({:?}, {:?})", &input, &threshold);
 
     let ephemerals: Vec<String> = input.into_iter()
@@ -50,7 +50,7 @@ pub fn mine(input: &[&str], threshold: f32) -> Result<(String, Vec<f64>), String
             Ok((res, distances))
         }
         Err(err) => {
-            println!("Error occurred: {:?}", &err);
+            debug!("Error occurred: {:?}", &err);
             Err(String::from("Error"))
         }
     }

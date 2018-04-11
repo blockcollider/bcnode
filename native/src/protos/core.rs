@@ -151,6 +151,7 @@ pub struct Block {
     // message fields
     pub blockchain: ::std::string::String,
     pub hash: ::std::string::String,
+    pub previous_hash: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -241,6 +242,40 @@ impl Block {
     fn mut_hash_for_reflect(&mut self) -> &mut ::std::string::String {
         &mut self.hash
     }
+
+    // string previous_hash = 3;
+
+    pub fn clear_previous_hash(&mut self) {
+        self.previous_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_previous_hash(&mut self, v: ::std::string::String) {
+        self.previous_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_previous_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
+
+    // Take field
+    pub fn take_previous_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.previous_hash, ::std::string::String::new())
+    }
+
+    pub fn get_previous_hash(&self) -> &str {
+        &self.previous_hash
+    }
+
+    fn get_previous_hash_for_reflect(&self) -> &::std::string::String {
+        &self.previous_hash
+    }
+
+    fn mut_previous_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
 }
 
 impl ::protobuf::Message for Block {
@@ -257,6 +292,9 @@ impl ::protobuf::Message for Block {
                 },
                 2 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.previous_hash)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -276,6 +314,9 @@ impl ::protobuf::Message for Block {
         if !self.hash.is_empty() {
             my_size += ::protobuf::rt::string_size(2, &self.hash);
         }
+        if !self.previous_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.previous_hash);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -287,6 +328,9 @@ impl ::protobuf::Message for Block {
         }
         if !self.hash.is_empty() {
             os.write_string(2, &self.hash)?;
+        }
+        if !self.previous_hash.is_empty() {
+            os.write_string(3, &self.previous_hash)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -342,6 +386,11 @@ impl ::protobuf::MessageStatic for Block {
                     Block::get_hash_for_reflect,
                     Block::mut_hash_for_reflect,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "previous_hash",
+                    Block::get_previous_hash_for_reflect,
+                    Block::mut_previous_hash_for_reflect,
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<Block>(
                     "Block",
                     fields,
@@ -356,6 +405,7 @@ impl ::protobuf::Clear for Block {
     fn clear(&mut self) {
         self.clear_blockchain();
         self.clear_hash();
+        self.clear_previous_hash();
         self.unknown_fields.clear();
     }
 }
@@ -373,9 +423,10 @@ impl ::protobuf::reflect::ProtobufValue for Block {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\ncore.proto\x12\x02bc\"\x06\n\x04Null\";\n\x05Block\x12\x1e\n\nblockc\
+    \n\ncore.proto\x12\x02bc\"\x06\n\x04Null\"`\n\x05Block\x12\x1e\n\nblockc\
     hain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\x01(\
-    \tR\x04hashb\x06proto3\
+    \tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cpreviousHashb\
+    \x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
