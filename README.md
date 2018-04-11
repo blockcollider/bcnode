@@ -120,9 +120,7 @@ $ open ./docs/index.html
 
 Helpful community tools will be added: [https://github.com/blockcollider/awesome-blockcollider](https://github.com/blockcollider/awesome-blockcollider)
 
-## Support
+## Help & Support
 * [Documentation](https://docs.blockcollider.org/docs)
+# [Blog](https://blog.blockcollider.org/latest)
 * hello [at] blockcollider.org
-
-## Blog
-# https://blog.blockcollider.org/latest
