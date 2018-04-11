@@ -1,0 +1,27 @@
+# Git stuff
+.git
+
+# Docker stuff
+*Dockerfile*
+*docker-compose*
+
+# Local data
+_data/
+
+# Coverage
+coverage/
+
+# Generated documentation
+docs/
+
+# Logs
+logs/
+*.log
+
+# Node artifacts
+node_modules/
+lib/
+
+# Rust artifacts
+target/
+native/target/
