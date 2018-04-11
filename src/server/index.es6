@@ -114,9 +114,7 @@ export default class Server {
     this._rpcServer.emitter.on('message', ({ name, data }) => {
       this._wsServer.clients.forEach(c => {
         if (c.readyState === WebSocket.OPEN) {
-          this._logger.debug(name)
-          this._logger.debug(inspect(data))
-
+          this._logger.debug(`Sending message to client `)
           try {
             c.send(JSON.stringify({ timestamp: Date.now(), name, data }), e => {
               if (e) {
@@ -132,12 +130,6 @@ export default class Server {
       })
     })
     this._wsServer.on('connection', (client, req) => {
-      // this._logger.info('Client connected', client)
-
-      // client.on('join', function (data) {
-      //   this._logger.log(data)
-      // })
-
       client.on('close', reason => {
         this._logger.info('Client connection closed', req.connection.remoteAddress)
       })
@@ -145,6 +137,11 @@ export default class Server {
       client.on('error', error => {
         this._logger.warn(`Client exited with error\n${error.stack}`)
       })
+    })
+
+    this._wsServer.on('error', (error) => {
+      // TODO restart WS server instead
+      this._logger.warn(`WS server exited (and will not be available until next start) with error ${error}`)
     })
   }
 
