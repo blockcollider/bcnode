@@ -7,4 +7,5 @@ message Null {}
 message Block {
     string blockchain = 1;
     string hash = 2;
+    string previous_hash = 3;
 }
