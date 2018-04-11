@@ -167,7 +167,7 @@ export default class Controller {
               if (err) {
                 this._logger.warn('RpcClient could not collect block')
               } else {
-                this._logger.debug('Collector Response:', response)
+                this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
               }
             })
           }

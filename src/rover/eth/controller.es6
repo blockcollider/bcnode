@@ -77,7 +77,7 @@ export default class Controller {
         this._logger.error(`Error while collecting block ${inspect(err)}`)
         return
       }
-      this._logger.debug(`Collector Response ${inspect(response)}`)
+      this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
     })
   }
 

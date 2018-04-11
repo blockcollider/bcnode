@@ -16,7 +16,7 @@ const Engine = require('../engine').default
 const pkg = require('../../package.json')
 
 // $FlowFixMe
-const native = require('../native/index.node')
+const native = require('../../native/index.node')
 
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 

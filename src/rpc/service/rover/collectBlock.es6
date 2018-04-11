@@ -17,5 +17,5 @@ export default function (context: Object, call: Object, callback: Function) {
   context.server.engine.persistence.put(key, block).then(() => {
     callback(null, new Null())
   })
-  context.emitter.emit('message', { name: 'block.latest', data: { blockchain, hash: block.getHash() } })
+  context.emitter.emit('collectBlock', { block })
 }

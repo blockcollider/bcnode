@@ -9,7 +9,6 @@
 import type { Logger } from 'winston'
 import type { $Request, $Response, NextFunction } from 'express'
 
-const { inspect } = require('util')
 const path = require('path')
 const http = require('http')
 const bodyParser = require('body-parser')
@@ -111,12 +110,16 @@ export default class Server {
     this._wsServer = new WebSocket.Server({ server: this._server, path: '/ws' })
 
     // setup relaying events from rpc server to websockets
-    this._rpcServer.emitter.on('message', ({ name, data }) => {
+    this._rpcServer.emitter.on('collectBlock', ({ block }) => {
       this._wsServer.clients.forEach(c => {
         if (c.readyState === WebSocket.OPEN) {
           this._logger.debug(`Sending message to client `)
           try {
-            c.send(JSON.stringify({ timestamp: Date.now(), name, data }), e => {
+            c.send(JSON.stringify({
+              timestamp: Date.now(),
+              name: 'block.latest',
+              data: { blockchain: block.getBlockchain(), hash: block.getHash() }
+            }), e => {
               if (e) {
                 this._logger.error(`Could not send\n ${e}`)
                 c.terminate()
