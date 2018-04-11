@@ -5,14 +5,20 @@ const { Block } = require('../../protos/core_pb')
 describe('RpcServer', () => {
   let server = null
   let persistenceMock
+  let emitterMock
 
   beforeEach(() => {
     persistenceMock = {
       put: jest.fn().mockReturnValue(Promise.resolve(true))
     }
 
+    emitterMock = {
+      emit: jest.fn()
+    }
+
     server = new RpcServer({
       persistence: persistenceMock,
+      _emitter: emitterMock
     })
   })
 
@@ -23,17 +29,15 @@ describe('RpcServer', () => {
     })
   })
 
-  // FIXME: klob, please review
   it('works', (done) => {
-    // const client = new RpcClient()
-    //
-    // const msg = new Block(['abc', '123456'])
-    //
-    // client.rover.collectBlock(msg, (err, response) => {
-    //   expect(persistenceMock.put).toHaveBeenCalledWith('abc.block.latest', msg)
-    //   done()
-    // })
-    expect(1).toEqual(1)
-    done()
+    const client = new RpcClient()
+
+    const msg = new Block(['abc', '123456'])
+
+    client.rover.collectBlock(msg, (_, response) => {
+      expect(persistenceMock.put).toHaveBeenCalledWith('abc.block.latest', msg)
+      expect(emitterMock.emit).toHaveBeenCalledWith('collectBlock', { block: msg })
+      done()
+    })
   })
 })
