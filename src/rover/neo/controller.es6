@@ -71,11 +71,10 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
     return all
   }, [])
 
-  // return obj
-
   const msg = new Block()
   msg.setBlockchain('neo')
   msg.setHash(obj.blockHash)
+  msg.setPreviousHash(obj.prevHash)
 
   return msg
 }

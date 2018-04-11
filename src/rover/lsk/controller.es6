@@ -82,6 +82,7 @@ const _createUnifiedBlock = (block): Block => {
   const msg = new Block()
   msg.setBlockchain('lsk')
   msg.setHash(obj.blockHash)
+  msg.setPreviousHash(obj.prevHash)
 
   return msg
 }

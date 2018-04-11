@@ -94,6 +94,7 @@ const _createUnifiedBlock = (block): Block => {
   const msg = new Block()
   msg.setBlockchain('wav')
   msg.setHash(obj.blockHash)
+  msg.setPreviousHash(obj.prevHash)
 
   return msg
 }

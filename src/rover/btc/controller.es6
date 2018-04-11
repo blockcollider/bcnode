@@ -246,6 +246,7 @@ export default class Controller {
     const msg = new Block()
     msg.setBlockchain('btc')
     msg.setHash(block.header.hash)
+    msg.setPreviousHash(swapOrder(block.header.prevHash.toString('hex')))
 
     return msg
   }

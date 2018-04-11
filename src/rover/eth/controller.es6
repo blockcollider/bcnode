@@ -69,6 +69,7 @@ export default class Controller {
     const msg = new Block()
     msg.setBlockchain('eth')
     msg.setHash(unifiedBlockData.blockHash)
+    msg.setPreviousHash(unifiedBlockData.prevHash)
 
     this._logger.debug(`Created unified block from eth block ${unifiedBlockData.blockNumber} (${unifiedBlockData.blockHash})`)
     this._rpc.rover.collectBlock(msg, (err, response) => {
