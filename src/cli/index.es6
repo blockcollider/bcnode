@@ -9,6 +9,7 @@
 
 const process = require('process')
 const program = require('commander')
+const { spawn } = require('child_process')
 
 const logging = require('../logger')
 const Engine = require('../engine').default
@@ -33,6 +34,9 @@ export async function main (args: string[]) {
   program
     .version(pkg.version)
     .option('-n, --node', 'Start P2P node')
+    .option('-r, --randezvous-server', 'Start randezvous server')
+    .option('--randezvous-server-bind [ip]', 'Randezvous server bind IP', '0.0.0.0')
+    .option('--randezvous-server-port [port]', 'Randezvous server port', '9090')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')
     .option('--rpc', 'enable RPC')
@@ -55,7 +59,38 @@ export async function main (args: string[]) {
     return -1
   }
 
-  const { node, rovers, rpc, ui, ws } = program.opts()
+  const {
+    node,
+    randezvousServer,
+    randezvousServerBind,
+    randezvousServerPort,
+    rovers,
+    rpc,
+    ui,
+    ws
+  } = program.opts()
+
+  if (randezvousServer) {
+    const args = [
+      `--port=${randezvousServerPort}`,
+      `--host=${randezvousServerBind}`
+    ]
+    const child = spawn('./node_modules/.bin/star-signal', args)
+
+    // use child.stdout.setEncoding('utf8'); if you want text chunks
+    child.stdout.on('data', (chunk) => {
+      console.log(chunk.toString())
+    })
+
+    // since these are streams, you can pipe them elsewhere
+    child.stderr.on('data', (chunk) => {
+      console.log(chunk.toString())
+    })
+
+    child.on('close', (code) => {
+      console.log(`Randezvous server process exited with code ${code}`)
+    })
+  }
 
   process.on('SIGINT', () => {
     console.log('Gracefully shutting down from  SIGINT (Ctrl-C)')

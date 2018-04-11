@@ -138,7 +138,7 @@
     "libp2p-railing": "^0.7.1",
     "libp2p-secio": "^0.9.4",
     "libp2p-tcp": "^0.11.6",
-    "libp2p-webrtc-star": "^0.13.4",
+    "libp2p-webrtc-star": "^0.14.0",
     "linvodb3": "^3.25.1",
     "lisk-js": "^0.5.1",
     "lru-cache": "^4.1.1",
