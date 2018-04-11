@@ -27,11 +27,9 @@ describe('RpcServer', () => {
     const client = new RpcClient()
 
     const msg = new Block(['abc', '123456'])
-    // msg.setBlockchain('abc')
-    // msg.setHash('123456')
 
     client.rover.collectBlock(msg, (err, response) => {
-      expect(persistenceMock.put).toHaveBeenCalledWith('abc.block.latest', '123456')
+      expect(persistenceMock.put).toHaveBeenCalledWith('abc.block.latest', msg)
       done()
     })
   })
