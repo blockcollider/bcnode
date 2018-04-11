@@ -20,7 +20,7 @@ pub fn mine(input: &Vec<String>, threshold: f32) -> Result<(String, Vec<f64>), S
 
     debug!("ephemerals = {:?}", &ephemerals);
 
-    let threshold = f64::from(1.0f32 - threshold);
+    let threshold = f64::from(1.0f64 - (threshold as f64));
 
     // count logical cores this process could try to use
     let cpu_count = num_cpus::get();
@@ -63,6 +63,14 @@ fn distance (s: &str, r: &str) -> f64 {
     let res = hasher.result_str();
 
     jaro_winkler(s, &res).abs()
+}
+
+fn distances(hashes: Vec<String>, nonce: String) -> Result<(String, Vec<f64>), ()> {
+    let distances: Vec<f64> = (&hashes).into_iter().map(|val| {
+        distance(val, &nonce)
+    }).collect();
+
+    Ok((nonce, distances))
 }
 
 fn distance_check(s: &str, r: &str, threshold: f64) -> bool {

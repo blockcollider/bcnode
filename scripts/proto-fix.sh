@@ -1,4 +1,5 @@
-#!/bin/sh
+#! /usr/bin/env bash
+
 system=$(uname -s | tr '[:upper:]' '[:lower:]')
 regex='s/if (goog.DEBUG/if (true || goog.DEBUG/g'
 
