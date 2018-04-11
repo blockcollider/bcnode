@@ -69,6 +69,7 @@ export default class Controller {
     const msg = new Block()
     msg.setBlockchain('eth')
     msg.setHash(unifiedBlockData.blockHash)
+    msg.setPreviousHash(unifiedBlockData.prevHash)
 
     this._logger.debug(`Created unified block from eth block ${unifiedBlockData.blockNumber} (${unifiedBlockData.blockHash})`)
     this._rpc.rover.collectBlock(msg, (err, response) => {
@@ -76,7 +77,7 @@ export default class Controller {
         this._logger.error(`Error while collecting block ${inspect(err)}`)
         return
       }
-      this._logger.debug(`Collector Response ${inspect(response)}`)
+      this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
     })
   }
 

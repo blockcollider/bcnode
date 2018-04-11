@@ -177,7 +177,8 @@ proto.bc.Block.prototype.toObject = function(opt_includeInstance) {
 proto.bc.Block.toObject = function(includeInstance, msg) {
   var f, obj = {
     blockchain: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    hash: jspb.Message.getFieldWithDefault(msg, 2, "")
+    hash: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    previousHash: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -222,6 +223,10 @@ proto.bc.Block.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setHash(value);
       break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setPreviousHash(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -265,6 +270,13 @@ proto.bc.Block.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getPreviousHash();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
 };
 
 
@@ -295,6 +307,21 @@ proto.bc.Block.prototype.getHash = function() {
 /** @param {string} value */
 proto.bc.Block.prototype.setHash = function(value) {
   jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional string previous_hash = 3;
+ * @return {string}
+ */
+proto.bc.Block.prototype.getPreviousHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.Block.prototype.setPreviousHash = function(value) {
+  jspb.Message.setField(this, 3, value);
 };
 
 

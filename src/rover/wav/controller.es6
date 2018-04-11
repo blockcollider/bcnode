@@ -94,6 +94,7 @@ const _createUnifiedBlock = (block): Block => {
   const msg = new Block()
   msg.setBlockchain('wav')
   msg.setHash(obj.blockHash)
+  msg.setPreviousHash(obj.prevHash)
 
   return msg
 }
@@ -141,14 +142,14 @@ export default class Controller {
             this._blockCache.set(lastBlock.reference)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${inspect(unifiedBlock, {depth: 0})}`)
+            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
                 this._logger.error(`Error while collecting block ${inspect(err)}`)
                 return
               }
-              this._logger.debug(`Collector Response ${inspect(response)}`)
+              this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
             })
           }
         })

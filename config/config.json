@@ -8,6 +8,10 @@
     "path": "_data"
   },
 
+  "p2p": {
+    "rendezvous": "/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star/"
+  },
+
   "rovers": {
     "eth": {
       "altBootNodes": [

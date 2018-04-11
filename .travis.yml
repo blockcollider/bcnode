@@ -45,9 +45,14 @@ node_js:
   - "8"
 
 cache:
+  apt: true
   yarn: true
+  bundler: true
+  cargo: true
   directories:
     - "node_modules"
+    - "$HOME/.cargo"
+    - "$HOME/.rustup"
 
 script: yarn run dist
 
