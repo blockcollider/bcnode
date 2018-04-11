@@ -1,4 +1,4 @@
-Block Collider Node 
+Block Collider Node
 ===================
 #### Build 1 - "Boson Hunter"
 
@@ -66,7 +66,7 @@ $ ./bin/cli -h
 #### Startup node with rover GUI & BTC & LSK rovers
 
 ```
-$ ./bin/cli --ui --rovers btc,lsk 
+$ ./bin/cli --ui --rovers btc,lsk
 ```
 
 ### Development
@@ -109,12 +109,13 @@ $ open ./docs/index.html
 * pool.js - miner template for in memory TX pool
 * storage.js - blockchain storage MMAP and ztsd
 
-## Rovers (Alphabetical) 
+## Rovers (Alphabetical)
 * Bitcoin Blockchain
-* Ethereum Blockchain 
-* Lisk Blockchain 
+* Ethereum Blockchain
+* Lisk Blockchain
 * Neo Blockchain
 * Waves Blockchain
+
 ## Block Collider Developer Community
 
 Helpful community tools will be added: [https://github.com/blockcollider/awesome-blockcollider](https://github.com/blockcollider/awesome-blockcollider)
@@ -123,3 +124,5 @@ Helpful community tools will be added: [https://github.com/blockcollider/awesome
 * [Documentation](https://docs.blockcollider.org/docs)
 * hello [at] blockcollider.org
 
+## Blog
+# https://blog.blockcollider.org/latest
