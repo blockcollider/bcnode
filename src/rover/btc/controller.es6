@@ -99,7 +99,11 @@ export default class Controller {
 
     pool.on('peerdisconnect', (peer, addr) => {
       this._logger.debug(`removing peer ${peer.host}, ${addr}`)
-      network.removePeer(peer)
+      try {
+        network.removePeer(peer)
+      } catch (e) {
+        this._logger.warn(`Error while disconnecting peer ${peer.host}, ${addr}, ${e.message}`)
+      }
     })
 
     pool.on('peererror', function (peer, err) {

@@ -123,8 +123,7 @@ export default class Controller {
 
     const cycle = () => {
       this._logger.info('trying to get new block')
-      // maybe better getRandomNode?
-      const node = this._neoMesh.getNodeWithBlock(-1, 'latency', false)
+      const node = this._neoMesh.getRandomNode()
 
       return node.rpc.getBestBlockHash().then(bestBlockHash => {
         this._logger.debug(`got best block: "${bestBlockHash}"`)
