@@ -35,10 +35,12 @@ RUN npm install -g neon-cli
 RUN mkdir /src
 WORKDIR /src
 
-ADD . .
+COPY . .
 
 # And build everything
 RUN yarn run dist
+
+RUN mkdir -p /src/logs
 
 EXPOSE 3000 9090
 

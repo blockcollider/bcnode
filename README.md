@@ -25,6 +25,13 @@ Mining node with built-in block rover, DHT, and peer discovery.
 
 ## Getting started
 
+### Build and run docker image
+
+```
+$ docker build -t blockcollider/bcnode .
+$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui
+```
+
 ### Build from source
 
 ```
