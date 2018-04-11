@@ -37,14 +37,19 @@ export default class Engine {
    * Initialize engine internals
    *
    * - Open database
-   * - Store name of available rovers as Buffer
+   * - Store name of available rovers
    */
   async init () {
-    const roverNames = Buffer.from(JSON.stringify(Object.keys(rovers)))
-
-    // FIXME: Handle possible error
-    await this._persistence.open()
-      .then(() => this.persistence.put('rovers', roverNames))
+    const roverNames = Object.keys(rovers)
+    try {
+      await this._persistence.open()
+      const res = await this.persistence.put('rovers', roverNames)
+      if (res) {
+        this._logger.debug('Stored rovers to persistence')
+      }
+    } catch (e) {
+      this._logger.warn('Could not store rovers to persistence')
+    }
 
     this._logger.info('Engine initialized')
   }

@@ -88,13 +88,12 @@ export default class PersistenceRocksDb {
    * @param key
    * @param opts
    */
-  get (key: string, opts: Object = {}): Promise<Object> {
+  get (key: string, opts: Object = { asBuffer: true }): Promise<Object> {
     return new Promise((resolve, reject) => {
       this.db.get(key, opts, (err, value) => {
         if (err) {
           return reject(new Error(`${err.message} - ${key}`))
         }
-
         try {
           const deserialized = deserialize(value)
           return resolve(deserialized)
