@@ -139,7 +139,7 @@ export default class Controller {
           }
         }
       } catch (err) {
-        this._logger.error('commoin peerinv handler error', err)
+        this._logger.error('Common peerinv handler error', err)
       }
     })
 
@@ -147,8 +147,8 @@ export default class Controller {
       const { block } = _ref
 
       this._logger.info('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
-      this._logger.info('peer best height submitting block: ' + peer.bestHeight)
-      this._logger.info('LAST BLOCK ' + network.bestHeight)
+      this._logger.info('Peer best height submitting block: ' + peer.bestHeight)
+      this._logger.info('Last block' + network.bestHeight)
 
       if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
         block.lastBlock = network.bestHeight
@@ -160,8 +160,12 @@ export default class Controller {
             network.bestHeight = _block.blockNumber
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
-              console.log('Collector Response:', response);
-            });
+              if (err) {
+                this._logger.warn('RpcClient could not collect block')
+              } else {
+                this._logger.debug('Collector Response:', response)
+              }
+            })
           }
         }
       } else {
