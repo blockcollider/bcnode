@@ -15,17 +15,19 @@ Mining node with built-in block rover, DHT, and peer discovery.
 - Ubuntu 16.04 (GNU)
 - Mac OSX 10.11+ (Debian)
 
-### Software
+### Required Software
 
 - [git](https://git-scm.com/downloads) 2.1+
 - [nodejs](https://nodejs.org) 4.3+
 - [yarn](https://yarnpkg.com/en/docs/install) 1.3.2+
-- [boost](http://www.boost.org/) Boost 1.66.0+
 
+- [boost](http://www.boost.org/) Boost 1.66.0+
 
 ## Getting started
 
 ### Build and run docker image
+
+Install [cargo+rust](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 
 ```
 $ docker build -t blockcollider/bcnode .
