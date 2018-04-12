@@ -69,6 +69,12 @@ $ ./bin/cli -h
 $ ./bin/cli --ui --rovers btc,lsk
 ```
 
+#### Run node with all rovers, GUI, and socket stream   
+
+```
+$ ./bin/cli --ui --ws
+```
+
 ### Development
 
 ```
