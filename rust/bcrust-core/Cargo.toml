@@ -3,14 +3,21 @@ name = "bcrust-core"
 version = "0.1.0"
 authors = ["Tomas Korcak <korczis@gmail.com>"]
 
+[[bin]]
+name = "bcrust_core"
+path = "src/main.rs"
+
 [lib]
 name = "bcrust_core"
 path = "src/lib.rs"
 
 [dependencies]
+afl = { git = "https://github.com/rust-fuzz/afl.rs"}
 env_logger = "0.4"
 log = "0.3"
+num = "0.1"
 num_cpus = "1.7"
 rand = "0.4"
 rust-crypto = "0.2"
 strsim = "0.6"
+url = "1.0"
