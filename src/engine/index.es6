@@ -33,8 +33,9 @@ export default class Engine {
   _knownRovers: string[]; // eslint-disable-line no-undef
   _collectedBlocks: Object; // eslint-disable-line no-undef
   _canMine: bool; // eslint-disable-line no-undef
+  _miner: Miner; // eslint-disable-line no-undef
 
-  constructor (logger: Object, knownRovers: string[]) {
+  constructor (logger: Object, knownRovers: string[], miner = new Miner()) {
     this._logger = logging.getLogger(__filename)
     this._knownRovers = knownRovers
     this._node = new Node(this)
@@ -48,6 +49,7 @@ export default class Engine {
       this._collectedBlocks[roverName] = 0
     }
     this._canMine = false
+    this._miner = miner
   }
 
   /**
@@ -154,8 +156,7 @@ export default class Engine {
         })).then(blocks => {
           this._logger.debug(`Got ${blocks.length} blocks from persistence`)
           minerRequest.setFingerprintsList(blocks)
-          const miner = new Miner()
-          const minerResponse = miner.mine(minerRequest)
+          const minerResponse = this._miner.mine(minerRequest)
           this._logger.info(`Mined new block: ${JSON.stringify(minerResponse.toObject(), null, 4)}`)
           // TODO create and broadcast BC block here
         })
