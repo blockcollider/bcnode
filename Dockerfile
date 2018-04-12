@@ -28,9 +28,9 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly \
 
 ENV PATH "/root/.cargo/bin:$PATH"
 
-RUN cargo install clippy \
-    && cargo cargo-fuzz \
-    && cargo install sccache \
+# RUN cargo install clippy \
+#    && cargo install cargo-fuzz \
+#    && cargo install sccache \
 
 ENV RUSTC_WRAPPER sccache
 
