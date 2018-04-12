@@ -28,18 +28,8 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly \
 
 ENV PATH "/root/.cargo/bin:$PATH"
 
-# RUN cargo install clippy \
-#    && cargo install cargo-fuzz \
-#    && cargo install sccache \
-
-ENV RUSTC_WRAPPER sccache
-
 # Install neon-bindings
 RUN npm install -g neon-cli
-
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-RUN yarn
 
 # Create /src folder and switch to it
 RUN mkdir /src
