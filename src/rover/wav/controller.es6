@@ -136,7 +136,7 @@ export default class Controller {
       this._logger.debug('Trying to get new block')
       return getLastHeight(this._wavesApi).then(height => {
         this._logger.debug(`Got last height '${height}'`)
-        getBlock(this._wavesApi, height).then(lastBlock => {
+        getBlock(this._wavesApi, height - 1).then(lastBlock => {
           if (!this._blockCache.has(lastBlock.reference)) {
             this._logger.info(`Unseen new block '${lastBlock.reference}', height: ${height}`)
             this._blockCache.set(lastBlock.reference)
