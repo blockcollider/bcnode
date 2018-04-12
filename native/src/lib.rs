@@ -58,7 +58,7 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
         String::from(info.get_hash())
     }).collect();
 
-    let distance = in_block.get_threshold();
+    let distance = in_block.get_threshold() as f64;
     let result = miner::mine(&hashes, distance);
     debug!("{:?}", &result);
 
