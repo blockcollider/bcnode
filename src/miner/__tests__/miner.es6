@@ -1,7 +1,7 @@
 const Miner = require('../').Miner
 
 
-const { BlockchainHash, BlockIn } = require('../../protos/miner_pb')
+const { BlockFingerprint, MinerRequest } = require('../../protos/miner_pb')
 const native = require('../../../native/index.node')
 
 describe('Miner', () => {
@@ -14,22 +14,29 @@ describe('Miner', () => {
   })
 
   test('mine()', () => {
-    const blockIn = new BlockIn()
+    const request = new MinerRequest()
 
-    blockIn.setThreshold(0.5);
-    const hashes = [
-      new BlockchainHash(["btc", "123"]),
-      new BlockchainHash(["eth", "234"]),
-      new BlockchainHash(["neo", "345"]),
-      new BlockchainHash(["wav", "456"]),
-      new BlockchainHash(["lsk", "567"]),
+    const blocks = {
+      btc: '00000000000000000026651a7e8638c65ec69991d8f5e437ee54867adbf07c49',
+      eth: '0x63ef70aa2161f7e23f35996c1f420c8b24a67be231b2ec9147477f6c4c3d868e',
+      neo: '0x27a022e66691fc40d264ef615cd1299c9247814fde451390c602160ae954881b',
+      wav: '2YzcfeKZW65PvzQP42ocD6XYJMKibRrj2xcvJJwZTqnmrhCyj4TZBymNmh9FAFXBaghvfGbGmpUvg5DjQ5xS3W6C',
+      lsk: '4571951483005954606'
+    }
+
+    const fingerprints = [
+      new BlockFingerprint(['btc', blocks.btc, Date.now(), true]),
+      new BlockFingerprint(['eth', blocks.eth, Date.now(), true]),
+      new BlockFingerprint(['neo', blocks.neo, Date.now(), true]),
+      new BlockFingerprint(['wav', blocks.wav, Date.now(), true]),
+      new BlockFingerprint(['lsk', blocks.lsk, Date.now(), true])
     ]
-    blockIn.setHashesList(hashes);
+    request.setFingerprintsList(fingerprints)
 
     const miner = new Miner();
-    const blockOut = miner.mine(blockIn)
+    const response = miner.mine(request)
 
-    expect(parseInt(blockOut.getNonce())).not.toBe(null)
+    expect(parseInt(response.getNonce())).not.toBe(null)
   })
 })
 
