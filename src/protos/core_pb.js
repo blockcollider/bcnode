@@ -178,7 +178,8 @@ proto.bc.Block.toObject = function(includeInstance, msg) {
   var f, obj = {
     blockchain: jspb.Message.getFieldWithDefault(msg, 1, ""),
     hash: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    previousHash: jspb.Message.getFieldWithDefault(msg, 3, "")
+    previousHash: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0)
   };
 
   if (includeInstance) {
@@ -226,6 +227,10 @@ proto.bc.Block.deserializeBinaryFromReader = function(msg, reader) {
     case 3:
       var value = /** @type {string} */ (reader.readString());
       msg.setPreviousHash(value);
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readUint32());
+      msg.setTimestamp(value);
       break;
     default:
       reader.skipField();
@@ -277,6 +282,13 @@ proto.bc.Block.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getTimestamp();
+  if (f !== 0) {
+    writer.writeUint32(
+      4,
+      f
+    );
+  }
 };
 
 
@@ -322,6 +334,21 @@ proto.bc.Block.prototype.getPreviousHash = function() {
 /** @param {string} value */
 proto.bc.Block.prototype.setPreviousHash = function(value) {
   jspb.Message.setField(this, 3, value);
+};
+
+
+/**
+ * optional uint32 timestamp = 4;
+ * @return {number}
+ */
+proto.bc.Block.prototype.getTimestamp = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.Block.prototype.setTimestamp = function(value) {
+  jspb.Message.setField(this, 4, value);
 };
 
 
