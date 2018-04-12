@@ -80,3 +80,19 @@ fn distance_check(s: &str, r: &str, threshold: f64) -> bool {
 fn get_random_string() -> String {
     rand::random::<u32>().to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test::Bencher;
+
+    #[test]
+    fn test_jaro_winkler() {
+        assert_eq!(jaro_winkler("abc", "abc").abs(), 1f64);
+    }
+
+    #[bench]
+    fn bench_get_random_string(b: &mut Bencher) {
+        b.iter(|| get_random_string());
+    }
+}

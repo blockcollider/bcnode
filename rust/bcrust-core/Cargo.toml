@@ -1,0 +1,16 @@
+[package]
+name = "bcrust-core"
+version = "0.1.0"
+authors = ["Tomas Korcak <korczis@gmail.com>"]
+
+[lib]
+name = "bcrust_core"
+path = "src/lib.rs"
+
+[dependencies]
+env_logger = "0.4"
+log = "0.3"
+num_cpus = "1.7"
+rand = "0.4"
+rust-crypto = "0.2"
+strsim = "0.6"

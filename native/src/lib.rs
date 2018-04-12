@@ -1,7 +1,8 @@
 #![cfg_attr(test, feature(plugin))]
 #![cfg_attr(test, plugin(clippy))]
 
-extern crate crypto;
+extern crate bcrust_core;
+
 #[macro_use]
 extern crate neon;
 extern crate grpc;
@@ -10,11 +11,10 @@ extern crate grpc;
 extern crate log;
 
 extern crate env_logger;
-extern crate num_cpus;
 extern crate protobuf;
-extern crate rand;
-extern crate strsim;
 extern crate tls_api;
+
+use bcrust_core::miner;
 
 use neon::vm::{Call, JsResult, Lock};
 use neon::js::JsBoolean;
@@ -25,7 +25,6 @@ use neon::mem::Handle;
 use protobuf::core::parse_from_bytes;
 use protobuf::Message;
 
-pub mod miner;
 pub mod protos;
 
 use protos::miner::{BlockIn, BlockOut};
@@ -90,3 +89,4 @@ register_module!(m, {
 
     Ok(())
 });
+

@@ -20,6 +20,8 @@ native/index.node
 
 # Rust stuff
 target/
+fuzz/artifacts
+fuzz/corpus
 
 # Logs
 logs/
