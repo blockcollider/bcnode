@@ -1,35 +1,259 @@
-const Miner = require('../').Miner
+const BN = require('bn.js')
+const _ = require('lodash')
 
-
-const { BlockchainHash, BlockIn } = require('../../protos/miner_pb')
-const native = require('../../../native/index.node')
+const {
+  blake,
+  createMerkleRoot,
+  getDiff,
+  getExpFactorDiff,
+  mine
+} = require('../miner')
 
 describe('Miner', () => {
-  beforeAll(() => {
-    return native.initLogger();
-  })
-
-  it('can instantiate self', () => {
-    expect(new Miner()).toBeInstanceOf(Miner)
-  })
-
   test('mine()', () => {
-    const blockIn = new BlockIn()
+    /* - example Bitcoin block
+      {
+        hash:      <---- Just need this for "const blockHashes" below
+        prevHash:
+        merkRoot:
+      }
+      */
 
-    blockIn.setThreshold(0.5);
-    const hashes = [
-      new BlockchainHash(["btc", "123"]),
-      new BlockchainHash(["eth", "234"]),
-      new BlockchainHash(["neo", "345"]),
-      new BlockchainHash(["wav", "456"]),
-      new BlockchainHash(["lsk", "567"]),
+    const minerPublicAddress = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
+    const oldTransactions = []
+
+    const oldBestBlockchainsBlockHeaders = [
+      {
+        hash: '0x39499390034',
+        prevHash: '0xxxxxxxxxxxxxxxxx',
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: 'ospoepfkspdfs',
+        prevHash: '0xxxxxxxxxxxxxxxxx',
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: '0x39300923i42034',
+        prevHash: '0xxxxxxxxxxxxxxxxx',
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: '0xsjdfo3i2oifji3o2',
+        prevHash: '0xxxxxxxxxxxxxxxxx',
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: '0xw3jkfok2jjvijief',
+        prevHash: '0xxxxxxxxxxxxxxxxx',
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      }
     ]
-    blockIn.setHashesList(hashes);
 
-    const miner = new Miner();
-    const blockOut = miner.mine(blockIn)
+    const oldBestBlockchainHeaderHashes = oldBestBlockchainsBlockHeaders.map(
+      function (b) {
+        return blake(b.hash + b.merkleRoot)
+      }
+    )
 
-    expect(parseInt(blockOut.getNonce())).not.toBe(null)
+    const oldChainRoot = oldBestBlockchainHeaderHashes.reduce(function (all, b) {
+      return all.xor(new BN(Buffer.from(b, 'hex')))
+    }, new BN(0))
+
+    const genesisBlock = {
+      hash: '0xxxxxxxxxxxxxxxxxxxxxxxxx', /// BLAKE("prevHashAddress" + "merkleRoot")
+      height: 1,
+      miner: minerPublicAddress,
+      difficulty: 141129464479256,
+      timestamp: ((Date.now * 1000) << 0) - 70,
+      merkleRoot: createMerkleRoot(
+        oldBestBlockchainHeaderHashes.concat(
+          oldTransactions.concat([minerPublicAddress, 1])
+        )
+      ), // blockchains, transactions, miner address, height
+      chainRoot: blake(oldChainRoot.toString()),
+      distance: 1, // <--- sign its a genesis block
+      nTransactions: 0,
+      transactions: oldTransactions,
+      nBlockchains: 5,
+      blockchainBlockHeaders: oldBestBlockchainsBlockHeaders
+    }
+
+    console.log(genesisBlock)
+
+    /* - !!! THIS NEW BLOCK COMES IN !!!
+    {
+        hash: "0x0000000000000000000",
+        merkleRoot: "0x000x00000",
+        height: 3,
+        timestamp: 1400000000
+    }
+
+    so a database query would gather all of the best blocks below in newBestBlockchainsBlockHeaders to assemble work around it
+    most of the blocks would be the same with the same values
+    */
+
+    const newTransactions = []
+    const newBestBlockchainsBlockHeaders = [
+      {
+        hash: '0x39499390034',
+        prevHash: "0xxxxxxxxxxxxxxxxx'",
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: '0xksjiefjisefmnsef', // <-------  the new block would update his previous block
+        prevHash: 'ospoepfkspdfs', // the previous hash from above
+        merkleRoot: '0x000x00000',
+        height: 3,
+        timestamp: 1480000000
+      },
+      {
+        hash: '0x39300923i42034',
+        prevHash: "0xxxxxxxxxxxxxxxxx'",
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: '0xsjdfo3i2oifji3o2',
+        prevHash: "0xxxxxxxxxxxxxxxxx'",
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      },
+      {
+        hash: '0xw3jkfok2jjvijief',
+        prevHash: "0xxxxxxxxxxxxxxxxx'",
+        merkleRoot: '0x000x00000',
+        height: 2,
+        timestamp: 1400000000
+      }
+    ]
+
+    const blockHashes = newBestBlockchainsBlockHeaders.map(function (header) {
+      return blake(header.hash + header.merkleRoot)
+    })
+
+    const newChainRoot = blockHashes.reduce(function (all, hash) {
+      return all.xor(new BN(Buffer.from(hash, 'hex')))
+    }, new BN(0))
+
+    const work = blake(
+      newChainRoot
+        .xor(
+          new BN(
+            Buffer.from(
+              blake(genesisBlock.hash + genesisBlock.merkleRoot),
+              'hex'
+            )
+          )
+        )
+        .toString()
+    )
+
+    let handicap = 0 // if BC address only, greatly increase difficulty (cataclysmic event)
+    const parentColliderBlockDifficulty = new BN(genesisBlock.difficulty, 16) // Assumes parent's difficulty is 141129464479256
+    const parentShareDiff = parentColliderBlockDifficulty.div(
+      new BN(blockHashes.length + 1, 16)
+    )
+
+    const minimumDiff = new BN(11801972029393, 16)
+    const minimumDiffShare = minimumDiff.div(new BN(blockHashes.length, 16)) // Standard deviation 100M cycles divided by the number of chains
+    const timestampEquality = [
+      oldBestBlockchainsBlockHeaders[0].timestamp ===
+      newBestBlockchainsBlockHeaders[0].timestamp, // these would be equal
+      oldBestBlockchainsBlockHeaders[1].timestamp ===
+      newBestBlockchainsBlockHeaders[1].timestamp, // this would be different
+      oldBestBlockchainsBlockHeaders[2].timestamp ===
+      newBestBlockchainsBlockHeaders[2].timestamp, // this would be equal
+      oldBestBlockchainsBlockHeaders[3].timestamp ===
+      newBestBlockchainsBlockHeaders[3].timestamp, // this would be equal
+      oldBestBlockchainsBlockHeaders[4].timestamp ===
+      newBestBlockchainsBlockHeaders[4].timestamp // this would be equal
+    ]
+
+    if (_.every(timestampEquality) === true) {
+      // If none of the chains have increased in height
+      handicap = 4
+    }
+
+    const blockColliderShareDiff = getDiff(
+      (Date.now() * 1000) << 0,
+      genesisBlock.timestamp,
+      minimumDiffShare,
+      parentShareDiff,
+      handicap
+    )
+
+    const newDifficulty = newBestBlockchainsBlockHeaders.reduce(function (
+      sum,
+      header,
+      i
+      ) {
+        return sum.add(
+          getDiff(
+            header.timestamp,
+            oldBestBlockchainsBlockHeaders[i].timestamp,
+            parentShareDiff,
+            minimumDiffShare
+          )
+        )
+      },
+      new BN(0))
+
+    newDifficulty.add(blockColliderShareDiff) // Add the Block Collider's chain to the values
+
+    const preExpDiff = getDiff(
+      (Date.now() * 1000) << 0,
+      genesisBlock.timestamp,
+      minimumDiff,
+      newDifficulty
+    ) // Calculate the final pre-singularity difficulty adjustment
+
+    const newMerkleRoot = createMerkleRoot(
+      blockHashes.concat(oldTransactions.concat([minerPublicAddress, 1]))
+    ) // blockchains, transactions, miner address, height
+
+    const newBlock = {
+      hash: blake(genesisBlock.hash + newMerkleRoot),
+      height: genesisBlock.height + 1,
+      merkleRoot: newMerkleRoot,
+      difficulty: newDifficulty,
+      chainRoot: blake(newChainRoot.toString()),
+      distance: 0,
+      nonce: 0,
+      nTransactions: 0,
+      transactions: newTransactions,
+      nBlockchains: 5,
+      blockchainBlockHeaders: newBestBlockchainsBlockHeaders
+    }
+
+    newBlock.difficulty = getExpFactorDiff(preExpDiff, genesisBlock.height) // Final difficulty post-singularity calculators <--- this is the threshold hold the work provided must beat
+
+    // const solution = mine(work, newBlock.difficuilty); /// <--- this is the correct version, below div by 16 so it would go faster
+    const solution = mine(
+      work,
+      minerPublicAddress,
+      newMerkleRoot,
+      newBlock.difficulty.div(new BN(11, 16)).toString()
+    )
+
+    newBlock.distance = solution.distance
+    newBlock.nonce = solution.nonce
+    newBlock.difficulty = newBlock.difficulty.toString()
+
+    console.log(newBlock)
   })
 })
-

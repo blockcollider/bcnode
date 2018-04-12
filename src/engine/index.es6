@@ -19,7 +19,7 @@ const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
 // const { Block } = require('../protos/core_pb')
 const { BlockIn, BlockchainHash } = require('../protos/miner_pb')
-const Miner = require('../miner').Miner
+const Miner = require('../miner').MinerNative
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
