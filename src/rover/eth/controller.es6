@@ -46,7 +46,7 @@ export default class Controller {
     obj.blockHash = '0x' + block.hash().toString('hex')
     obj.root = d.header.stateRoot
     obj.nonce = parseInt(d.header.nonce, 16)
-    obj.timestamp = parseInt(d.header.timestamp, 16)
+    obj.timestamp = parseInt(d.header.timestamp, 16) * 1000
     obj.difficulty = parseInt(d.header.difficulty, 16)
     obj.coinbase = d.header.coinbase
     obj.marked = false
@@ -70,6 +70,7 @@ export default class Controller {
     msg.setBlockchain('eth')
     msg.setHash(unifiedBlockData.blockHash)
     msg.setPreviousHash(unifiedBlockData.prevHash)
+    msg.setTimestamp(unifiedBlockData.timestamp)
 
     this._logger.debug(`Created unified block from eth block ${unifiedBlockData.blockNumber} (${unifiedBlockData.blockHash})`)
     this._rpc.rover.collectBlock(msg, (err, response) => {

@@ -58,7 +58,7 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   obj.size = block.size
   obj.nonce = block.nonce
   obj.nextConsensus = block.nextconsensus
-  obj.timestamp = block.time
+  obj.timestamp = block.time * 1000
   obj.version = block.version
   obj.transactions = block.tx.reduce(function (all, t) {
     const tx = {
@@ -75,6 +75,7 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   msg.setBlockchain('neo')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
 
   return msg
 }

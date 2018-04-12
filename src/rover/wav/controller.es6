@@ -76,7 +76,7 @@ const _createUnifiedBlock = (block): Block => {
   obj.generator = block.generator
   obj.genSignature = block['nxt-consensus']['generation-signature']
   obj.baseTarget = block['nxt-consensus']['base-target']
-  obj.timestamp = block.timestamp
+  obj.timestamp = parseInt(block.timestamp, 10)
   obj.version = block.version
   obj.generator = block.generator
   obj.transactions = block.transactions.reduce(function (all, t) {
@@ -95,6 +95,7 @@ const _createUnifiedBlock = (block): Block => {
   msg.setBlockchain('wav')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
 
   return msg
 }
