@@ -183,10 +183,12 @@ export function split (t) {
 }
 
 /**
- * FUNCTION: dist(t)
+ * FUNCTION: dist(x, y, clbk)
  *    Converts cosine similary to cos distance
  *
- * @param {String} t
+ * @param {String} x
+ * @param {String} y
+ * @param {String} cblk
  * @returns {Number|Array}
  */
 export function dist (x, y, clbk) {
@@ -200,8 +202,7 @@ export function dist (x, y, clbk) {
 }
 
 /**
- * FUNCTION: distance(a,b)
- *    Returns summed distances between two strings broken into of 8 bits
+ * Returns summed distances between two strings broken into of 8 bits
  *
  * @param {Hash} a
  * @param {Hash} b
@@ -219,8 +220,7 @@ export function distance (a, b) {
 }
 
 /**
- * FUNCTION: mine(work)
- *    Finds the mean of the distances from a provided set of hashed header proofs
+ * Finds the mean of the distances from a provided set of hashed header proofs
  *
  * @param {Array} work
  * @returns {Object} dist,nonce
