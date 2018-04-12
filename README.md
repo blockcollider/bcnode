@@ -25,7 +25,13 @@ Mining node with built-in block rover, DHT, and peer discovery.
 
 ## Getting started
 
-### Build and run docker image
+### Run official docker image from public repo
+
+```
+$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
+```
+
+### Build and run docker image locally
 
 Install [cargo+rust](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 
