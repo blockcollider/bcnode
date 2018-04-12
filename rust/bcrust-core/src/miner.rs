@@ -87,12 +87,12 @@ mod tests {
     use test::Bencher;
 
     #[test]
-    fn test_jaro_winkler() {
+    fn jaro_winkler_test() {
         assert_eq!(jaro_winkler("abc", "abc").abs(), 1f64);
     }
 
     #[bench]
-    fn bench_get_random_string(b: &mut Bencher) {
+    fn get_random_string_bench(b: &mut Bencher) {
         b.iter(|| get_random_string());
     }
 }
