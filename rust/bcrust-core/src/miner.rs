@@ -65,14 +65,6 @@ fn distance (s: &str, r: &str) -> f64 {
     jaro_winkler(s, &res).abs()
 }
 
-//fn distances(hashes: Vec<String>, nonce: String) -> Result<(String, Vec<f64>), ()> {
-//    let distances: Vec<f64> = (&hashes).into_iter().map(|val| {
-//        distance(val, &nonce)
-//    }).collect();
-//
-//    Ok((nonce, distances))
-//}
-
 fn distance_check(s: &str, r: &str, threshold: f64) -> bool {
     distance(s, r) > threshold
 }

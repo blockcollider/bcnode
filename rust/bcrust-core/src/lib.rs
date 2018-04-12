@@ -12,6 +12,7 @@ extern crate num_cpus;
 extern crate rand;
 extern crate strsim;
 
+pub mod data;
 pub mod funcs;
 pub mod miner;
 pub mod miner_new;
