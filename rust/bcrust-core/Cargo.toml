@@ -13,6 +13,7 @@ path = "src/lib.rs"
 
 [dependencies]
 afl = { git = "https://github.com/rust-fuzz/afl.rs"}
+blake2-rfc = "0.2"
 env_logger = "0.4"
 log = "0.3"
 num = "0.1"
