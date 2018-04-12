@@ -6,7 +6,7 @@ Mining node with built-in block rover, DHT, and peer discovery.
 
 ## Status
 
-[![Build Status](https://travis-ci.com/blockcollider/bcnode.png?token=zcFCsPT3bTmtCApsaoXp&branch=master)](https://travis-ci.com/blockcollider/bcnode)
+[![Build Status](https://travis-ci.org/blockcollider/bcnode.svg?branch=master)](https://travis-ci.org/blockcollider/bcnode)
 
 ## System Requirements
 
