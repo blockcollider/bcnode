@@ -14,7 +14,8 @@ extern crate env_logger;
 extern crate protobuf;
 extern crate tls_api;
 
-use bcrust_core::miner;
+use bcrust_core::miner_new;
+use bcrust_core::protos::miner::*;
 
 use neon::vm::{Call, JsResult, Lock};
 use neon::js::JsBoolean;
@@ -24,10 +25,6 @@ use neon::mem::Handle;
 
 use protobuf::core::parse_from_bytes;
 use protobuf::Message;
-
-pub mod protos;
-
-use protos::miner::{MinerRequest, MinerResponse};
 
 fn init_logger(call: Call) -> JsResult<JsBoolean> {
     let scope = call.scope;
@@ -54,20 +51,7 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
         parse_from_bytes::<MinerRequest>(&slice)
     }).unwrap();
 
-    // TODO also use get_timestamp() and is_current() & get_blockchain() from fingerprints
-    // TODO sort fingerprints in according to miner::mine doc
-    let hashes: Vec<String> = in_block.get_fingerprints().iter().map(|info| { // info is now BlockFingerprint from miner.proto
-        String::from(info.get_hash())
-    }).collect();
-
-    let distance = 0.3f64; // TODO compute from fingerprints
-    let result = miner::mine(&hashes, distance);
-    debug!("{:?}", &result);
-
-    // Construct result block
-    let mut out_block = MinerResponse::new();
-    out_block.set_nonce(result.unwrap().0);
-
+    let out_block: MinerResponse = miner_new::mine(&in_block);
     debug!("{:?}", &out_block);
 
     // Serialize output
