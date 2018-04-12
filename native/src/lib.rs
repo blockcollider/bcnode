@@ -5,16 +5,14 @@ extern crate bcrust_core;
 
 #[macro_use]
 extern crate neon;
-extern crate grpc;
 
 #[macro_use]
 extern crate log;
 
 extern crate env_logger;
 extern crate protobuf;
-extern crate tls_api;
 
-use bcrust_core::miner_new;
+use bcrust_core::miner;
 use bcrust_core::protos::miner::*;
 
 use neon::vm::{Call, JsResult, Lock};
@@ -51,7 +49,7 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
         parse_from_bytes::<MinerRequest>(&slice)
     }).unwrap();
 
-    let out_block: MinerResponse = miner_new::mine(&in_block);
+    let out_block: MinerResponse = miner::mine(&in_block);
     debug!("{:?}", &out_block);
 
     // Serialize output
