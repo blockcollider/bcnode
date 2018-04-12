@@ -27,7 +27,7 @@ use protobuf::Message;
 
 pub mod protos;
 
-use protos::miner::{BlockIn, BlockOut};
+use protos::miner::{MinerRequest, MinerResponse};
 
 fn init_logger(call: Call) -> JsResult<JsBoolean> {
     let scope = call.scope;
@@ -51,19 +51,21 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
     let mut buffer: Handle<JsBuffer> = call.arguments.require(call.scope, 0)?.check::<JsBuffer>()?;
     let in_block = buffer.grab(|contents| {
         let slice = contents.as_slice();
-        parse_from_bytes::<BlockIn>(&slice)
+        parse_from_bytes::<MinerRequest>(&slice)
     }).unwrap();
 
-    let hashes: Vec<String> = in_block.get_hashes().iter().map(|info| {
+    // TODO also use get_timestamp() and is_current() & get_blockchain() from fingerprints
+    // TODO sort fingerprints in according to miner::mine doc
+    let hashes: Vec<String> = in_block.get_fingerprints().iter().map(|info| { // info is now BlockFingerprint from miner.proto
         String::from(info.get_hash())
     }).collect();
 
-    let distance = in_block.get_threshold() as f64;
+    let distance = 0.3f64; // TODO compute from fingerprints
     let result = miner::mine(&hashes, distance);
     debug!("{:?}", &result);
 
     // Construct result block
-    let mut out_block = BlockOut::new();
+    let mut out_block = MinerResponse::new();
     out_block.set_nonce(result.unwrap().0);
 
     debug!("{:?}", &out_block);
