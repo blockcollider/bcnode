@@ -18,7 +18,7 @@ const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
 // const { Block } = require('../protos/core_pb')
-const { BlockIn, BlockchainHash } = require('../protos/miner_pb')
+const { MinerRequest, BlockFingerprint } = require('../protos/miner_pb')
 const Miner = require('../miner').Miner
 
 export default class Engine {
@@ -133,21 +133,21 @@ export default class Engine {
     this._emitter.on('collectBlock', ({ block }) => {
       blocks[block.getBlockchain()] = block.getHash()
 
-      const blockIn = new BlockIn()
+      const minerRequest = new MinerRequest()
+      minerRequest.setMerkleRoot('e3b98a4da31a127d4bde6e43033f66ba274cab0eb7eb1c70ec41402bf6273dd8')
 
-      blockIn.setThreshold(0.5)
-      const hashes = [
-        new BlockchainHash(['btc', blocks.btc]),
-        new BlockchainHash(['eth', blocks.eth]),
-        new BlockchainHash(['neo', blocks.neo]),
-        new BlockchainHash(['wav', blocks.wav]),
-        new BlockchainHash(['lsk', blocks.lsk])
+      const fingerprints = [
+        new BlockFingerprint(['btc', blocks.btc, Date.now(), true]),
+        new BlockFingerprint(['eth', blocks.eth, Date.now(), true]),
+        new BlockFingerprint(['neo', blocks.neo, Date.now(), true]),
+        new BlockFingerprint(['wav', blocks.wav, Date.now(), true]),
+        new BlockFingerprint(['lsk', blocks.lsk, Date.now(), true])
       ]
-      blockIn.setHashesList(hashes)
+      minerRequest.setFingerprintsList(fingerprints)
 
       const miner = new Miner()
-      const blockOut = miner.mine(blockIn)
-      this._logger.info(`Mined new block: ${JSON.stringify(blockOut.toObject(), null, 4)}`)
+      const minerResponse = miner.mine(minerRequest)
+      this._logger.info(`Mined new block: ${JSON.stringify(minerResponse.toObject(), null, 4)}`)
     })
   }
 
