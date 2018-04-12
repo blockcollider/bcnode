@@ -56,7 +56,7 @@ export async function main (args: string[]) {
   native.initLogger()
 
   // Create instance of engine
-  const engine = new Engine(logging.getLogger(__filename))
+  const engine = new Engine(logging.getLogger(__filename), ROVERS)
 
   try {
     await engine.init()
