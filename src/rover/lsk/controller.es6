@@ -29,9 +29,11 @@ type LiskBlock = { // eslint-disable-line no-undef
   blockSignature: string,
   confirmations: number,
   totalForged: number,
-  timestamp: string,
+  timestamp: number,
   version: string,
 }
+
+const LSK_GENESIS_DATE = new Date('2016-05-24T17:00:00.000Z')
 
 const getMerkleRoot = (txs) => txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
 
@@ -48,8 +50,11 @@ const getTransactionsForBlock = (api: Object, blockId: string): Promise<Object[]
   return api.sendRequest('transactions', { blockId }).then(response => response.transactions)
 }
 
+const getAbsoluteTimestamp = (blockTs: number) => {
+  return ((LSK_GENESIS_DATE.getTime() / 1000 << 0) + blockTs) * 1000
+}
+
 const _createUnifiedBlock = (block): Block => {
-  // TODO return Block as message
   const obj = {}
 
   obj.blockNumber = block.height
@@ -64,7 +69,7 @@ const _createUnifiedBlock = (block): Block => {
   obj.blockSignature = block.blockSignature
   obj.confirmations = block.confirmations
   obj.totalForged = block.totalForged
-  obj.timestamp = block.timestamp
+  obj.timestamp = getAbsoluteTimestamp(parseInt(block.timestamp, 10))
   obj.version = block.version
   obj.transactions = block.transactions.reduce(function (all, t) {
     const tx = {
@@ -83,6 +88,7 @@ const _createUnifiedBlock = (block): Block => {
   msg.setBlockchain('lsk')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
 
   return msg
 }

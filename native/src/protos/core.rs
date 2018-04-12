@@ -152,6 +152,7 @@ pub struct Block {
     pub blockchain: ::std::string::String,
     pub hash: ::std::string::String,
     pub previous_hash: ::std::string::String,
+    pub timestamp: u64,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -276,6 +277,29 @@ impl Block {
     fn mut_previous_hash_for_reflect(&mut self) -> &mut ::std::string::String {
         &mut self.previous_hash
     }
+
+    // uint64 timestamp = 4;
+
+    pub fn clear_timestamp(&mut self) {
+        self.timestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_timestamp(&mut self, v: u64) {
+        self.timestamp = v;
+    }
+
+    pub fn get_timestamp(&self) -> u64 {
+        self.timestamp
+    }
+
+    fn get_timestamp_for_reflect(&self) -> &u64 {
+        &self.timestamp
+    }
+
+    fn mut_timestamp_for_reflect(&mut self) -> &mut u64 {
+        &mut self.timestamp
+    }
 }
 
 impl ::protobuf::Message for Block {
@@ -295,6 +319,13 @@ impl ::protobuf::Message for Block {
                 },
                 3 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.previous_hash)?;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.timestamp = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -317,6 +348,9 @@ impl ::protobuf::Message for Block {
         if !self.previous_hash.is_empty() {
             my_size += ::protobuf::rt::string_size(3, &self.previous_hash);
         }
+        if self.timestamp != 0 {
+            my_size += ::protobuf::rt::value_size(4, self.timestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -331,6 +365,9 @@ impl ::protobuf::Message for Block {
         }
         if !self.previous_hash.is_empty() {
             os.write_string(3, &self.previous_hash)?;
+        }
+        if self.timestamp != 0 {
+            os.write_uint64(4, self.timestamp)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -391,6 +428,11 @@ impl ::protobuf::MessageStatic for Block {
                     Block::get_previous_hash_for_reflect,
                     Block::mut_previous_hash_for_reflect,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "timestamp",
+                    Block::get_timestamp_for_reflect,
+                    Block::mut_timestamp_for_reflect,
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<Block>(
                     "Block",
                     fields,
@@ -406,6 +448,7 @@ impl ::protobuf::Clear for Block {
         self.clear_blockchain();
         self.clear_hash();
         self.clear_previous_hash();
+        self.clear_timestamp();
         self.unknown_fields.clear();
     }
 }
@@ -423,10 +466,10 @@ impl ::protobuf::reflect::ProtobufValue for Block {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\ncore.proto\x12\x02bc\"\x06\n\x04Null\"`\n\x05Block\x12\x1e\n\nblockc\
+    \n\ncore.proto\x12\x02bc\"\x06\n\x04Null\"~\n\x05Block\x12\x1e\n\nblockc\
     hain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\x01(\
-    \tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cpreviousHashb\
-    \x06proto3\
+    \tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cpreviousHash\
+    \x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestampb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

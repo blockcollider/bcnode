@@ -22,30 +22,32 @@ use protobuf::Message as Message_imported_for_functions;
 use protobuf::ProtobufEnum as ProtobufEnum_imported_for_functions;
 
 #[derive(PartialEq,Clone,Default)]
-pub struct BlockchainHash {
+pub struct BlockFingerprint {
     // message fields
     pub blockchain: ::std::string::String,
     pub hash: ::std::string::String,
+    pub timestamp: u64,
+    pub is_current: bool,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
 }
 
 // see codegen.rs for the explanation why impl Sync explicitly
-unsafe impl ::std::marker::Sync for BlockchainHash {}
+unsafe impl ::std::marker::Sync for BlockFingerprint {}
 
-impl BlockchainHash {
-    pub fn new() -> BlockchainHash {
+impl BlockFingerprint {
+    pub fn new() -> BlockFingerprint {
         ::std::default::Default::default()
     }
 
-    pub fn default_instance() -> &'static BlockchainHash {
-        static mut instance: ::protobuf::lazy::Lazy<BlockchainHash> = ::protobuf::lazy::Lazy {
+    pub fn default_instance() -> &'static BlockFingerprint {
+        static mut instance: ::protobuf::lazy::Lazy<BlockFingerprint> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const BlockchainHash,
+            ptr: 0 as *const BlockFingerprint,
         };
         unsafe {
-            instance.get(BlockchainHash::new)
+            instance.get(BlockFingerprint::new)
         }
     }
 
@@ -116,9 +118,55 @@ impl BlockchainHash {
     fn mut_hash_for_reflect(&mut self) -> &mut ::std::string::String {
         &mut self.hash
     }
+
+    // uint64 timestamp = 3;
+
+    pub fn clear_timestamp(&mut self) {
+        self.timestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_timestamp(&mut self, v: u64) {
+        self.timestamp = v;
+    }
+
+    pub fn get_timestamp(&self) -> u64 {
+        self.timestamp
+    }
+
+    fn get_timestamp_for_reflect(&self) -> &u64 {
+        &self.timestamp
+    }
+
+    fn mut_timestamp_for_reflect(&mut self) -> &mut u64 {
+        &mut self.timestamp
+    }
+
+    // bool is_current = 4;
+
+    pub fn clear_is_current(&mut self) {
+        self.is_current = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_is_current(&mut self, v: bool) {
+        self.is_current = v;
+    }
+
+    pub fn get_is_current(&self) -> bool {
+        self.is_current
+    }
+
+    fn get_is_current_for_reflect(&self) -> &bool {
+        &self.is_current
+    }
+
+    fn mut_is_current_for_reflect(&mut self) -> &mut bool {
+        &mut self.is_current
+    }
 }
 
-impl ::protobuf::Message for BlockchainHash {
+impl ::protobuf::Message for BlockFingerprint {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -132,6 +180,20 @@ impl ::protobuf::Message for BlockchainHash {
                 },
                 2 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
+                },
+                3 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.timestamp = tmp;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.is_current = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -151,6 +213,12 @@ impl ::protobuf::Message for BlockchainHash {
         if !self.hash.is_empty() {
             my_size += ::protobuf::rt::string_size(2, &self.hash);
         }
+        if self.timestamp != 0 {
+            my_size += ::protobuf::rt::value_size(3, self.timestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.is_current != false {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -162,6 +230,12 @@ impl ::protobuf::Message for BlockchainHash {
         }
         if !self.hash.is_empty() {
             os.write_string(2, &self.hash)?;
+        }
+        if self.timestamp != 0 {
+            os.write_uint64(3, self.timestamp)?;
+        }
+        if self.is_current != false {
+            os.write_bool(4, self.is_current)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -194,12 +268,12 @@ impl ::protobuf::Message for BlockchainHash {
     }
 }
 
-impl ::protobuf::MessageStatic for BlockchainHash {
-    fn new() -> BlockchainHash {
-        BlockchainHash::new()
+impl ::protobuf::MessageStatic for BlockFingerprint {
+    fn new() -> BlockFingerprint {
+        BlockFingerprint::new()
     }
 
-    fn descriptor_static(_: ::std::option::Option<BlockchainHash>) -> &'static ::protobuf::reflect::MessageDescriptor {
+    fn descriptor_static(_: ::std::option::Option<BlockFingerprint>) -> &'static ::protobuf::reflect::MessageDescriptor {
         static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
             ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
@@ -209,16 +283,26 @@ impl ::protobuf::MessageStatic for BlockchainHash {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "blockchain",
-                    BlockchainHash::get_blockchain_for_reflect,
-                    BlockchainHash::mut_blockchain_for_reflect,
+                    BlockFingerprint::get_blockchain_for_reflect,
+                    BlockFingerprint::mut_blockchain_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "hash",
-                    BlockchainHash::get_hash_for_reflect,
-                    BlockchainHash::mut_hash_for_reflect,
+                    BlockFingerprint::get_hash_for_reflect,
+                    BlockFingerprint::mut_hash_for_reflect,
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<BlockchainHash>(
-                    "BlockchainHash",
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "timestamp",
+                    BlockFingerprint::get_timestamp_for_reflect,
+                    BlockFingerprint::mut_timestamp_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "is_current",
+                    BlockFingerprint::get_is_current_for_reflect,
+                    BlockFingerprint::mut_is_current_for_reflect,
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<BlockFingerprint>(
+                    "BlockFingerprint",
                     fields,
                     file_descriptor_proto()
                 )
@@ -227,114 +311,127 @@ impl ::protobuf::MessageStatic for BlockchainHash {
     }
 }
 
-impl ::protobuf::Clear for BlockchainHash {
+impl ::protobuf::Clear for BlockFingerprint {
     fn clear(&mut self) {
         self.clear_blockchain();
         self.clear_hash();
+        self.clear_timestamp();
+        self.clear_is_current();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for BlockchainHash {
+impl ::std::fmt::Debug for BlockFingerprint {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for BlockchainHash {
+impl ::protobuf::reflect::ProtobufValue for BlockFingerprint {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct BlockIn {
+pub struct MinerRequest {
     // message fields
-    pub threshold: f32,
-    pub hashes: ::protobuf::RepeatedField<BlockchainHash>,
+    pub merkle_root: ::std::string::String,
+    pub fingerprints: ::protobuf::RepeatedField<BlockFingerprint>,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
 }
 
 // see codegen.rs for the explanation why impl Sync explicitly
-unsafe impl ::std::marker::Sync for BlockIn {}
+unsafe impl ::std::marker::Sync for MinerRequest {}
 
-impl BlockIn {
-    pub fn new() -> BlockIn {
+impl MinerRequest {
+    pub fn new() -> MinerRequest {
         ::std::default::Default::default()
     }
 
-    pub fn default_instance() -> &'static BlockIn {
-        static mut instance: ::protobuf::lazy::Lazy<BlockIn> = ::protobuf::lazy::Lazy {
+    pub fn default_instance() -> &'static MinerRequest {
+        static mut instance: ::protobuf::lazy::Lazy<MinerRequest> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const BlockIn,
+            ptr: 0 as *const MinerRequest,
         };
         unsafe {
-            instance.get(BlockIn::new)
+            instance.get(MinerRequest::new)
         }
     }
 
-    // float threshold = 1;
+    // string merkle_root = 1;
 
-    pub fn clear_threshold(&mut self) {
-        self.threshold = 0.;
+    pub fn clear_merkle_root(&mut self) {
+        self.merkle_root.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_threshold(&mut self, v: f32) {
-        self.threshold = v;
-    }
-
-    pub fn get_threshold(&self) -> f32 {
-        self.threshold
-    }
-
-    fn get_threshold_for_reflect(&self) -> &f32 {
-        &self.threshold
-    }
-
-    fn mut_threshold_for_reflect(&mut self) -> &mut f32 {
-        &mut self.threshold
-    }
-
-    // repeated .bc.BlockchainHash hashes = 2;
-
-    pub fn clear_hashes(&mut self) {
-        self.hashes.clear();
-    }
-
-    // Param is passed by value, moved
-    pub fn set_hashes(&mut self, v: ::protobuf::RepeatedField<BlockchainHash>) {
-        self.hashes = v;
+    pub fn set_merkle_root(&mut self, v: ::std::string::String) {
+        self.merkle_root = v;
     }
 
     // Mutable pointer to the field.
-    pub fn mut_hashes(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHash> {
-        &mut self.hashes
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_merkle_root(&mut self) -> &mut ::std::string::String {
+        &mut self.merkle_root
     }
 
     // Take field
-    pub fn take_hashes(&mut self) -> ::protobuf::RepeatedField<BlockchainHash> {
-        ::std::mem::replace(&mut self.hashes, ::protobuf::RepeatedField::new())
+    pub fn take_merkle_root(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.merkle_root, ::std::string::String::new())
     }
 
-    pub fn get_hashes(&self) -> &[BlockchainHash] {
-        &self.hashes
+    pub fn get_merkle_root(&self) -> &str {
+        &self.merkle_root
     }
 
-    fn get_hashes_for_reflect(&self) -> &::protobuf::RepeatedField<BlockchainHash> {
-        &self.hashes
+    fn get_merkle_root_for_reflect(&self) -> &::std::string::String {
+        &self.merkle_root
     }
 
-    fn mut_hashes_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHash> {
-        &mut self.hashes
+    fn mut_merkle_root_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.merkle_root
+    }
+
+    // repeated .bc.BlockFingerprint fingerprints = 2;
+
+    pub fn clear_fingerprints(&mut self) {
+        self.fingerprints.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_fingerprints(&mut self, v: ::protobuf::RepeatedField<BlockFingerprint>) {
+        self.fingerprints = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_fingerprints(&mut self) -> &mut ::protobuf::RepeatedField<BlockFingerprint> {
+        &mut self.fingerprints
+    }
+
+    // Take field
+    pub fn take_fingerprints(&mut self) -> ::protobuf::RepeatedField<BlockFingerprint> {
+        ::std::mem::replace(&mut self.fingerprints, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_fingerprints(&self) -> &[BlockFingerprint] {
+        &self.fingerprints
+    }
+
+    fn get_fingerprints_for_reflect(&self) -> &::protobuf::RepeatedField<BlockFingerprint> {
+        &self.fingerprints
+    }
+
+    fn mut_fingerprints_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockFingerprint> {
+        &mut self.fingerprints
     }
 }
 
-impl ::protobuf::Message for BlockIn {
+impl ::protobuf::Message for MinerRequest {
     fn is_initialized(&self) -> bool {
-        for v in &self.hashes {
+        for v in &self.fingerprints {
             if !v.is_initialized() {
                 return false;
             }
@@ -347,14 +444,10 @@ impl ::protobuf::Message for BlockIn {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
                 1 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeFixed32 {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_float()?;
-                    self.threshold = tmp;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.merkle_root)?;
                 },
                 2 => {
-                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.hashes)?;
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.fingerprints)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -368,10 +461,10 @@ impl ::protobuf::Message for BlockIn {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if self.threshold != 0. {
-            my_size += 5;
+        if !self.merkle_root.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.merkle_root);
         }
-        for value in &self.hashes {
+        for value in &self.fingerprints {
             let len = value.compute_size();
             my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         };
@@ -381,10 +474,10 @@ impl ::protobuf::Message for BlockIn {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
-        if self.threshold != 0. {
-            os.write_float(1, self.threshold)?;
+        if !self.merkle_root.is_empty() {
+            os.write_string(1, &self.merkle_root)?;
         }
-        for v in &self.hashes {
+        for v in &self.fingerprints {
             os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
@@ -420,12 +513,12 @@ impl ::protobuf::Message for BlockIn {
     }
 }
 
-impl ::protobuf::MessageStatic for BlockIn {
-    fn new() -> BlockIn {
-        BlockIn::new()
+impl ::protobuf::MessageStatic for MinerRequest {
+    fn new() -> MinerRequest {
+        MinerRequest::new()
     }
 
-    fn descriptor_static(_: ::std::option::Option<BlockIn>) -> &'static ::protobuf::reflect::MessageDescriptor {
+    fn descriptor_static(_: ::std::option::Option<MinerRequest>) -> &'static ::protobuf::reflect::MessageDescriptor {
         static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
             ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
@@ -433,18 +526,18 @@ impl ::protobuf::MessageStatic for BlockIn {
         unsafe {
             descriptor.get(|| {
                 let mut fields = ::std::vec::Vec::new();
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeFloat>(
-                    "threshold",
-                    BlockIn::get_threshold_for_reflect,
-                    BlockIn::mut_threshold_for_reflect,
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "merkle_root",
+                    MinerRequest::get_merkle_root_for_reflect,
+                    MinerRequest::mut_merkle_root_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHash>>(
-                    "hashes",
-                    BlockIn::get_hashes_for_reflect,
-                    BlockIn::mut_hashes_for_reflect,
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockFingerprint>>(
+                    "fingerprints",
+                    MinerRequest::get_fingerprints_for_reflect,
+                    MinerRequest::mut_fingerprints_for_reflect,
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<BlockIn>(
-                    "BlockIn",
+                ::protobuf::reflect::MessageDescriptor::new::<MinerRequest>(
+                    "MinerRequest",
                     fields,
                     file_descriptor_proto()
                 )
@@ -453,28 +546,28 @@ impl ::protobuf::MessageStatic for BlockIn {
     }
 }
 
-impl ::protobuf::Clear for BlockIn {
+impl ::protobuf::Clear for MinerRequest {
     fn clear(&mut self) {
-        self.clear_threshold();
-        self.clear_hashes();
+        self.clear_merkle_root();
+        self.clear_fingerprints();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for BlockIn {
+impl ::std::fmt::Debug for MinerRequest {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for BlockIn {
+impl ::protobuf::reflect::ProtobufValue for MinerRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct BlockOut {
+pub struct MinerResponse {
     // message fields
     pub nonce: ::std::string::String,
     // special fields
@@ -483,20 +576,20 @@ pub struct BlockOut {
 }
 
 // see codegen.rs for the explanation why impl Sync explicitly
-unsafe impl ::std::marker::Sync for BlockOut {}
+unsafe impl ::std::marker::Sync for MinerResponse {}
 
-impl BlockOut {
-    pub fn new() -> BlockOut {
+impl MinerResponse {
+    pub fn new() -> MinerResponse {
         ::std::default::Default::default()
     }
 
-    pub fn default_instance() -> &'static BlockOut {
-        static mut instance: ::protobuf::lazy::Lazy<BlockOut> = ::protobuf::lazy::Lazy {
+    pub fn default_instance() -> &'static MinerResponse {
+        static mut instance: ::protobuf::lazy::Lazy<MinerResponse> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const BlockOut,
+            ptr: 0 as *const MinerResponse,
         };
         unsafe {
-            instance.get(BlockOut::new)
+            instance.get(MinerResponse::new)
         }
     }
 
@@ -535,7 +628,7 @@ impl BlockOut {
     }
 }
 
-impl ::protobuf::Message for BlockOut {
+impl ::protobuf::Message for MinerResponse {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -602,12 +695,12 @@ impl ::protobuf::Message for BlockOut {
     }
 }
 
-impl ::protobuf::MessageStatic for BlockOut {
-    fn new() -> BlockOut {
-        BlockOut::new()
+impl ::protobuf::MessageStatic for MinerResponse {
+    fn new() -> MinerResponse {
+        MinerResponse::new()
     }
 
-    fn descriptor_static(_: ::std::option::Option<BlockOut>) -> &'static ::protobuf::reflect::MessageDescriptor {
+    fn descriptor_static(_: ::std::option::Option<MinerResponse>) -> &'static ::protobuf::reflect::MessageDescriptor {
         static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
             ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
@@ -617,11 +710,11 @@ impl ::protobuf::MessageStatic for BlockOut {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "nonce",
-                    BlockOut::get_nonce_for_reflect,
-                    BlockOut::mut_nonce_for_reflect,
+                    MinerResponse::get_nonce_for_reflect,
+                    MinerResponse::mut_nonce_for_reflect,
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<BlockOut>(
-                    "BlockOut",
+                ::protobuf::reflect::MessageDescriptor::new::<MinerResponse>(
+                    "MinerResponse",
                     fields,
                     file_descriptor_proto()
                 )
@@ -630,32 +723,34 @@ impl ::protobuf::MessageStatic for BlockOut {
     }
 }
 
-impl ::protobuf::Clear for BlockOut {
+impl ::protobuf::Clear for MinerResponse {
     fn clear(&mut self) {
         self.clear_nonce();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for BlockOut {
+impl ::std::fmt::Debug for MinerResponse {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for BlockOut {
+impl ::protobuf::reflect::ProtobufValue for MinerResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x0bminer.proto\x12\x02bc\"D\n\x0eBlockchainHash\x12\x1e\n\nblockchain\
-    \x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\
-    \x04hash\"S\n\x07BlockIn\x12\x1c\n\tthreshold\x18\x01\x20\x01(\x02R\tthr\
-    eshold\x12*\n\x06hashes\x18\x02\x20\x03(\x0b2\x12.bc.BlockchainHashR\x06\
-    hashes\"\x20\n\x08BlockOut\x12\x14\n\x05nonce\x18\x01\x20\x01(\tR\x05non\
-    ceb\x06proto3\
+    \n\x0bminer.proto\x12\x02bc\"\x83\x01\n\x10BlockFingerprint\x12\x1e\n\nb\
+    lockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\
+    \x01(\tR\x04hash\x12\x1c\n\ttimestamp\x18\x03\x20\x01(\x04R\ttimestamp\
+    \x12\x1d\n\nis_current\x18\x04\x20\x01(\x08R\tisCurrent\"i\n\x0cMinerReq\
+    uest\x12\x1f\n\x0bmerkle_root\x18\x01\x20\x01(\tR\nmerkleRoot\x128\n\x0c\
+    fingerprints\x18\x02\x20\x03(\x0b2\x14.bc.BlockFingerprintR\x0cfingerpri\
+    nts\"%\n\rMinerResponse\x12\x14\n\x05nonce\x18\x01\x20\x01(\tR\x05nonceb\
+    \x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

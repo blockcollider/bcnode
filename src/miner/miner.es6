@@ -10,12 +10,12 @@
 // $FlowFixMe
 const native = require('../../native/index.node')
 
-const { BlockIn, BlockOut } = require('../protos/miner_pb')
+const { MinerRequest, MinerResponse } = require('../protos/miner_pb')
 
 export default class Miner {
-  mine (block: BlockIn) : BlockOut {
+  mine (block: MinerRequest) : MinerResponse {
     const buf = block.serializeBinary()
     const raw = native.mine(buf)
-    return BlockOut.deserializeBinary(new Uint8Array(raw))
+    return MinerResponse.deserializeBinary(new Uint8Array(raw))
   }
 }
