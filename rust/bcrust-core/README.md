@@ -41,7 +41,7 @@ $ cargo test --benches
 
 ```
 $ cargo afl build
-$ cargo afl fuzz -i in -o out target/debug/bcrust-core
+$ cargo afl fuzz -i in -o out target/debug/bcrust_core
 ```
 
 **cargo-fuzz**
