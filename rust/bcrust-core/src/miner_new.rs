@@ -1,6 +1,7 @@
 use blake2_rfc::blake2s::{blake2s};
 use serialize::hex::{FromHex, ToHex};
 use std::iter::Iterator;
+use protos::miner::{MinerRequest, MinerResponse};
 
 use super::data;
 use super::funcs;
@@ -28,7 +29,9 @@ use super::funcs;
 /// - Incoming hashes must be in order mentioned above
 /// - Compute ephemeral hashes using blake to unify length
 /// - XOR all ephemeral hashes together
-pub fn mine(input: &Vec<String>) -> Result<(String, Vec<f64>), String> {
+pub fn mine(_in: &MinerRequest) -> MinerResponse {
+    let input = &Vec::new();
+
     // Lowercase all incoming hashes and calculate their blake hash
     let ephemerals = create_ephemeral_hashes(input);
     let xored_hash = xor_hashes(&ephemerals);
@@ -38,7 +41,11 @@ pub fn mine(input: &Vec<String>) -> Result<(String, Vec<f64>), String> {
 
     println!("{:?}", &blake_xored);
 
-    Ok((blake_xored, Vec::new()))
+    // Ok((blake_xored, Vec::new()))
+
+    let mut out_block = MinerResponse::new();
+    out_block.set_nonce(String::from(""));
+    out_block
 }
 
 fn create_ephemeral_hashes(input: &Vec<String>) -> Vec<String> {
