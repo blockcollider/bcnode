@@ -8,5 +8,5 @@ message Block {
     string blockchain = 1;
     string hash = 2;
     string previous_hash = 3;
-    uint32 timestamp = 4;
+    uint64 timestamp = 4;
 }

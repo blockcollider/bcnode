@@ -229,7 +229,7 @@ proto.bc.Block.deserializeBinaryFromReader = function(msg, reader) {
       msg.setPreviousHash(value);
       break;
     case 4:
-      var value = /** @type {number} */ (reader.readUint32());
+      var value = /** @type {number} */ (reader.readUint64());
       msg.setTimestamp(value);
       break;
     default:
@@ -284,7 +284,7 @@ proto.bc.Block.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getTimestamp();
   if (f !== 0) {
-    writer.writeUint32(
+    writer.writeUint64(
       4,
       f
     );
@@ -338,7 +338,7 @@ proto.bc.Block.prototype.setPreviousHash = function(value) {
 
 
 /**
- * optional uint32 timestamp = 4;
+ * optional uint64 timestamp = 4;
  * @return {number}
  */
 proto.bc.Block.prototype.getTimestamp = function() {
