@@ -1,5 +1,9 @@
+#![feature(rustc_private)]
+
 #![feature(test)]
 extern crate test;
+extern crate serialize;
+extern crate blake2_rfc;
 
 extern crate crypto;
 #[macro_use]
