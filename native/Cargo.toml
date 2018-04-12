@@ -17,6 +17,7 @@ protoc-rust-grpc = "0.2.1"
 clippy = { version = "*" }
 
 [dependencies]
+bcrust-core = { path = "../rust/bcrust-core"}
 bitcrust = { git = "https://github.com/tomasvdw/bitcrust" }
 blake = "2.0"
 bytes = "0.4"
@@ -26,9 +27,5 @@ futures-cpupool = "0.1"
 grpc = "0.2"
 log = "0.3"
 neon = "0.1"
-num_cpus = "1.7"
 protobuf = "1.4"
-rand = "0.4"
-rust-crypto = "0.2"
-strsim = "0.6"
 tls-api = "0.1"

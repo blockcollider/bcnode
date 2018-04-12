@@ -39,6 +39,11 @@ before_install:
   - rustup component add rust-src
   - export RUST_SRC_PATH=`rustc --print sysroot`/lib/rustlib/src/rust/src
   - export RUST_BACKTRACE=1
+#  - cargo install afl
+#  - cargo install clippy
+#  - cargo install cargo-fuzz
+#  - cargo install sccache
+#  - export RUSTC_WRAPPER=sccache
 
 node_js:
   - "7"
