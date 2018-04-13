@@ -1,0 +1,18 @@
+# Release
+
+How to release new version.
+
+## Steps
+
+- Checkout latest upstream master
+- Build
+- Run tests
+- Build docker image
+- Release docker image
+- Tag latest version
+
+## After release
+
+- Bump version in package.json
+- Create new section in CHANGELOG.md
+- Update diff link in CHANGELOG.md
