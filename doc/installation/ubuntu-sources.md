@@ -4,7 +4,7 @@
 
 ```
 # Create new user
-$ adduser username bc
+$ adduser bc
 
 # Add user to sudo group
 $ usermod -aG sudo bc
