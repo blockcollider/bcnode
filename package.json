@@ -1,6 +1,6 @@
 {
   "name": "bcnode",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Block Collider with miners and rovers",
   "main": "lib/src/init.js",
   "scripts": {
