@@ -40,7 +40,6 @@ $ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
 - [git](https://git-scm.com/downloads) 2.1+
 - [nodejs](https://nodejs.org) 4.3+
 - [yarn](https://yarnpkg.com/en/docs/install) 1.3.2+
-
 - [boost](http://www.boost.org/) Boost 1.66.0+
 
 ```
