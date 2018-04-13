@@ -25,7 +25,7 @@ $ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
 
 ### Build and run docker image locally
 
-Install [cargo+rust](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+
 
 ```
 $ docker build -t blockcollider/bcnode .
@@ -36,6 +36,7 @@ $ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
 
 #### Prerequisites
 
+- [rust & cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 - [git](https://git-scm.com/downloads) 2.1+
 - [nodejs](https://nodejs.org) 4.3+
 - [yarn](https://yarnpkg.com/en/docs/install) 1.3.2+
