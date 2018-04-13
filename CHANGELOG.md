@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [[Unreleased](https://github.com/blockcollider/bcnode/compare/v0.1.0...HEAD)]
 
-## [0.1.1]
-
 ### Added
 
 ### Changed
