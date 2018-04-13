@@ -239,7 +239,12 @@ export function mine (work, miner, merkleRoot, threshold, rng = Math.random) {
  *
  */
 
-export default class Miner {
-
+export function getChildrenPreviousBlocksHashes (previousBlocks) {
+  return previousBlocks.map(block => blake2bl(block.getHash() + block.getMerkleRoot()))
 }
-// main()
+
+export function getChildrenPreviousRootHash (previousBlockHashes) {
+  return blake2bl(previousBlockHashes.reduce((all, blockHash) => {
+    return all.xor(new BN(Buffer.from(blockHash, 'hex')))
+  }, new BN(0)).toString())
+}

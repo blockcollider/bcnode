@@ -1,11 +1,14 @@
 const BN = require('bn.js')
 const _ = require('lodash')
 const { blake2bl } = require('../../utils/crypto')
+const { Block } = require('../../protos/core_pb')
 
 const {
   createMerkleRoot,
   getDiff,
   getExpFactorDiff,
+  getChildrenPreviousBlocksHashes,
+  getChildrenPreviousRootHash,
   mine
 } = require('../miner')
 
@@ -23,52 +26,51 @@ describe('Miner', () => {
     const oldTransactions = []
 
     const oldBestBlockchainsBlockHeaders = [
-      {
-        hash: '0x39499390034',
-        prevHash: '0xxxxxxxxxxxxxxxxx',
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: 'ospoepfkspdfs',
-        prevHash: '0xxxxxxxxxxxxxxxxx',
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: '0x39300923i42034',
-        prevHash: '0xxxxxxxxxxxxxxxxx',
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: '0xsjdfo3i2oifji3o2',
-        prevHash: '0xxxxxxxxxxxxxxxxx',
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: '0xw3jkfok2jjvijief',
-        prevHash: '0xxxxxxxxxxxxxxxxx',
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      }
+      new Block([
+        'btc',
+        '0x39499390034',
+        '0xxxxxxxxxxxxxxxxx',
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'eth',
+        'ospoepfkspdfs',
+        '0xxxxxxxxxxxxxxxxx',
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'lsk',
+        '0x39300923i42034',
+        '0xxxxxxxxxxxxxxxxx',
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'wav',
+        '0xsjdfo3i2oifji3o2',
+        '0xxxxxxxxxxxxxxxxx',
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'neo',
+        '0xw3jkfok2jjvijief',
+        '0xxxxxxxxxxxxxxxxx',
+        1400000000,
+        2,
+        '0x000x00000'
+      ])
     ]
 
-    const oldBestBlockchainHeaderHashes = oldBestBlockchainsBlockHeaders.map(
-      function (b) {
-        return blake2bl(b.hash + b.merkleRoot)
-      }
-    )
+    const oldBestBlockchainHeaderHashes = getChildrenPreviousBlocksHashes(oldBestBlockchainsBlockHeaders)
 
-    const oldChainRoot = oldBestBlockchainHeaderHashes.reduce(function (all, b) {
-      return all.xor(new BN(Buffer.from(b, 'hex')))
-    }, new BN(0))
+    const oldChainRoot = getChildrenPreviousRootHash(oldBestBlockchainHeaderHashes)
 
     const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
     const genesisBlock = {
@@ -82,12 +84,12 @@ describe('Miner', () => {
           oldTransactions.concat([minerPublicAddress, 1])
         )
       ), // blockchains, transactions, miner address, height
-      chainRoot: blake2bl(oldChainRoot.toString()),
+      chainRoot: oldChainRoot,
       distance: 1, // <--- sign its a genesis block
       nTransactions: 0,
       transactions: oldTransactions,
       nBlockchains: 5,
-      blockchainBlockHeaders: oldBestBlockchainsBlockHeaders
+      blockchainBlockHeaders: oldBestBlockchainsBlockHeaders.map(b => b.toObject())
     }
 
     expect(genesisBlock).toEqual({
@@ -103,28 +105,33 @@ describe('Miner', () => {
       transactions: [],
       nBlockchains: 5,
       blockchainBlockHeaders: [
-        { hash: '0x39499390034',
-          prevHash: '0xxxxxxxxxxxxxxxxx',
+        { blockchain: 'btc',
+          hash: '0x39499390034',
+          previousHash: '0xxxxxxxxxxxxxxxxx',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: 'ospoepfkspdfs',
-          prevHash: '0xxxxxxxxxxxxxxxxx',
+        { blockchain: 'eth',
+          hash: 'ospoepfkspdfs',
+          previousHash: '0xxxxxxxxxxxxxxxxx',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: '0x39300923i42034',
-          prevHash: '0xxxxxxxxxxxxxxxxx',
+        { blockchain: 'lsk',
+          hash: '0x39300923i42034',
+          previousHash: '0xxxxxxxxxxxxxxxxx',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: '0xsjdfo3i2oifji3o2',
-          prevHash: '0xxxxxxxxxxxxxxxxx',
+        { blockchain: 'wav',
+          hash: '0xsjdfo3i2oifji3o2',
+          previousHash: '0xxxxxxxxxxxxxxxxx',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: '0xw3jkfok2jjvijief',
-          prevHash: '0xxxxxxxxxxxxxxxxx',
+        { blockchain: 'neo',
+          hash: '0xw3jkfok2jjvijief',
+          previousHash: '0xxxxxxxxxxxxxxxxx',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 }
@@ -241,7 +248,7 @@ describe('Miner', () => {
       return sum.add(
         getDiff(
           header.timestamp,
-          oldBestBlockchainsBlockHeaders[i].timestamp,
+          oldBestBlockchainsBlockHeaders[i].getTimestamp(),
           parentShareDiff,
           minimumDiffShare
         )
