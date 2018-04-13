@@ -24,7 +24,7 @@ const BN = require('bn.js')
 const _ = require('lodash')
 
 const { blake2bl } = require('../utils/crypto')
-const { Block, BcBlock } = require('../protos/core_pb')
+const { Block, BcBlock, BcTransaction } = require('../protos/core_pb')
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
 
@@ -311,4 +311,59 @@ export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff:
   ) // Calculate the final pre-singularity difficulty adjustment
 
   return preExpDiff
+}
+
+export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Block[]): string {
+  const newChainRoot = getChildrenRootHash(getChildrenBlocksHashes(childrenCurrentBlocks))
+  const work = blake2bl(
+    newChainRoot.xor(
+      new BN(
+        Buffer.from(
+          blake2bl(previousBlock.getHash() + previousBlock.getMerkleRoot()),
+          'hex'
+        )
+      )
+    ).toString()
+  )
+
+  return work
+}
+
+export function prepareNewBlock (previousBlock: BcBlock, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[], newTransactions: BcTransaction[], minerAddress: string): BcBlock {
+  const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
+  const newChainRoot = getChildrenRootHash(blockHashes)
+
+  const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
+  const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
+  const preExpDiff = getNewPreExpDifficulty(
+    previousBlock,
+    parentShareDiff,
+    minimumDiffShare,
+    childrenPreviousBlocks,
+    childrenCurrentBlocks
+  )
+
+  const oldTransactions = previousBlock.getTransactionsList()
+  const newMerkleRoot = createMerkleRoot(
+    blockHashes.concat(oldTransactions.concat([minerAddress, 1]))
+  ) // blockchains, transactions, miner address, height
+
+  const newBlock = new BcBlock()
+  newBlock.setHash(blake2bl(previousBlock.getHash() + newMerkleRoot))
+  newBlock.setHeight(previousBlock.getHeight() + 1)
+  newBlock.setMiner(minerAddress)
+  newBlock.setDifficulty(getExpFactorDiff(preExpDiff, previousBlock.getHeight()).toNumber())
+  // TODO remove - should be assigned after mining
+  // newBlock.setTimestamp(Date.now())
+  newBlock.setMerkleRoot(newMerkleRoot)
+  newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
+  newBlock.setDistance(0)
+  newBlock.setTxCount(0)
+  // TODO remove - should be assigned after mining
+  // newBlock.setNonce(0)
+  newBlock.setTransactionsList(newTransactions)
+  newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
+  newBlock.setChildBlockHeadersList(childrenCurrentBlocks)
+
+  return newBlock
 }
