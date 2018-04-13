@@ -10,7 +10,6 @@ $ adduser bc
 $ usermod -aG sudo bc
 ```
 
-
 ## Login as sudo enabled user
 
 ```
@@ -18,7 +17,7 @@ $ usermod -aG sudo bc
 $ su - bc
 ```
 
-## Intall required apt-pacakges
+## Install required apt-packages
 
 ```
 # Update package cache
