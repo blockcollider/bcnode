@@ -24,6 +24,7 @@ const BN = require('bn.js')
 const _ = require('lodash')
 
 const { blake2bl } = require('../utils/crypto')
+const { Block } = require('../protos/core_pb')
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -239,12 +240,16 @@ export function mine (work, miner, merkleRoot, threshold, rng = Math.random) {
  *
  */
 
-export function getChildrenPreviousBlocksHashes (previousBlocks) {
+export function getChildrenBlocksHashes (previousBlocks: Block[]): string[] {
   return previousBlocks.map(block => blake2bl(block.getHash() + block.getMerkleRoot()))
 }
 
-export function getChildrenPreviousRootHash (previousBlockHashes) {
-  return blake2bl(previousBlockHashes.reduce((all, blockHash) => {
+export function getChildrenRootHash (previousBlockHashes: string[]): BN {
+  return previousBlockHashes.reduce((all, blockHash) => {
     return all.xor(new BN(Buffer.from(blockHash, 'hex')))
-  }, new BN(0)).toString())
+  }, new BN(0))
+}
+
+export function compareTimestamps (a: Block, b: Block) {
+  return a.getTimestamp() === b.getTimestamp()
 }

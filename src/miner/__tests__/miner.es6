@@ -7,8 +7,9 @@ const {
   createMerkleRoot,
   getDiff,
   getExpFactorDiff,
-  getChildrenPreviousBlocksHashes,
-  getChildrenPreviousRootHash,
+  getChildrenBlocksHashes,
+  getChildrenRootHash,
+  compareTimestamps,
   mine
 } = require('../miner')
 
@@ -68,9 +69,9 @@ describe('Miner', () => {
       ])
     ]
 
-    const oldBestBlockchainHeaderHashes = getChildrenPreviousBlocksHashes(oldBestBlockchainsBlockHeaders)
+    const oldBestBlockchainHeaderHashes = getChildrenBlocksHashes(oldBestBlockchainsBlockHeaders)
 
-    const oldChainRoot = getChildrenPreviousRootHash(oldBestBlockchainHeaderHashes)
+    const oldChainRoot = blake2bl(getChildrenRootHash(oldBestBlockchainHeaderHashes).toString())
 
     const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
     const genesisBlock = {
@@ -152,50 +153,50 @@ describe('Miner', () => {
 
     const newTransactions = []
     const newBestBlockchainsBlockHeaders = [
-      {
-        hash: '0x39499390034',
-        prevHash: "0xxxxxxxxxxxxxxxxx'",
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: '0xksjiefjisefmnsef', // <-------  the new block would update his previous block
-        prevHash: 'ospoepfkspdfs', // the previous hash from above
-        merkleRoot: '0x000x00000',
-        height: 3,
-        timestamp: 1480000000
-      },
-      {
-        hash: '0x39300923i42034',
-        prevHash: "0xxxxxxxxxxxxxxxxx'",
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: '0xsjdfo3i2oifji3o2',
-        prevHash: "0xxxxxxxxxxxxxxxxx'",
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      },
-      {
-        hash: '0xw3jkfok2jjvijief',
-        prevHash: "0xxxxxxxxxxxxxxxxx'",
-        merkleRoot: '0x000x00000',
-        height: 2,
-        timestamp: 1400000000
-      }
+      new Block([
+        'btc',
+        '0x39499390034',
+        "0xxxxxxxxxxxxxxxxx'",
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'eth',
+        '0xksjiefjisefmnsef', // <-------  the new block would update his previous block
+        'ospoepfkspdfs', // the previous hash from above
+        1480000000,
+        3,
+        '0x000x00000'
+      ]),
+      new Block([
+        'lsk',
+        '0x39300923i42034',
+        "0xxxxxxxxxxxxxxxxx'",
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'wav',
+        '0xsjdfo3i2oifji3o2',
+        "0xxxxxxxxxxxxxxxxx'",
+        1400000000,
+        2,
+        '0x000x00000'
+      ]),
+      new Block([
+        'neo',
+        '0xw3jkfok2jjvijief',
+        "0xxxxxxxxxxxxxxxxx'",
+        1400000000,
+        2,
+        '0x000x00000'
+      ])
     ]
 
-    const blockHashes = newBestBlockchainsBlockHeaders.map(function (header) {
-      return blake2bl(header.hash + header.merkleRoot)
-    })
-
-    const newChainRoot = blockHashes.reduce(function (all, hash) {
-      return all.xor(new BN(Buffer.from(hash, 'hex')))
-    }, new BN(0))
+    const blockHashes = getChildrenBlocksHashes(newBestBlockchainsBlockHeaders)
+    const newChainRoot = getChildrenRootHash(blockHashes)
 
     const work = blake2bl(
       newChainRoot
@@ -219,16 +220,16 @@ describe('Miner', () => {
     const minimumDiff = new BN(11801972029393, 16)
     const minimumDiffShare = minimumDiff.div(new BN(blockHashes.length, 16)) // Standard deviation 100M cycles divided by the number of chains
     const timestampEquality = [
-      oldBestBlockchainsBlockHeaders[0].timestamp ===
-      newBestBlockchainsBlockHeaders[0].timestamp, // these would be equal
-      oldBestBlockchainsBlockHeaders[1].timestamp ===
-      newBestBlockchainsBlockHeaders[1].timestamp, // this would be different
-      oldBestBlockchainsBlockHeaders[2].timestamp ===
-      newBestBlockchainsBlockHeaders[2].timestamp, // this would be equal
-      oldBestBlockchainsBlockHeaders[3].timestamp ===
-      newBestBlockchainsBlockHeaders[3].timestamp, // this would be equal
-      oldBestBlockchainsBlockHeaders[4].timestamp ===
-      newBestBlockchainsBlockHeaders[4].timestamp // this would be equal
+      // these would be equal
+      compareTimestamps(oldBestBlockchainsBlockHeaders[0], newBestBlockchainsBlockHeaders[0]),
+      // these would be different
+      compareTimestamps(oldBestBlockchainsBlockHeaders[1], newBestBlockchainsBlockHeaders[1]),
+      // these would be equal
+      compareTimestamps(oldBestBlockchainsBlockHeaders[2], newBestBlockchainsBlockHeaders[2]),
+      // these would be equal
+      compareTimestamps(oldBestBlockchainsBlockHeaders[3], newBestBlockchainsBlockHeaders[3]),
+      // these would be equal
+      compareTimestamps(oldBestBlockchainsBlockHeaders[4], newBestBlockchainsBlockHeaders[4])
     ]
 
     if (_.every(timestampEquality) === true) {
@@ -247,7 +248,7 @@ describe('Miner', () => {
     const newDifficulty = newBestBlockchainsBlockHeaders.reduce(function (sum, header, i) {
       return sum.add(
         getDiff(
-          header.timestamp,
+          header.getTimestamp(),
           oldBestBlockchainsBlockHeaders[i].getTimestamp(),
           parentShareDiff,
           minimumDiffShare
@@ -279,7 +280,7 @@ describe('Miner', () => {
       nTransactions: 0,
       transactions: newTransactions,
       nBlockchains: 5,
-      blockchainBlockHeaders: newBestBlockchainsBlockHeaders
+      blockchainBlockHeaders: newBestBlockchainsBlockHeaders.map(b => b.toObject())
     }
 
     newBlock.difficulty = getExpFactorDiff(preExpDiff, genesisBlock.height) // Final difficulty post-singularity calculators <--- this is the threshold hold the work provided must beat
@@ -308,28 +309,33 @@ describe('Miner', () => {
       transactions: [],
       nBlockchains: 5,
       blockchainBlockHeaders: [
-        { hash: '0x39499390034',
-          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+        { blockchain: 'btc',
+          hash: '0x39499390034',
+          previousHash: '0xxxxxxxxxxxxxxxxx\'',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: '0xksjiefjisefmnsef',
-          prevHash: 'ospoepfkspdfs',
+        { blockchain: 'eth',
+          hash: '0xksjiefjisefmnsef',
+          previousHash: 'ospoepfkspdfs',
           merkleRoot: '0x000x00000',
           height: 3,
           timestamp: 1480000000 },
-        { hash: '0x39300923i42034',
-          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+        { blockchain: 'lsk',
+          hash: '0x39300923i42034',
+          previousHash: '0xxxxxxxxxxxxxxxxx\'',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: '0xsjdfo3i2oifji3o2',
-          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+        { blockchain: 'wav',
+          hash: '0xsjdfo3i2oifji3o2',
+          previousHash: '0xxxxxxxxxxxxxxxxx\'',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 },
-        { hash: '0xw3jkfok2jjvijief',
-          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+        { blockchain: 'neo',
+          hash: '0xw3jkfok2jjvijief',
+          previousHash: '0xxxxxxxxxxxxxxxxx\'',
           merkleRoot: '0x000x00000',
           height: 2,
           timestamp: 1400000000 }
