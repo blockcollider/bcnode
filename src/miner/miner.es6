@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @no-flow
+ * @flow
  */
 
 /**
@@ -41,7 +41,7 @@ const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
  * @param {Number} parentBlockHeight
  * @returns {BN|Difficulty}
  */
-export function getExpFactorDiff (x, parentBlockHeight) {
+export function getExpFactorDiff (x, parentBlockHeight: number) {
   const big1 = new BN(1, 16)
   const big2 = new BN(2, 16)
   const expDiffPeriod = new BN(66000000, 16)
@@ -69,7 +69,7 @@ export function getExpFactorDiff (x, parentBlockHeight) {
  * @param {Number} handicap
  * @returns {BN|Difficulty}
  */
-export function getDiff (blockTime, parentTime, parentDiff, minimumDiff, handicap) {
+export function getDiff (blockTime: number, parentTime: number, parentDiff: number, minimumDiff: number, handicap: ?number) {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 
   let bigMinDiff = new BN(minimumDiff, 16)
@@ -127,15 +127,17 @@ export function getDiff (blockTime, parentTime, parentDiff, minimumDiff, handica
   return x
 }
 
-export function createMerkleRoot (list, prev) {
+export function createMerkleRoot (list: string[], prev: ?string): string {
   if (list.length > 0) {
     if (prev !== undefined) {
+      // $FlowFixMe
       prev = blake2bl(prev + list.shift())
     } else {
       prev = blake2bl(list.shift())
     }
     return createMerkleRoot(list, prev)
   }
+  // $FlowFixMe
   return prev
 }
 
@@ -162,7 +164,7 @@ export function createMerkleRoot (list, prev) {
  *
  * @returns {Number|Array}
  */
-export function split (t) {
+export function split (t: string) {
   return t.split('').map(function (an) {
     return an.charCodeAt(0)
   })
@@ -171,7 +173,7 @@ export function split (t) {
 /**
  * Converts cosine similary to cos distance
  */
-export function dist (x, y, clbk) {
+export function dist (x: string, y: string, clbk: ?Function) {
   let s
   if (arguments.length > 2) {
     s = similarity(x, y, clbk)
@@ -188,7 +190,7 @@ export function dist (x, y, clbk) {
  * @param {Hash} b
  * @returns {Number}
  */
-export function distance (a, b) {
+export function distance (a: string, b: string) {
   const ac = _.chunk(split(a), 32)
   const bc = _.chunk(split(b), 32)
 
@@ -205,11 +207,11 @@ export function distance (a, b) {
  * // @param {Array} work
  * @returns {Object} dist,nonce
  */
-export function mine (work, miner, merkleRoot, threshold, rng = Math.random) {
+export function mine (work: string, miner: string, merkleRoot: string, threshold: number, rng: Function = Math.random) {
   threshold = new BN(threshold, 16)
   let result
 
-  console.log('mining for threshold: ' + threshold)
+  // console.log('mining for threshold: ' + threshold)
 
   // TODO: @pm check
   while (true) {
@@ -247,7 +249,7 @@ export function getChildrenBlocksHashes (previousBlocks: Block[]): string[] {
 }
 
 export function getChildrenRootHash (previousBlockHashes: string[]): BN {
-  return previousBlockHashes.reduce((all, blockHash) => {
+  return previousBlockHashes.reduce((all: BN, blockHash) => {
     return all.xor(new BN(Buffer.from(blockHash, 'hex')))
   }, new BN(0))
 }
