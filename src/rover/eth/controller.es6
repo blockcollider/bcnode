@@ -71,7 +71,10 @@ export default class Controller {
     msg.setHash(unifiedBlockData.blockHash)
     msg.setPreviousHash(unifiedBlockData.prevHash)
     msg.setTimestamp(unifiedBlockData.timestamp)
+    msg.setHeight(unifiedBlockData.blockNumber)
+    msg.setMerkleRoot(unifiedBlockData.root)
 
+    console.log(msg.toObject());
     this._logger.debug(`Created unified block from eth block ${unifiedBlockData.blockNumber} (${unifiedBlockData.blockHash})`)
     this._rpc.rover.collectBlock(msg, (err, response) => {
       if (err) {

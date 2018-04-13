@@ -96,6 +96,8 @@ const _createUnifiedBlock = (block): Block => {
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
   msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }

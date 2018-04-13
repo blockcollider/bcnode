@@ -76,6 +76,8 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
   msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }

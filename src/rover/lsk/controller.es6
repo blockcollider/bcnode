@@ -14,7 +14,7 @@ const lisk = require('lisk-js')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
-const string = require('../../utils/strings.js')
+const { blake2b } = require('../../utils/crypto')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -35,7 +35,7 @@ type LiskBlock = { // eslint-disable-line no-undef
 
 const LSK_GENESIS_DATE = new Date('2016-05-24T17:00:00.000Z')
 
-const getMerkleRoot = (txs) => txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
+const getMerkleRoot = (txs) => txs.reduce((all, tx) => blake2b(all + tx.id), '')
 
 const getLastHeight = (api: Object): Promise<number> => {
   const response = api.sendRequest('blocks/getHeight')
@@ -56,7 +56,6 @@ const getAbsoluteTimestamp = (blockTs: number) => {
 
 const _createUnifiedBlock = (block): Block => {
   const obj = {}
-
   obj.blockNumber = block.height
   obj.prevHash = block.previousBlock
   obj.blockHash = block.id
@@ -89,6 +88,8 @@ const _createUnifiedBlock = (block): Block => {
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
   msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
