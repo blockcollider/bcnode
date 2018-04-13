@@ -24,7 +24,9 @@ const BN = require('bn.js')
 const _ = require('lodash')
 
 const { blake2bl } = require('../utils/crypto')
-const { Block } = require('../protos/core_pb')
+const { Block, BcBlock } = require('../protos/core_pb')
+
+const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -252,4 +254,61 @@ export function getChildrenRootHash (previousBlockHashes: string[]): BN {
 
 export function compareTimestamps (a: Block, b: Block) {
   return a.getTimestamp() === b.getTimestamp()
+}
+
+export function getParentShareDiff (parentDifficulty: number, childChainCount: number): BN {
+  return (new BN(parentDifficulty, 16)).div(new BN(childChainCount + 1, 16))
+}
+
+export function getMinimumDifficulty (childChainCount: number): BN {
+  // Standard deviation 100M cycles divided by the number of chains
+  return MINIMUM_DIFFICULTY.div(new BN(childChainCount, 16))
+}
+
+// TODO rename arguments to better describe data
+export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff: BN, minimumDiffShare: BN, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[]) {
+  let handicap = 0
+  // TODO reduce pairs with accum start = false
+  const timestampEquality = [
+    compareTimestamps(childrenPreviousBlocks[0], childrenCurrentBlocks[0]),
+    compareTimestamps(childrenPreviousBlocks[1], childrenCurrentBlocks[1]),
+    compareTimestamps(childrenPreviousBlocks[2], childrenCurrentBlocks[2]),
+    compareTimestamps(childrenPreviousBlocks[3], childrenCurrentBlocks[3]),
+    compareTimestamps(childrenPreviousBlocks[4], childrenCurrentBlocks[4])
+  ]
+
+  if (_.every(timestampEquality) === true) {
+    // If none of the chains have increased in height
+    handicap = 4
+  }
+
+  const blockColliderShareDiff = getDiff(
+    (Date.now() / 1000) << 0, // TODO inject current date
+    previousBlock.getTimestamp(),
+    minimumDiffShare,
+    parentShareDiff,
+    handicap
+  )
+
+  const newDifficulty = childrenCurrentBlocks.reduce(function (sum, header, i) {
+    return sum.add(
+      getDiff(
+        header.getTimestamp(),
+        childrenPreviousBlocks[i].getTimestamp(),
+        parentShareDiff,
+        minimumDiffShare
+      )
+    )
+  }, new BN(0))
+
+  newDifficulty.add(blockColliderShareDiff) // Add the Block Collider's chain to the values
+
+  const preExpDiff = getDiff(
+    (Date.now() / 1000) << 0,
+    previousBlock.getTimestamp(),
+    MINIMUM_DIFFICULTY,
+    newDifficulty
+  ) // Calculate the final pre-singularity difficulty adjustment
+
+  return preExpDiff
 }

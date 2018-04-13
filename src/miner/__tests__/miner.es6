@@ -1,15 +1,15 @@
 const BN = require('bn.js')
-const _ = require('lodash')
 const { blake2bl } = require('../../utils/crypto')
-const { Block } = require('../../protos/core_pb')
+const { Block, BcBlock } = require('../../protos/core_pb')
 
 const {
   createMerkleRoot,
-  getDiff,
   getExpFactorDiff,
   getChildrenBlocksHashes,
   getChildrenRootHash,
-  compareTimestamps,
+  getParentShareDiff,
+  getMinimumDifficulty,
+  getNewPreExpDifficulty,
   mine
 } = require('../miner')
 
@@ -74,26 +74,29 @@ describe('Miner', () => {
     const oldChainRoot = blake2bl(getChildrenRootHash(oldBestBlockchainHeaderHashes).toString())
 
     const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
-    const genesisBlock = {
-      hash: '0xxxxxxxxxxxxxxxxxxxxxxxxx', /// BLAKE("prevHashAddress" + "merkleRoot")
-      height: 1,
-      miner: minerPublicAddress,
-      difficulty: 141129464479256,
-      timestamp: genesisTimestamp,
-      merkleRoot: createMerkleRoot(
+    const genesisBlock = new BcBlock()
+    genesisBlock.setHash('0xxxxxxxxxxxxxxxxxxxxxxxxx')
+    genesisBlock.setHeight(1)
+    genesisBlock.setMiner(minerPublicAddress)
+    genesisBlock.setDifficulty(141129464479256)
+    genesisBlock.setTimestamp(genesisTimestamp)
+    // blockchains, transactions, miner address, height
+    genesisBlock.setMerkleRoot(
+      createMerkleRoot(
         oldBestBlockchainHeaderHashes.concat(
           oldTransactions.concat([minerPublicAddress, 1])
         )
-      ), // blockchains, transactions, miner address, height
-      chainRoot: oldChainRoot,
-      distance: 1, // <--- sign its a genesis block
-      nTransactions: 0,
-      transactions: oldTransactions,
-      nBlockchains: 5,
-      blockchainBlockHeaders: oldBestBlockchainsBlockHeaders.map(b => b.toObject())
-    }
+      )
+    )
+    genesisBlock.setChainRoot(oldChainRoot)
+    genesisBlock.setDistance(1)
+    genesisBlock.setTxCount(0)
+    genesisBlock.setNonce(0) // TODO
+    genesisBlock.setTransactionsList(oldTransactions)
+    genesisBlock.setChildBlockchainCount(5)
+    genesisBlock.setChildBlockHeadersList(oldBestBlockchainsBlockHeaders)
 
-    expect(genesisBlock).toEqual({
+    expect(genesisBlock.toObject()).toEqual({
       hash: '0xxxxxxxxxxxxxxxxxxxxxxxxx',
       height: 1,
       miner: '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3',
@@ -102,10 +105,11 @@ describe('Miner', () => {
       merkleRoot: '570905689d00f6b7a15c332e54c02418f22e98db880a675f32e63537531ae48c',
       chainRoot: 'b4816d65eabac8f1a143805ffc6f4ca148c4548e020de3db21207a4849ea9abe',
       distance: 1,
-      nTransactions: 0,
-      transactions: [],
-      nBlockchains: 5,
-      blockchainBlockHeaders: [
+      nonce: 0,
+      txCount: 0,
+      transactionsList: [],
+      childBlockchainCount: 5,
+      childBlockHeadersList: [
         { blockchain: 'btc',
           hash: '0x39499390034',
           previousHash: '0xxxxxxxxxxxxxxxxx',
@@ -203,7 +207,7 @@ describe('Miner', () => {
         .xor(
           new BN(
             Buffer.from(
-              blake2bl(genesisBlock.hash + genesisBlock.merkleRoot),
+              blake2bl(genesisBlock.getHash() + genesisBlock.getMerkleRoot()),
               'hex'
             )
           )
@@ -211,69 +215,27 @@ describe('Miner', () => {
         .toString()
     )
 
-    let handicap = 0 // if BC address only, greatly increase difficulty (cataclysmic event)
-    const parentColliderBlockDifficulty = new BN(genesisBlock.difficulty, 16) // Assumes parent's difficulty is 141129464479256
-    const parentShareDiff = parentColliderBlockDifficulty.div(
-      new BN(blockHashes.length + 1, 16)
-    )
-
-    const minimumDiff = new BN(11801972029393, 16)
-    const minimumDiffShare = minimumDiff.div(new BN(blockHashes.length, 16)) // Standard deviation 100M cycles divided by the number of chains
-    const timestampEquality = [
-      // these would be equal
-      compareTimestamps(oldBestBlockchainsBlockHeaders[0], newBestBlockchainsBlockHeaders[0]),
-      // these would be different
-      compareTimestamps(oldBestBlockchainsBlockHeaders[1], newBestBlockchainsBlockHeaders[1]),
-      // these would be equal
-      compareTimestamps(oldBestBlockchainsBlockHeaders[2], newBestBlockchainsBlockHeaders[2]),
-      // these would be equal
-      compareTimestamps(oldBestBlockchainsBlockHeaders[3], newBestBlockchainsBlockHeaders[3]),
-      // these would be equal
-      compareTimestamps(oldBestBlockchainsBlockHeaders[4], newBestBlockchainsBlockHeaders[4])
-    ]
-
-    if (_.every(timestampEquality) === true) {
-      // If none of the chains have increased in height
-      handicap = 4
-    }
-
-    const blockColliderShareDiff = getDiff(
-      (Date.now() / 1000) << 0,
-      genesisBlock.timestamp,
-      minimumDiffShare,
+    const parentShareDiff = getParentShareDiff(genesisBlock.getDifficulty(), blockHashes.length)
+    const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
+    const preExpDiff = getNewPreExpDifficulty(
+      genesisBlock,
       parentShareDiff,
-      handicap
+      minimumDiffShare,
+      oldBestBlockchainsBlockHeaders,
+      newBestBlockchainsBlockHeaders
     )
-
-    const newDifficulty = newBestBlockchainsBlockHeaders.reduce(function (sum, header, i) {
-      return sum.add(
-        getDiff(
-          header.getTimestamp(),
-          oldBestBlockchainsBlockHeaders[i].getTimestamp(),
-          parentShareDiff,
-          minimumDiffShare
-        )
-      )
-    }, new BN(0))
-
-    newDifficulty.add(blockColliderShareDiff) // Add the Block Collider's chain to the values
-
-    const preExpDiff = getDiff(
-      (Date.now() / 1000) << 0,
-      genesisBlock.timestamp,
-      minimumDiff,
-      newDifficulty
-    ) // Calculate the final pre-singularity difficulty adjustment
 
     const newMerkleRoot = createMerkleRoot(
       blockHashes.concat(oldTransactions.concat([minerPublicAddress, 1]))
     ) // blockchains, transactions, miner address, height
 
+    // TODO create new BcBlock
     const newBlock = {
-      hash: blake2bl(genesisBlock.hash + newMerkleRoot),
-      height: genesisBlock.height + 1,
+      hash: blake2bl(genesisBlock.getHash() + newMerkleRoot),
+      height: genesisBlock.getHeight() + 1,
       merkleRoot: newMerkleRoot,
-      difficulty: newDifficulty,
+      // Final difficulty post-singularity calculators <--- this is the threshold hold the work provided must beat
+      difficulty: getExpFactorDiff(preExpDiff, genesisBlock.height),
       chainRoot: blake2bl(newChainRoot.toString()),
       distance: 0,
       nonce: 0,
@@ -282,8 +244,6 @@ describe('Miner', () => {
       nBlockchains: 5,
       blockchainBlockHeaders: newBestBlockchainsBlockHeaders.map(b => b.toObject())
     }
-
-    newBlock.difficulty = getExpFactorDiff(preExpDiff, genesisBlock.height) // Final difficulty post-singularity calculators <--- this is the threshold hold the work provided must beat
 
     const solution = mine(
       work,

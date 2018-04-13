@@ -12,6 +12,7 @@ var goog = jspb;
 var global = Function('return this')();
 
 goog.exportSymbol('proto.bc.BcBlock', null, global);
+goog.exportSymbol('proto.bc.BcTransaction', null, global);
 goog.exportSymbol('proto.bc.Block', null, global);
 goog.exportSymbol('proto.bc.Null', null, global);
 
@@ -430,7 +431,7 @@ if (true || goog.DEBUG && !COMPILED) {
  * @private {!Array<number>}
  * @const
  */
-proto.bc.BcBlock.repeatedFields_ = [10];
+proto.bc.BcBlock.repeatedFields_ = [11,13];
 
 
 
@@ -463,13 +464,17 @@ proto.bc.BcBlock.toObject = function(includeInstance, msg) {
   var f, obj = {
     hash: jspb.Message.getFieldWithDefault(msg, 1, ""),
     height: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    merkleRoot: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    miner: jspb.Message.getFieldWithDefault(msg, 3, ""),
     difficulty: +jspb.Message.getFieldWithDefault(msg, 4, 0.0),
-    chainRoot: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    distance: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    nonce: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    txCount: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    childBlockchainCount: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    merkleRoot: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    chainRoot: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    distance: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    nonce: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    txCount: jspb.Message.getFieldWithDefault(msg, 10, 0),
+    transactionsList: jspb.Message.toObjectList(msg.getTransactionsList(),
+    proto.bc.BcTransaction.toObject, includeInstance),
+    childBlockchainCount: jspb.Message.getFieldWithDefault(msg, 12, 0),
     childBlockHeadersList: jspb.Message.toObjectList(msg.getChildBlockHeadersList(),
     proto.bc.Block.toObject, includeInstance)
   };
@@ -518,33 +523,46 @@ proto.bc.BcBlock.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 3:
       var value = /** @type {string} */ (reader.readString());
-      msg.setMerkleRoot(value);
+      msg.setMiner(value);
       break;
     case 4:
       var value = /** @type {number} */ (reader.readFloat());
       msg.setDifficulty(value);
       break;
     case 5:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setTimestamp(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setMerkleRoot(value);
+      break;
+    case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setChainRoot(value);
       break;
-    case 6:
+    case 8:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setDistance(value);
       break;
-    case 7:
+    case 9:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setNonce(value);
       break;
-    case 8:
+    case 10:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setTxCount(value);
       break;
-    case 9:
+    case 11:
+      var value = new proto.bc.BcTransaction;
+      reader.readMessage(value,proto.bc.BcTransaction.deserializeBinaryFromReader);
+      msg.addTransactions(value);
+      break;
+    case 12:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setChildBlockchainCount(value);
       break;
-    case 10:
+    case 13:
       var value = new proto.bc.Block;
       reader.readMessage(value,proto.bc.Block.deserializeBinaryFromReader);
       msg.addChildBlockHeaders(value);
@@ -592,7 +610,7 @@ proto.bc.BcBlock.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getMerkleRoot();
+  f = message.getMiner();
   if (f.length > 0) {
     writer.writeString(
       3,
@@ -606,45 +624,67 @@ proto.bc.BcBlock.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getTimestamp();
+  if (f !== 0) {
+    writer.writeUint64(
+      5,
+      f
+    );
+  }
+  f = message.getMerkleRoot();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
   f = message.getChainRoot();
   if (f.length > 0) {
     writer.writeString(
-      5,
+      7,
       f
     );
   }
   f = message.getDistance();
   if (f !== 0) {
     writer.writeUint64(
-      6,
+      8,
       f
     );
   }
   f = message.getNonce();
   if (f !== 0) {
     writer.writeUint64(
-      7,
+      9,
       f
     );
   }
   f = message.getTxCount();
   if (f !== 0) {
     writer.writeUint64(
-      8,
+      10,
       f
+    );
+  }
+  f = message.getTransactionsList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      11,
+      f,
+      proto.bc.BcTransaction.serializeBinaryToWriter
     );
   }
   f = message.getChildBlockchainCount();
   if (f !== 0) {
     writer.writeUint64(
-      9,
+      12,
       f
     );
   }
   f = message.getChildBlockHeadersList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      10,
+      13,
       f,
       proto.bc.Block.serializeBinaryToWriter
     );
@@ -683,16 +723,16 @@ proto.bc.BcBlock.prototype.setHeight = function(value) {
 
 
 /**
- * optional string merkle_root = 3;
+ * optional string miner = 3;
  * @return {string}
  */
-proto.bc.BcBlock.prototype.getMerkleRoot = function() {
+proto.bc.BcBlock.prototype.getMiner = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /** @param {string} value */
-proto.bc.BcBlock.prototype.setMerkleRoot = function(value) {
+proto.bc.BcBlock.prototype.setMiner = function(value) {
   jspb.Message.setField(this, 3, value);
 };
 
@@ -713,93 +753,154 @@ proto.bc.BcBlock.prototype.setDifficulty = function(value) {
 
 
 /**
- * optional string chain_root = 5;
- * @return {string}
+ * optional uint64 timestamp = 5;
+ * @return {number}
  */
-proto.bc.BcBlock.prototype.getChainRoot = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+proto.bc.BcBlock.prototype.getTimestamp = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
 
-/** @param {string} value */
-proto.bc.BcBlock.prototype.setChainRoot = function(value) {
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTimestamp = function(value) {
   jspb.Message.setField(this, 5, value);
 };
 
 
 /**
- * optional uint64 distance = 6;
- * @return {number}
+ * optional string merkle_root = 6;
+ * @return {string}
  */
-proto.bc.BcBlock.prototype.getDistance = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+proto.bc.BcBlock.prototype.getMerkleRoot = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
-/** @param {number} value */
-proto.bc.BcBlock.prototype.setDistance = function(value) {
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setMerkleRoot = function(value) {
   jspb.Message.setField(this, 6, value);
 };
 
 
 /**
- * optional uint64 nonce = 7;
- * @return {number}
+ * optional string chain_root = 7;
+ * @return {string}
  */
-proto.bc.BcBlock.prototype.getNonce = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+proto.bc.BcBlock.prototype.getChainRoot = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
 };
 
 
-/** @param {number} value */
-proto.bc.BcBlock.prototype.setNonce = function(value) {
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setChainRoot = function(value) {
   jspb.Message.setField(this, 7, value);
 };
 
 
 /**
- * optional uint64 tx_count = 8;
+ * optional uint64 distance = 8;
  * @return {number}
  */
-proto.bc.BcBlock.prototype.getTxCount = function() {
+proto.bc.BcBlock.prototype.getDistance = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.bc.BcBlock.prototype.setTxCount = function(value) {
+proto.bc.BcBlock.prototype.setDistance = function(value) {
   jspb.Message.setField(this, 8, value);
 };
 
 
 /**
- * optional uint64 child_blockchain_count = 9;
+ * optional uint64 nonce = 9;
  * @return {number}
  */
-proto.bc.BcBlock.prototype.getChildBlockchainCount = function() {
+proto.bc.BcBlock.prototype.getNonce = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
 };
 
 
 /** @param {number} value */
-proto.bc.BcBlock.prototype.setChildBlockchainCount = function(value) {
+proto.bc.BcBlock.prototype.setNonce = function(value) {
   jspb.Message.setField(this, 9, value);
 };
 
 
 /**
- * repeated Block child_block_headers = 10;
+ * optional uint64 tx_count = 10;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getTxCount = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTxCount = function(value) {
+  jspb.Message.setField(this, 10, value);
+};
+
+
+/**
+ * repeated BcTransaction transactions = 11;
+ * @return {!Array.<!proto.bc.BcTransaction>}
+ */
+proto.bc.BcBlock.prototype.getTransactionsList = function() {
+  return /** @type{!Array.<!proto.bc.BcTransaction>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.BcTransaction, 11));
+};
+
+
+/** @param {!Array.<!proto.bc.BcTransaction>} value */
+proto.bc.BcBlock.prototype.setTransactionsList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 11, value);
+};
+
+
+/**
+ * @param {!proto.bc.BcTransaction=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.bc.BcTransaction}
+ */
+proto.bc.BcBlock.prototype.addTransactions = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 11, opt_value, proto.bc.BcTransaction, opt_index);
+};
+
+
+proto.bc.BcBlock.prototype.clearTransactionsList = function() {
+  this.setTransactionsList([]);
+};
+
+
+/**
+ * optional uint64 child_blockchain_count = 12;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getChildBlockchainCount = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 12, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setChildBlockchainCount = function(value) {
+  jspb.Message.setField(this, 12, value);
+};
+
+
+/**
+ * repeated Block child_block_headers = 13;
  * @return {!Array.<!proto.bc.Block>}
  */
 proto.bc.BcBlock.prototype.getChildBlockHeadersList = function() {
   return /** @type{!Array.<!proto.bc.Block>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.bc.Block, 10));
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.Block, 13));
 };
 
 
 /** @param {!Array.<!proto.bc.Block>} value */
 proto.bc.BcBlock.prototype.setChildBlockHeadersList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 10, value);
+  jspb.Message.setRepeatedWrapperField(this, 13, value);
 };
 
 
@@ -809,12 +910,154 @@ proto.bc.BcBlock.prototype.setChildBlockHeadersList = function(value) {
  * @return {!proto.bc.Block}
  */
 proto.bc.BcBlock.prototype.addChildBlockHeaders = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 10, opt_value, proto.bc.Block, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 13, opt_value, proto.bc.Block, opt_index);
 };
 
 
 proto.bc.BcBlock.prototype.clearChildBlockHeadersList = function() {
   this.setChildBlockHeadersList([]);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.BcTransaction = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.bc.BcTransaction, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.BcTransaction.displayName = 'proto.bc.BcTransaction';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.BcTransaction.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.BcTransaction.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.BcTransaction} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.BcTransaction.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    hash: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.BcTransaction}
+ */
+proto.bc.BcTransaction.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.BcTransaction;
+  return proto.bc.BcTransaction.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.BcTransaction} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.BcTransaction}
+ */
+proto.bc.BcTransaction.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setHash(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.BcTransaction.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.BcTransaction.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.BcTransaction} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.BcTransaction.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getHash();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string hash = 1;
+ * @return {string}
+ */
+proto.bc.BcTransaction.prototype.getHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcTransaction.prototype.setHash = function(value) {
+  jspb.Message.setField(this, 1, value);
 };
 
 
