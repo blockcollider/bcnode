@@ -216,16 +216,16 @@ export function distance (a, b) {
  * // @param {Array} work
  * @returns {Object} dist,nonce
  */
-export function mine (work, miner, merkleRoot, threshold, result) {
+export function mine (work, miner, merkleRoot, threshold, rng = Math.random) {
   threshold = new BN(threshold, 16)
-  const i = 0
+  let result
 
   console.log('mining for threshold: ' + threshold)
 
   // TODO: @pm check
-  // while (i < 2) {
-  if (i < 2) {
-    let nonce = String(Math.random()) // random string
+  while (true) {
+  // if (i < 2) {
+    let nonce = String(rng()) // random string
     let nonceHash = blake(nonce)
     result = distance(work, blake(miner + merkleRoot + nonceHash))
     if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
@@ -234,11 +234,6 @@ export function mine (work, miner, merkleRoot, threshold, result) {
         nonce: nonce
       }
     }
-  }
-
-  return {
-    distance: null,
-    nonce: null
   }
 }
 

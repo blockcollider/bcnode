@@ -15,7 +15,7 @@ describe('Miner', () => {
       {
         hash:      <---- Just need this for "const blockHashes" below
         prevHash:
-        merkRoot:
+        merkleRoot:
       }
       */
 
@@ -75,7 +75,7 @@ describe('Miner', () => {
       height: 1,
       miner: minerPublicAddress,
       difficulty: 141129464479256,
-      timestamp: ((Date.now * 1000) << 0) - 70,
+      timestamp: ((Date.now() / 1000) << 0) - 70,
       merkleRoot: createMerkleRoot(
         oldBestBlockchainHeaderHashes.concat(
           oldTransactions.concat([minerPublicAddress, 1])
@@ -190,33 +190,28 @@ describe('Miner', () => {
     }
 
     const blockColliderShareDiff = getDiff(
-      (Date.now() * 1000) << 0,
+      (Date.now() / 1000) << 0,
       genesisBlock.timestamp,
       minimumDiffShare,
       parentShareDiff,
       handicap
     )
 
-    const newDifficulty = newBestBlockchainsBlockHeaders.reduce(function (
-      sum,
-      header,
-      i
-      ) {
-        return sum.add(
-          getDiff(
-            header.timestamp,
-            oldBestBlockchainsBlockHeaders[i].timestamp,
-            parentShareDiff,
-            minimumDiffShare
-          )
+    const newDifficulty = newBestBlockchainsBlockHeaders.reduce(function (sum, header, i) {
+      return sum.add(
+        getDiff(
+          header.timestamp,
+          oldBestBlockchainsBlockHeaders[i].timestamp,
+          parentShareDiff,
+          minimumDiffShare
         )
-      },
-      new BN(0))
+      )
+    }, new BN(0))
 
     newDifficulty.add(blockColliderShareDiff) // Add the Block Collider's chain to the values
 
     const preExpDiff = getDiff(
-      (Date.now() * 1000) << 0,
+      (Date.now() / 1000) << 0,
       genesisBlock.timestamp,
       minimumDiff,
       newDifficulty
@@ -242,18 +237,56 @@ describe('Miner', () => {
 
     newBlock.difficulty = getExpFactorDiff(preExpDiff, genesisBlock.height) // Final difficulty post-singularity calculators <--- this is the threshold hold the work provided must beat
 
-    // const solution = mine(work, newBlock.difficuilty); /// <--- this is the correct version, below div by 16 so it would go faster
     const solution = mine(
       work,
       minerPublicAddress,
       newMerkleRoot,
-      newBlock.difficulty.div(new BN(11, 16)).toString()
+      newBlock.difficulty.div(new BN(100000, 16)).toString(), // divide diff in test by huge number to finish quickly
+      () => 0.12137218313968567 // fake rng to produce stable test result
     )
 
     newBlock.distance = solution.distance
     newBlock.nonce = solution.nonce
     newBlock.difficulty = newBlock.difficulty.toString()
 
-    console.log(newBlock)
+    expect(newBlock).toEqual({
+      hash: '9b997d19c13614c9745da60e0407136493098b948ea0d80a3678d10169acbeee',
+      height: 2,
+      merkleRoot: 'c2ee334dc882a6c910eaccd55732eef3f2053fa4dc8c781c4cf4e508646ed10c',
+      difficulty: '169690252393619',
+      chainRoot: '8f256b08516fd7f4c69539680efd7371553a9f32c94107a793d1e96b899fbd24',
+      distance: 146237851348249,
+      nonce: '0.12137218313968567',
+      nTransactions: 0,
+      transactions: [],
+      nBlockchains: 5,
+      blockchainBlockHeaders: [
+        { hash: '0x39499390034',
+          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: '0xksjiefjisefmnsef',
+          prevHash: 'ospoepfkspdfs',
+          merkleRoot: '0x000x00000',
+          height: 3,
+          timestamp: 1480000000 },
+        { hash: '0x39300923i42034',
+          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: '0xsjdfo3i2oifji3o2',
+          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: '0xw3jkfok2jjvijief',
+          prevHash: '0xxxxxxxxxxxxxxxxx\'',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 }
+      ]
+    })
   })
 })
