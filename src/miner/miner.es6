@@ -19,25 +19,11 @@
  *      PART 4: Create Block Collider Block Hash  [COMPLETE]
  *
  */
-const crypto = require('crypto')
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
 const _ = require('lodash')
 
-/**
- * FUNCTION: blake(str)
- *   Hashes a given string according to the Blake2b Lite format
- *
- * @param {String} str
- * @returns {String}
- */
-export function blake (str: String) {
-  // This would be blake2bl found in utils/strings
-  return crypto
-    .createHash('sha256')
-    .update(str)
-    .digest('hex')
-}
+const { blake2bl } = require('../utils/crypto')
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -141,9 +127,9 @@ export function getDiff (blockTime, parentTime, parentDiff, minimumDiff, handica
 export function createMerkleRoot (list, prev) {
   if (list.length > 0) {
     if (prev !== undefined) {
-      prev = blake(prev + list.shift())
+      prev = blake2bl(prev + list.shift())
     } else {
-      prev = blake(list.shift())
+      prev = blake2bl(list.shift())
     }
     return createMerkleRoot(list, prev)
   }
@@ -226,8 +212,8 @@ export function mine (work, miner, merkleRoot, threshold, rng = Math.random) {
   while (true) {
   // if (i < 2) {
     let nonce = String(rng()) // random string
-    let nonceHash = blake(nonce)
-    result = distance(work, blake(miner + merkleRoot + nonceHash))
+    let nonceHash = blake2bl(nonce)
+    result = distance(work, blake2bl(miner + merkleRoot + nonceHash))
     if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
       return {
         distance: result,

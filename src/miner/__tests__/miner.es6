@@ -1,8 +1,8 @@
 const BN = require('bn.js')
 const _ = require('lodash')
+const { blake2bl } = require('../../utils/crypto')
 
 const {
-  blake,
   createMerkleRoot,
   getDiff,
   getExpFactorDiff,
@@ -62,7 +62,7 @@ describe('Miner', () => {
 
     const oldBestBlockchainHeaderHashes = oldBestBlockchainsBlockHeaders.map(
       function (b) {
-        return blake(b.hash + b.merkleRoot)
+        return blake2bl(b.hash + b.merkleRoot)
       }
     )
 
@@ -70,18 +70,19 @@ describe('Miner', () => {
       return all.xor(new BN(Buffer.from(b, 'hex')))
     }, new BN(0))
 
+    const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
     const genesisBlock = {
       hash: '0xxxxxxxxxxxxxxxxxxxxxxxxx', /// BLAKE("prevHashAddress" + "merkleRoot")
       height: 1,
       miner: minerPublicAddress,
       difficulty: 141129464479256,
-      timestamp: ((Date.now() / 1000) << 0) - 70,
+      timestamp: genesisTimestamp,
       merkleRoot: createMerkleRoot(
         oldBestBlockchainHeaderHashes.concat(
           oldTransactions.concat([minerPublicAddress, 1])
         )
       ), // blockchains, transactions, miner address, height
-      chainRoot: blake(oldChainRoot.toString()),
+      chainRoot: blake2bl(oldChainRoot.toString()),
       distance: 1, // <--- sign its a genesis block
       nTransactions: 0,
       transactions: oldTransactions,
@@ -89,7 +90,46 @@ describe('Miner', () => {
       blockchainBlockHeaders: oldBestBlockchainsBlockHeaders
     }
 
-    console.log(genesisBlock)
+    expect(genesisBlock).toEqual({
+      hash: '0xxxxxxxxxxxxxxxxxxxxxxxxx',
+      height: 1,
+      miner: '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3',
+      difficulty: 141129464479256,
+      timestamp: genesisTimestamp,
+      merkleRoot: '570905689d00f6b7a15c332e54c02418f22e98db880a675f32e63537531ae48c',
+      chainRoot: 'b4816d65eabac8f1a143805ffc6f4ca148c4548e020de3db21207a4849ea9abe',
+      distance: 1,
+      nTransactions: 0,
+      transactions: [],
+      nBlockchains: 5,
+      blockchainBlockHeaders: [
+        { hash: '0x39499390034',
+          prevHash: '0xxxxxxxxxxxxxxxxx',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: 'ospoepfkspdfs',
+          prevHash: '0xxxxxxxxxxxxxxxxx',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: '0x39300923i42034',
+          prevHash: '0xxxxxxxxxxxxxxxxx',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: '0xsjdfo3i2oifji3o2',
+          prevHash: '0xxxxxxxxxxxxxxxxx',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 },
+        { hash: '0xw3jkfok2jjvijief',
+          prevHash: '0xxxxxxxxxxxxxxxxx',
+          merkleRoot: '0x000x00000',
+          height: 2,
+          timestamp: 1400000000 }
+      ]
+    })
 
     /* - !!! THIS NEW BLOCK COMES IN !!!
     {
@@ -143,19 +183,19 @@ describe('Miner', () => {
     ]
 
     const blockHashes = newBestBlockchainsBlockHeaders.map(function (header) {
-      return blake(header.hash + header.merkleRoot)
+      return blake2bl(header.hash + header.merkleRoot)
     })
 
     const newChainRoot = blockHashes.reduce(function (all, hash) {
       return all.xor(new BN(Buffer.from(hash, 'hex')))
     }, new BN(0))
 
-    const work = blake(
+    const work = blake2bl(
       newChainRoot
         .xor(
           new BN(
             Buffer.from(
-              blake(genesisBlock.hash + genesisBlock.merkleRoot),
+              blake2bl(genesisBlock.hash + genesisBlock.merkleRoot),
               'hex'
             )
           )
@@ -222,11 +262,11 @@ describe('Miner', () => {
     ) // blockchains, transactions, miner address, height
 
     const newBlock = {
-      hash: blake(genesisBlock.hash + newMerkleRoot),
+      hash: blake2bl(genesisBlock.hash + newMerkleRoot),
       height: genesisBlock.height + 1,
       merkleRoot: newMerkleRoot,
       difficulty: newDifficulty,
-      chainRoot: blake(newChainRoot.toString()),
+      chainRoot: blake2bl(newChainRoot.toString()),
       distance: 0,
       nonce: 0,
       nTransactions: 0,
@@ -250,12 +290,12 @@ describe('Miner', () => {
     newBlock.difficulty = newBlock.difficulty.toString()
 
     expect(newBlock).toEqual({
-      hash: '9b997d19c13614c9745da60e0407136493098b948ea0d80a3678d10169acbeee',
+      hash: '642759529ceb51fe2141b398da012d07959de22e563ab35a01d4f2424f6f94d0',
       height: 2,
-      merkleRoot: 'c2ee334dc882a6c910eaccd55732eef3f2053fa4dc8c781c4cf4e508646ed10c',
+      merkleRoot: '3846bfe390e8d5e887cf9df928e25516ca3209b9f87320ac24628b82276a6acc',
       difficulty: '169690252393619',
-      chainRoot: '8f256b08516fd7f4c69539680efd7371553a9f32c94107a793d1e96b899fbd24',
-      distance: 146237851348249,
+      chainRoot: '0d6ac1386c1792cedd2066f6e062033788a8a66ddb8c10b1ba9f5339dcafad51',
+      distance: 182925574122964,
       nonce: '0.12137218313968567',
       nTransactions: 0,
       transactions: [],
