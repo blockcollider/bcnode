@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
+ * @no-flow
  */
 
 /**
@@ -31,7 +31,7 @@ const _ = require('lodash')
  * @param {String} str
  * @returns {String}
  */
-export function blake (str) {
+export function blake (str: String) {
   // This would be blake2bl found in utils/strings
   return crypto
     .createHash('sha256')
@@ -41,13 +41,12 @@ export function blake (str) {
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
-/// ////////////////////////  PART 1  - Difiiculty of the next block
+/// ////////////////////////  PART 1  - Dificulty of the next block
 /// ////////////////////////
 /// /////////////////////////////////////////////////////////////////////
 
 /**
- * FUNCTION: getExpFactorDiff(t)
- *   Determines the singularity height and difficulty
+ * Determines the singularity height and difficulty
  *
  * @param {BN|Difficulty} x
  * @param {Number} parentBlockHeight
@@ -170,10 +169,8 @@ export function createMerkleRoot (list, prev) {
 // ]
 
 /**
- * FUNCTION: split(t)
- *    Converts characters of string into ASCII codes
+ *  Converts characters of string into ASCII codes
  *
- * @param {String} t
  * @returns {Number|Array}
  */
 export function split (t) {
@@ -183,13 +180,7 @@ export function split (t) {
 }
 
 /**
- * FUNCTION: dist(x, y, clbk)
- *    Converts cosine similary to cos distance
- *
- * @param {String} x
- * @param {String} y
- * @param {String} cblk
- * @returns {Number|Array}
+ * Converts cosine similary to cos distance
  */
 export function dist (x, y, clbk) {
   let s
@@ -222,7 +213,7 @@ export function distance (a, b) {
 /**
  * Finds the mean of the distances from a provided set of hashed header proofs
  *
- * @param {Array} work
+ * // @param {Array} work
  * @returns {Object} dist,nonce
  */
 export function mine (work, miner, merkleRoot, threshold, result) {
@@ -267,4 +258,7 @@ export function mine (work, miner, merkleRoot, threshold, result) {
  *
  */
 
+export default class Miner {
+
+}
 // main()
