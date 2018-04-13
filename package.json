@@ -80,6 +80,7 @@
   "dependencies": {
     "@cityofzion/neo-js": "0.7.0",
     "async": "~2.6.0",
+    "atob": "2.1.0",
     "avon": "^2.1.0",
     "axios": "^0.18.0",
     "base-x": "^3.0.4",
