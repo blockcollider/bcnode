@@ -25,10 +25,20 @@ $ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
 
 ### Build and run docker image locally
 
-
-
 ```
+# Clone sources
+$ https://github.com/blockcollider/bcnode.git
+
+# Change folder
+$ cd bcnode
+
+# Switch to release branch
+$ git checkout release
+
+# Build image locally
 $ docker build -t blockcollider/bcnode .
+
+# Run locally build image
 $ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
 ```
 
