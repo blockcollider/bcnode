@@ -9,6 +9,7 @@ describe('RpcServer', () => {
 
   beforeEach(() => {
     persistenceMock = {
+      get: jest.fn().mockReturnValue(Promise.resolve(true)),
       put: jest.fn().mockReturnValue(Promise.resolve(true))
     }
 
