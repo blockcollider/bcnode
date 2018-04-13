@@ -8,6 +8,7 @@ How to release new version.
 - Build
 - Run tests
 - Merge master -> release
+- Wait for CI
 - Build docker image
 - Release docker image
 - Tag latest version
