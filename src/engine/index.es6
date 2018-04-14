@@ -8,7 +8,7 @@
  */
 
 const { EventEmitter } = require('events')
-const { xprod, equals, all, values, partition } = require('ramda')
+const { xprod, equals, all, values, filter, reject, addIndex } = require('ramda')
 
 const config = require('../../config/config')
 const logging = require('../logger')
@@ -167,8 +167,10 @@ export default class Engine {
           })
         })).then(blocks => {
           this._logger.debug(`Got ${blocks.length} blocks from persistence`)
-          const [currentBlocks, previousBlocks] = partition(blocks) // latest are on odd indices, previous on even
-          console.log(currentBlocks.map(b => b.toObject()))
+          const isEven = n => n % 2 === 0
+          const indexEven = (val, idx) => isEven(idx)
+          const currentBlocks = addIndex(reject)(indexEven, blocks) // latest are on odd indices
+          const previousBlocks = addIndex(filter)(indexEven, blocks) // previous on even
           return this._persistence.get('bc.block.latest').then(bcBlock => {
             return [previousBlocks, currentBlocks, bcBlock]
           })
@@ -201,7 +203,8 @@ export default class Engine {
           this._logger.info(`Mined new block: ${JSON.stringify(solution, null, 2)}`)
           // TODO broadcast BC block here
           // TODO persist BC block to persistence (?if verified?)
-        }).catch(() => {
+        }).catch(e => {
+          this._logger.error(`Mining failed, reason: ${e.message}`)
           this._mining = false
         })
       } else {
