@@ -22,22 +22,19 @@ addons:
     packages:
     - graphviz
 
-# deploy:
-#   provider: script
-#   script: bash scripts/deploy-docker.sh
-#   on:
-#     branch:
-#     - master
-#     - release
-
 jobs:
   include:
     - stage: docker push
       node_js: "8"
-      script: echo "Deploying to npm ..."
+      os: "linux"
+      script: skip
       deploy:
         provider: script
-        script: echo "Pushing docker image to registry"
+        script: echo "docker push ..." # bash scripts/deploy-docker.sh
+        on:
+          branch:
+          - master
+          - release
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -OL https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip;
