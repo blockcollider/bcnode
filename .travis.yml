@@ -36,12 +36,16 @@ cache:
 jobs:
   include:
     - stage: docker push
+      # if: type IN (push)
+      if: branch IN (master, release)
       sudo: required
       services:
         - docker
       os: "linux"
-      install: skip
-      script: ./scripts/deploy-docker.sh
+      script: skip
+      deploy:
+        provider: script
+        script: bash scripts/deploy-docker.sh
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -OL https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip;
