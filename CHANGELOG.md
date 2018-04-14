@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [CLI] - New option --miner-key
 - [UI] - Serve documentation - /doc
 - [CI] - Automatically build docker images
 - [Docker] - Mountable volumes - _data, config, logs
