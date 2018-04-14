@@ -64,6 +64,10 @@ before_install:
   - export RUST_SRC_PATH=`rustc --print sysroot`/lib/rustlib/src/rust/src
   - export RUST_BACKTRACE=1
 
+install:
+  - npm install -g yarn
+  - yarn
+  
 cache:
   apt: true
   yarn: true
