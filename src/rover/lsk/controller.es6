@@ -14,7 +14,7 @@ const lisk = require('lisk-js')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
-const { blake2b } = require('../../utils/strings')
+const { blake2b } = require('../../utils/crypto')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,

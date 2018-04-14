@@ -25,7 +25,7 @@ const async = require('async')
 const request = require('request')
 const crypto = require('crypto')
 const big = require('big.js')
-const string = require('../utils/strings.js')
+const { blake2b } = require('../utils/crypto')
 const Log = require('../log.js')
 const https = require('https')
 const fs = require('fs')
@@ -93,7 +93,7 @@ function send (type, data) {
 function getMerkleRoot (txs) {
   if (txs != undefined && txs.length > 0) {
     return txs.reduce(function (all, tx) {
-      all = string.blake2b(all + tx.id)
+      all = blake2b(all + tx.id)
 
       return all
     }, '')

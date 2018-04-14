@@ -13,7 +13,7 @@ const LRUCache = require('lru-cache')
 
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
-const { blake2b } = require('../../utils/strings')
+const { blake2b } = require('../../utils/crypto')
 const { RpcClient } = require('../../rpc')
 
 type WavesTransaction = {

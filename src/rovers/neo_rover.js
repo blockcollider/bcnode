@@ -7,7 +7,7 @@ const async = require('async')
 const request = require('request')
 const crypto = require('crypto')
 const big = require('big.js')
-const string = require('../utils/strings.js')
+const { blake2b } = require('../utils/crypto')
 const Log = require('../log.js')
 const neo = require('./neo_dist/neo.blockchain.neo').neo // must be removed when they fix their NPM lib.
 
@@ -64,7 +64,7 @@ function send (type, data) {
 
 function getMerkleRoot (txs) {
   return txs.reduce(function (all, tx) {
-    all = string.blake2b(all + tx.id)
+    all = blake2b(all + tx.id)
 
     return all
   }, '')

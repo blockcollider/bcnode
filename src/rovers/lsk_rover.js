@@ -5,7 +5,7 @@ const request = require('request')
 const crypto = require('crypto')
 const big = require('big.js')
 const lisk = require('lisk-js')
-const string = require('../utils/strings.js')
+const { blake2b } = require('../utils/crypto')
 const Log = require('../log.js')
 
 const liskOptions = {
