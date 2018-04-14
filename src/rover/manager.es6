@@ -59,10 +59,9 @@ export default class RoverManager {
       roverPath,
       [],
       {
-        execArgv: process.env.DEBUGGER ? ['--inspect-brk'] : []
+        execArgv: []
       }
     )
-
     this._rovers[roverName] = rover
 
     rover.on('exit', (code, signal) => {
