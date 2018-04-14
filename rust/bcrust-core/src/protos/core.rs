@@ -563,12 +563,15 @@ pub struct BcBlock {
     // message fields
     pub hash: ::std::string::String,
     pub height: u64,
-    pub merkle_root: ::std::string::String,
+    pub miner: ::std::string::String,
     pub difficulty: f32,
+    pub timestamp: u64,
+    pub merkle_root: ::std::string::String,
     pub chain_root: ::std::string::String,
     pub distance: u64,
     pub nonce: u64,
     pub tx_count: u64,
+    pub transactions: ::protobuf::RepeatedField<BcTransaction>,
     pub child_blockchain_count: u64,
     pub child_block_headers: ::protobuf::RepeatedField<Block>,
     // special fields
@@ -651,7 +654,87 @@ impl BcBlock {
         &mut self.height
     }
 
-    // string merkle_root = 3;
+    // string miner = 3;
+
+    pub fn clear_miner(&mut self) {
+        self.miner.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_miner(&mut self, v: ::std::string::String) {
+        self.miner = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_miner(&mut self) -> &mut ::std::string::String {
+        &mut self.miner
+    }
+
+    // Take field
+    pub fn take_miner(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.miner, ::std::string::String::new())
+    }
+
+    pub fn get_miner(&self) -> &str {
+        &self.miner
+    }
+
+    fn get_miner_for_reflect(&self) -> &::std::string::String {
+        &self.miner
+    }
+
+    fn mut_miner_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.miner
+    }
+
+    // float difficulty = 4;
+
+    pub fn clear_difficulty(&mut self) {
+        self.difficulty = 0.;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_difficulty(&mut self, v: f32) {
+        self.difficulty = v;
+    }
+
+    pub fn get_difficulty(&self) -> f32 {
+        self.difficulty
+    }
+
+    fn get_difficulty_for_reflect(&self) -> &f32 {
+        &self.difficulty
+    }
+
+    fn mut_difficulty_for_reflect(&mut self) -> &mut f32 {
+        &mut self.difficulty
+    }
+
+    // uint64 timestamp = 5;
+
+    pub fn clear_timestamp(&mut self) {
+        self.timestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_timestamp(&mut self, v: u64) {
+        self.timestamp = v;
+    }
+
+    pub fn get_timestamp(&self) -> u64 {
+        self.timestamp
+    }
+
+    fn get_timestamp_for_reflect(&self) -> &u64 {
+        &self.timestamp
+    }
+
+    fn mut_timestamp_for_reflect(&mut self) -> &mut u64 {
+        &mut self.timestamp
+    }
+
+    // string merkle_root = 6;
 
     pub fn clear_merkle_root(&mut self) {
         self.merkle_root.clear();
@@ -685,30 +768,7 @@ impl BcBlock {
         &mut self.merkle_root
     }
 
-    // float difficulty = 4;
-
-    pub fn clear_difficulty(&mut self) {
-        self.difficulty = 0.;
-    }
-
-    // Param is passed by value, moved
-    pub fn set_difficulty(&mut self, v: f32) {
-        self.difficulty = v;
-    }
-
-    pub fn get_difficulty(&self) -> f32 {
-        self.difficulty
-    }
-
-    fn get_difficulty_for_reflect(&self) -> &f32 {
-        &self.difficulty
-    }
-
-    fn mut_difficulty_for_reflect(&mut self) -> &mut f32 {
-        &mut self.difficulty
-    }
-
-    // string chain_root = 5;
+    // string chain_root = 7;
 
     pub fn clear_chain_root(&mut self) {
         self.chain_root.clear();
@@ -742,7 +802,7 @@ impl BcBlock {
         &mut self.chain_root
     }
 
-    // uint64 distance = 6;
+    // uint64 distance = 8;
 
     pub fn clear_distance(&mut self) {
         self.distance = 0;
@@ -765,7 +825,7 @@ impl BcBlock {
         &mut self.distance
     }
 
-    // uint64 nonce = 7;
+    // uint64 nonce = 9;
 
     pub fn clear_nonce(&mut self) {
         self.nonce = 0;
@@ -788,7 +848,7 @@ impl BcBlock {
         &mut self.nonce
     }
 
-    // uint64 tx_count = 8;
+    // uint64 tx_count = 10;
 
     pub fn clear_tx_count(&mut self) {
         self.tx_count = 0;
@@ -811,7 +871,40 @@ impl BcBlock {
         &mut self.tx_count
     }
 
-    // uint64 child_blockchain_count = 9;
+    // repeated .bc.BcTransaction transactions = 11;
+
+    pub fn clear_transactions(&mut self) {
+        self.transactions.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_transactions(&mut self, v: ::protobuf::RepeatedField<BcTransaction>) {
+        self.transactions = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_transactions(&mut self) -> &mut ::protobuf::RepeatedField<BcTransaction> {
+        &mut self.transactions
+    }
+
+    // Take field
+    pub fn take_transactions(&mut self) -> ::protobuf::RepeatedField<BcTransaction> {
+        ::std::mem::replace(&mut self.transactions, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_transactions(&self) -> &[BcTransaction] {
+        &self.transactions
+    }
+
+    fn get_transactions_for_reflect(&self) -> &::protobuf::RepeatedField<BcTransaction> {
+        &self.transactions
+    }
+
+    fn mut_transactions_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BcTransaction> {
+        &mut self.transactions
+    }
+
+    // uint64 child_blockchain_count = 12;
 
     pub fn clear_child_blockchain_count(&mut self) {
         self.child_blockchain_count = 0;
@@ -834,7 +927,7 @@ impl BcBlock {
         &mut self.child_blockchain_count
     }
 
-    // repeated .bc.Block child_block_headers = 10;
+    // repeated .bc.Block child_block_headers = 13;
 
     pub fn clear_child_block_headers(&mut self) {
         self.child_block_headers.clear();
@@ -870,6 +963,11 @@ impl BcBlock {
 
 impl ::protobuf::Message for BcBlock {
     fn is_initialized(&self) -> bool {
+        for v in &self.transactions {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
         for v in &self.child_block_headers {
             if !v.is_initialized() {
                 return false;
@@ -893,7 +991,7 @@ impl ::protobuf::Message for BcBlock {
                     self.height = tmp;
                 },
                 3 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.merkle_root)?;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.miner)?;
                 },
                 4 => {
                     if wire_type != ::protobuf::wire_format::WireTypeFixed32 {
@@ -903,37 +1001,50 @@ impl ::protobuf::Message for BcBlock {
                     self.difficulty = tmp;
                 },
                 5 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.chain_root)?;
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.timestamp = tmp;
                 },
                 6 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_uint64()?;
-                    self.distance = tmp;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.merkle_root)?;
                 },
                 7 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_uint64()?;
-                    self.nonce = tmp;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.chain_root)?;
                 },
                 8 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.tx_count = tmp;
+                    self.distance = tmp;
                 },
                 9 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.child_blockchain_count = tmp;
+                    self.nonce = tmp;
                 },
                 10 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.tx_count = tmp;
+                },
+                11 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.transactions)?;
+                },
+                12 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.child_blockchain_count = tmp;
+                },
+                13 => {
                     ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.child_block_headers)?;
                 },
                 _ => {
@@ -954,26 +1065,36 @@ impl ::protobuf::Message for BcBlock {
         if self.height != 0 {
             my_size += ::protobuf::rt::value_size(2, self.height, ::protobuf::wire_format::WireTypeVarint);
         }
-        if !self.merkle_root.is_empty() {
-            my_size += ::protobuf::rt::string_size(3, &self.merkle_root);
+        if !self.miner.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.miner);
         }
         if self.difficulty != 0. {
             my_size += 5;
         }
+        if self.timestamp != 0 {
+            my_size += ::protobuf::rt::value_size(5, self.timestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.merkle_root.is_empty() {
+            my_size += ::protobuf::rt::string_size(6, &self.merkle_root);
+        }
         if !self.chain_root.is_empty() {
-            my_size += ::protobuf::rt::string_size(5, &self.chain_root);
+            my_size += ::protobuf::rt::string_size(7, &self.chain_root);
         }
         if self.distance != 0 {
-            my_size += ::protobuf::rt::value_size(6, self.distance, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(8, self.distance, ::protobuf::wire_format::WireTypeVarint);
         }
         if self.nonce != 0 {
-            my_size += ::protobuf::rt::value_size(7, self.nonce, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(9, self.nonce, ::protobuf::wire_format::WireTypeVarint);
         }
         if self.tx_count != 0 {
-            my_size += ::protobuf::rt::value_size(8, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(10, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
         }
+        for value in &self.transactions {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
         if self.child_blockchain_count != 0 {
-            my_size += ::protobuf::rt::value_size(9, self.child_blockchain_count, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(12, self.child_blockchain_count, ::protobuf::wire_format::WireTypeVarint);
         }
         for value in &self.child_block_headers {
             let len = value.compute_size();
@@ -991,29 +1112,40 @@ impl ::protobuf::Message for BcBlock {
         if self.height != 0 {
             os.write_uint64(2, self.height)?;
         }
-        if !self.merkle_root.is_empty() {
-            os.write_string(3, &self.merkle_root)?;
+        if !self.miner.is_empty() {
+            os.write_string(3, &self.miner)?;
         }
         if self.difficulty != 0. {
             os.write_float(4, self.difficulty)?;
         }
+        if self.timestamp != 0 {
+            os.write_uint64(5, self.timestamp)?;
+        }
+        if !self.merkle_root.is_empty() {
+            os.write_string(6, &self.merkle_root)?;
+        }
         if !self.chain_root.is_empty() {
-            os.write_string(5, &self.chain_root)?;
+            os.write_string(7, &self.chain_root)?;
         }
         if self.distance != 0 {
-            os.write_uint64(6, self.distance)?;
+            os.write_uint64(8, self.distance)?;
         }
         if self.nonce != 0 {
-            os.write_uint64(7, self.nonce)?;
+            os.write_uint64(9, self.nonce)?;
         }
         if self.tx_count != 0 {
-            os.write_uint64(8, self.tx_count)?;
+            os.write_uint64(10, self.tx_count)?;
         }
+        for v in &self.transactions {
+            os.write_tag(11, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
         if self.child_blockchain_count != 0 {
-            os.write_uint64(9, self.child_blockchain_count)?;
+            os.write_uint64(12, self.child_blockchain_count)?;
         }
         for v in &self.child_block_headers {
-            os.write_tag(10, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_tag(13, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
         };
@@ -1072,14 +1204,24 @@ impl ::protobuf::MessageStatic for BcBlock {
                     BcBlock::mut_height_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                    "merkle_root",
-                    BcBlock::get_merkle_root_for_reflect,
-                    BcBlock::mut_merkle_root_for_reflect,
+                    "miner",
+                    BcBlock::get_miner_for_reflect,
+                    BcBlock::mut_miner_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeFloat>(
                     "difficulty",
                     BcBlock::get_difficulty_for_reflect,
                     BcBlock::mut_difficulty_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "timestamp",
+                    BcBlock::get_timestamp_for_reflect,
+                    BcBlock::mut_timestamp_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "merkle_root",
+                    BcBlock::get_merkle_root_for_reflect,
+                    BcBlock::mut_merkle_root_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "chain_root",
@@ -1100,6 +1242,11 @@ impl ::protobuf::MessageStatic for BcBlock {
                     "tx_count",
                     BcBlock::get_tx_count_for_reflect,
                     BcBlock::mut_tx_count_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BcTransaction>>(
+                    "transactions",
+                    BcBlock::get_transactions_for_reflect,
+                    BcBlock::mut_transactions_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
                     "child_blockchain_count",
@@ -1125,12 +1272,15 @@ impl ::protobuf::Clear for BcBlock {
     fn clear(&mut self) {
         self.clear_hash();
         self.clear_height();
-        self.clear_merkle_root();
+        self.clear_miner();
         self.clear_difficulty();
+        self.clear_timestamp();
+        self.clear_merkle_root();
         self.clear_chain_root();
         self.clear_distance();
         self.clear_nonce();
         self.clear_tx_count();
+        self.clear_transactions();
         self.clear_child_blockchain_count();
         self.clear_child_block_headers();
         self.unknown_fields.clear();
@@ -1149,22 +1299,201 @@ impl ::protobuf::reflect::ProtobufValue for BcBlock {
     }
 }
 
+#[derive(PartialEq,Clone,Default)]
+pub struct BcTransaction {
+    // message fields
+    pub hash: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+// see codegen.rs for the explanation why impl Sync explicitly
+unsafe impl ::std::marker::Sync for BcTransaction {}
+
+impl BcTransaction {
+    pub fn new() -> BcTransaction {
+        ::std::default::Default::default()
+    }
+
+    pub fn default_instance() -> &'static BcTransaction {
+        static mut instance: ::protobuf::lazy::Lazy<BcTransaction> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const BcTransaction,
+        };
+        unsafe {
+            instance.get(BcTransaction::new)
+        }
+    }
+
+    // string hash = 1;
+
+    pub fn clear_hash(&mut self) {
+        self.hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_hash(&mut self, v: ::std::string::String) {
+        self.hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+
+    // Take field
+    pub fn take_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.hash, ::std::string::String::new())
+    }
+
+    pub fn get_hash(&self) -> &str {
+        &self.hash
+    }
+
+    fn get_hash_for_reflect(&self) -> &::std::string::String {
+        &self.hash
+    }
+
+    fn mut_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+}
+
+impl ::protobuf::Message for BcTransaction {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.hash);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.hash.is_empty() {
+            os.write_string(1, &self.hash)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        ::protobuf::MessageStatic::descriptor_static(None::<Self>)
+    }
+}
+
+impl ::protobuf::MessageStatic for BcTransaction {
+    fn new() -> BcTransaction {
+        BcTransaction::new()
+    }
+
+    fn descriptor_static(_: ::std::option::Option<BcTransaction>) -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "hash",
+                    BcTransaction::get_hash_for_reflect,
+                    BcTransaction::mut_hash_for_reflect,
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<BcTransaction>(
+                    "BcTransaction",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+}
+
+impl ::protobuf::Clear for BcTransaction {
+    fn clear(&mut self) {
+        self.clear_hash();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for BcTransaction {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for BcTransaction {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\ncore.proto\x12\x02bc\"\x06\n\x04Null\"\xb7\x01\n\x05Block\x12\x1e\n\
     \nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\
     \x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cprevio\
     usHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestamp\x12\x16\n\
     \x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0bmerkle_root\x18\
-    \x06\x20\x01(\tR\nmerkleRoot\"\xd3\x02\n\x07BcBlock\x12\x12\n\x04hash\
+    \x06\x20\x01(\tR\nmerkleRoot\"\xbe\x03\n\x07BcBlock\x12\x12\n\x04hash\
     \x18\x01\x20\x01(\tR\x04hash\x12\x16\n\x06height\x18\x02\x20\x01(\x04R\
-    \x06height\x12\x1f\n\x0bmerkle_root\x18\x03\x20\x01(\tR\nmerkleRoot\x12\
-    \x1e\n\ndifficulty\x18\x04\x20\x01(\x02R\ndifficulty\x12\x1d\n\nchain_ro\
-    ot\x18\x05\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x06\x20\x01(\
-    \x04R\x08distance\x12\x14\n\x05nonce\x18\x07\x20\x01(\x04R\x05nonce\x12\
-    \x19\n\x08tx_count\x18\x08\x20\x01(\x04R\x07txCount\x124\n\x16child_bloc\
-    kchain_count\x18\t\x20\x01(\x04R\x14childBlockchainCount\x129\n\x13child\
-    _block_headers\x18\n\x20\x03(\x0b2\t.bc.BlockR\x11childBlockHeadersb\x06\
-    proto3\
+    \x06height\x12\x14\n\x05miner\x18\x03\x20\x01(\tR\x05miner\x12\x1e\n\ndi\
+    fficulty\x18\x04\x20\x01(\x02R\ndifficulty\x12\x1c\n\ttimestamp\x18\x05\
+    \x20\x01(\x04R\ttimestamp\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\n\
+    merkleRoot\x12\x1d\n\nchain_root\x18\x07\x20\x01(\tR\tchainRoot\x12\x1a\
+    \n\x08distance\x18\x08\x20\x01(\x04R\x08distance\x12\x14\n\x05nonce\x18\
+    \t\x20\x01(\x04R\x05nonce\x12\x19\n\x08tx_count\x18\n\x20\x01(\x04R\x07t\
+    xCount\x125\n\x0ctransactions\x18\x0b\x20\x03(\x0b2\x11.bc.BcTransaction\
+    R\x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\x20\x01(\x04R\
+    \x14childBlockchainCount\x129\n\x13child_block_headers\x18\r\x20\x03(\
+    \x0b2\t.bc.BlockR\x11childBlockHeaders\"#\n\rBcTransaction\x12\x12\n\x04\
+    hash\x18\x01\x20\x01(\tR\x04hashb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
