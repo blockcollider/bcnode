@@ -8,6 +8,7 @@ fn main() {
             "../../protos/core.proto",
             "../../protos/db.proto",
             "../../protos/miner.proto",
+            "../../protos/protocol.proto",
             "../../protos/rover.proto",
         ],
         includes: &["../../protos"],
