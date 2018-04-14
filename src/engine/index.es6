@@ -70,15 +70,14 @@ export default class Engine {
         this._logger.debug('Stored rovers to persistence')
       }
       try {
-        const bc1 = await this.persistence.get('bc.block.1')
+        await this.persistence.get('bc.block.1')
         this._logger.debug('Genesis block present, everything ok')
       } catch (_) { // genesis block not found
         const newGenesisBlock = getGenesisBlock(minerPublicAddress)
         try {
-          const genesisFirstCreationResult = await this.persistence.put('bc.block.1', newGenesisBlock)
-          const genesisLatestCreationResult = await this.persistence.put('bc.block.latest', newGenesisBlock)
+          await this.persistence.put('bc.block.1', newGenesisBlock)
+          await this.persistence.put('bc.block.latest', newGenesisBlock)
           this._logger.debug('Genesis block was missing so we stored it')
-          console.log(genesisFirstCreationResult);
         } catch (e) {
           this._logger.error(`Error while creating genesis block ${e.message}`)
           process.exit(1)
