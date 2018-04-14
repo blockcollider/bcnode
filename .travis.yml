@@ -22,6 +22,17 @@ addons:
     packages:
     - graphviz
 
+cache:
+  apt: true
+  yarn: true
+  bundler: true
+  cargo: true
+  directories:
+  - node_modules
+  - "$HOME/.cargo"
+  - "$HOME/.nvm"
+  - "$HOME/.rustup"
+
 jobs:
   include:
     - stage: docker push
@@ -29,6 +40,7 @@ jobs:
       services:
         - docker
       os: "linux"
+      install: skip
       script: skip
       deploy:
         provider: script
@@ -38,7 +50,7 @@ jobs:
           - master
           - release
 
-before_install:
+install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -OL https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then unzip protoc-3.5.1-linux-x86_64.zip
@@ -66,18 +78,9 @@ before_install:
   - export RUST_SRC_PATH=`rustc --print sysroot`/lib/rustlib/src/rust/src
   - export RUST_BACKTRACE=1
 
-cache:
-  apt: true
-  yarn: true
-  bundler: true
-  cargo: true
-  directories:
-  - node_modules
-  - "$HOME/.cargo"
-  - "$HOME/.nvm"
-  - "$HOME/.rustup"
-
-script: yarn run dist
+script:
+  - yarn
+  - yarn run dist
 
 notifications:
   email:
