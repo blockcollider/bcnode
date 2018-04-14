@@ -22,7 +22,7 @@ export default function (context: Object, call: Object, callback: Function) {
   persistence.get(key).then(oldLatest => {
     // there is older latest block, make previous from it
     log.debug(`We have old latest ${key}`)
-    persistence.put(`${blockchain}.block.previous`, oldLatest).then(() => {
+    return persistence.put(`${blockchain}.block.previous`, oldLatest).then(() => {
       log.debug(`Stored previous for ${blockchain}`)
       persistence.put(key, block).then(() => {
         log.debug(`Stored latest for ${blockchain}`)
@@ -31,10 +31,11 @@ export default function (context: Object, call: Object, callback: Function) {
     })
   }, _ => { // there is no older latest block, just store
     log.debug(`Did not have latest for ${blockchain}`)
-    persistence.put(key, block).then(() => {
+    return persistence.put(key, block).then(() => {
       log.debug(`Stored latest for ${blockchain}`)
       callback(null, new Null())
     })
+  }).then(() => {
+    context.emitter.emit('collectBlock', { block })
   })
-  context.emitter.emit('collectBlock', { block })
 }
