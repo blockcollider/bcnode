@@ -25,6 +25,9 @@ addons:
 jobs:
   include:
     - stage: docker push
+      sudo: required
+      services:
+        - docker
       os: "linux"
       script: skip
       deploy:
