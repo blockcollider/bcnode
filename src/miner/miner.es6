@@ -116,7 +116,13 @@ export function getDiff (blockTime: number, parentTime: number, parentDiff: numb
     x = x.mul(big5.sub(elapsedTime)).pow(big3) // Significantly decrease difficulty for slower blocks
   }
 
-  y = bigParentDiff.div(bigMinDiff) // Divide the parent difficulty by the minimum difficulty
+  // Divide the parent difficulty by the minimum difficulty
+  if (bigMinDiff.eq(big0)) {
+    y = big1
+  } else {
+    y = bigParentDiff.div(bigMinDiff)
+  }
+
   x = x.mul(y) // Multiple the purposed difficulty by the mindiff bound
   x = x.add(bigParentDiff) // Add the previous parents difficulty to the purposed difficulty
 
