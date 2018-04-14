@@ -271,13 +271,7 @@ export function getMinimumDifficulty (childChainCount: number): BN {
 export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff: BN, minimumDiffShare: BN, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[]) {
   let handicap = 0
   // TODO reduce pairs with accum start = false
-  const timestampEquality = [
-    compareTimestamps(childrenPreviousBlocks[0], childrenCurrentBlocks[0]),
-    compareTimestamps(childrenPreviousBlocks[1], childrenCurrentBlocks[1]),
-    compareTimestamps(childrenPreviousBlocks[2], childrenCurrentBlocks[2]),
-    compareTimestamps(childrenPreviousBlocks[3], childrenCurrentBlocks[3]),
-    compareTimestamps(childrenPreviousBlocks[4], childrenCurrentBlocks[4])
-  ]
+  const timestampEquality = childrenCurrentBlocks.map((childBlock, idx) => compareTimestamps(childBlock, childrenCurrentBlocks[idx]))
 
   if (_.every(timestampEquality) === true) {
     // If none of the chains have increased in height
