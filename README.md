@@ -17,18 +17,31 @@ Mining node with built-in block rover, DHT, and peer discovery.
 
 ## Getting started
 
+- *$ - lines starting with this symbol ($) should be executed in bash/terminal/command-line/cmd.exe WITHOUT symbol ($) itself*
+- *# - lines starting with this symbol (#) are comments and SHOULD not be executed*
+
 ### Run official docker image from public repo
 
 ```
-$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
+$ docker run -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node
 ```
 
 ### Build and run docker image locally
 
-
-
 ```
+# Clone sources
+$ https://github.com/blockcollider/bcnode.git
+
+# Change folder
+$ cd bcnode
+
+# Switch to release branch
+$ git checkout release
+
+# Build image locally
 $ docker build -t blockcollider/bcnode .
+
+# Run locally build image
 $ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
 ```
 

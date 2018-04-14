@@ -29,11 +29,16 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly \
 ENV PATH "/root/.cargo/bin:$PATH"
 
 # Install neon-bindings
-RUN npm install -g neon-cli
+RUN npm install -g neon-cli forever
 
 # Create /src folder and switch to it
 RUN mkdir /src
 WORKDIR /src
+
+# Support for mounted volumes
+VOLUME /src/_data
+VOLUME /src/config
+VOLUME /src/logs
 
 COPY . .
 
@@ -44,5 +49,5 @@ RUN mkdir -p /src/logs
 
 EXPOSE 3000 9090
 
-ENTRYPOINT [ "node", "./bin/cli" ]
+ENTRYPOINT [ "forever", "./bin/cli" ]
 
