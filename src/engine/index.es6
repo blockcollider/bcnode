@@ -204,7 +204,7 @@ export default class Engine {
           // $FlowFixMe - add annotation to mine method
           newBlock.setNonce(solution.nonce)
 
-          this.processMinedBlock(solution)
+          this.processMinedBlock(newBlock)
         }).catch(e => {
           this._logger.error(`Mining failed, reason: ${e.message}`)
           this._mining = false
@@ -224,7 +224,7 @@ export default class Engine {
   }
 
   processMinedBlock (newBlock: BcBlock) {
-    this._logger.info(`Mined new block: ${JSON.stringify(newBlock, null, 2)}`)
+    this._logger.info(`Mined new block: ${JSON.stringify(newBlock.toObject(), null, 2)}`)
 
     // TODO broadcast BC block here
     // TODO persist BC block to persistence (?if verified?)

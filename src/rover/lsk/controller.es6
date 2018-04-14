@@ -55,33 +55,34 @@ const getAbsoluteTimestamp = (blockTs: number) => {
 }
 
 const _createUnifiedBlock = (block): Block => {
-  const obj = {}
-  obj.blockNumber = block.height
-  obj.prevHash = block.previousBlock
-  obj.blockHash = block.id
-  obj.root = getMerkleRoot(block.transactions)
-  obj.fee = block.totalFee
-  obj.size = block.payloadLength
-  obj.payloadHash = block.payloadHash
-  obj.generator = block.generatorId
-  obj.generatorPublicKey = block.generatorPublicKey
-  obj.blockSignature = block.blockSignature
-  obj.confirmations = block.confirmations
-  obj.totalForged = block.totalForged
-  obj.timestamp = getAbsoluteTimestamp(parseInt(block.timestamp, 10))
-  obj.version = block.version
-  obj.transactions = block.transactions.reduce(function (all, t) {
-    const tx = {
-      txHash: t.id,
-      // inputs: t.inputs,
-      // outputs: t.outputs,
-      marked: false
-    }
-    all.push(tx)
-    return all
-  }, [])
-
-  // return obj
+  const obj = {
+    blockNumber: block.height,
+    prevHash: block.previousBlock,
+    blockHash: block.id,
+    root: block.transactions.length === 0 ? `${block.blockSignature}` : getMerkleRoot(block.transactions),
+    fee: block.totalFee,
+    size: block.payloadLength,
+    payloadHash: block.payloadHash,
+    generator: block.generatorId,
+    generatorPublicKey: block.generatorPublicKey,
+    blockSignature: block.blockSignature,
+    confirmations: block.confirmations,
+    totalForged: block.totalForged,
+    timestamp: getAbsoluteTimestamp(parseInt(block.timestamp, 10)),
+    version: block.version,
+    transactions: block.transactions.reduce(
+      function (all, t) {
+        all.push({
+          txHash: t.id,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        })
+        return all
+      },
+      []
+    )
+  }
 
   const msg = new Block()
   msg.setBlockchain('lsk')
