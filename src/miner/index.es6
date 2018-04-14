@@ -7,5 +7,4 @@
  * @flow
  */
 
-export { default as Miner } from './miner'
 export { default as MinerNative } from './minerNative'
