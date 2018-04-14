@@ -470,7 +470,7 @@ proto.bc.BcBlock.toObject = function(includeInstance, msg) {
     merkleRoot: jspb.Message.getFieldWithDefault(msg, 6, ""),
     chainRoot: jspb.Message.getFieldWithDefault(msg, 7, ""),
     distance: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    nonce: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    nonce: jspb.Message.getFieldWithDefault(msg, 9, ""),
     txCount: jspb.Message.getFieldWithDefault(msg, 10, 0),
     transactionsList: jspb.Message.toObjectList(msg.getTransactionsList(),
     proto.bc.BcTransaction.toObject, includeInstance),
@@ -546,7 +546,7 @@ proto.bc.BcBlock.deserializeBinaryFromReader = function(msg, reader) {
       msg.setDistance(value);
       break;
     case 9:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {string} */ (reader.readString());
       msg.setNonce(value);
       break;
     case 10:
@@ -653,8 +653,8 @@ proto.bc.BcBlock.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getNonce();
-  if (f !== 0) {
-    writer.writeUint64(
+  if (f.length > 0) {
+    writer.writeString(
       9,
       f
     );
@@ -813,15 +813,15 @@ proto.bc.BcBlock.prototype.setDistance = function(value) {
 
 
 /**
- * optional uint64 nonce = 9;
- * @return {number}
+ * optional string nonce = 9;
+ * @return {string}
  */
 proto.bc.BcBlock.prototype.getNonce = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
 
-/** @param {number} value */
+/** @param {string} value */
 proto.bc.BcBlock.prototype.setNonce = function(value) {
   jspb.Message.setField(this, 9, value);
 };
