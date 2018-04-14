@@ -21,8 +21,6 @@ const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock, mine } = require('../miner/miner')
 const { getGenesisBlock } = require('../miner/genesis')
 
-const MINER_PUBLIC_ADDRESS = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
-
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
@@ -32,13 +30,15 @@ export default class Engine {
   _server: Server; // eslint-disable-line no-undef
   _emitter: EventEmitter; // eslint-disable-line no-undef
   _knownRovers: string[]; // eslint-disable-line no-undef
+  _minerKey: string; // eslint-disable-line no-undef
   _collectedBlocks: Object; // eslint-disable-line no-undef
   _canMine: bool; // eslint-disable-line no-undef
   _mining: bool;
 
-  constructor (logger: Object, knownRovers: string[]) {
+  constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
-    this._knownRovers = knownRovers
+    this._knownRovers = opts.rovers
+    this._minerKey = opts.minerKey
     this._node = new Node(this)
     this._persistence = new PersistenceRocksDb(config.persistence.path)
     this._rovers = new RoverManager()
@@ -62,7 +62,7 @@ export default class Engine {
   async init () {
     const roverNames = Object.keys(rovers)
     // TODO get from CLI / config
-    const minerPublicAddress = MINER_PUBLIC_ADDRESS
+    const minerPublicAddress = this._minerKey
     try {
       await this._persistence.open()
       const res = await this.persistence.put('rovers', roverNames)
@@ -182,13 +182,13 @@ export default class Engine {
             previousBcBlock.getChildBlockHeadersList(),
             currentBlocks,
             [], // TODO add transactions
-            MINER_PUBLIC_ADDRESS // TODO miner public address
+            this._minerKey
           )
 
           this._mining = true
           const solution = mine(
             work,
-            MINER_PUBLIC_ADDRESS,
+            this._minerKey,
             newBlock.getMerkleRoot(),
             newBlock.getDifficulty()
           )

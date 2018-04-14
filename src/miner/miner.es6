@@ -207,7 +207,7 @@ export function distance (a: string, b: string) {
  * // @param {Array} work
  * @returns {Object} dist,nonce
  */
-export function mine (work: string, miner: string, merkleRoot: string, threshold: number, rng: Function = Math.random) {
+export function mine (work: string, miner: string, merkleRoot: string, threshold: number) {
   threshold = new BN(threshold, 16)
   let result
 
@@ -216,7 +216,7 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
   // TODO: @pm check
   while (true) {
   // if (i < 2) {
-    let nonce = String(rng()) // random string
+    let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash))
     if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {

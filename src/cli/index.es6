@@ -39,6 +39,7 @@ process.on('unhandledRejection', (err) => {
 export async function main (args: string[]) {
   program
     .version(pkg.version)
+    .option('--miner-key [key]', 'Miner key')
     .option('-n, --node', 'Start P2P node')
     .option('-r, --randezvous-server', 'Start randezvous server')
     .option('--randezvous-server-bind [ip]', 'Randezvous server bind IP', '0.0.0.0')
@@ -61,17 +62,10 @@ export async function main (args: string[]) {
   // Initialize rust logger
   native.initLogger()
 
-  // Create instance of engine
-  const engine = new Engine(logging.getLogger(__filename), ROVERS)
-
-  try {
-    await engine.init()
-  } catch (e) {
-    console.log(e)
-    return -1
-  }
+  const logger: Object = logging.getLogger(__filename)
 
   const {
+    minerKey,
     node,
     randezvousServer,
     randezvousServerBind,
@@ -81,6 +75,25 @@ export async function main (args: string[]) {
     ui,
     ws
   } = program.opts()
+
+  if (!minerKey) {
+    logger.error('--miner-key required')
+    return -1
+  }
+
+  // Create instance of engine
+  const opts = {
+    rovers: ROVERS,
+    minerKey: '123'
+  }
+  const engine = new Engine(logger, opts)
+
+  try {
+    await engine.init()
+  } catch (e) {
+    logger.error(`Engine initialization failed, reason: ${e.message}`)
+    return -1
+  }
 
   if (randezvousServer) {
     const args = [

@@ -9,16 +9,10 @@ const {
 
 const { getGenesisBlock } = require('../genesis')
 
+import { mockRandom } from 'jest-mock-random'
+
 describe('Miner', () => {
   test('mine()', () => {
-    /* - example Bitcoin block
-      {
-        hash:      <---- Just need this for "const blockHashes" below
-        prevHash:
-        merkleRoot:
-      }
-      */
-
     const minerPublicAddress = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
 
     const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
@@ -135,12 +129,13 @@ describe('Miner', () => {
       minerPublicAddress
     )
 
+    mockRandom([0.12137218313968567])
+
     const solution = mine(
       work,
       minerPublicAddress,
       newBlock.getMerkleRoot(),
-      new BN(newBlock.getDifficulty()).div(new BN(100000, 16)).toString(), // divide diff in test by huge number to finish quickly
-      () => 0.12137218313968567 // fake rng to produce stable test result
+      new BN(newBlock.getDifficulty()).div(new BN(100000, 16)).toString() // divide diff in test by huge number to finish quickly
     )
 
     const newBlockTimestamp = Date.now() / 1000 << 0
