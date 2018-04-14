@@ -20,6 +20,7 @@ const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock, mine } = require('../miner/miner')
 const { getGenesisBlock } = require('../miner/genesis')
+const { BcBlock } = require('../protos/core_pb')
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
@@ -202,9 +203,8 @@ export default class Engine {
           newBlock.setDistance(solution.distance)
           // $FlowFixMe - add annotation to mine method
           newBlock.setNonce(solution.nonce)
-          this._logger.info(`Mined new block: ${JSON.stringify(solution, null, 2)}`)
-          // TODO broadcast BC block here
-          // TODO persist BC block to persistence (?if verified?)
+
+          this.processMinedBlock(solution)
         }).catch(e => {
           this._logger.error(`Mining failed, reason: ${e.message}`)
           this._mining = false
@@ -221,6 +221,13 @@ export default class Engine {
         this._logger.warn(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
       }
     })
+  }
+
+  processMinedBlock (newBlock: BcBlock) {
+    this._logger.info(`Mined new block: ${JSON.stringify(newBlock, null, 2)}`)
+
+    // TODO broadcast BC block here
+    // TODO persist BC block to persistence (?if verified?)
   }
 
   /**
