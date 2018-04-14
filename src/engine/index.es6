@@ -11,6 +11,7 @@ const { EventEmitter } = require('events')
 const { xprod, equals, all, values, filter, reject, addIndex } = require('ramda')
 
 const config = require('../../config/config')
+const { debugSaveObject } = require('../debug')
 const logging = require('../logger')
 const { Node } = require('../p2p')
 const RoverManager = require('../rover/manager').default
@@ -226,7 +227,9 @@ export default class Engine {
   }
 
   processMinedBlock (newBlock: BcBlock) {
-    this._logger.info(`Mined new block: ${JSON.stringify(newBlock.toObject(), null, 2)}`)
+    const newBlockObj = newBlock.toObject()
+    this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
+    debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
 
     const tasks = [
       this.persistence.put('bc.block.latest', newBlock),

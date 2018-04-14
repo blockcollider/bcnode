@@ -15,6 +15,7 @@ const convBin = require('binstring')
 const process = require('process')
 const logging = require('../../logger')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
@@ -160,8 +161,11 @@ export default class Controller {
 
           if (isNew) {
             const unifiedBlock = this._createUnifiedBlock(_block)
+            const blockObj = unifiedBlock.toObject()
+            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
+
             network.bestHeight = _block.blockNumber
-            console.log(unifiedBlock.toObject())
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
                 this._logger.warn('RpcClient could not collect block')

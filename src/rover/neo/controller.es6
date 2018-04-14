@@ -13,6 +13,7 @@ const NeoNode = require('@cityofzion/neo-js/dist/node/node')
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
@@ -138,7 +139,9 @@ export default class Controller {
             this._logger.debug(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+            const blockObj = unifiedBlock.toObject()
+            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {

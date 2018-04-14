@@ -13,6 +13,10 @@ const process = require('process')
 const program = require('commander')
 const { spawn } = require('child_process')
 
+const {
+  isDebugEnabled,
+  ensureDebugDir
+} = require('../debug')
 const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
@@ -20,7 +24,7 @@ const pkg = require('../../package.json')
 // $FlowFixMe
 const native = require('../../native/index.node')
 
-const LOG_FOLDER = path.resolve(__dirname, '..', '..', 'logs')
+const LOG_DIR = path.resolve(__dirname, '..', '..', 'logs')
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const globalLog = logging.getLogger(__filename)
@@ -56,8 +60,12 @@ export async function main (args: string[]) {
     return program.help()
   }
 
+  if (isDebugEnabled) {
+    ensureDebugDir()
+  }
+
   // Make sure log folder exists
-  ensureLogFolder()
+  ensureLogDir()
 
   // Initialize rust logger
   native.initLogger()
@@ -153,8 +161,8 @@ export async function main (args: string[]) {
   // engine.wait()
 }
 
-function ensureLogFolder () {
-  if (!fs.existsSync(LOG_FOLDER)) {
-    fs.mkdirSync(LOG_FOLDER)
+function ensureLogDir () {
+  if (!fs.existsSync(LOG_DIR)) {
+    fs.mkdirSync(LOG_DIR)
   }
 }

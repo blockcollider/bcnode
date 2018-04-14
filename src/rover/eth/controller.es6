@@ -12,6 +12,7 @@ const EthereumBlock = require('ethereumjs-block')
 const EthereumTx = require('ethereumjs-tx')
 var ethUtils = require('ethereumjs-util')
 
+const { debugSaveObject } = require('../../debug')
 const logging = require('../../logger')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
@@ -65,6 +66,9 @@ export default class Controller {
 
   transmitNewBlock (block: EthereumBlock) {
     const unifiedBlockData = this._createUnifiedBlock(block)
+    const blockObj = unifiedBlockData.toObject()
+    this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+    debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
     const msg = new Block()
     msg.setBlockchain('eth')
@@ -74,8 +78,6 @@ export default class Controller {
     msg.setHeight(unifiedBlockData.blockNumber)
     msg.setMerkleRoot(unifiedBlockData.root)
 
-    console.log(msg.toObject());
-    this._logger.debug(`Created unified block from eth block ${unifiedBlockData.blockNumber} (${unifiedBlockData.blockHash})`)
     this._rpc.rover.collectBlock(msg, (err, response) => {
       if (err) {
         this._logger.error(`Error while collecting block ${inspect(err)}`)

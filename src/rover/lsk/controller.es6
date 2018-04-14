@@ -11,6 +11,7 @@ const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
@@ -160,7 +161,9 @@ export default class Controller {
               this._logger.debug(`successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
 
               const unifiedBlock = _createUnifiedBlock(lastBlock)
-              this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+              const blockObj = unifiedBlock.toObject()
+              this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+              debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
               this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
                 if (err) {

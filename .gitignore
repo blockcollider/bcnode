@@ -1,6 +1,9 @@
 # IntelliJ Idea Project
 .idea/
 
+# Debug data
+_debug/
+
 # Temp data
 _data/
 

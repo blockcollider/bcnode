@@ -11,6 +11,7 @@ const { inspect } = require('util')
 const WavesApi = require('waves-api')
 const LRUCache = require('lru-cache')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
 const { blake2b } = require('../../utils/crypto')
@@ -147,7 +148,9 @@ export default class Controller {
             this._blockCache.set(lastBlock.reference)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+            const blockObj = unifiedBlock.toObject()
+            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
