@@ -4,7 +4,7 @@ node_js:
   - "7"
   - "8"
 
-sudo: false
+sudo: true
 
 dist: trusty
 
@@ -30,7 +30,7 @@ jobs:
       script: skip
       deploy:
         provider: script
-        script: echo "docker push ..." # bash scripts/deploy-docker.sh
+        script: bash scripts/deploy-docker.sh
         on:
           branch:
           - master
@@ -63,10 +63,6 @@ before_install:
   - rustup component add rust-src
   - export RUST_SRC_PATH=`rustc --print sysroot`/lib/rustlib/src/rust/src
   - export RUST_BACKTRACE=1
-
-install:
-  - npm install -g yarn
-  - yarn
 
 cache:
   apt: true
