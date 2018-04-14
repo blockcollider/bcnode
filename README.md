@@ -20,6 +20,29 @@ Mining node with built-in block rover, DHT, and peer discovery.
 - *$ - lines starting with this symbol ($) should be executed in bash/terminal/command-line/cmd.exe WITHOUT symbol ($) itself*
 - *# - lines starting with this symbol (#) are comments and SHOULD not be executed*
 
+### CLI Options
+
+```
+$ ./bin/cli -h
+
+  Usage: cli [options]
+
+  Options:
+
+    -V, --version                    output the version number
+    --miner-key [key]                Miner key
+    -n, --node                       Start P2P node
+    -r, --randezvous-server          Start randezvous server
+    --randezvous-server-bind [ip]    Randezvous server bind IP (default: 0.0.0.0)
+    --randezvous-server-port [port]  Randezvous server port (default: 9090)
+    --rovers [items]                 start rover (default: lsk, neo)
+    -R, --no-rovers                  do not start any rover
+    --rpc                            enable RPC
+    --ui                             enable Web UI
+    --ws                             enable WebSocket
+    -h, --help                       output usage information
+```
+
 ### Run official docker image from public repo
 
 ```
