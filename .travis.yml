@@ -13,13 +13,13 @@ addons:
   apt:
     packages:
     - graphviz
-deploy:
-  provider: script
-  script: bash scripts/deploy-docker.sh
-  on:
-    branch:
-    - master
-    - release
+# deploy:
+#   provider: script
+#   script: bash scripts/deploy-docker.sh
+#   on:
+#     branch:
+#     - master
+#     - release
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -OL https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip;
   fi
