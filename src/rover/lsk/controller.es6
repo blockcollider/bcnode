@@ -14,7 +14,7 @@ const lisk = require('lisk-js')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
-const { blake2b } = require('../../utils/crypto')
+const { blake2b } = require('../../utils/strings')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -36,13 +36,11 @@ type LiskBlock = { // eslint-disable-line no-undef
 const LSK_GENESIS_DATE = new Date('2016-05-24T17:00:00.000Z')
 
 const getMerkleRoot = (block) => {
-  let txs = []
-  if (block.transactions !== undefined && block.transactions.length > 0) {
-    txs = block.transactions.map((tx) => tx.id)
-  } else {
-    txs = [block.blockSignature]
+  if (!block.transactions || (block.transactions.length === 0)) {
+    return blake2b(block.blockSignature)
   }
 
+  const txs = block.transactions.map((tx) => tx.id)
   return txs.reduce((acc, el) => blake2b(acc + el), '')
 }
 

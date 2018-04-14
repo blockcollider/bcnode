@@ -46,7 +46,7 @@ $ ./bin/cli -h
 ### Run official docker image from public repo
 
 ```
-$ docker run -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node
+$ docker run -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build and run docker image locally
@@ -65,7 +65,7 @@ $ git checkout release
 $ docker build -t blockcollider/bcnode .
 
 # Run locally build image
-$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
+$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build from source

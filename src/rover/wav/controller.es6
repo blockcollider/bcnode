@@ -13,7 +13,7 @@ const LRUCache = require('lru-cache')
 
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
-const { blake2b } = require('../../utils/crypto')
+const { blake2b } = require('../../utils/strings')
 const { RpcClient } = require('../../rpc')
 
 type WavesTransaction = {
@@ -49,13 +49,11 @@ type WavesBlock = {
 }
 
 const getMerkleRoot = (block) => {
-  let txs = []
-  if (block.transactions !== undefined && block.transactions.length > 0) {
-    txs = block.transactions.map((tx) => tx.id)
-  } else {
-    txs = [block.signature]
+  if (!block.transactions || (block.transactions.length === 0)) {
+    return blake2b(block.signature)
   }
 
+  const txs = block.transactions.map((tx) => tx.id)
   return txs.reduce((acc, el) => blake2b(acc + el), '')
 }
 
