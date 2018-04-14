@@ -25,7 +25,6 @@ addons:
 jobs:
   include:
     - stage: docker push
-      node_js: "8"
       os: "linux"
       script: skip
       deploy:
