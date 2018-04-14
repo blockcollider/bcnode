@@ -1,5 +1,9 @@
 language: node_js
 
+node_js:
+  - "7"
+  - "8"
+
 sudo: false
 
 dist: trusty
@@ -9,9 +13,6 @@ os:
   - osx
 
 env:
-  matrix:
-    - export NODE_VERSION="v7.10.1"
-    - export NODE_VERSION="v8.11.1"
   global:
     - secure: iYfhZV5+0bS388n9bX26V27hBqoMLmX5zvoIIRUhPXM7X148oa2IvZxkSaURRYMlVl9KkKab9/ol2SK6yZZL+U33XGIxP6H5bFlophNRo4emUVpnRlw1B7lOgzY11crYE4/iMMtdYN635thkbwIA4d0Ny9yiGOle6RWoDczNeWDFLFp3hhsa64Es30BVOABXEMw52Z02WqlsO9cdjyGVOzbP23SClzjY+O1zkH7UGxcaUcpoZMYliumP9FaeUOsEKiYJd4JX1oW5SZXjj1lubUM/rzhcNEd2S3kJ1teDIfnxHz/WwsrY9MeIIAByU8PIpjJoIxz0YPEUfwgIUeL8fQcSeWShNEE+oaw3jkVMq8mYpQgHeRB78W2e02r0e8xftJR0z37GRtZwtaWL19viGqCQCemC8wRp5AL3dTKqkGgdrngG63BaWuhKk4ujiAQBo1HiOn73qyOAEX8ITG+rU7Lvng3d+G7j6m4+b53de9jcU0Z2YaZO7nbqZcTUrYnaP6STucLRWeNdwVzcGuTCm3f0dkvxa95HJMxXlf4Sle8pVko9pNqq7PeuqR8uSD51MkVWdgbGDVC0RPjEoCqoIcoVDQ2ZdTQrgWFn4gvDKigRULw9aV1WiBhjSug0LTL5Prr/cYvS/VUzPeHkZOErqD16qYQyM3/l6EMnm6qrrZ4=
     - secure: Q4ChW8MN7/YU+IhSMHAGUaVkes7eK4u4kpsNxYU352uIaSHgFpc+hUq6q9mU53YO7Kvw+LQphK9t9dgFGL4HXI/miEfiatKIe45bBVhdCxsmV6s4JenhWMV/OmbPRZuiE7cfLYU2+ASIEoCPZ886vXg9ZXafmm9iSvviQuYupJ2bw92aFSZo9GoAHvL3Q2e0D4Y9WWc08E45bQWRUXxoFXHPAzd8xgCUs6zR60C4zPsq65nz1fGSxRM5V73y9GJk5S4iruailarYYJgqPHNWjfgLwNAM1msJPLC04ah2G1WUAlqP1MdGK63jpsQYXgpJpGyEhwuus+k7f/l4bE8/PLPzZtv/BVEljCluv81kDxz++MoxH2aStGkN2zYam92TEYe4rwMboKMEDvz2pMVVcUotjKt1t883k6x3zANyMrVO2DzouIvWun6gNz9m1hazkZslSuzDVG0p9g36YtOzKpEaGeyomtn6XCfJ3NL7PFXiy39M/gXyyJRENh/odwXU78otS33PH3qfh4Ia3nOFDC3GzxWkTDzz8MixfQNSwiIDGFu9r38Tsfz/c7ISTipaHFC/6d17PFnb74erTA8/4XYkeMPYP8MzIXbcT+TUasif4zq8yFn5e1k9T30Tn61ANHgsnFds4q+b1rZx1UQah9XR1bkQ2t5wtHc7dLfoSTI=
@@ -29,14 +30,16 @@ addons:
 #     - master
 #     - release
 
+jobs:
+  include:
+    - stage: docker push
+      node_js: "8"
+      script: echo "Deploying to npm ..."
+      deploy:
+        provider: script
+        script: echo "Pushing docker image to registry"
+
 before_install:
-  # We install nvm to take care of node.js version
-  - git clone https://github.com/creationix/nvm.git ./.nvm
-  - source ./.nvm/nvm.sh
-  # We use the env var defined in the build matrix to install the
-  # appropriate nod.js version using nvm
-  - nvm install $NODE_VERSION
-  - nvm use $NODE_VERSION
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -OL https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then unzip protoc-3.5.1-linux-x86_64.zip
@@ -67,7 +70,7 @@ before_install:
 install:
   - npm install -g yarn
   - yarn
-  
+
 cache:
   apt: true
   yarn: true
