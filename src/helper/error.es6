@@ -21,7 +21,7 @@
  * @param err Error to be converted
  * @return {{}}
  */
-export function errToObj(err: Error) {
+export function errToObj (err: Error) {
   const props = Object.getOwnPropertyNames(err)
 
   const obj = props.reduce((acc, val) => {
@@ -31,7 +31,7 @@ export function errToObj(err: Error) {
   }, {})
 
   obj.stack = obj.stack
-    .split("\n")
+    .split('\n')
     .map((line) => line.trim())
 
   return obj
