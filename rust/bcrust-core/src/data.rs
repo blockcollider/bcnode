@@ -9,16 +9,6 @@ pub const HASH_NEO: &str = "0x27a022e66691fc40d264ef615cd1299c9247814fde451390c6
 pub const HASH_WAV: &str = "2YzcfeKZW65PvzQP42ocD6XYJMKibRrj2xcvJJwZTqnmrhCyj4TZBymNmh9FAFXBaghvfGbGmpUvg5DjQ5xS3W6C";
 pub const HASH_LSK: &str = "4571951483005954606";
 
-/// Should be in order specified in miner::mine() documentation
-///
-/// - MERKLE_ROOT
-/// - EMB (Block Collider)
-/// - BTC - Bitcoin
-/// - ETH - Ethereum
-/// - LSK - Lisk
-/// - WAV - Waves
-/// - NEO - Neo
-///
 pub const HASHES: [&str; 7] = [
     MERKLE_ROOT,
     HASH_EMB,

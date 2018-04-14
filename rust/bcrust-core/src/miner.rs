@@ -10,19 +10,7 @@ use super::funcs;
 ///
 /// # Notes
 ///
-/// - Order is important.
 /// - Case is important (we use lower case).
-///
-///
-/// # Order of hashes
-///
-/// - MERKLE_ROOT
-/// - EMB (Block Collider)
-/// - BTC - Bitcoin
-/// - ETH - Ethereum
-/// - LSK - Lisk
-/// - WAV - Waves
-/// - NEO - Neo
 ///
 /// # Algorithm
 ///
