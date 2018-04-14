@@ -15,6 +15,9 @@ const process = require('process')
 const DEBUG_ENABLED = process.env.BC_DEBUG === 'true'
 const DEBUG_DIR = path.resolve(__dirname, '..', '..', '_debug')
 
+/**
+ * Creates _debug directory if does not exists
+*/
 export function ensureDebugDir () {
   if (!isDebugEnabled()) {
     return
@@ -25,10 +28,18 @@ export function ensureDebugDir () {
   }
 }
 
+/**
+ * Checks if is debug enabled, BC_DEBUG=true
+ */
 export function isDebugEnabled () {
   return DEBUG_ENABLED
 }
 
+/**
+ * Saves object in JSON format into DEBUG_DIR
+ * @param relativePath path relative to DEBUG_DIR
+ * @param obj Object to be saved
+ */
 export function debugSaveObject (relativePath: string, obj: Object) {
   if (!isDebugEnabled()) {
     return
