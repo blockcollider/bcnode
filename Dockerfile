@@ -31,6 +31,9 @@ ENV PATH "/root/.cargo/bin:$PATH"
 # Install neon-bindings
 RUN npm install -g neon-cli forever
 
+# Install neon-bindings
+RUN npm install -g neon-cli
+
 # Create /src folder and switch to it
 RUN mkdir /src
 WORKDIR /src

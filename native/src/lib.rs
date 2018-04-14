@@ -5,16 +5,15 @@ extern crate bcrust_core;
 
 #[macro_use]
 extern crate neon;
-extern crate grpc;
 
 #[macro_use]
 extern crate log;
 
 extern crate env_logger;
 extern crate protobuf;
-extern crate tls_api;
 
 use bcrust_core::miner;
+use bcrust_core::protos::miner::*;
 
 use neon::vm::{Call, JsResult, Lock};
 use neon::js::JsBoolean;
@@ -24,10 +23,6 @@ use neon::mem::Handle;
 
 use protobuf::core::parse_from_bytes;
 use protobuf::Message;
-
-pub mod protos;
-
-use protos::miner::{BlockIn, BlockOut};
 
 fn init_logger(call: Call) -> JsResult<JsBoolean> {
     let scope = call.scope;
@@ -51,21 +46,10 @@ fn mine(call: Call) -> JsResult<JsBuffer> {
     let mut buffer: Handle<JsBuffer> = call.arguments.require(call.scope, 0)?.check::<JsBuffer>()?;
     let in_block = buffer.grab(|contents| {
         let slice = contents.as_slice();
-        parse_from_bytes::<BlockIn>(&slice)
+        parse_from_bytes::<MinerRequest>(&slice)
     }).unwrap();
 
-    let hashes: Vec<String> = in_block.get_hashes().iter().map(|info| {
-        String::from(info.get_hash())
-    }).collect();
-
-    let distance = in_block.get_threshold();
-    let result = miner::mine(&hashes, distance);
-    debug!("{:?}", &result);
-
-    // Construct result block
-    let mut out_block = BlockOut::new();
-    out_block.set_nonce(result.unwrap().0);
-
+    let out_block: MinerResponse = miner::mine(&in_block);
     debug!("{:?}", &out_block);
 
     // Serialize output

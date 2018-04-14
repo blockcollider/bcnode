@@ -251,6 +251,7 @@ export default class Controller {
     msg.setBlockchain('btc')
     msg.setHash(block.header.hash)
     msg.setPreviousHash(swapOrder(block.header.prevHash.toString('hex')))
+    msg.setTimestamp(block.header.time * 1000)
 
     return msg
   }

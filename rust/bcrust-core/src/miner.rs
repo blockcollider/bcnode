@@ -1,84 +1,73 @@
-use std::sync::mpsc::channel;
-use std::thread;
+use blake2_rfc::blake2s::{blake2s};
+use serialize::hex::{FromHex, ToHex};
+use std::iter::Iterator;
+use protos::miner::{MinerRequest, MinerResponse};
 
-use crypto::digest::Digest;
-use crypto::sha2::Sha256;
-use num_cpus;
-use strsim::jaro_winkler;
-use rand;
+use super::data;
+use super::funcs;
 
-pub fn mine(input: &Vec<String>, threshold: f32) -> Result<(String, Vec<f64>), String> {
-    debug!("mine({:?}, {:?})", &input, &threshold);
+/// Mining function
+///
+/// # Notes
+///
+/// - Order is important.
+/// - Case is important (we use lower case).
+///
+///
+/// # Order of hashes
+///
+/// - MERKLE_ROOT
+/// - EMB (Block Collider)
+/// - BTC - Bitcoin
+/// - ETH - Ethereum
+/// - LSK - Lisk
+/// - WAV - Waves
+/// - NEO - Neo
+///
+/// # Algorithm
+///
+/// - Incoming hashes must be in order mentioned above
+/// - Compute ephemeral hashes using blake to unify length
+/// - XOR all ephemeral hashes together
+pub fn mine(req: &MinerRequest) -> MinerResponse {
+    let input: Vec<String> = req
+        .get_fingerprints()
+        .iter()
+        .map(|fingerprint| {
+            fingerprint.get_hash().to_string()
+        }).collect();
 
-    let ephemerals: Vec<String> = input.into_iter()
-        .map(|val| {
-            let mut hasher = Sha256::new();
-            hasher.input_str(val);
-            hasher.result_str()
-        })
-        .collect();
+    // Lowercase all incoming hashes and calculate their blake hash
+    let ephemerals = create_ephemeral_hashes(&input);
+    let xored_hash = xor_hashes(&ephemerals);
+    let blake_xored = blake2s(32, &[], xored_hash.as_bytes())
+        .as_bytes()
+        .to_hex();
 
-    debug!("ephemerals = {:?}", &ephemerals);
+    println!("{:?}", &blake_xored);
 
-    let threshold = f64::from(1.0f64 - (threshold as f64));
+    // Ok((blake_xored, Vec::new()))
 
-    // count logical cores this process could try to use
-    let cpu_count = num_cpus::get();
-
-    let mut threads = Vec::new();
-    let (tx, rx) = channel();
-    for _ in 0..cpu_count {
-        let e = ephemerals.clone();
-        let tx = tx.clone();
-
-        threads.push(thread::spawn(move || {
-            let mut r = get_random_string();
-            while !(&e).into_iter().all(|val| { distance_check(val, &r, threshold) }) {
-                r = get_random_string();
-            }
-
-            let _ = tx.send(r);
-        }));
-    }
-
-    match rx.recv() {
-        Ok(res) => {
-           let distances: Vec<f64> = (&ephemerals).into_iter().map(|val| {
-                distance(val, &res)
-            }).collect();
-
-            Ok((res, distances))
-        }
-        Err(err) => {
-            debug!("Error occurred: {:?}", &err);
-            Err(String::from("Error"))
-        }
-    }
+    let mut out_block = MinerResponse::new();
+    out_block.set_nonce(String::from(""));
+    out_block
 }
 
-fn distance (s: &str, r: &str) -> f64 {
-    let mut hasher = Sha256::new();
-    hasher.input_str(s);
-    hasher.input_str(r);
-    let res = hasher.result_str();
-
-    jaro_winkler(s, &res).abs()
+fn create_ephemeral_hashes(input: &Vec<String>) -> Vec<String> {
+    input.iter().map(|orig_hash| {
+        blake2s(32, &[], orig_hash.to_lowercase().as_bytes())
+            .as_bytes()
+            .to_hex()
+    }).collect()
 }
 
-fn distances(hashes: Vec<String>, nonce: String) -> Result<(String, Vec<f64>), ()> {
-    let distances: Vec<f64> = (&hashes).into_iter().map(|val| {
-        distance(val, &nonce)
-    }).collect();
+fn xor_hashes(input: &Vec<String>) -> String {
+    let zero_hash_vec = data::HASH_ZER.from_hex().unwrap();
+    let res = input.iter().fold(zero_hash_vec, |acc, x| {
+        funcs::xor(&acc, &x.as_bytes())
+    });
 
-    Ok((nonce, distances))
-}
-
-fn distance_check(s: &str, r: &str, threshold: f64) -> bool {
-    distance(s, r) > threshold
-}
-
-fn get_random_string() -> String {
-    rand::random::<u32>().to_string()
+    res.to_hex()
 }
 
 #[cfg(test)]
@@ -87,12 +76,25 @@ mod tests {
     use test::Bencher;
 
     #[test]
-    fn test_jaro_winkler() {
-        assert_eq!(jaro_winkler("abc", "abc").abs(), 1f64);
+    fn mine_test() {
+        // Test result validated using - http://tomeko.net/online_tools/xor.php?lang=en
+
+        let hashes= data::HASHES.iter().map(|hash| {
+            hash.to_string()
+        }).collect();
+
+        let res = mine(&hashes);
+        println!("DONE: {:?}", &res);
+
+        assert_eq!(1, 1);
     }
 
     #[bench]
-    fn bench_get_random_string(b: &mut Bencher) {
-        b.iter(|| get_random_string());
+    fn mine_bench(b: &mut Bencher) {
+        let hashes= data::HASHES.iter().map(|hash| {
+            hash.to_string()
+        }).collect();
+
+        b.iter(|| mine(&hashes));
     }
 }

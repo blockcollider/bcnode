@@ -8,6 +8,7 @@
  */
 
 const { EventEmitter } = require('events')
+const { xprod, equals, all, values } = require('ramda')
 
 const config = require('../../config/config')
 const logging = require('../logger')
@@ -18,7 +19,7 @@ const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
 // const { Block } = require('../protos/core_pb')
-const { BlockIn, BlockchainHash } = require('../protos/miner_pb')
+const { MinerRequest, BlockFingerprint } = require('../protos/miner_pb')
 const Miner = require('../miner').Miner
 
 export default class Engine {
@@ -29,15 +30,26 @@ export default class Engine {
   _rpc: RpcServer; // eslint-disable-line no-undef
   _server: Server; // eslint-disable-line no-undef
   _emitter: EventEmitter; // eslint-disable-line no-undef
+  _knownRovers: string[]; // eslint-disable-line no-undef
+  _collectedBlocks: Object; // eslint-disable-line no-undef
+  _canMine: bool; // eslint-disable-line no-undef
+  _miner: Miner; // eslint-disable-line no-undef
 
-  constructor (logger: Object) {
+  constructor (logger: Object, knownRovers: string[], miner = new Miner()) {
     this._logger = logging.getLogger(__filename)
+    this._knownRovers = knownRovers
     this._node = new Node(this)
     this._persistence = new PersistenceRocksDb(config.persistence.path)
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
     this._rpc = new RpcServer(this)
     this._server = new Server(this._rpc)
+    this._collectedBlocks = {}
+    for (let roverName of this._knownRovers) {
+      this._collectedBlocks[roverName] = 0
+    }
+    this._canMine = false
+    this._miner = miner
   }
 
   /**
@@ -122,32 +134,39 @@ export default class Engine {
       }
     })
 
-    const blocks = {
-      btc: '00000000000000000026651a7e8638c65ec69991d8f5e437ee54867adbf07c49',
-      eth: '0x63ef70aa2161f7e23f35996c1f420c8b24a67be231b2ec9147477f6c4c3d868e',
-      neo: '0x27a022e66691fc40d264ef615cd1299c9247814fde451390c602160ae954881b',
-      wav: '2YzcfeKZW65PvzQP42ocD6XYJMKibRrj2xcvJJwZTqnmrhCyj4TZBymNmh9FAFXBaghvfGbGmpUvg5DjQ5xS3W6C',
-      lsk: '4571951483005954606'
-    }
-
     this._emitter.on('collectBlock', ({ block }) => {
-      blocks[block.getBlockchain()] = block.getHash()
+      this._collectedBlocks[block.getBlockchain()] += 1
 
-      const blockIn = new BlockIn()
+      if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) {
+        this._canMine = true
+      }
 
-      blockIn.setThreshold(0.5)
-      const hashes = [
-        new BlockchainHash(['btc', blocks.btc]),
-        new BlockchainHash(['eth', blocks.eth]),
-        new BlockchainHash(['neo', blocks.neo]),
-        new BlockchainHash(['wav', blocks.wav]),
-        new BlockchainHash(['lsk', blocks.lsk])
-      ]
-      blockIn.setHashesList(hashes)
+      // start mining only if all known chains are being rovered
+      if (this._canMine && equals(new Set(this._knownRovers), new Set(rovers))) {
+        const minerRequest = new MinerRequest()
+        minerRequest.setMerkleRoot('e3b98a4da31a127d4bde6e43033f66ba274cab0eb7eb1c70ec41402bf6273dd8')
 
-      const miner = new Miner()
-      const blockOut = miner.mine(blockIn)
-      this._logger.info(`Mined new block: ${JSON.stringify(blockOut.toObject(), null, 4)}`)
+        const getKeys: [string, bool][] = xprod(rovers, ['latest', 'previous']).map(([chain, which]) => ([`${chain}.block.${which}`, which === 'latest']))
+
+        Promise.all(getKeys.map(([key, isLatest]) => {
+          return this._persistence.get(key).then(block => {
+            this._logger.debug(`Got "${key}"`)
+            return new BlockFingerprint([block.getBlockchain(), block.getHash(), block.getTimestamp(), isLatest])
+          })
+        })).then(blocks => {
+          this._logger.debug(`Got ${blocks.length} blocks from persistence`)
+          minerRequest.setFingerprintsList(blocks)
+          const minerResponse = this._miner.mine(minerRequest)
+          this._logger.info(`Mined new block: ${JSON.stringify(minerResponse.toObject(), null, 4)}`)
+          // TODO create and broadcast BC block here
+        })
+      } else {
+        if (!this._canMine) {
+          this._logger.info(`Not mining because not collected enough blocks from all chains yet (status ${JSON.stringify(this._collectedBlocks)})`)
+          return
+        }
+        this._logger.warn(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
+      }
     })
   }
 
