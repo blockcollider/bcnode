@@ -13,7 +13,7 @@ const LRUCache = require('lru-cache')
 
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
-const string = require('../../utils/strings.js')
+const { blake2b } = require('../../utils/crypto')
 const { RpcClient } = require('../../rpc')
 
 type WavesTransaction = {
@@ -48,11 +48,15 @@ type WavesBlock = {
   height: number
 }
 
-const getMerkleRoot = (txs: WavesTransaction[]) => {
-  if (txs !== undefined && txs.length > 0) {
-    return txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
+const getMerkleRoot = (block) => {
+  let txs = []
+  if (block.transactions !== undefined && block.transactions.length > 0) {
+    txs = block.transactions.map((tx) => tx.id)
+  } else {
+    txs = [block.signature]
   }
-  return false
+
+  return txs.reduce((acc, el) => blake2b(acc + el), '')
 }
 
 const getLastHeight = (api: Object): Promise<number> => {
@@ -65,31 +69,31 @@ const getBlock = (api: Object, height: number): Promise<WavesBlock> => {
 }
 
 const _createUnifiedBlock = (block): Block => {
-  const obj = {}
-
-  obj.blockNumber = block.height
-  obj.prevHash = block.reference
-  obj.blockHash = block.signature
-  obj.root = getMerkleRoot(block.transactions)
-  obj.fee = block.fee
-  obj.size = block.blocksize
-  obj.generator = block.generator
-  obj.genSignature = block['nxt-consensus']['generation-signature']
-  obj.baseTarget = block['nxt-consensus']['base-target']
-  obj.timestamp = parseInt(block.timestamp, 10)
-  obj.version = block.version
-  obj.generator = block.generator
-  obj.transactions = block.transactions.reduce(function (all, t) {
-    var tx = {
-      txHash: t.id,
-      // inputs: t.inputs,
-      // outputs: t.outputs,
-      marked: false
-    }
-
-    all.push(tx)
-    return all
-  }, [])
+  const obj = {
+    blockNumber: block.height,
+    prevHash: block.reference,
+    blockHash: block.signature,
+    root: getMerkleRoot(block),
+    fee: block.fee,
+    size: block.blocksize,
+    generator: block.generator,
+    genSignature: block['nxt-consensus']['generation-signature'],
+    baseTarget: block['nxt-consensus']['base-target'],
+    timestamp: parseInt(block.timestamp, 10),
+    version: block.version,
+    transactions: block.transactions.reduce(
+      function (all, t) {
+        all.push({
+          txHash: t.id,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        })
+        return all
+      },
+      []
+    )
+  }
 
   const msg = new Block()
   msg.setBlockchain('wav')

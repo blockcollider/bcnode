@@ -35,7 +35,16 @@ type LiskBlock = { // eslint-disable-line no-undef
 
 const LSK_GENESIS_DATE = new Date('2016-05-24T17:00:00.000Z')
 
-const getMerkleRoot = (txs) => txs.reduce((all, tx) => blake2b(all + tx.id), '')
+const getMerkleRoot = (block) => {
+  let txs = []
+  if (block.transactions !== undefined && block.transactions.length > 0) {
+    txs = block.transactions.map((tx) => tx.id)
+  } else {
+    txs = [block.blockSignature]
+  }
+
+  return txs.reduce((acc, el) => blake2b(acc + el), '')
+}
 
 const getLastHeight = (api: Object): Promise<number> => {
   const response = api.sendRequest('blocks/getHeight')
@@ -59,7 +68,7 @@ const _createUnifiedBlock = (block): Block => {
     blockNumber: block.height,
     prevHash: block.previousBlock,
     blockHash: block.id,
-    root: block.transactions.length === 0 ? `${block.blockSignature}` : getMerkleRoot(block.transactions),
+    root: getMerkleRoot(block),
     fee: block.totalFee,
     size: block.payloadLength,
     payloadHash: block.payloadHash,
