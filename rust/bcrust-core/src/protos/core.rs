@@ -569,7 +569,7 @@ pub struct BcBlock {
     pub merkle_root: ::std::string::String,
     pub chain_root: ::std::string::String,
     pub distance: u64,
-    pub nonce: u64,
+    pub nonce: ::std::string::String,
     pub tx_count: u64,
     pub transactions: ::protobuf::RepeatedField<BcTransaction>,
     pub child_blockchain_count: u64,
@@ -825,26 +825,37 @@ impl BcBlock {
         &mut self.distance
     }
 
-    // uint64 nonce = 9;
+    // string nonce = 9;
 
     pub fn clear_nonce(&mut self) {
-        self.nonce = 0;
+        self.nonce.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_nonce(&mut self, v: u64) {
+    pub fn set_nonce(&mut self, v: ::std::string::String) {
         self.nonce = v;
     }
 
-    pub fn get_nonce(&self) -> u64 {
-        self.nonce
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_nonce(&mut self) -> &mut ::std::string::String {
+        &mut self.nonce
     }
 
-    fn get_nonce_for_reflect(&self) -> &u64 {
+    // Take field
+    pub fn take_nonce(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.nonce, ::std::string::String::new())
+    }
+
+    pub fn get_nonce(&self) -> &str {
         &self.nonce
     }
 
-    fn mut_nonce_for_reflect(&mut self) -> &mut u64 {
+    fn get_nonce_for_reflect(&self) -> &::std::string::String {
+        &self.nonce
+    }
+
+    fn mut_nonce_for_reflect(&mut self) -> &mut ::std::string::String {
         &mut self.nonce
     }
 
@@ -1021,11 +1032,7 @@ impl ::protobuf::Message for BcBlock {
                     self.distance = tmp;
                 },
                 9 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_uint64()?;
-                    self.nonce = tmp;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nonce)?;
                 },
                 10 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
@@ -1083,8 +1090,8 @@ impl ::protobuf::Message for BcBlock {
         if self.distance != 0 {
             my_size += ::protobuf::rt::value_size(8, self.distance, ::protobuf::wire_format::WireTypeVarint);
         }
-        if self.nonce != 0 {
-            my_size += ::protobuf::rt::value_size(9, self.nonce, ::protobuf::wire_format::WireTypeVarint);
+        if !self.nonce.is_empty() {
+            my_size += ::protobuf::rt::string_size(9, &self.nonce);
         }
         if self.tx_count != 0 {
             my_size += ::protobuf::rt::value_size(10, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
@@ -1130,8 +1137,8 @@ impl ::protobuf::Message for BcBlock {
         if self.distance != 0 {
             os.write_uint64(8, self.distance)?;
         }
-        if self.nonce != 0 {
-            os.write_uint64(9, self.nonce)?;
+        if !self.nonce.is_empty() {
+            os.write_string(9, &self.nonce)?;
         }
         if self.tx_count != 0 {
             os.write_uint64(10, self.tx_count)?;
@@ -1233,7 +1240,7 @@ impl ::protobuf::MessageStatic for BcBlock {
                     BcBlock::get_distance_for_reflect,
                     BcBlock::mut_distance_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "nonce",
                     BcBlock::get_nonce_for_reflect,
                     BcBlock::mut_nonce_for_reflect,
@@ -1488,9 +1495,9 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\x04R\ttimestamp\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\n\
     merkleRoot\x12\x1d\n\nchain_root\x18\x07\x20\x01(\tR\tchainRoot\x12\x1a\
     \n\x08distance\x18\x08\x20\x01(\x04R\x08distance\x12\x14\n\x05nonce\x18\
-    \t\x20\x01(\x04R\x05nonce\x12\x19\n\x08tx_count\x18\n\x20\x01(\x04R\x07t\
-    xCount\x125\n\x0ctransactions\x18\x0b\x20\x03(\x0b2\x11.bc.BcTransaction\
-    R\x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\x20\x01(\x04R\
+    \t\x20\x01(\tR\x05nonce\x12\x19\n\x08tx_count\x18\n\x20\x01(\x04R\x07txC\
+    ount\x125\n\x0ctransactions\x18\x0b\x20\x03(\x0b2\x11.bc.BcTransactionR\
+    \x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\x20\x01(\x04R\
     \x14childBlockchainCount\x129\n\x13child_block_headers\x18\r\x20\x03(\
     \x0b2\t.bc.BlockR\x11childBlockHeaders\"#\n\rBcTransaction\x12\x12\n\x04\
     hash\x18\x01\x20\x01(\tR\x04hashb\x06proto3\
