@@ -21,6 +21,7 @@ const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock, mine } = require('../miner/miner')
 const { getGenesisBlock } = require('../miner/genesis')
 const { BcBlock } = require('../protos/core_pb')
+const { errToObj } = require('../helper/error')
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
@@ -206,7 +207,8 @@ export default class Engine {
 
           this.processMinedBlock(newBlock)
         }).catch(e => {
-          this._logger.error(`Mining failed, reason: ${e.message}`)
+          const reason = JSON.stringify(errToObj(e), null, 2)
+          this._logger.error(`Mining failed, reason: ${reason}`)
           this._mining = false
         })
       } else {
@@ -226,8 +228,20 @@ export default class Engine {
   processMinedBlock (newBlock: BcBlock) {
     this._logger.info(`Mined new block: ${JSON.stringify(newBlock.toObject(), null, 2)}`)
 
+    const tasks = [
+      this.persistence.put('bc.block.latest', newBlock),
+      this.persistence.put(`bc.block.${newBlock.getHash()}`, newBlock)
+    ]
+
+    Promise.all(tasks)
+      .then(() => {
+        this._logger.info('New BC block stored in DB')
+      })
+      .catch((err) => {
+        this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
+      })
+
     // TODO broadcast BC block here
-    // TODO persist BC block to persistence (?if verified?)
   }
 
   /**

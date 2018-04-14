@@ -4,6 +4,7 @@
   "description": "Block Collider with miners and rovers",
   "main": "lib/src/init.js",
   "scripts": {
+    "bcnode": "./bin/cli --ws --rovers --ui --node --miner-key ABCDEF",
     "check": "yarn run dist",
     "doc": "./node_modules/.bin/esdoc",
     "lint:standard": "standard src/**/*.es6",

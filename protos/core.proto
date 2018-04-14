@@ -22,7 +22,7 @@ message BcBlock {
     string merkle_root = 6;
     string chain_root = 7;
     uint64 distance = 8;
-    uint64 nonce = 9;
+    string nonce = 9;
     uint64 tx_count = 10;
     repeated BcTransaction transactions = 11;
     uint64 child_blockchain_count = 12;
