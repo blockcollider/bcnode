@@ -26,6 +26,7 @@ const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
+const MONITOR_ENABLED = process.env.BC_MONITOR === 'true'
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
@@ -95,7 +96,9 @@ export default class Engine {
       this._logger.warn(`Could not store rovers to persistence, reason ${e.message}`)
     }
 
-    this._monitor.start()
+    if (MONITOR_ENABLED) {
+      this._monitor.start()
+    }
 
     this._logger.info('Engine initialized')
   }

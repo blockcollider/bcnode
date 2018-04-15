@@ -55,6 +55,7 @@ Following environment variables can be used for advanced tweaking
 | BC_GRPC_PORT  | gRPC port; 0..65535                       |
 | BC_LOG        | Override log level; debug/info/warn/error |
 | BC_MINER_KEY  | Miner keyl string                         |
+| BC_MONITOR    | Print Stats periodically; true/false      |
 
 ### Run official docker image from public repo
 
