@@ -46,7 +46,8 @@ const logger = new winston.Logger({
       timestamp: tsFormat,
       datePattern: '-yyyyMMddHH.log',
       json: false,
-      formatter: format
+      formatter: format,
+      level: LOG_LEVEL
     })
   ]
 })

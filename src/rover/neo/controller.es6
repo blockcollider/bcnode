@@ -136,7 +136,7 @@ export default class Controller {
           this._logger.debug(`unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
 
           node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
-            this._logger.debug(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
+            this._logger.info(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
             const blockObj = unifiedBlock.toObject()
@@ -153,7 +153,7 @@ export default class Controller {
           })
         }
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`error while getting new block, err: ${e.message}`)
       })
     }
 

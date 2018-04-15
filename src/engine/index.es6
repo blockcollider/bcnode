@@ -13,6 +13,7 @@ const { xprod, equals, all, values, filter, reject, addIndex } = require('ramda'
 const config = require('../../config/config')
 const { debugSaveObject } = require('../debug')
 const logging = require('../logger')
+const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')
 const RoverManager = require('../rover/manager').default
 const rovers = require('../rover/manager').rovers
@@ -24,8 +25,11 @@ const { getGenesisBlock } = require('../miner/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 
+const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
+
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
+  _monitor: Monitor; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _rovers: RoverManager; // eslint-disable-line no-undef
@@ -42,8 +46,9 @@ export default class Engine {
     this._logger = logging.getLogger(__filename)
     this._knownRovers = opts.rovers
     this._minerKey = opts.minerKey
+    this._monitor = new Monitor(this, {})
     this._node = new Node(this)
-    this._persistence = new PersistenceRocksDb(config.persistence.path)
+    this._persistence = new PersistenceRocksDb(DATA_DIR)
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
     this._rpc = new RpcServer(this)
@@ -89,6 +94,8 @@ export default class Engine {
     } catch (e) {
       this._logger.warn(`Could not store rovers to persistence, reason ${e.message}`)
     }
+
+    this._monitor.start()
 
     this._logger.info('Engine initialized')
   }
@@ -155,96 +162,81 @@ export default class Engine {
     })
 
     this._emitter.on('collectBlock', ({ block }) => {
-      this._collectedBlocks[block.getBlockchain()] += 1
-
-      if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) {
-        this._canMine = true
-      }
-
-      // start mining only if all known chains are being rovered
-      if (this._canMine && !this._mining && equals(new Set(this._knownRovers), new Set(rovers))) {
-        const getKeys: [string, bool][] = xprod(rovers, ['latest', 'previous']).map(([chain, which]) => ([`${chain}.block.${which}`, which === 'latest']))
-
-        Promise.all(getKeys.map(([key, isLatest]) => {
-          return this._persistence.get(key).then(block => {
-            this._logger.debug(`Got "${key}"`)
-            return block
-          })
-        })).then(blocks => {
-          this._logger.debug(`Got ${blocks.length} blocks from persistence`)
-          const isEven = n => n % 2 === 0
-          const indexEven = (val, idx) => isEven(idx)
-          const currentBlocks = addIndex(reject)(indexEven, blocks) // latest are on odd indices
-          const previousBlocks = addIndex(filter)(indexEven, blocks) // previous on even
-          return this._persistence.get('bc.block.latest').then(bcBlock => {
-            return [previousBlocks, currentBlocks, bcBlock]
-          })
-        }).then(([previousBlocks, currentBlocks, previousBcBlock]) => {
-          this._logger.debug(`Starting mining now`)
-          const work = prepareWork(previousBcBlock, currentBlocks)
-          const newBlock = prepareNewBlock(
-            previousBcBlock,
-            previousBcBlock.getChildBlockHeadersList(),
-            currentBlocks,
-            [], // TODO add transactions
-            this._minerKey
-          )
-
-          this._mining = true
-          const solution = mine(
-            work,
-            this._minerKey,
-            newBlock.getMerkleRoot(),
-            newBlock.getDifficulty()
-          )
-          this._mining = false
-
-          // Set timestamp after mining
-          newBlock.setTimestamp(Date.now() / 1000 << 0)
-          // $FlowFixMe - add annotation to mine method
-          newBlock.setDistance(solution.distance)
-          // $FlowFixMe - add annotation to mine method
-          newBlock.setNonce(solution.nonce)
-
-          this.processMinedBlock(newBlock)
-        }).catch(e => {
-          const reason = JSON.stringify(errToObj(e), null, 2)
-          this._logger.error(`Mining failed, reason: ${reason}`)
-          this._mining = false
-        })
-      } else {
-        if (!this._canMine) {
-          this._logger.info(`Not mining because not collected enough blocks from all chains yet (status ${JSON.stringify(this._collectedBlocks)})`)
-          return
-        }
-        if (!this._mining) {
-          this._logger.info('Not starting mining new block while already mining one')
-          return
-        }
-        this._logger.warn(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
-      }
+      process.nextTick(() => {
+        this.collectBlock(rovers, block)
+      })
     })
   }
 
-  processMinedBlock (newBlock: BcBlock) {
-    const newBlockObj = newBlock.toObject()
-    this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
-    debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
+  collectBlock (rovers: string[], block: BcBlock) {
+    this._collectedBlocks[block.getBlockchain()] += 1
 
-    const tasks = [
-      this.persistence.put('bc.block.latest', newBlock),
-      this.persistence.put(`bc.block.${newBlock.getHash()}`, newBlock)
-    ]
+    if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) {
+      this._canMine = true
+    }
 
-    Promise.all(tasks)
-      .then(() => {
-        this._logger.info('New BC block stored in DB')
+    // start mining only if all known chains are being rovered
+    if (this._canMine && !this._mining && equals(new Set(this._knownRovers), new Set(rovers))) {
+      const getKeys: [string, bool][] = xprod(rovers, ['latest', 'previous']).map(([chain, which]) => ([`${chain}.block.${which}`, which === 'latest']))
+
+      Promise.all(getKeys.map(([key, isLatest]) => {
+        return this._persistence.get(key).then(block => {
+          this._logger.debug(`Got "${key}"`)
+          return block
+        })
+      })).then(blocks => {
+        this._logger.debug(`Got ${blocks.length} blocks from persistence`)
+        const isEven = n => n % 2 === 0
+        const indexEven = (val, idx) => isEven(idx)
+        const currentBlocks = addIndex(reject)(indexEven, blocks) // latest are on odd indices
+        const previousBlocks = addIndex(filter)(indexEven, blocks) // previous on even
+        return this._persistence.get('bc.block.latest').then(bcBlock => {
+          return [previousBlocks, currentBlocks, bcBlock]
+        })
+      }).then(([previousBlocks, currentBlocks, previousBcBlock]) => {
+        this._logger.debug(`Starting mining now`)
+        const work = prepareWork(previousBcBlock, currentBlocks)
+        const newBlock = prepareNewBlock(
+          previousBcBlock,
+          previousBcBlock.getChildBlockHeadersList(),
+          currentBlocks,
+          [], // TODO add transactions
+          this._minerKey
+        )
+
+        this._mining = true
+        const solution = mine(
+          work,
+          this._minerKey,
+          newBlock.getMerkleRoot(),
+          newBlock.getDifficulty()
+        )
+        this._mining = false
+
+        // Set timestamp after mining
+        newBlock.setTimestamp(Date.now() / 1000 << 0)
+        // $FlowFixMe - add annotation to mine method
+        newBlock.setDistance(solution.distance)
+        // $FlowFixMe - add annotation to mine method
+        newBlock.setNonce(solution.nonce)
+
+        return this._processMinedBlock(newBlock)
+      }).catch(e => {
+        const reason = JSON.stringify(errToObj(e), null, 2)
+        this._logger.error(`Mining failed, reason: ${reason}`)
+        this._mining = false
       })
-      .catch((err) => {
-        this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
-      })
-
-    // TODO broadcast BC block here
+    } else {
+      if (!this._canMine) {
+        this._logger.info(`Not mining because not collected enough blocks from all chains yet (status ${JSON.stringify(this._collectedBlocks)})`)
+        return
+      }
+      if (!this._mining) {
+        this._logger.info('Not starting mining new block while already mining one')
+        return
+      }
+      this._logger.warn(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
+    }
   }
 
   /**
@@ -258,5 +250,38 @@ export default class Engine {
 
   requestExit () {
     return this._rovers.killRovers()
+  }
+
+  _broadcastMinedBlock (newBlock: BcBlock): Promise<*> {
+    this._logger.info('Broadcasting mined block')
+
+    const method = 'newblock'
+    const payload = newBlock.toObject()
+    this.node.brodcastMessage(method, payload)
+
+    return Promise.resolve(true)
+  }
+
+  _processMinedBlock (newBlock: BcBlock): Promise<*> {
+    const newBlockObj = newBlock.toObject()
+    this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
+    debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
+
+    const tasks = [
+      // FIXME: This collides with genesis block
+      // this.persistence.put('bc.block.latest', newBlock),
+      this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
+    ]
+
+    return Promise.all(tasks)
+      .then(() => {
+        this._logger.info('New BC block stored in DB')
+
+        // TODO broadcast BC block here
+        return this._broadcastMinedBlock(newBlock)
+      })
+      .catch((err) => {
+        this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
+      })
   }
 }

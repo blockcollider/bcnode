@@ -18,6 +18,8 @@ const {
   isDebugEnabled,
   ensureDebugDir
 } = require('../debug')
+
+const { errToObj } = require('../helper/error')
 const logging = require('../logger')
 const Engine = require('../engine').default
 const pkg = require('../../package.json')
@@ -25,14 +27,31 @@ const pkg = require('../../package.json')
 // $FlowFixMe
 const native = require('../../native/index.node')
 
+const EXCEPTION_PATH = path.resolve(__dirname, '..', '..', 'exception.log')
 const LOG_DIR = path.resolve(__dirname, '..', '..', 'logs')
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const globalLog = logging.getLogger(__filename)
+
 // setup logging of unhandled rejections
 process.on('unhandledRejection', (err) => {
   // $FlowFixMe
   globalLog.error(`Rejected promise, trace:\n${err.stack}`)
+})
+
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION, saving in exception.log', err)
+
+  fs.writeFile(EXCEPTION_PATH, JSON.stringify(errToObj(err), null, 2), (err) => {
+    if (err) {
+      console.log(`Unable to save ${EXCEPTION_PATH}`, err)
+      return process.exit(-1)
+    }
+
+    console.log(`Exception was saved in ${EXCEPTION_PATH}`)
+    console.log('Exiting...')
+    return process.exit(-1)
+  })
 })
 
 /**
@@ -62,7 +81,6 @@ export async function main (args: string[]) {
   }
 
   const {
-    minerKey,
     node,
     randezvousServer,
     randezvousServerBind,
@@ -88,6 +106,7 @@ export async function main (args: string[]) {
   logger.info(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
 
   // Create instance of engine
+  const minerKey = process.env.BC_MINER_KEY || program.opts().minerKey
   const opts = {
     rovers: ROVERS,
     minerKey: minerKey
