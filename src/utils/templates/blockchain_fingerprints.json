@@ -1,15 +1,15 @@
 {
   "fingerprintsHash": "",
-  "nGenesisBlockchains": 5,
+  "genesisBlockchainCount": 5,
   "blockchainHeaders": [
   {
     "name":"btc",
     "description":"Bitcoin",
     "hash": "390fcf5ffdfedca732c19e2571e367230895725bed88e53f92d43762c14e3d57",
-    "electionStartBlock": "",
-    "electionEndBlock": "",
+    "electionStartBlockHeight": "",
+    "electionEndBlockHeight": "",
     "version": 1,
-    "nBlocks": 3,
+    "blocksCount": 3,
     "fingerprint": [
        {
           "hash": "000000000000a89a2c06f66c5aa3e278b53a19d094026be17c9c5a6bbae32e6b",
@@ -36,8 +36,8 @@
     "description":"Ethereum",
     "hash": "bbe5c469c469cec1f8c0b01de640df724f3d9053c23b19c6ed1bc6ee0faf5160",
     "genesisBlockchainSignature": "",
-    "electionStartBlock": "",
-    "electionEndBlock": "",
+    "electionStartBlockHeight": "",
+    "electionEndBlockHeight": "",
     "version": 1,
     "fingerprint": [
        {
@@ -64,10 +64,10 @@
     "name":"wav",
     "description":"Waves",
     "hash": "3bc516a4f96b1c08a5ccc19acc3ce643929c040ca3319c08480bfd784538333b",
-    "electionStartBlock": "",
-    "electionEndBlock": "",
+    "electionStartBlockHeight": "",
+    "electionEndBlockHeight": "",
     "version": 1,
-    "nBlocks": 3,
+    "blocksCount": 3,
     "fingerprint": [
        {
           "hash": "FSH8eAAzZNqnG8xgTZtz5xuLqXySsXgAjmFEC25hXMbEufiGjqWPnGCZFt6gLiVLJny16ipxRNAkkzjjhqTjBE2",
@@ -93,10 +93,10 @@
     "name":"neo",
     "description":"NEO",
     "hash": "2d37e680ed8d737499b65ee55245577df9fb0cf603c33bdb2f98fafafcd95fab",
-    "electionStartBlock": "",
-    "electionEndBlock": "",
+    "electionStartBlockHeight": "",
+    "electionEndBlockHeight": "",
     "version": 1,
-    "nBlocks": 3,
+    "blocksCount": 3,
     "fingerprint": [
        {
           "hash": "d42561e3d30e15be6400b6df2f328e02d2bf6354c41dce433bc57687c82144bf",
@@ -122,10 +122,10 @@
     "name":"lsk",
     "description":"Lisk",
     "hash": "1ce956a5687e7ad5c40c0cb91f88a03a2abbc6ff12c4d87cb568fa86a0c07fe9",
-    "electionStartBlock": "",
-    "electionEndBlock": "",
+    "electionStartBlockHeight": "",
+    "electionEndBlockHeight": "",
     "version": 1,
-    "nBlocks": 3,
+    "blocksCount": 3,
     "fingerprint": [
        {
           "hash": "13658550407518916215",
