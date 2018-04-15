@@ -20,7 +20,7 @@ Mining node with built-in block rover, DHT, and peer discovery.
 - *$ - lines starting with this symbol ($) should be executed in bash/terminal/command-line/cmd.exe WITHOUT symbol ($) itself*
 - *# - lines starting with this symbol (#) are comments and SHOULD not be executed*
 
-### CLI Options
+### CLI options
 
 ```
 $ ./bin/cli -h
@@ -42,6 +42,13 @@ $ ./bin/cli -h
     --ws                             enable WebSocket
     -h, --help                       output usage information
 ```
+
+### Environment variables
+
+Following environment variables can be used for advanced tweaking
+
+- BC_LOG - true/false
+- BC_DEBUG - debug/info/warn/error
 
 ### Run official docker image from public repo
 
