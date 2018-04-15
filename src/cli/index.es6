@@ -9,6 +9,7 @@
 
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
 const process = require('process')
 const program = require('commander')
 const { spawn } = require('child_process')
@@ -60,18 +61,6 @@ export async function main (args: string[]) {
     return program.help()
   }
 
-  if (isDebugEnabled) {
-    ensureDebugDir()
-  }
-
-  // Make sure log folder exists
-  ensureLogDir()
-
-  // Initialize rust logger
-  native.initLogger()
-
-  const logger: Object = logging.getLogger(__filename)
-
   const {
     minerKey,
     node,
@@ -84,10 +73,24 @@ export async function main (args: string[]) {
     ws
   } = program.opts()
 
+  if (isDebugEnabled) {
+    ensureDebugDir()
+  }
+
+  // Make sure log folder exists
+  ensureLogDir()
+
+  // Initialize rust logger
+  native.initLogger()
+
+  const logger: Object = logging.getLogger(__filename)
+
   if (!minerKey) {
     logger.error('--miner-key required')
     return -1
   }
+
+  logger.debug(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
 
   // Create instance of engine
   const opts = {
@@ -159,6 +162,19 @@ export async function main (args: string[]) {
 
   // TODO: Wait for engine finish
   // engine.wait()
+}
+
+function getOsInfo () {
+  return {
+    arch: os.arch(),
+    cpus: os.cpus(),
+    hostname: os.hostname(),
+    platform: os.platform(),
+    release: os.release(),
+    mem: os.totalmem(),
+    network: os.networkInterfaces(),
+    type: os.type()
+  }
 }
 
 function ensureLogDir () {
