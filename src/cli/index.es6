@@ -90,7 +90,7 @@ export async function main (args: string[]) {
   // Create instance of engine
   const opts = {
     rovers: ROVERS,
-    minerKey: '123'
+    minerKey: minerKey
   }
   const engine = new Engine(logger, opts)
 
