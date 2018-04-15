@@ -53,7 +53,7 @@ export default class App extends Component<*, State> {
     })
     return (
       <div className='container'>
-        <h1>BlockCollider</h1>
+        <h1>Block Collider</h1>
         <div className='container'>
           <h2>Collected blocks (last 20) <ConnectionState connected={this.state.connected} /></h2>
           <div className='d-flex flex-wrap flex-row'>

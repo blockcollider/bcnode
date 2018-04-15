@@ -5628,7 +5628,7 @@ var App = function (_Component) {
         _react2.default.createElement(
           'h1',
           null,
-          'Blockcollider'
+          'Block Collider'
         ),
         _react2.default.createElement(
           'div',
