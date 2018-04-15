@@ -265,7 +265,7 @@ export default class Engine {
     const tasks = [
       // FIXME: This collides with genesis block
       // this.persistence.put('bc.block.latest', newBlock),
-      this.persistence.put(`bc.block.${newBlock.getHash()}`, newBlock)
+      this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
     ]
 
     return Promise.all(tasks)
