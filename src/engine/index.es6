@@ -256,8 +256,7 @@ export default class Engine {
     this._logger.info('Broadcasting mined block')
 
     const method = 'newblock'
-    const payload = newBlock.toObject()
-    this.node.brodcastMessage(method, payload)
+    this.node.broadcastNewBlock(method, newBlock)
 
     return Promise.resolve(true)
   }

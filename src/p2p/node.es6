@@ -16,6 +16,7 @@ const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
 const logging = require('../logger')
+const { BcBlock } = require('../protos/core_pb')
 const config = require('../../config/config')
 const Bundle = require('./bundle').default
 
@@ -79,19 +80,18 @@ export default class Node {
     return true
   }
 
-  brodcastMessage (method: string, msg: Object) {
-    this._logger.info(`Broadcasting msg to peers, ${inspect(msg)}`)
+  broadcastNewBlock (method: string, block: BcBlock) {
+    this._logger.info(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
 
     const url = `${PROTOCOL_PREFIX}/${method}`
     this._peers.getAllArray().map(peer => {
       this._logger.info(`Sending to peer ${peer}`)
       this.node.dialProtocol(peer, url, (err, conn) => {
         if (err) {
-          console.log('Error sending message to peer', peer, err)
+          this._logger.error('Error sending message to peer', peer, err)
         }
 
-        console.log('done')
-        pull(pull.values([JSON.stringify(msg)]), conn)
+        pull(pull.values([block.serializeBinary()]), conn)
       })
     })
   }
@@ -133,8 +133,14 @@ export default class Node {
           return
         }
 
-        const data = JSON.parse(wireData.toString())
-        console.log('_handleMessageNewBlock', data)
+        try {
+          const bytes = wireData[0]
+          const raw = new Uint8Array(bytes)
+          const block = BcBlock.deserializeBinary(raw)
+          this._logger.info('Received new block from peer', block.toObject())
+        } catch (e) {
+          this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
+        }
       })
     )
   }
