@@ -85,11 +85,6 @@ export async function main (args: string[]) {
 
   const logger: Object = logging.getLogger(__filename)
 
-  if (!minerKey) {
-    logger.error('--miner-key required')
-    return -1
-  }
-
   logger.debug(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
 
   // Create instance of engine
@@ -129,12 +124,17 @@ export async function main (args: string[]) {
   }
 
   process.on('SIGINT', () => {
-    console.log('Gracefully shutting down from  SIGINT (Ctrl-C)')
+    logger.info('Gracefully shutting down from  SIGINT (Ctrl-C)')
 
     // TODO: Inform engine
-
-    // wish this worked on Windows
-    process.exit()
+    engine.requestExit()
+      .then(() => {
+        process.exit()
+      })
+      .catch((e) => {
+        this._logger.error(`Error in Engine.requestExit(), reason: ${e.message}`)
+        process.exit(-1)
+      })
   })
 
   if (node) {
@@ -147,6 +147,11 @@ export async function main (args: string[]) {
       rovers === true
         ? ROVERS
         : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
+
+    if (!minerKey) {
+      logger.error('--miner-key required')
+      return -1
+    }
 
     engine.startRovers(roversToStart)
   }

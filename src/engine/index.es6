@@ -255,4 +255,8 @@ export default class Engine {
   startServer (opts: Object) {
     this.server.run(opts)
   }
+
+  requestExit () {
+    return this._rovers.killRovers()
+  }
 }
