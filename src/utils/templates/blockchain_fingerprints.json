@@ -1,4 +1,7 @@
-[
+{
+  "fingerprintsHash": "",
+  "nGenesisBlockchains": 5,
+  "blockchainHeaders": [
   {
     "name":"btc",
     "description":"Bitcoin",
