@@ -20,10 +20,10 @@ export default class Navbar extends Component<*> {
 
     return (
       <nav className='navbar navbar-fixed-top navbar-light bg-light'>
-        <div className='navbar-brand'>
+        <a className='navbar-brand' href='https://blockcollider.org'>
           <img src='/img/bc-black.png' style={styleBrand} />
           <span style={{marginLeft: '10px'}}>Block Collider</span>
-        </div>
+        </a>
         <div className='collapse navbar-collapse'>
           <ul className='navbar-nav mr-auto'>
             <li className='nav-item active'>
