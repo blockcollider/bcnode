@@ -14,7 +14,7 @@
     "transpile": "babel src --source-maps=true --config-file ./.babelrc --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "test": "jest",
     "build-native": "./node_modules/neon-cli/bin/cli.js build -d",
-    "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files ",
+    "build": "rimraf dist/ && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files && yarn run webpack",
     "dist": "yarn && yarn run proto && yarn run build-native && yarn run build && yarn test --ci && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
     "outdated": "yarn outdated || true",
     "watch:lint": "onchange src/**/*.es6 -- yarn run lint:standard",

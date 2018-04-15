@@ -21,6 +21,7 @@ export default class App extends Component<*> {
 
     return (
       <div className='d-flex flex-wrap flex-row'>
+        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Collected blocks (last 20)</h2>
         {blocks}
       </div>
     )

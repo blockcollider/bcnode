@@ -39,15 +39,16 @@ export default class App extends Component<*, State> {
     if (this.state.connected) {
       blocks = <Blocks blocks={this.state.blocks} />
     } else {
-      blocks = <div>Disconnected</div>
+      blocks = null
     }
 
     return (
-      <div className='container-fluid'>
-        <Navbar />
-        <div className='container'>
-          <h2>Collected blocks (last 20) <ConnectionState connected={this.state.connected} /></h2>
-          {blocks}
+      <div>
+        <Navbar connected={this.state.connected} />
+        <div className='container-fluid'>
+          <div className='container'>
+            {blocks}
+          </div>
         </div>
       </div>
     )
@@ -67,12 +68,4 @@ export default class App extends Component<*, State> {
       window.setTimeout(this._run.bind(this), 1000)
     }
   }
-}
-
-const ConnectionState = ({ connected }) => {
-  const statusClass = connected ? 'badge-success' : 'badge-warning'
-
-  return (
-    <span className={`badge ${statusClass}`}>{connected ? 'CONNECTED' : 'DICONNECTED'}</span>
-  )
 }

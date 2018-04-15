@@ -8,10 +8,31 @@
  */
 import React, { Component } from 'react'
 
+import ConnectionState from './ConnectionState'
+
 export default class Navbar extends Component<*> {
   render () {
+    const styleBrand = {
+      height: '35px',
+      width: '35px',
+      padding: 0
+    }
+
     return (
-      <h1>Block Collider</h1>
+      <nav className='navbar navbar-fixed-top navbar-light bg-light'>
+        <div className='navbar-brand'>
+          <img src='/img/bc-black.png' style={styleBrand} />
+          <span style={{marginLeft: '10px'}}>Block Collider</span>
+        </div>
+        <div className='collapse navbar-collapse'>
+          <ul className='navbar-nav mr-auto'>
+            <li className='nav-item active'>
+              <span className='nav-link'>Block Collider</span>
+            </li>
+          </ul>
+        </div>
+        <ConnectionState connected={this.props.connected} />
+      </nav>
     )
   }
 }
