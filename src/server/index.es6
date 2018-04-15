@@ -23,7 +23,7 @@ const config = require('../../config/config')
 const { Null } = require('../protos/core_pb')
 const { RpcClient, RpcServer } = require('../rpc')
 
-const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'dist')
+const assetsDir = path.resolve(__dirname, '..', '..', 'public')
 const docsDir = path.resolve(__dirname, '..', '..', 'docs')
 
 type Opts = {|

@@ -96,3 +96,6 @@ dist/
 data
 miner_data
 .wavescache
+
+# Webpack assets
+/public/assets
