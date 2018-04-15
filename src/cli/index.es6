@@ -81,7 +81,6 @@ export async function main (args: string[]) {
   }
 
   const {
-    minerKey,
     node,
     randezvousServer,
     randezvousServerBind,
@@ -107,6 +106,7 @@ export async function main (args: string[]) {
   logger.info(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
 
   // Create instance of engine
+  const minerKey = process.env.BC_MINER_KEY || program.opts().minerKey
   const opts = {
     rovers: ROVERS,
     minerKey: minerKey

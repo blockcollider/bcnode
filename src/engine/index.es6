@@ -24,6 +24,8 @@ const { getGenesisBlock } = require('../miner/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 
+const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
+
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
@@ -43,7 +45,7 @@ export default class Engine {
     this._knownRovers = opts.rovers
     this._minerKey = opts.minerKey
     this._node = new Node(this)
-    this._persistence = new PersistenceRocksDb(config.persistence.path)
+    this._persistence = new PersistenceRocksDb(DATA_DIR)
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
     this._rpc = new RpcServer(this)
@@ -213,7 +215,7 @@ export default class Engine {
         // $FlowFixMe - add annotation to mine method
         newBlock.setNonce(solution.nonce)
 
-        return this.processMinedBlock(newBlock)
+        return this._processMinedBlock(newBlock)
       }).catch(e => {
         const reason = JSON.stringify(errToObj(e), null, 2)
         this._logger.error(`Mining failed, reason: ${reason}`)
@@ -232,7 +234,30 @@ export default class Engine {
     }
   }
 
-  processMinedBlock (newBlock: BcBlock): Promise<*> {
+  /**
+   * Start Server
+   *
+   * @param opts Options to start server with
+   */
+  startServer (opts: Object) {
+    this.server.run(opts)
+  }
+
+  requestExit () {
+    return this._rovers.killRovers()
+  }
+
+  _broadcastMinedBlock (newBlock: BcBlock): Promise<*> {
+    this._logger.info('Broadcasting mined block')
+
+    const method = 'newblock'
+    const payload = newBlock.toObject()
+    this.node.brodcastMessage(method, payload)
+
+    return Promise.resolve(true)
+  }
+
+  _processMinedBlock (newBlock: BcBlock): Promise<*> {
     const newBlockObj = newBlock.toObject()
     this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
     debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
@@ -246,24 +271,12 @@ export default class Engine {
     return Promise.all(tasks)
       .then(() => {
         this._logger.info('New BC block stored in DB')
+
+        // TODO broadcast BC block here
+        return this._broadcastMinedBlock(newBlock)
       })
       .catch((err) => {
         this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
       })
-
-    // TODO broadcast BC block here
-  }
-
-  /**
-   * Start Server
-   *
-   * @param opts Options to start server with
-   */
-  startServer (opts: Object) {
-    this.server.run(opts)
-  }
-
-  requestExit () {
-    return this._rovers.killRovers()
   }
 }

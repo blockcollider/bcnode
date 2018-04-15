@@ -14,7 +14,7 @@ const SECIO = require('libp2p-secio')
 const WStar = require('libp2p-webrtc-star')
 
 export default class Bundle extends libp2p {
-  constructor (peerInfo: Object) {
+  constructor (peerInfo: Object, peerBook: ?Object, options: ?Object) {
     const ws = new WStar({
       wrtc: wrtc
     })
@@ -36,6 +36,6 @@ export default class Bundle extends libp2p {
       ]
     }
 
-    super(modules, peerInfo)
+    super(modules, peerInfo, peerBook, options)
   }
 }

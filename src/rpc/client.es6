@@ -13,13 +13,17 @@ const { RoverClient } = require('../protos/rover_grpc_pb')
 
 const config = require('../../config/config')
 
+const GRPC_HOST = process.env.BC_GRPC_HOST || config.grpc.host
+const GRPC_PORT = process.env.BC_GRPC_PORT || config.grpc.port
+const GRPC_URL = `${GRPC_HOST}:${GRPC_PORT}`
+
 export default class RpcClient {
   _services: Object; // eslint-disable-line no-undef
 
   constructor () {
     this._services = {
-      bc: new BcClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure()),
-      rover: new RoverClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure())
+      bc: new BcClient(GRPC_URL, grpc.credentials.createInsecure()),
+      rover: new RoverClient(GRPC_URL, grpc.credentials.createInsecure())
     }
   }
 
