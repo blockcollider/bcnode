@@ -9,7 +9,7 @@ const {
 
 const { getGenesisBlock } = require('../genesis')
 
-import { mockRandom } from 'jest-mock-random'
+const { mockRandom } = require('jest-mock-random')
 
 describe('Miner', () => {
   test('mine()', () => {
