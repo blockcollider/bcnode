@@ -149,7 +149,7 @@ export default class Controller {
         this._logger.debug(`got lastHeight: "${lastHeight}"`)
 
         getBlock(this._liskApi, lastHeight).then(lastBlock => {
-          this._logger.debug(`collected new block with id: ${inspect(lastBlock.id)}`)
+          this._logger.info(`collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
@@ -176,7 +176,7 @@ export default class Controller {
           }
         })
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`error while getting new block, err: ${e.message}`)
       })
     }
 
