@@ -85,7 +85,7 @@ export async function main (args: string[]) {
 
   const logger: Object = logging.getLogger(__filename)
 
-  logger.debug(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
+  logger.info(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
 
   // Create instance of engine
   const opts = {
