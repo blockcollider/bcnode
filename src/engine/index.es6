@@ -13,6 +13,7 @@ const { xprod, equals, all, values, filter, reject, addIndex } = require('ramda'
 const config = require('../../config/config')
 const { debugSaveObject } = require('../debug')
 const logging = require('../logger')
+const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')
 const RoverManager = require('../rover/manager').default
 const rovers = require('../rover/manager').rovers
@@ -28,6 +29,7 @@ const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
+  _monitor: Monitor; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _rovers: RoverManager; // eslint-disable-line no-undef
@@ -44,6 +46,7 @@ export default class Engine {
     this._logger = logging.getLogger(__filename)
     this._knownRovers = opts.rovers
     this._minerKey = opts.minerKey
+    this._monitor = new Monitor(this, {})
     this._node = new Node(this)
     this._persistence = new PersistenceRocksDb(DATA_DIR)
     this._rovers = new RoverManager()
@@ -91,6 +94,8 @@ export default class Engine {
     } catch (e) {
       this._logger.warn(`Could not store rovers to persistence, reason ${e.message}`)
     }
+
+    this._monitor.start()
 
     this._logger.info('Engine initialized')
   }
