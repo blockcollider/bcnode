@@ -18,7 +18,7 @@ const GRPC_PORT = process.env.BC_GRPC_PORT || config.grpc.port
 const GRPC_URL = `${GRPC_HOST}:${GRPC_PORT}`
 
 export default class RpcClient {
-  _services: Object; // eslint-disable-line no-undef
+  _services: { bc: BcClient, rover: RoverClient}; // eslint-disable-line no-undef
 
   constructor () {
     this._services = {
@@ -31,11 +31,11 @@ export default class RpcClient {
     return this._services[name]
   }
 
-  get bc (): Object {
-    return this.service('bc')
+  get bc (): BcClient {
+    return this._services.bc
   }
 
-  get rover (): Object {
-    return this.service('rover')
+  get rover (): RoverClient {
+    return this._services.rover
   }
 }
