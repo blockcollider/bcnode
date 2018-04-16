@@ -15,6 +15,7 @@ const PeerBook = require('peer-book')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
+const Engine = require('../engine').default
 const logging = require('../logger')
 const { BcBlock } = require('../protos/core_pb')
 const config = require('../../config/config')
@@ -31,12 +32,12 @@ type StatusMsg = {
 
 export default class Node {
   _logger: Object // eslint-disable-line no-undef
-  _engine: Object // eslint-disable-line no-undef
+  _engine: Engine // eslint-disable-line no-undef
   _statusMsg: StatusMsg // eslint-disable-line no-undef
   _peers: PeerBook // eslint-disable-line no-undef
-  _node: Object // eslint-disable-line no-undef
+  _node: Bundle // eslint-disable-line no-undef
 
-  constructor (engine: Object) {
+  constructor (engine: Engine) {
     this._engine = engine
     this._logger = logging.getLogger(__filename)
     this._statusMsg = {
@@ -46,7 +47,7 @@ export default class Node {
     this._peers = new PeerBook()
   }
 
-  get node (): Object {
+  get node (): Bundle {
     return this._node
   }
 
@@ -96,7 +97,7 @@ export default class Node {
     })
   }
 
-  _handleEventPeerConnect (node: Object, peer: Object) {
+  _handleEventPeerConnect (node: Bundle, peer: Object) {
     this._logger.info('Connection established:', peer.id.toB58String())
     node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
       if (err) {
@@ -115,7 +116,7 @@ export default class Node {
     this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
   }
 
-  _handleEventPeerDiscovery (node: Object, peer: Object) {
+  _handleEventPeerDiscovery (node: Bundle, peer: Object) {
     this._logger.info(`Discovered: ${peer.id.toB58String()}`)
     node.dial(peer, (err) => {
       if (err) {
@@ -145,7 +146,7 @@ export default class Node {
     )
   }
 
-  _handleMessageStatus (node: Object, protocol: Object, conn: Object) {
+  _handleMessageStatus (node: Bundle, protocol: Object, conn: Object) {
     pull(
       conn,
       pull.collect((err, wireData) => {
@@ -179,13 +180,13 @@ export default class Node {
     )
   }
 
-  _registerEventHandlers (node: Object) {
+  _registerEventHandlers (node: Bundle) {
     node.on('peer:discovery', (peer) => this._handleEventPeerDiscovery(node, peer))
     node.on('peer:connect', (peer) => this._handleEventPeerConnect(node, peer))
     node.on('peer:disconnect', (peer) => this._handleEventPeerDisconnect(peer))
   }
 
-  _registerMessageHandlers (node: Object) {
+  _registerMessageHandlers (node: Bundle) {
     node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => this._handleMessageNewBlock(protocol, conn))
     node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => this._handleMessageStatus(node, protocol, conn))
   }

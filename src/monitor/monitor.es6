@@ -9,15 +9,16 @@
 
 const os = require('os')
 
+const Engine = require('../engine').default
 const logging = require('../logger')
 
 export default class Monitor {
   _logger: Object; // eslint-disable-line no-undef
-  _engine: Object; // eslint-disable-line no-undef
+  _engine: Engine; // eslint-disable-line no-undef
   _opts: Object; // eslint-disable-line no-undef
   _interval: ?IntervalID; // eslint-disable-line no-undef
 
-  constructor (engine: Object, opts: Object) {
+  constructor (engine: Engine, opts: Object) {
     this._logger = logging.getLogger(__filename)
     this._engine = engine
     this._opts = opts

@@ -6,6 +6,7 @@
  *
  * @flow
  */
+
 import type { Logger } from 'winston'
 const { inspect } = require('util')
 const WavesApi = require('waves-api')

@@ -6,6 +6,7 @@
  *
  * @flow
  */
+
 import type { Logger } from 'winston'
 const { inspect } = require('util')
 const EthereumBlock = require('ethereumjs-block')
