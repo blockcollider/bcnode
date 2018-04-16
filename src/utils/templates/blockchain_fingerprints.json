@@ -2,149 +2,150 @@
   "fingerprintsHash": "",
   "genesisBlockchainCount": 5,
   "blockchainHeaders": [
-  {
-    "name":"btc",
-    "description":"Bitcoin",
-    "hash": "390fcf5ffdfedca732c19e2571e367230895725bed88e53f92d43762c14e3d57",
-    "electionStartBlockHeight": "",
-    "electionEndBlockHeight": "",
-    "version": 1,
-    "blocksCount": 3,
-    "fingerprint": [
-       {
+    {
+      "name": "btc",
+      "description": "Bitcoin",
+      "hash": "390fcf5ffdfedca732c19e2571e367230895725bed88e53f92d43762c14e3d57",
+      "electionStartBlockHeight": "",
+      "electionEndBlockHeight": "",
+      "version": 1,
+      "blocksCount": 3,
+      "fingerprint": [
+        {
           "hash": "000000000000a89a2c06f66c5aa3e278b53a19d094026be17c9c5a6bbae32e6b",
           "data": "61e3853d4c4441ccafe91f722734d9fd7ab94e50025454519c77b7ce144d79e8",
           "height": 74690,
           "index": 0
-       },
-       {
+        },
+        {
           "hash": "00000000005c22d199706df1c38b38d76f8401920dcbe91edf3417f8847da707",
           "data": "40c7f718052b1e3540374482b9f2329b163c8044512a7f15447245a1adc6d895",
           "height": 74691,
           "index": 1
-       },
-       {
+        },
+        {
           "hash": "00000000000c4df039d8ba791eead74ca301e27d806bd6559c1087abf25c9b1f",
           "data": "10ad2d4d40a763d8dcd118d3d6494a986c43c28fab8fae23d795d3271af14083",
           "height": 74692,
           "index": 2
-       }
-    ]
-  },
-  {
-    "name":"eth",
-    "description":"Ethereum",
-    "hash": "bbe5c469c469cec1f8c0b01de640df724f3d9053c23b19c6ed1bc6ee0faf5160",
-    "genesisBlockchainSignature": "",
-    "electionStartBlockHeight": "",
-    "electionEndBlockHeight": "",
-    "version": 1,
-    "fingerprint": [
-       {
+        }
+      ]
+    },
+    {
+      "name": "eth",
+      "description": "Ethereum",
+      "hash": "bbe5c469c469cec1f8c0b01de640df724f3d9053c23b19c6ed1bc6ee0faf5160",
+      "genesisBlockchainSignature": "",
+      "electionStartBlockHeight": "",
+      "electionEndBlockHeight": "",
+      "version": 1,
+      "fingerprint": [
+        {
           "hash": "a218e2c611f21232d857e3c8cecdcdf1f65f25a4477f98f6f47e4063807f2308",
           "data": "62382916183238",
           "height": 1919999,
           "index": 0
-       },
-       {
+        },
+        {
           "hash": "4985f5ca3d2afbec36529aa96f74de3cc10a2a4a6c44f2157a57d2c6059a11bb",
           "data": "62413376722602",
           "height": 1920000,
           "index": 1
-       },
-       {
+        },
+        {
           "hash": "87b2bc3f12e3ded808c6d4b9b528381fa2a7e95ff2368ba93191a9495daa7f50",
           "data": "62321951008868",
           "height": 1920001,
           "index": 2
-       }
-    ]
-  },
-  {
-    "name":"wav",
-    "description":"Waves",
-    "hash": "3bc516a4f96b1c08a5ccc19acc3ce643929c040ca3319c08480bfd784538333b",
-    "electionStartBlockHeight": "",
-    "electionEndBlockHeight": "",
-    "version": 1,
-    "blocksCount": 3,
-    "fingerprint": [
-       {
+        }
+      ]
+    },
+    {
+      "name": "wav",
+      "description": "Waves",
+      "hash": "3bc516a4f96b1c08a5ccc19acc3ce643929c040ca3319c08480bfd784538333b",
+      "electionStartBlockHeight": "",
+      "electionEndBlockHeight": "",
+      "version": 1,
+      "blocksCount": 3,
+      "fingerprint": [
+        {
           "hash": "FSH8eAAzZNqnG8xgTZtz5xuLqXySsXgAjmFEC25hXMbEufiGjqWPnGCZFt6gLiVLJny16ipxRNAkkzjjhqTjBE2",
           "data": "3P274YB5qseSE9DTTL3bpSjosZrYBPDpJ8k",
           "height": 1,
           "index": 0
-       },
-       {
+        },
+        {
           "hash": "62ruZoatk3Wvs1pkWH1VB2utacPSyYdCfdAiMaYygJn6jUFGyGVg9F5i1SqDjimJvGhi8FhyT7LuRQusbHRXMnjp",
           "data": "3P9o3ZYwtHkaU1KxsKkFjJqJKS3dLHLC9oF",
           "height": 2,
           "index": 1
-       },
-       {
+        },
+        {
           "hash": "54dS4KPRoKzccHv6sXYPaDNnxLL9n91LiQkDA6BkUi9tc7SJaUAXiaWZpsjrnTDYESDuqjtxjsqd34D6acyAMw7a",
           "data": "3PBWXDFUc86N2EQxKJmW8eFco65xTyMZx6J",
           "height": 3,
           "index": 2
-       }
-    ]
-  },
-  {
-    "name":"neo",
-    "description":"NEO",
-    "hash": "2d37e680ed8d737499b65ee55245577df9fb0cf603c33bdb2f98fafafcd95fab",
-    "electionStartBlockHeight": "",
-    "electionEndBlockHeight": "",
-    "version": 1,
-    "blocksCount": 3,
-    "fingerprint": [
-       {
+        }
+      ]
+    },
+    {
+      "name": "neo",
+      "description": "NEO",
+      "hash": "2d37e680ed8d737499b65ee55245577df9fb0cf603c33bdb2f98fafafcd95fab",
+      "electionStartBlockHeight": "",
+      "electionEndBlockHeight": "",
+      "version": 1,
+      "blocksCount": 3,
+      "fingerprint": [
+        {
           "hash": "d42561e3d30e15be6400b6df2f328e02d2bf6354c41dce433bc57687c82144bf",
           "data": "803ff4abe3ea6533bcc0be574efa02f83ae8fdc651c879056b0d9be336c01bf4",
           "height": 0,
           "index": 0
-       },
-       {
+        },
+        {
           "hash": "d782db8a38b0eea0d7394e0f007c61c71798867578c77c387c08113903946cc9",
           "data": "d6ba8b0f381897a59396394e9ce266a3d1d0857b5e3827941c2d2cedc38ef918",
           "height": 1,
           "index": 1
-       },
-       {
+        },
+        {
           "hash": "bf638e92c85016df9bc3b62b33f3879fa22d49d5f55d822b423149a3bca9e574",
           "data": "afa183a1579babc4d55f5609c68710954c27132d146427fb426af54295df0842",
           "height": 2,
           "index": 2
-       }
-    ]
-  },
-  {
-    "name":"lsk",
-    "description":"Lisk",
-    "hash": "1ce956a5687e7ad5c40c0cb91f88a03a2abbc6ff12c4d87cb568fa86a0c07fe9",
-    "electionStartBlockHeight": "",
-    "electionEndBlockHeight": "",
-    "version": 1,
-    "blocksCount": 3,
-    "fingerprint": [
-       {
+        }
+      ]
+    },
+    {
+      "name": "lsk",
+      "description": "Lisk",
+      "hash": "1ce956a5687e7ad5c40c0cb91f88a03a2abbc6ff12c4d87cb568fa86a0c07fe9",
+      "electionStartBlockHeight": "",
+      "electionEndBlockHeight": "",
+      "version": 1,
+      "blocksCount": 3,
+      "fingerprint": [
+        {
           "hash": "13658550407518916215",
           "data": "6566229458323231555L",
           "height": 1,
           "index": 0
-       },
-       {
+        },
+        {
           "hash": "13332666788283026871",
           "data": "genesis_16",
           "height": 2,
           "index": 1
-       },
-       {
+        },
+        {
           "hash": "7234275607611561282",
           "data": "genesis_7",
           "height": 3,
           "index": 2
-       }
-    ]
-  }
-]
+        }
+      ]
+    }
+  ]
+}
