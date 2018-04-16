@@ -36,8 +36,7 @@ cache:
 jobs:
   include:
     - stage: docker push
-      # if: type IN (push)
-      if: branch IN (master, release)
+      if: (type IN (push)) AND (branch IN (master, release)) AND (fork = false)
       sudo: required
       services:
         - docker
@@ -74,6 +73,7 @@ install:
   - rustup component add rust-src
   - export RUST_SRC_PATH=`rustc --print sysroot`/lib/rustlib/src/rust/src
   - export RUST_BACKTRACE=1
+  - mkdir logs
 
 script:
   - yarn

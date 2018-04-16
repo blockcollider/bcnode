@@ -13,5 +13,6 @@
         "transform-async-to-generator"
       ]
     }]
-  ]
+  ],
+  "sourceMaps": true
 }

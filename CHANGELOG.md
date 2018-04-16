@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [Engine] - Add stats/monitor
+- [Rover] - Kill all child rovers at ctrl+c
+- [Global] - Added env variables BC_LOG, BC_DEBUG
+- [CLI] - New option --miner-key
+- [UI] - Serve documentation - /doc
 - [CI] - Automatically build docker images
 - [Docker] - Mountable volumes - _data, config, logs
 - [Docker] - Use foreverjs
 
 ### Changed
+
+- [UI] - Polish UI
 
 ### Removed
 

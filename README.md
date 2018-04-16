@@ -20,10 +20,47 @@ Mining node with built-in block rover, DHT, and peer discovery.
 - *$ - lines starting with this symbol ($) should be executed in bash/terminal/command-line/cmd.exe WITHOUT symbol ($) itself*
 - *# - lines starting with this symbol (#) are comments and SHOULD not be executed*
 
+### CLI options
+
+```
+$ ./bin/cli -h
+
+  Usage: cli [options]
+
+  Options:
+
+    -V, --version                    output the version number
+    --miner-key [key]                Miner key
+    -n, --node                       Start P2P node
+    -r, --randezvous-server          Start randezvous server
+    --randezvous-server-bind [ip]    Randezvous server bind IP (default: 0.0.0.0)
+    --randezvous-server-port [port]  Randezvous server port (default: 9090)
+    --rovers [items]                 start rover (default: lsk, neo)
+    -R, --no-rovers                  do not start any rover
+    --rpc                            enable RPC
+    --ui                             enable Web UI
+    --ws                             enable WebSocket
+    -h, --help                       output usage information
+```
+
+### Environment variables
+
+Following environment variables can be used for advanced tweaking
+
+| Name          | Description                               |
+|---------------|-------------------------------------------|
+| BC_DEBUG      | Collect data in _debug folder; true/false |
+| BC_DATA_DIR   | Data directory; path                      |
+| BC_GRPC_HOST  | gRPC bind host; IP                        |
+| BC_GRPC_PORT  | gRPC port; 0..65535                       |
+| BC_LOG        | Override log level; debug/info/warn/error |
+| BC_MINER_KEY  | Miner keyl string                         |
+| BC_MONITOR    | Print Stats periodically; true/false      |
+
 ### Run official docker image from public repo
 
 ```
-$ docker run -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node
+$ docker run -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build and run docker image locally
@@ -42,7 +79,7 @@ $ git checkout release
 $ docker build -t blockcollider/bcnode .
 
 # Run locally build image
-$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node
+$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build from source

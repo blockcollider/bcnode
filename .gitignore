@@ -1,6 +1,9 @@
 # IntelliJ Idea Project
 .idea/
 
+# Debug data
+_debug/
+
 # Temp data
 _data/
 
@@ -93,3 +96,6 @@ dist/
 data
 miner_data
 .wavescache
+
+# Webpack assets
+/public/assets

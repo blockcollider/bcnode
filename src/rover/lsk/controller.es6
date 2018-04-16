@@ -11,10 +11,11 @@ const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
-const string = require('../../utils/strings.js')
+const { blake2b } = require('../../utils/crypto')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -29,11 +30,20 @@ type LiskBlock = { // eslint-disable-line no-undef
   blockSignature: string,
   confirmations: number,
   totalForged: number,
-  timestamp: string,
+  timestamp: number,
   version: string,
 }
 
-const getMerkleRoot = (txs) => txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
+const LSK_GENESIS_DATE = new Date('2016-05-24T17:00:00.000Z')
+
+const getMerkleRoot = (block) => {
+  if (!block.transactions || (block.transactions.length === 0)) {
+    return blake2b(block.blockSignature)
+  }
+
+  const txs = block.transactions.map((tx) => tx.id)
+  return txs.reduce((acc, el) => blake2b(acc + el), '')
+}
 
 const getLastHeight = (api: Object): Promise<number> => {
   const response = api.sendRequest('blocks/getHeight')
@@ -48,41 +58,47 @@ const getTransactionsForBlock = (api: Object, blockId: string): Promise<Object[]
   return api.sendRequest('transactions', { blockId }).then(response => response.transactions)
 }
 
+const getAbsoluteTimestamp = (blockTs: number) => {
+  return ((LSK_GENESIS_DATE.getTime() / 1000 << 0) + blockTs) * 1000
+}
+
 const _createUnifiedBlock = (block): Block => {
-  // TODO return Block as message
-  const obj = {}
-
-  obj.blockNumber = block.height
-  obj.prevHash = block.previousBlock
-  obj.blockHash = block.id
-  obj.root = getMerkleRoot(block.transactions)
-  obj.fee = block.totalFee
-  obj.size = block.payloadLength
-  obj.payloadHash = block.payloadHash
-  obj.generator = block.generatorId
-  obj.generatorPublicKey = block.generatorPublicKey
-  obj.blockSignature = block.blockSignature
-  obj.confirmations = block.confirmations
-  obj.totalForged = block.totalForged
-  obj.timestamp = block.timestamp
-  obj.version = block.version
-  obj.transactions = block.transactions.reduce(function (all, t) {
-    const tx = {
-      txHash: t.id,
-      // inputs: t.inputs,
-      // outputs: t.outputs,
-      marked: false
-    }
-    all.push(tx)
-    return all
-  }, [])
-
-  // return obj
+  const obj = {
+    blockNumber: block.height,
+    prevHash: block.previousBlock,
+    blockHash: block.id,
+    root: getMerkleRoot(block),
+    fee: block.totalFee,
+    size: block.payloadLength,
+    payloadHash: block.payloadHash,
+    generator: block.generatorId,
+    generatorPublicKey: block.generatorPublicKey,
+    blockSignature: block.blockSignature,
+    confirmations: block.confirmations,
+    totalForged: block.totalForged,
+    timestamp: getAbsoluteTimestamp(parseInt(block.timestamp, 10)),
+    version: block.version,
+    transactions: block.transactions.reduce(
+      function (all, t) {
+        all.push({
+          txHash: t.id,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        })
+        return all
+      },
+      []
+    )
+  }
 
   const msg = new Block()
   msg.setBlockchain('lsk')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
@@ -133,7 +149,7 @@ export default class Controller {
         this._logger.debug(`got lastHeight: "${lastHeight}"`)
 
         getBlock(this._liskApi, lastHeight).then(lastBlock => {
-          this._logger.debug(`collected new block with id: ${inspect(lastBlock.id)}`)
+          this._logger.info(`collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
@@ -145,7 +161,9 @@ export default class Controller {
               this._logger.debug(`successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
 
               const unifiedBlock = _createUnifiedBlock(lastBlock)
-              this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+              const blockObj = unifiedBlock.toObject()
+              this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+              debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
               this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
                 if (err) {
@@ -158,7 +176,7 @@ export default class Controller {
           }
         })
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`error while getting new block, err: ${e.message}`)
       })
     }
 

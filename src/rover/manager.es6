@@ -40,6 +40,10 @@ export default class RoverManager {
     this._rovers = {}
   }
 
+  get rovers (): Object {
+    return this._rovers
+  }
+
   /**
    * Start rover
    * @param roverName Name of rover to start
@@ -59,10 +63,9 @@ export default class RoverManager {
       roverPath,
       [],
       {
-        execArgv: process.env.DEBUGGER ? ['--inspect-brk'] : []
+        execArgv: []
       }
     )
-
     this._rovers[roverName] = rover
 
     rover.on('exit', (code, signal) => {
@@ -75,5 +78,30 @@ export default class RoverManager {
     })
 
     return true
+  }
+
+  /**
+   * Kill all rovers managed by this manager
+   * @return {*} Promise
+   */
+  killRovers (): Promise<bool> {
+    const roverNames = Object.keys(this._rovers)
+    roverNames.map((roverName) => {
+      this._killRover(roverName)
+    })
+
+    return Promise.resolve(true)
+  }
+
+  /**
+   * Kill rover managed by this manager by its name
+   * @param roverName
+   * @private
+   */
+  _killRover (roverName: string) {
+    const rover = this._rovers[roverName]
+    const pid = rover.pid
+    this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
+    process.kill(pid, 'SIGHUP')
   }
 }
