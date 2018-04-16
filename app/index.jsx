@@ -1,12 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-// import { merge, concat, take } from 'ramda'
+import { HashRouter } from 'react-router-dom'
 
 import App from './components/App'
 
 const appEl = document.getElementById('app')
 if (appEl) {
-  ReactDOM.render(<App />, appEl)
+  ReactDOM.render((
+    <HashRouter>
+      <App />
+    </HashRouter>
+  ), appEl)
 } else {
   console.error('Cannot find element with id "app"')
 }

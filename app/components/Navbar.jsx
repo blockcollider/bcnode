@@ -19,17 +19,13 @@ export default class Navbar extends Component<*> {
     }
 
     return (
-      <nav className='navbar navbar-fixed-top navbar-light bg-light'>
+      <nav className='navbar nnavbar-expand-lg navbar-light bg-light'>
         <a className='navbar-brand' href='https://blockcollider.org'>
           <img src='/img/bc-black.png' style={styleBrand} />
           <span style={{marginLeft: '10px'}}>Block Collider</span>
         </a>
-        <div className='collapse navbar-collapse'>
-          <ul className='navbar-nav mr-auto'>
-            <li className='nav-item active'>
-              <span className='nav-link'>Block Collider</span>
-            </li>
-          </ul>
+        <div className='collapse navbar-collapse' id='navbarText'>
+          <a className='nav-link' href='/'>Blocks</a>
         </div>
         <ConnectionState connected={this.props.connected} />
       </nav>

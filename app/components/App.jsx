@@ -10,7 +10,7 @@
 import React, { Component } from 'react'
 import { merge, concat } from 'ramda'
 
-import Blocks from './Blocks'
+import Main from './Main'
 import Navbar from './Navbar'
 
 type State = {
@@ -35,19 +35,13 @@ export default class App extends Component<*, State> {
   }
 
   render () {
-    let blocks = null
-    if (this.state.connected) {
-      blocks = <Blocks blocks={this.state.blocks} />
-    } else {
-      blocks = null
-    }
-
+    const props = this.state
     return (
       <div>
         <Navbar connected={this.state.connected} />
         <div className='container-fluid'>
           <div className='container'>
-            {blocks}
+            <Main {...props} />
           </div>
         </div>
       </div>
