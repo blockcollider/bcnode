@@ -17,10 +17,14 @@ import Blocks from './Blocks'
 
 export default class Main extends Component<*> {
   render () {
+    const mainProps = this.props
     return (
       <main>
         <Switch>
-          <Route exact path='/' component={Blocks} />
+          <Route
+            exact path='/'
+            render={(props) => <Blocks {...mainProps} />}
+          />
         </Switch>
       </main>
     )

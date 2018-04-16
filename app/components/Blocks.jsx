@@ -11,9 +11,9 @@ import { take } from 'ramda'
 
 import Block from './Block'
 
-export default class App extends Component<*> {
+export default class Blocks extends Component<*> {
   render () {
-    const blocks = take(20, [] // this.props.blocks
+    const blocks = take(20, this.props.blocks
       .sort((a, b) => b.timestamp - a.timestamp))
       .map(block => {
         return <Block {...block} block={block} key={block.data.hash} />

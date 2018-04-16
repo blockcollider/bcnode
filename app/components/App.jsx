@@ -35,12 +35,13 @@ export default class App extends Component<*, State> {
   }
 
   render () {
+    const props = this.state
     return (
       <div>
         <Navbar connected={this.state.connected} />
         <div className='container-fluid'>
           <div className='container'>
-            <Main state={this.state} />
+            <Main {...props} />
           </div>
         </div>
       </div>
