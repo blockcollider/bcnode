@@ -1,46 +1,14 @@
-const { RpcClient, RpcServer } = require('../index')
-
-const { Block } = require('../../protos/core_pb')
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
 
 describe('RpcServer', () => {
-  let server = null
-  let persistenceMock
-  let emitterMock
-
-  beforeEach(() => {
-    persistenceMock = {
-      get: jest.fn().mockReturnValue(Promise.resolve(true)),
-      put: jest.fn().mockReturnValue(Promise.resolve(true))
-    }
-
-    emitterMock = {
-      emit: jest.fn()
-    }
-
-    server = new RpcServer({
-      persistence: persistenceMock,
-      _emitter: emitterMock
-    })
-  })
-
-  afterEach((done) => {
-    server.server.tryShutdown(() => {
-      server = null
-      done()
-    })
-  })
-
-  it('works', (done) => {
-    // const client = new RpcClient()
-    //
-    // const msg = new Block(['abc', '123456'])
-    //
-    // client.rover.collectBlock(msg, (_, response) => {
-    //   expect(persistenceMock.put).toHaveBeenCalledWith('abc.block.latest', msg)
-    //   expect(emitterMock.emit).toHaveBeenCalledWith('collectBlock', { block: msg })
-    //   done()
-    // })
+  it('works', () => {
     expect(true).toEqual(true)
-    done()
   })
 })
