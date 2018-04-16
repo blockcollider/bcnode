@@ -36,8 +36,7 @@ cache:
 jobs:
   include:
     - stage: docker push
-      # if: type IN (push)
-      if: branch IN (master, release) AND (fork = false)
+      if: (type IN (push)) AND (branch IN (master, release)) AND (fork = false)
       sudo: required
       services:
         - docker
