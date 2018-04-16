@@ -11,11 +11,11 @@ const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-js')
 
-const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
 const { blake2b } = require('../../utils/crypto')
+const { createUnifiedBlock } = require('../helper')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -62,7 +62,7 @@ const getAbsoluteTimestamp = (blockTs: number) => {
   return ((LSK_GENESIS_DATE.getTime() / 1000 << 0) + blockTs) * 1000
 }
 
-const _createUnifiedBlock = (block): Block => {
+function _createUnifiedBlock (block: Object): Block {
   const obj = {
     blockNumber: block.height,
     prevHash: block.previousBlock,
@@ -160,11 +160,9 @@ export default class Controller {
               lastBlock.transactions = transactions
               this._logger.debug(`successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
 
-              const unifiedBlock = _createUnifiedBlock(lastBlock)
-              const blockObj = unifiedBlock.toObject()
-              this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
-              debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
+              const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
+              this._logger.debug('LSK Going to call this._rpc.rover.collectBlock()')
               this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
                 if (err) {
                   this._logger.error(`Error while collecting block ${inspect(err)}`)
