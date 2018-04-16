@@ -37,7 +37,7 @@ jobs:
   include:
     - stage: docker push
       # if: type IN (push)
-      if: branch IN (master, release) AND fork = false
+      if: branch IN (master, release) AND (fork = false)
       sudo: required
       services:
         - docker
