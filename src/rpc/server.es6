@@ -11,6 +11,7 @@ const { EventEmitter } = require('events')
 const grpc = require('grpc')
 const config = require('../../config/config')
 
+const Engine = require('../engine').default
 const logging = require('../logger')
 
 const { BcService } = require('../protos/bc_grpc_pb')
@@ -25,10 +26,10 @@ const GRPC_URL = `${GRPC_HOST}:${GRPC_PORT}`
 
 export default class RpcServer {
   _logger: Object; // eslint-disable-line no-undef
-  _engine: Object // eslint-disable-line no-undef
+  _engine: Engine // eslint-disable-line no-undef
   _rpcServer: Object // eslint-disable-line no-undef
 
-  constructor (engine: Object) {
+  constructor (engine: Engine) {
     this._logger = logging.getLogger(__filename)
     this._engine = engine
 
@@ -54,7 +55,7 @@ export default class RpcServer {
     return this._rpcServer
   }
 
-  get engine () : Object {
+  get engine () : Engine {
     return this._engine
   }
 }
