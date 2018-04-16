@@ -7,8 +7,7 @@
  * @disable-flow
  */
 
-// const { inspect } = require('util')
-
+const { pathOr } = require('ramda')
 const { Messages } = require('bitcore-p2p')
 const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
@@ -16,6 +15,7 @@ const convBin = require('binstring')
 const process = require('process')
 const logging = require('../../logger')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
@@ -98,7 +98,7 @@ export default class Controller {
     })
 
     pool.on('peerdisconnect', (peer, addr) => {
-      this._logger.debug(`removing peer ${peer.host}, ${addr}`)
+      this._logger.debug(`Removing peer ${pathOr('', ['ip', 'v4'], addr)}:${addr.port}`)
       try {
         network.removePeer(peer)
       } catch (e) {
@@ -133,7 +133,7 @@ export default class Controller {
             var peerMessage = new Messages().GetData(message.inventory)
             peer.sendMessage(peerMessage)
           } catch (err) {
-            this._logger.error('error sening message', err)
+            this._logger.error('error sending message', err)
 
             try {
               pool._removePeer(peer)
@@ -161,8 +161,11 @@ export default class Controller {
 
           if (isNew) {
             const unifiedBlock = this._createUnifiedBlock(_block)
-            network.bestHeight = _block.blockNumber
+            const blockObj = unifiedBlock.toObject()
+            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
+            network.bestHeight = _block.blockNumber
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
                 this._logger.warn('RpcClient could not collect block')
@@ -251,6 +254,9 @@ export default class Controller {
     msg.setBlockchain('btc')
     msg.setHash(block.header.hash)
     msg.setPreviousHash(swapOrder(block.header.prevHash.toString('hex')))
+    msg.setTimestamp(block.header.time * 1000)
+    msg.setHeight(parseInt(block.blockNumber, 10))
+    msg.setMerkleRoot(block.header.merkleRoot.toString('hex'))
 
     return msg
   }

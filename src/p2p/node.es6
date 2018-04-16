@@ -7,6 +7,8 @@
  * @flow
  */
 
+const { inspect } = require('util')
+
 const PeerId = require('peer-id')
 const PeerInfo = require('peer-info')
 const PeerBook = require('peer-book')
@@ -14,6 +16,7 @@ const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
 const logging = require('../logger')
+const { BcBlock } = require('../protos/core_pb')
 const config = require('../../config/config')
 const Bundle = require('./bundle').default
 
@@ -31,6 +34,7 @@ export default class Node {
   _engine: Object // eslint-disable-line no-undef
   _statusMsg: StatusMsg // eslint-disable-line no-undef
   _peers: PeerBook // eslint-disable-line no-undef
+  _node: Object // eslint-disable-line no-undef
 
   constructor (engine: Object) {
     this._engine = engine
@@ -42,6 +46,10 @@ export default class Node {
     this._peers = new PeerBook()
   }
 
+  get node (): Object {
+    return this._node
+  }
+
   start () {
     let node: Bundle
 
@@ -50,9 +58,11 @@ export default class Node {
       (peerInfo, cb) => {
         peerInfo.multiaddrs.add(config.p2p.rendezvous)
 
-        node = new Bundle(peerInfo)
+        node = new Bundle(peerInfo, this._peers)
         this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
         node.start(cb)
+
+        this._node = node
 
         this._registerMessageHandlers(node)
       }
@@ -68,6 +78,22 @@ export default class Node {
     })
 
     return true
+  }
+
+  broadcastNewBlock (method: string, block: BcBlock) {
+    this._logger.info(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
+
+    const url = `${PROTOCOL_PREFIX}/${method}`
+    this._peers.getAllArray().map(peer => {
+      this._logger.info(`Sending to peer ${peer}`)
+      this.node.dialProtocol(peer, url, (err, conn) => {
+        if (err) {
+          this._logger.error('Error sending message to peer', peer, err)
+        }
+
+        pull(pull.values([block.serializeBinary()]), conn)
+      })
+    })
   }
 
   _handleEventPeerConnect (node: Object, peer: Object) {
@@ -101,8 +127,21 @@ export default class Node {
   _handleMessageNewBlock (protocol: Object, conn: Object) {
     pull(
       conn,
-      pull.map((v) => v.toString()),
-      pull.log() // TODO store to persistence
+      pull.collect((err, wireData) => {
+        if (err) {
+          console.log('ERROR _handleMessageNewBlock()', err, wireData)
+          return
+        }
+
+        try {
+          const bytes = wireData[0]
+          const raw = new Uint8Array(bytes)
+          const block = BcBlock.deserializeBinary(raw)
+          this._logger.info('Received new block from peer', block.toObject())
+        } catch (e) {
+          this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
+        }
+      })
     )
   }
 

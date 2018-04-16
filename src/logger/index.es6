@@ -13,10 +13,10 @@ const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
 const logDir = resolve(__dirname, '..', '..', 'logs')
-
 const logPath = `${logDir}/bcnode`
-
 const tsFormat = () => new Date().toISOString()
+
+const LOG_LEVEL = (process.stdout.isTTY || 'DEBUG' in process.env) ? process.env.BC_LOG || 'debug' : process.env.BC_LOG || 'info'
 
 const format = options => {
   const ts = options.timestamp()
@@ -37,7 +37,7 @@ const logger = new winston.Logger({
       colorize: true,
       timestamp: tsFormat,
       formatter: format,
-      level: (process.stdout.isTTY || 'DEBUG' in process.env) ? 'debug' : 'info'
+      level: LOG_LEVEL
     }),
 
     // File
@@ -46,7 +46,8 @@ const logger = new winston.Logger({
       timestamp: tsFormat,
       datePattern: '-yyyyMMddHH.log',
       json: false,
-      formatter: format
+      formatter: format,
+      level: LOG_LEVEL
     })
   ]
 })

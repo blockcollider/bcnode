@@ -11,9 +11,10 @@ const { inspect } = require('util')
 const WavesApi = require('waves-api')
 const LRUCache = require('lru-cache')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
-const string = require('../../utils/strings.js')
+const { blake2b } = require('../../utils/crypto')
 const { RpcClient } = require('../../rpc')
 
 type WavesTransaction = {
@@ -48,11 +49,13 @@ type WavesBlock = {
   height: number
 }
 
-const getMerkleRoot = (txs: WavesTransaction[]) => {
-  if (txs !== undefined && txs.length > 0) {
-    return txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
+const getMerkleRoot = (block) => {
+  if (!block.transactions || (block.transactions.length === 0)) {
+    return blake2b(block.signature)
   }
-  return false
+
+  const txs = block.transactions.map((tx) => tx.id)
+  return txs.reduce((acc, el) => blake2b(acc + el), '')
 }
 
 const getLastHeight = (api: Object): Promise<number> => {
@@ -65,36 +68,39 @@ const getBlock = (api: Object, height: number): Promise<WavesBlock> => {
 }
 
 const _createUnifiedBlock = (block): Block => {
-  const obj = {}
-
-  obj.blockNumber = block.height
-  obj.prevHash = block.reference
-  obj.blockHash = block.signature
-  obj.root = getMerkleRoot(block.transactions)
-  obj.fee = block.fee
-  obj.size = block.blocksize
-  obj.generator = block.generator
-  obj.genSignature = block['nxt-consensus']['generation-signature']
-  obj.baseTarget = block['nxt-consensus']['base-target']
-  obj.timestamp = block.timestamp
-  obj.version = block.version
-  obj.generator = block.generator
-  obj.transactions = block.transactions.reduce(function (all, t) {
-    var tx = {
-      txHash: t.id,
-      // inputs: t.inputs,
-      // outputs: t.outputs,
-      marked: false
-    }
-
-    all.push(tx)
-    return all
-  }, [])
+  const obj = {
+    blockNumber: block.height,
+    prevHash: block.reference,
+    blockHash: block.signature,
+    root: getMerkleRoot(block),
+    fee: block.fee,
+    size: block.blocksize,
+    generator: block.generator,
+    genSignature: block['nxt-consensus']['generation-signature'],
+    baseTarget: block['nxt-consensus']['base-target'],
+    timestamp: parseInt(block.timestamp, 10),
+    version: block.version,
+    transactions: block.transactions.reduce(
+      function (all, t) {
+        all.push({
+          txHash: t.id,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        })
+        return all
+      },
+      []
+    )
+  }
 
   const msg = new Block()
   msg.setBlockchain('wav')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
@@ -142,7 +148,9 @@ export default class Controller {
             this._blockCache.set(lastBlock.reference)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+            const blockObj = unifiedBlock.toObject()
+            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {

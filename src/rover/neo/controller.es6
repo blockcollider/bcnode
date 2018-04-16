@@ -13,6 +13,7 @@ const NeoNode = require('@cityofzion/neo-js/dist/node/node')
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 
+const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
@@ -58,7 +59,7 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   obj.size = block.size
   obj.nonce = block.nonce
   obj.nextConsensus = block.nextconsensus
-  obj.timestamp = block.time
+  obj.timestamp = block.time * 1000
   obj.version = block.version
   obj.transactions = block.tx.reduce(function (all, t) {
     const tx = {
@@ -75,6 +76,9 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   msg.setBlockchain('neo')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
@@ -132,10 +136,12 @@ export default class Controller {
           this._logger.debug(`unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
 
           node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
-            this._logger.debug(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
+            this._logger.info(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
             const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+            const blockObj = unifiedBlock.toObject()
+            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
+            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
@@ -147,7 +153,7 @@ export default class Controller {
           })
         }
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`error while getting new block, err: ${e.message}`)
       })
     }
 

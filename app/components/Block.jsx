@@ -6,18 +6,26 @@
  *
  * @flow
  */
-import React from 'react'
+import React, { Component } from 'react'
 
-export default ({ timestamp, data: { blockchain, hash } }: Object) => {
-  return (
-    <div className='card' style={{width: '9rem'}}>
-      <img className='card-img-top' style={{ width: '6rem', height: '6rem', marginTop: '0.6em' }} src={getBlockIcon(blockchain)} alt={blockchain} />
-      <div className='card-body'>
-        <p className='card-text'><small>{hash.slice(0, 12)}&hellip;</small></p>
-        <a href={getBlockLink(blockchain, hash)} target='_blank' className='btn btn-sm'>View block</a>
+export default class Block extends Component<*> {
+  // ()
+
+  render () {
+    // { timestamp, data: { blockchain, hash } = this.props.block
+    const blockchain = this.props.block.data.blockchain
+    const hash = this.props.block.data.hash
+
+    return (
+      <div className='card' style={{width: '9rem'}}>
+        <img className='card-img-top' style={{ width: '6rem', height: '6rem', marginTop: '0.6em' }} src={getBlockIcon(blockchain)} alt={blockchain} />
+        <div className='card-body'>
+          <p className='card-text'><small>{hash.slice(0, 12)}&hellip;</small></p>
+          <a href={getBlockLink(blockchain, hash)} target='_blank' className='btn btn-sm'>View block</a>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 }
 
 const getBlockLink = (blockchain, hash) => {

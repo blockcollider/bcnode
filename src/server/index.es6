@@ -23,7 +23,8 @@ const config = require('../../config/config')
 const { Null } = require('../protos/core_pb')
 const { RpcClient, RpcServer } = require('../rpc')
 
-const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'dist')
+const assetsDir = path.resolve(__dirname, '..', '..', 'public')
+const docsDir = path.resolve(__dirname, '..', '..', 'docs')
 
 type Opts = {|
   ws: bool,
@@ -184,6 +185,8 @@ export default class Server {
   }
 
   initUi () {
+    this.app.use('/doc', express.static(docsDir))
+
     // Serve static content
     this.app.use(
       express.static(assetsDir),
