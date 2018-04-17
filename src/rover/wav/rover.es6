@@ -19,7 +19,6 @@ process.on('unhandledRejection', (err) => {
   globalLog.error(`Rejected promise, trace:\n${err.stack}`)
 })
 
-
 const Controller = require('./controller').default
 const config = require('../../../config/config')
 

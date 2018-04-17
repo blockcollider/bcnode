@@ -1,6 +1,3 @@
-#![cfg_attr(test, feature(plugin))]
-#![cfg_attr(test, plugin(clippy))]
-
 extern crate bcrust_core;
 
 #[macro_use]

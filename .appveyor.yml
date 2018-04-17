@@ -1,0 +1,112 @@
+os: Visual Studio 2017
+
+platform:
+  - x64
+
+configuration: Release
+
+image: Visual Studio 2017
+
+environment:
+  PROFILE: release
+  RUST_BACKTRACE: 1
+  matrix:
+    - TARGET: x86_64-pc-windows-msvc
+      CHANNEL: nightly
+
+init:
+  - "@echo on"
+
+shallow_clone: true
+clone_depth: 1
+
+# Install Rust and Cargo - https://github.com/japaric/rust-everywhere
+install:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  # - call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+  # - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+  - ps: Install-Product node $env:nodejs_version x64
+  - ps: Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
+  - npm config set msvs_version 2017
+  - node -e "console.log(process.argv[0], process.arch, process.versions)"
+  - npm config get
+  - npm install -g node-gyp yarn pkg neon-cli
+  - npm install -g --production windows-build-tools
+  - curl -sSf -o rustup-init.exe https://win.rustup.rs
+  - rustup-init.exe --default-host %TARGET% --default-toolchain %CHANNEL% -y
+  - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
+  - rustup default nightly-x86_64-pc-windows-msvc
+  - rustc -Vv
+  - cargo -V
+  - curl -LfsS -o protoc-3.5.1-win32.zip https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-win32.zip
+  - 7z e C:\projects\bcnode\protoc-3.5.1-win32.zip -oC:\Users\appveyor\protoc
+  - set PATH=%PATH%;C:\Users\appveyor\protoc
+  - protoc --version
+  # - git clone https://github.com/aisouard/libwebrtc.git
+  # - cd libwebrtc
+  # - mkdir out
+  # - cd out
+  # - cmake --version
+  # - cmake .. -G "Visual Studio 15 2017 Win64"
+  # - cmake --build . --target install
+
+# 'cargo test' takes care of building for us, so disable Appveyor's build stage. This prevents
+# the "directory does not contain a project or solution file" error.
+# source: https://github.com/starkat99/appveyor-rust/blob/master/appveyor.yml#L113
+build: false
+
+# Equivalent to Travis' `script` phase
+# TODO modify this phase as you see fit
+test_script:
+  - yarn run dist-windows
+  - pkg package.json --out-path=dist --target=node9-win-x64
+  # - cargo build --verbose
+  # - cargo run
+  # - cargo test
+
+cache:
+  - 'C:\Users\appveyor\.cargo'
+  - 'C:\Users\appveyor\.rustup'
+  - 'C:\projects\bcnode\node_modules'
+  - 'C:\projects\bcnode\native\target'
+  - 'C:\projects\bcnode\rust\bcrust-core\target'
+
+before_deploy:
+  # Generate artifacts for release
+  - cargo build --release
+  - mkdir staging
+  # TODO update this part to copy the artifacts that make sense for your project
+  - copy target\release\hello.exe staging
+  - cd staging
+    # release zipfile will look like 'rust-everywhere-v1.2.3-x86_64-pc-windows-msvc'
+  - 7z a ../%PROJECT_NAME%-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip *
+  - appveyor PushArtifact ../%PROJECT_NAME%-%APPVEYOR_REPO_TAG_NAME%-%TARGET%.zip
+
+deploy:
+  description: 'Windows release'
+  # All the zipped artifacts will be deployed
+  artifact: /.*\.zip/
+  # TODO Regenerate this auth_token for your project, this one won't work for you. Here's how:
+  # - Go to 'https://github.com/settings/tokens/new' and generate a Token with only the
+  # `public_repo` scope enabled
+  # - Then go to 'https://ci.appveyor.com/tools/encrypt' and enter the newly generated token.
+  # - Enter the "encrypted value" below
+  auth_token:
+    secure: "dzMTzsFtSvwCRGDYkTjbh8sVdTQx3Lz53UXnrT0+hQIGqjlpMybwAB3dxO2A467G"
+  provider: GitHub
+  # deploy when a new tag is pushed and only on the stable channel
+  on:
+    # channel to use to produce the release artifacts
+    # NOTE make sure you only release *once* per target
+    # TODO you may want to pick a different channel
+    CHANNEL: stable
+    appveyor_repo_tag: true
+
+branches:
+  only:
+    - master
+    - appveyor
+    - release
+    # IMPORTANT Regex to match tags. Required, or appveyor may not trigger deploys when a new tag
+    # is pushed. This regex matches semantic versions like v1.2.3-rc4+2016.02.22
+    - /^v\d+\.\d+\.\d+.*$/

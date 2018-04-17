@@ -12,19 +12,9 @@ crate-type = ["dylib"]
 [build-dependencies]
 neon-build = "0.1.22"
 
-[dev-dependencies]
-clippy = { version = "*" }
-
 [dependencies]
 bcrust-core = { path = "../rust/bcrust-core"}
-bitcrust = { git = "https://github.com/tomasvdw/bitcrust" }
-blake = "2.0"
-bytes = "0.4"
 env_logger = "0.4"
-futures  = "0.1"
-futures-cpupool = "0.1"
-grpc = "0.2"
 log = "0.3"
 neon = "0.1"
 protobuf = "1.4"
-tls-api = "0.1"

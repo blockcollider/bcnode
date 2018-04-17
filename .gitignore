@@ -99,3 +99,6 @@ miner_data
 
 # Webpack assets
 /public/assets
+
+# Secret variables
+.env.sh
