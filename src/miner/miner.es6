@@ -21,7 +21,7 @@
  */
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
-const _ = require('lodash')
+const { all, zip, splitEvery, reverse } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
 const { Block, BcBlock, BcTransaction } = require('../protos/core_pb')
@@ -41,93 +41,99 @@ const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
  * @param {Number} parentBlockHeight
  * @returns {BN|Difficulty}
  */
-export function getExpFactorDiff (x, parentBlockHeight: number) {
+export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: number) {
   const big1 = new BN(1, 16)
   const big2 = new BN(2, 16)
   const expDiffPeriod = new BN(66000000, 16)
 
+  // periodCount = (parentBlockHeight + 1) / 66000000
   let periodCount = new BN(parentBlockHeight).add(big1)
   periodCount = periodCount.div(expDiffPeriod)
 
+  // if (periodCount > 2)
   if (periodCount.gt(big2) === true) {
+    // return calculatedDifficulty + (2 ^ (periodCount - 2))
     let y = periodCount.sub(big2)
     y = big2.pow(y)
-    x = x.add(y)
-    return x
+    calculatedDifficulty = calculatedDifficulty.add(y)
+    return calculatedDifficulty
   }
-  return x
+  return calculatedDifficulty
 }
 
 /**
  * FUNCTION: getDiff(t)
  *   Gets the difficulty of a given blockchain without singularity calculation
  *
- * @param {Number|Epoch} blockTime
- * @param {Number|Epoch} parentTime
+ * @param {Number|Epoch} currentBlockTime
+ * @param {Number|Epoch} previousBlockTime
  * @param {Number} parentDiff
- * @param {Number} minimumDiff
+ * @param {Number} minimalDiffulty
  * @param {Number} handicap
  * @returns {BN|Difficulty}
  */
-export function getDiff (blockTime: number, parentTime: number, parentDiff: number, minimumDiff: number, handicap: ?number) {
+export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, handicap: number = 0) {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 
-  let bigMinDiff = new BN(minimumDiff, 16)
+  let bigMinimalDifficulty = new BN(minimalDiffulty, 16)
 
-  const bigParentTime = new BN(parentTime, 16)
-  const bigParentDiff = new BN(parentDiff, 16)
-  const bigBlockTime = new BN(blockTime, 16)
+  const bigPreviousBlockTime = new BN(previousBlockTime, 16)
+  const bigPreviousDifficulty = new BN(previousDifficulty, 16)
+  const bigCurentBlockTime = new BN(currentBlockTime, 16)
   const bigMinus99 = new BN(-99, 16)
-  // const big10 = new BN(10, 16)
   const big7 = new BN(7, 16)
   const big5 = new BN(5, 16)
-  // const big4 = new BN(4, 16)
   const big3 = new BN(3, 16)
-  // const big2 = new BN(2, 16)
   const big1 = new BN(1, 16)
   const big0 = new BN(0, 16)
-  const elapsedTime = bigBlockTime.sub(bigParentTime)
-  // const periodBounds = elapsedTime.div(big5)
+  const elapsedTime = bigCurentBlockTime.sub(bigPreviousBlockTime)
 
+  // if elapsedTime !== 0
   if (elapsedTime.eq(big0) === false) {
-    bigMinDiff = bigMinDiff.div(elapsedTime)
+    // minimalDiffulty = minimalDiffulty / elapsedTime
+    bigMinimalDifficulty = bigMinimalDifficulty.div(elapsedTime)
   } else {
-    bigMinDiff = big1
+    // minimalDiffulty = 1
+    bigMinimalDifficulty = big1
   }
 
   let x
   let y
 
-  x = bigBlockTime.sub(bigParentTime) // Get the window of time between bigBlockTime - bigParentTime
+  // x = 1 - (elapsedTime / 5) + handicap
+  x = elapsedTime // Get the window of time between bigCurentBlockTime - bigPreviousBlockTime
   x = x.div(big5) // Divide this difference by the seconds (in BN)
   x = big1.sub(x) // Move X to a negative / 0 val integer
+  x = x.add(new BN(handicap, 16))
 
-  if (handicap !== undefined && handicap !== false) {
-    x = x.add(new BN(handicap, 16))
-  }
-
+  // x = (x < 99) ? - 99 : x
   if (x.lt(bigMinus99) === true) {
     x = bigMinus99
   }
 
+  // x === 0 && elapsedTime > 7
   if (x.eq(big0) === true && elapsedTime.gt(big7) === true) {
+    // x = x - 1
     x = x.sub(big1) // Move X to a negative factor
   } else if (x.gt(big0) === true) {
+    // x = (x * (5 - elapsedTime)) ^ 3
     x = x.mul(big5.sub(elapsedTime)).pow(big3) // Significantly decrease difficulty for slower blocks
   }
 
-  // Divide the parent difficulty by the minimum difficulty
-  if (bigMinDiff.eq(big0)) {
+  // Divide the previous difficulty by the minimum difficulty
+  if (bigMinimalDifficulty.eq(big0)) {
     y = big1
   } else {
-    y = bigParentDiff.div(bigMinDiff)
+    y = bigPreviousDifficulty.div(bigMinimalDifficulty)
   }
 
-  x = x.mul(y) // Multiple the purposed difficulty by the mindiff bound
-  x = x.add(bigParentDiff) // Add the previous parents difficulty to the purposed difficulty
+  // x = (x * y) + previousDifficulty
+  x = x.mul(y) // Multiple the purposed difficulty by the minimalDiffulty bound
+  x = x.add(bigPreviousDifficulty) // Add the previous parents difficulty to the purposed difficulty
 
-  if (x.lt(bigMinDiff) === true) {
-    x = bigMinDiff // Force minimum difficulty
+  // x = Math.max(x, minimumDiff)
+  if (x.lt(bigMinimalDifficulty) === true) {
+    x = bigMinimalDifficulty // Force minimum difficulty
   }
 
   return x
@@ -170,7 +176,7 @@ export function createMerkleRoot (list: string[], prev: ?string): string {
  *
  * @returns {Number|Array}
  */
-export function split (t: string) {
+export function split (t: string): number[] {
   return t.split('').map(function (an) {
     return an.charCodeAt(0)
   })
@@ -179,7 +185,7 @@ export function split (t: string) {
 /**
  * Converts cosine similary to cos distance
  */
-export function dist (x: string, y: string, clbk: ?Function) {
+export function dist (x: number[], y: number[], clbk: ?Function) {
   let s
   if (arguments.length > 2) {
     s = similarity(x, y, clbk)
@@ -197,13 +203,20 @@ export function dist (x: string, y: string, clbk: ?Function) {
  * @returns {Number}
  */
 export function distance (a: string, b: string) {
-  const ac = _.chunk(split(a), 32)
-  const bc = _.chunk(split(b), 32)
+  const aChunks = reverse(splitEvery(32, split(a)))
+  const bChunks = splitEvery(32, split(b))
+  const chunks = zip(aChunks, bChunks)
 
-  const value = bc.reduce(function (all, bd, i) {
-    return all + dist(bd, ac.pop())
+  const value = chunks.reduce(function (all, [a, b]) {
+    return all + dist(b, a)
   }, 0)
 
+  // TODO this is the previous implementation - because of
+  // ac.pop() we need to reverse(aChunks) to produce same number
+  // is that correct or just side-effect?
+  // const value = bc.reduce(function (all, bd, i) {
+  //   return all + dist(bd, ac.pop())
+  // }, 0)
   return Math.floor(value * 1000000000000000) // TODO: Move to safe MATH
 }
 
@@ -260,10 +273,6 @@ export function getChildrenRootHash (previousBlockHashes: string[]): BN {
   }, new BN(0))
 }
 
-export function compareTimestamps (a: Block, b: Block) {
-  return a.getTimestamp() === b.getTimestamp()
-}
-
 export function getParentShareDiff (parentDifficulty: number, childChainCount: number): BN {
   return (new BN(parentDifficulty, 16)).div(new BN(childChainCount + 1, 16))
 }
@@ -276,10 +285,13 @@ export function getMinimumDifficulty (childChainCount: number): BN {
 // TODO rename arguments to better describe data
 export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff: BN, minimumDiffShare: BN, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[]) {
   let handicap = 0
-  // TODO reduce pairs with accum start = false
-  const timestampEquality = childrenCurrentBlocks.map((childBlock, idx) => compareTimestamps(childBlock, childrenCurrentBlocks[idx]))
+  const previousBlockTimestamps = childrenPreviousBlocks.map(block => block.getTimestamp())
+  const currentBlockTimestamps = childrenCurrentBlocks.map(block => block.getTimestamp())
+  const tsPairs = zip(previousBlockTimestamps, currentBlockTimestamps)
 
-  if (_.every(timestampEquality) === true) {
+  const allChildBlocksHaveSameTimestamp = all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
+
+  if (allChildBlocksHaveSameTimestamp) {
     // If none of the chains have increased in height
     handicap = 4
   }
@@ -292,11 +304,11 @@ export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff:
     handicap
   )
 
-  const newDifficulty = childrenCurrentBlocks.reduce(function (sum, header, i) {
+  const newDifficulty: BN = tsPairs.reduce((sum: BN, [previousTs, currentTs]) => {
     return sum.add(
       getDiff(
-        header.getTimestamp(),
-        childrenPreviousBlocks[i].getTimestamp(),
+        currentTs,
+        previousTs,
         parentShareDiff,
         minimumDiffShare
       )
