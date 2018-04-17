@@ -1,3 +1,4 @@
+/* eslint-disable spaced-comment */
 /**
  * Copyright (c) 2017-present, BlockCollider developers, All rights reserved.
  *
@@ -10,8 +11,14 @@
 const fs = require('fs')
 const path = require('path')
 const { randomBytes } = require('crypto')
-const { transpose } = require('ramda')
+
+const BN = require('bn.js')
+const R = require('ramda')
 const { getGenesisBlock } = require('../genesis')
+
+const {
+  blake2bl
+} = require('../../utils/crypto')
 
 const FIXTURES_DIR = path.resolve(__dirname, '..', '..', '..', 'test', 'data')
 
@@ -77,14 +84,18 @@ const BLOCKS_ARRAY = BLOCKCHAIN_NAMES.map((name) => {
   return BLOCKS_MAP[name]
 })
 
-const MINEABLE_BLOCKS = transpose(BLOCKS_ARRAY)
+const MINEABLE_BLOCKS = R.transpose(BLOCKS_ARRAY)
 
 const GENESIS_KEY = randomBytes(32).toString('hex')
 
 const GENESIS_BLOCK = getGenesisBlock(GENESIS_KEY).toObject()
 
+// const concat = (a, b) => a + b
+// const getHash = (block) => R.prop('hash', block)
+// const getMerkleRoot = (block) => R.prop('merkleRoot', block)
+
 describe('Mining Algorithm', () => {
-  test('test data', () => {
+  test('valid test data', () => {
     expect(MINEABLE_BLOCKS.length).toEqual(5)
 
     MINEABLE_BLOCKS.forEach((mb) => {
@@ -92,5 +103,143 @@ describe('Mining Algorithm', () => {
     })
 
     expect(GENESIS_BLOCK).not.toBeNull()
+  })
+
+  test('getExpFactorDiff', () => {
+
+  })
+
+  test('stream', () => {
+    /////////////////
+    // * HELPERS * //
+    /////////////////
+
+    const print = R.tap(console.log)
+
+    ////////////////////////
+    // * CALCULATE WORK * //
+    ////////////////////////
+
+    const oldBlock = MINEABLE_BLOCKS[0]
+    const newBlock = MINEABLE_BLOCKS[1]
+
+    // const xorBn = (a, b) => a.xor(b)
+    const xorBn = R.curry((a: BN, b: BN) => a.xor(b))
+
+    // createBuffer: string -> Buffer
+    const createBuffer = data => Buffer.from(data, 'hex')
+
+    // newBn: string -> BN
+    const newBn = (data: string) => new BN(createBuffer(data))
+
+    // calcHash: block -> hash
+    const calcHash = R.pipe(R.props(['hash', 'merkleRoot']), R.join(''), blake2bl)
+
+    // calcHashes: [blocks] -> [hashes]
+    const calcHashes = R.map(calcHash)
+
+    // reduceHash: hash -> hash -> hash
+    const combineTwoHashes = (a, b) => xorBn(a, newBn(b))
+
+    // combineMultipleHashes: [hashes] -> hash
+    const combineMultipleHashes = R.reduce(combineTwoHashes, new BN(0))
+
+    // calcCombinedBlockHash: block -> [hash] -> hash
+    const calcCombinedBlockHash = R.pipe(calcHashes, combineMultipleHashes)
+
+    // old block hash (combined) -> old chain root
+    const combinedOldBlockHash = calcCombinedBlockHash(oldBlock)
+    console.log('combinedOldBlockHash', combinedOldBlockHash)
+
+    // new block hash (combined) -> new chain root
+    const combinedNewBlockHash = calcCombinedBlockHash(newBlock)
+    console.log('combinedNewBlockHash', combinedNewBlockHash)
+
+    const calcWork = R.pipe(calcHash, newBn, xorBn(combinedNewBlockHash), R.toString, blake2bl)
+    const work = calcWork(GENESIS_BLOCK)
+    console.log('work', work)
+
+    //////////////////////////////
+    // * CALCULATE DIFFICULTY * //
+    //////////////////////////////
+
+    const parentBlockDifficulty = new BN(oldBlock.difficulty, 16)
+
+    const oldTimestamps = R.map(R.prop('timestamp'), oldBlock)
+    console.log('oldTimestamps', oldTimestamps)
+
+    const newTimestamps = R.map(R.prop('timestamp'), newBlock)
+    console.log('newTimestamps', newTimestamps)
+
+    const diffTimestamps = R.zipWith(R.subtract, newTimestamps, oldTimestamps)
+    console.log('diffTimestamps', diffTimestamps)
+
+    const count = R.min(R.length(oldTimestamps), R.length(newTimestamps))
+    console.log('count', count)
+
+    const getHandicap = (a, b) => R.equals(a, b) ? 4 : 0
+    const handicap = getHandicap(oldTimestamps, newTimestamps)
+    console.log('handicap', handicap)
+
+    const getParentShareDiff = R.curry((difficulty, count) => difficulty / (count + 1))
+    const parentShareDiff = getParentShareDiff(GENESIS_BLOCK.difficulty, count)
+    console.log('parentShareDiff', parentShareDiff)
+
+    const minimumDifficulty = 11801972029393
+    const minimumDiffShare = minimumDifficulty / count
+    console.log('minimumDiffShare', minimumDiffShare)
+
+    const getMinimumDifficulty = (elapsedTime, minimumDifficulty) => {
+      return R.ifElse(
+        R.equals(0),
+        R.always(1),
+        R.always(minimumDifficulty / elapsedTime)
+      )(elapsedTime)
+    }
+    expect(getMinimumDifficulty(0, 1)).toEqual(1)
+    expect(getMinimumDifficulty(4, 2)).toEqual(0.5)
+
+    const clampLow = R.curry((limit, val) => R.max(limit, val))
+    expect(clampLow(-99, -100)).toEqual(-99)
+    expect(clampLow(-99, -98)).toEqual(-98)
+
+    const getDifficulty = (elapsedTime, parentDifficulty, minimumDifficulty, handicap) => {
+      console.log('getDifficulty', elapsedTime, parentDifficulty, minimumDifficulty, handicap)
+
+      const minDiff = getMinimumDifficulty(minimumDifficulty, elapsedTime)
+      console.log('minDiff', minDiff)
+
+      let x = 1 - (elapsedTime / 5) + handicap
+      console.log(x)
+
+      x = clampLow(-99, x)
+      console.log(x)
+
+      let y = parentDifficulty / minimumDifficulty
+      x = (x * y) + parentDifficulty
+
+      return Math.max(x, minimumDifficulty)
+    }
+
+    // TODO: Vymyslet lepe
+    const args = [parentBlockDifficulty, minimumDifficulty, handicap]
+    const tmp = (diffTimestamp) => {
+      return R.apply(getDifficulty, R.concat([diffTimestamp], args))
+    }
+
+    const difficulties = R.map(tmp, diffTimestamps)
+    console.log('difficulties', difficulties)
+
+    // const vals = R.apply(f, args)
+    // console.log('vals', vals)
+
+    // const vals = R.map(diffTimestamps, )
+    // console.log(vals)
+
+    // const args =
+    // const r = R.apply(R.add, [1] + [2])
+    // console.log(r)
+
+    expect(1).toEqual(1)
   })
 })
