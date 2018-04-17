@@ -6,7 +6,7 @@
  *
  * @flow
  */
-const { Block, BcBlock } = require('../protos/core_pb')
+const { ChildBlockHeader, BcBlock } = require('../protos/core_pb')
 const {
   createMerkleRoot,
   getChildrenBlocksHashes,
@@ -18,45 +18,50 @@ export function getGenesisBlock (minerPublicAddress: string) {
   const oldTransactions = []
 
   const oldBestBlockchainsBlockHeaders = [
-    new Block([
+    new ChildBlockHeader([
       'btc',
       '0x39499390034',
       '0xxxxxxxxxxxxxxxxx',
       1400000000,
       2,
-      '0x000x00000'
+      '0x000x00000',
+      1
     ]),
-    new Block([
+    new ChildBlockHeader([
       'eth',
       'ospoepfkspdfs',
       '0xxxxxxxxxxxxxxxxx',
       1400000000,
       2,
-      '0x000x00000'
+      '0x000x00000',
+      1
     ]),
-    new Block([
+    new ChildBlockHeader([
       'lsk',
       '0x39300923i42034',
       '0xxxxxxxxxxxxxxxxx',
       1400000000,
       2,
-      '0x000x00000'
+      '0x000x00000',
+      1
     ]),
-    new Block([
+    new ChildBlockHeader([
       'wav',
       '0xsjdfo3i2oifji3o2',
       '0xxxxxxxxxxxxxxxxx',
       1400000000,
       2,
-      '0x000x00000'
+      '0x000x00000',
+      1
     ]),
-    new Block([
+    new ChildBlockHeader([
       'neo',
       '0xw3jkfok2jjvijief',
       '0xxxxxxxxxxxxxxxxx',
       1400000000,
       2,
-      '0x000x00000'
+      '0x000x00000',
+      1
     ])
   ]
 

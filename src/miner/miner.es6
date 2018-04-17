@@ -21,10 +21,10 @@
  */
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
-const { all, zip, splitEvery, reverse } = require('ramda')
+const { all, zip, splitEvery, reverse, fromPairs } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
-const { Block, BcBlock, BcTransaction } = require('../protos/core_pb')
+const { Block, BcBlock, BcTransaction, ChildBlockHeader } = require('../protos/core_pb')
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
 
@@ -82,7 +82,7 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   const bigCurentBlockTime = new BN(currentBlockTime, 16)
   const bigMinus99 = new BN(-99, 16)
   const big7 = new BN(7, 16)
-  const big5 = new BN(5, 16)
+  const big6 = new BN(6, 16)
   const big3 = new BN(3, 16)
   const big1 = new BN(1, 16)
   const big0 = new BN(0, 16)
@@ -100,9 +100,9 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   let x
   let y
 
-  // x = 1 - (elapsedTime / 5) + handicap
+  // x = 1 - (elapsedTime / 6) + handicap
   x = elapsedTime // Get the window of time between bigCurentBlockTime - bigPreviousBlockTime
-  x = x.div(big5) // Divide this difference by the seconds (in BN)
+  x = x.div(big6) // Divide this difference by the seconds (in BN)
   x = big1.sub(x) // Move X to a negative / 0 val integer
   x = x.add(new BN(handicap, 16))
 
@@ -116,8 +116,8 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
     // x = x - 1
     x = x.sub(big1) // Move X to a negative factor
   } else if (x.gt(big0) === true) {
-    // x = (x * (5 - elapsedTime)) ^ 3
-    x = x.mul(big5.sub(elapsedTime)).pow(big3) // Significantly decrease difficulty for slower blocks
+    // x = (x * (6 - elapsedTime)) ^ 3
+    x = x.mul(big6.sub(elapsedTime)).pow(big3) // Significantly decrease difficulty for slower blocks
   }
 
   // Divide the previous difficulty by the minimum difficulty
@@ -274,7 +274,7 @@ export function getChildrenRootHash (previousBlockHashes: string[]): BN {
 }
 
 export function getParentShareDiff (parentDifficulty: number, childChainCount: number): BN {
-  return (new BN(parentDifficulty, 16)).div(new BN(childChainCount + 1, 16))
+  return (new BN(parentDifficulty, 16)).div(new BN(childChainCount, 16))
 }
 
 export function getMinimumDifficulty (childChainCount: number): BN {
@@ -283,7 +283,7 @@ export function getMinimumDifficulty (childChainCount: number): BN {
 }
 
 // TODO rename arguments to better describe data
-export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff: BN, minimumDiffShare: BN, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[]) {
+export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff: BN, minimumDiffShare: BN, childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
   let handicap = 0
   const previousBlockTimestamps = childrenPreviousBlocks.map(block => block.getTimestamp())
   const currentBlockTimestamps = childrenCurrentBlocks.map(block => block.getTimestamp())
@@ -296,26 +296,29 @@ export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff:
     handicap = 4
   }
 
-  const blockColliderShareDiff = getDiff(
+  const currentChildrenDifficulty = getDiff(
     (Date.now() / 1000) << 0, // TODO inject current date
     previousBlock.getTimestamp(),
     minimumDiffShare,
-    parentShareDiff,
+    MINIMUM_DIFFICULTY,
     handicap
   )
 
-  const newDifficulty: BN = tsPairs.reduce((sum: BN, [previousTs, currentTs]) => {
+  const newDifficulty: BN = zip(childrenPreviousBlocks, childrenCurrentBlocks).reduce((sum: BN, [previousHeader, currentHeader]) => {
+    // TODO @pm - basic confirmation count is 0 - we can't divide by 0 here, should we start from 1 then?
+    const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
+    const timeBonus = (currentHeader.getTimestamp() - previousHeader.getTimestamp()) / confirmationCount
     return sum.add(
       getDiff(
-        currentTs,
-        previousTs,
+        previousHeader.getTimestamp() + timeBonus,
+        previousHeader.getTimestamp(),
         parentShareDiff,
         minimumDiffShare
       )
     )
   }, new BN(0))
 
-  newDifficulty.add(blockColliderShareDiff) // Add the Block Collider's chain to the values
+  newDifficulty.add(currentChildrenDifficulty)
 
   const preExpDiff = getDiff(
     (Date.now() / 1000) << 0,
@@ -343,9 +346,36 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
   return work
 }
 
-export function prepareNewBlock (previousBlock: BcBlock, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[], newTransactions: BcTransaction[], minerAddress: string): BcBlock {
+/**
+ * Create a ChildBlockHeader[] for new BcBlock, before count new confirmation count for each child block.
+ *
+ * Assumption here is that confirmation count of all headers from previous block is taken and incrementend by one
+ * except for the one which caused the new block being mine - for that case is is reset to 0
+ */
+function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Block[], newChildBlock: Block): ChildBlockHeader[] {
+  const newChildBlockConfirmations = fromPairs(previousBlock.getChildBlockHeadersList().map(header => {
+    // TODO @pm - basic confirmation count is 0 - we can't divide by 0, should we start from 1 then?
+    const confirmationCount = (header.getBlockchain() === newChildBlock.getBlockchain()) ? 1 : header.getChildBlockConfirmationsInParentCount() + 1
+    return [header.getBlockchain(), confirmationCount]
+  }))
+  return currentBlocks.map(currentBlock => {
+    const header = new ChildBlockHeader()
+    header.setBlockchain(currentBlock.getBlockchain())
+    header.setHash(currentBlock.getHash())
+    header.setPreviousHash(currentBlock.getPreviousHash())
+    header.setTimestamp(currentBlock.getTimestamp())
+    header.setHeight(currentBlock.getHeight())
+    header.setMerkleRoot(currentBlock.getMerkleRoot())
+    header.setChildBlockConfirmationsInParentCount(newChildBlockConfirmations[currentBlock.getBlockchain()])
+    return header
+  })
+}
+
+export function prepareNewBlock (previousBlock: BcBlock, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
+
+  const childBlockHeadersList = prepareChildBlockHeadersList(previousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
 
   const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
@@ -353,8 +383,8 @@ export function prepareNewBlock (previousBlock: BcBlock, childrenPreviousBlocks:
     previousBlock,
     parentShareDiff,
     minimumDiffShare,
-    childrenPreviousBlocks,
-    childrenCurrentBlocks
+    previousBlock.getChildBlockHeadersList(),
+    childBlockHeadersList
   )
 
   const oldTransactions = previousBlock.getTransactionsList()
@@ -377,7 +407,7 @@ export function prepareNewBlock (previousBlock: BcBlock, childrenPreviousBlocks:
   // newBlock.setNonce(0)
   newBlock.setTransactionsList(newTransactions)
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
-  newBlock.setChildBlockHeadersList(childrenCurrentBlocks)
+  newBlock.setChildBlockHeadersList(childBlockHeadersList)
 
   return newBlock
 }

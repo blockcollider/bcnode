@@ -203,6 +203,7 @@ export default class Engine {
           previousBcBlock,
           previousBcBlock.getChildBlockHeadersList(),
           currentBlocks,
+          block,
           [], // TODO add transactions
           this._minerKey
         )
