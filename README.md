@@ -4,6 +4,9 @@ Block Collider Node
 
 Mining node with built-in block rover, DHT, and peer discovery.
 
+#### Block Collider Advanced Community
+For technical & mining questions visit: https://www.t.me/blockcollideradvanced
+
 ## Status
 
 [![Build Status](https://travis-ci.org/blockcollider/bcnode.svg?branch=master)](https://travis-ci.org/blockcollider/bcnode)
