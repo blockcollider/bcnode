@@ -23,8 +23,8 @@ describe('Miner', () => {
       miner: '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3',
       difficulty: 141129464479256,
       timestamp: genesisTimestamp,
-      merkleRoot: '570905689d00f6b7a15c332e54c02418f22e98db880a675f32e63537531ae48c',
-      chainRoot: 'b4816d65eabac8f1a143805ffc6f4ca148c4548e020de3db21207a4849ea9abe',
+      merkleRoot: '511d94127384b79e22a900ed4c86f4fda2b824619b00ad59a730aaa2945ca5a6',
+      chainRoot: 'f65d51318cfd348bb66c8893a9583dfbebb475599f862f5bbc3978dd6d7b290f',
       distance: 1,
       nonce: 0,
       txCount: 0,
@@ -145,12 +145,12 @@ describe('Miner', () => {
     newBlock.setNonce(solution.nonce)
 
     expect(newBlock.toObject()).toEqual({
-      hash: '642759529ceb51fe2141b398da012d07959de22e563ab35a01d4f2424f6f94d0',
+      hash: 'fc3d9ba19e4ad2cdcf3dc488a8d167aeb6352e4f647aecd825ff95d706e44427',
       height: 2,
-      merkleRoot: '3846bfe390e8d5e887cf9df928e25516ca3209b9f87320ac24628b82276a6acc',
+      merkleRoot: '6afe889d6f083c70df22ff7fc5fd02e66d2ade95b214839661046681d6e9592f',
       difficulty: 169690252393619,
-      chainRoot: '0d6ac1386c1792cedd2066f6e062033788a8a66ddb8c10b1ba9f5339dcafad51',
-      distance: 182925574122964,
+      chainRoot: '132f52a2ae403c18fd6b5d232af8b6860e7d6f5f52df9504e58c2f39c49d7dd4',
+      distance: 212727732440313,
       nonce: '0.12137218313968567',
       txCount: 0,
       miner: minerPublicAddress,

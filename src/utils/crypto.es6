@@ -6,14 +6,10 @@
  *
  * @flow
  */
-const os = require('os')
 const avon = require('avon')
 
-const IS_SMP = os.cpus().length > 1
-
 export const blake2b = (input: string): string => {
-  const algo = IS_SMP ? avon.ALGORITHMS.BP : avon.ALGORITHMS.B
-  return avon.sumBuffer(Buffer.from(input), algo).toString('hex')
+  return avon.sumBuffer(Buffer.from(input), avon.ALGORITHMS.B).toString('hex')
 }
 
 export const blake2bl = (input: string): string => {
