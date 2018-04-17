@@ -106,7 +106,7 @@ describe('Mining Algorithm', () => {
   })
 
   test('getExpFactorDiff', () => {
-
+      expect(1).toEqual(2)
   })
 
   test('stream', () => {
@@ -163,7 +163,7 @@ describe('Mining Algorithm', () => {
     // * CALCULATE DIFFICULTY * //
     //////////////////////////////
 
-    const parentBlockDifficulty = new BN(oldBlock.difficulty, 16)
+    // const parentBlockDifficulty = new BN(oldBlock.difficulty, 16)
 
     const oldTimestamps = R.map(R.prop('timestamp'), oldBlock)
     console.log('oldTimestamps', oldTimestamps)
@@ -173,18 +173,17 @@ describe('Mining Algorithm', () => {
 
     const diffTimestamps = R.zipWith(R.subtract, newTimestamps, oldTimestamps)
     console.log('diffTimestamps', diffTimestamps)
-
-    const count = R.min(R.length(oldTimestamps), R.length(newTimestamps))
+    src/miner/__tests__/alg.es
+    const count = R.min(R.length(oldTimestamps), R:ewlength(newTimestamps))
     console.log('count', count)
 
     const getHandicap = (a, b) => R.equals(a, b) ? 4 : 0
     const handicap = getHandicap(oldTimestamps, newTimestamps)
     console.log('handicap', handicap)
 
-    const getParentShareDiff = R.curry((difficulty, count) => difficulty / (count + 1))
+    const getParentShareDiff = R.curry((difficulty, count: number) => difficulty / (count + 1))
     const parentShareDiff = getParentShareDiff(GENESIS_BLOCK.difficulty, count)
     console.log('parentShareDiff', parentShareDiff)
-
     const minimumDifficulty = 11801972029393
     const minimumDiffShare = minimumDifficulty / count
     console.log('minimumDiffShare', minimumDiffShare)
@@ -199,7 +198,7 @@ describe('Mining Algorithm', () => {
     expect(getMinimumDifficulty(0, 1)).toEqual(1)
     expect(getMinimumDifficulty(4, 2)).toEqual(0.5)
 
-    const clampLow = R.curry((limit, val) => R.max(limit, val))
+    const clampLow = R.curry((limit: number, val: number) => R.max(limit, val))
     expect(clampLow(-99, -100)).toEqual(-99)
     expect(clampLow(-99, -98)).toEqual(-98)
 

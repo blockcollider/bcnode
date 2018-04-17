@@ -9,6 +9,18 @@
 
 // const R = require('ramda')
 
-// export function xorStrings(input: string[]): string {
-//   return input.reduce()
-// }
+// const { zip } = require("rambda")
+// const similarity = require('compute-cosine-similarity')
+// const _ = require('lodash')
+// const { blake2bl } = require('../../utils/crypto')
+//
+// const blake = black2bl
+
+function getExpFactorDiff (calculatedDifficulty, parentBlockHeight) {
+  let periodCount = (parentBlockHeight + 1) / 66000000
+  if (periodCount > 2) {
+    return calculatedDifficulty + (2 ^ (periodCount - 2))
+  }
+
+  return calculatedDifficulty
+}
