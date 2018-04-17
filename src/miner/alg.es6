@@ -16,7 +16,7 @@
 //
 // const blake = black2bl
 
-function getExpFactorDiff (calculatedDifficulty, parentBlockHeight) {
+export function getExpFactorDiff (calculatedDifficulty: number, parentBlockHeight: number) {
   let periodCount = (parentBlockHeight + 1) / 66000000
   if (periodCount > 2) {
     return calculatedDifficulty + (2 ^ (periodCount - 2))
