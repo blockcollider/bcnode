@@ -371,7 +371,7 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
   })
 }
 
-export function prepareNewBlock (previousBlock: BcBlock, childrenPreviousBlocks: Block[], childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
+export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
 

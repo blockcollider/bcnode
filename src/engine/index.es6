@@ -197,7 +197,6 @@ export default class Engine {
         const work = prepareWork(previousBcBlock, currentBlocks)
         const newBlock = prepareNewBlock(
           previousBcBlock,
-          previousBcBlock.getChildBlockHeadersList(),
           currentBlocks,
           block,
           [], // TODO add transactions
