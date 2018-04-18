@@ -180,23 +180,19 @@ export default class Engine {
 
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._mining && equals(new Set(this._knownRovers), new Set(rovers))) {
-      const getKeys: [string, bool][] = xprod(rovers, ['latest', 'previous']).map(([chain, which]) => ([`${chain}.block.${which}`, which === 'latest']))
+      const getKeys: string[] = rovers.map(chain => `${chain}.block.latest`)
 
-      Promise.all(getKeys.map(([key, isLatest]) => {
+      Promise.all(getKeys.map((key) => {
         return this._persistence.get(key).then(block => {
           this._logger.debug(`Got "${key}"`)
           return block
         })
-      })).then(blocks => {
-        this._logger.debug(`Got ${blocks.length} blocks from persistence`)
-        const isEven = n => n % 2 === 0
-        const indexEven = (val, idx) => isEven(idx)
-        const currentBlocks = addIndex(reject)(indexEven, blocks) // latest are on odd indices
-        const previousBlocks = addIndex(filter)(indexEven, blocks) // previous on even
+      })).then(currentBlocks => {
+        this._logger.debug(`Got ${currentBlocks.length} blocks from persistence`)
         return this._persistence.get('bc.block.latest').then(bcBlock => {
-          return [previousBlocks, currentBlocks, bcBlock]
+          return [currentBlocks, bcBlock]
         })
-      }).then(([previousBlocks, currentBlocks, previousBcBlock]) => {
+      }).then(([currentBlocks, previousBcBlock]) => {
         this._logger.debug(`Starting mining now`)
         const work = prepareWork(previousBcBlock, currentBlocks)
         const newBlock = prepareNewBlock(
