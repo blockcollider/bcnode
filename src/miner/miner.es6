@@ -21,7 +21,7 @@
  */
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
-const { map, compose, zipWith, flip, repeat, call, join, invoker, all, zip, splitEvery, reverse, fromPairs } = require('ramda')
+const { partialRight, reduce, map, compose, zipWith, flip, repeat, call, join, invoker, all, zip, splitEvery, reverse, fromPairs } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
 const { Block, BcBlock, BcTransaction, ChildBlockHeader } = require('../protos/core_pb')
@@ -262,24 +262,24 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
  * as seen in bcnode/src/utils/templates/blockchain_fingerprints.json
  *
  */
-const hash = invoker(0, 'getHash')
-const timestamp = invoker(0, 'getTimestamp')
-const merkleRoot = invoker(0, 'getMerkleRoot')
+const toHexBuffer: ((string) => Buffer) = partialRight(invoker(2, 'from'), ['hex', Buffer])
+const hash: ((ChildBlockHeader|Block) => string) = invoker(0, 'getHash')
+const timestamp: ((ChildBlockHeader|Block) => number) = invoker(0, 'getTimestamp')
+const merkleRoot: ((ChildBlockHeader|Block) => string) = invoker(0, 'getMerkleRoot')
 
-const blockHash = compose(
+// blake2bl(hash + mekleRoot)
+const blockHash: (ChildBlockHeader|Block => string) = compose(
   blake2bl,
   join(''),
   zipWith(call, [hash, merkleRoot]),
   flip(repeat)(2)
 )
 
-export const getChildrenBlocksHashes = map(blockHash)
+export const getChildrenBlocksHashes: ((ChildBlockHeader[]|Block[]) => string[]) = map(blockHash)
 
-export function getChildrenRootHash (previousBlockHashes: string[]): BN {
-  return previousBlockHashes.reduce((all: BN, blockHash) => {
-    return all.xor(new BN(Buffer.from(blockHash, 'hex')))
-  }, new BN(0))
-}
+export const getChildrenRootHash = reduce((all: BN, blockHash: string) => {
+  return all.xor(new BN(toHexBuffer(blockHash)))
+}, new BN(0))
 
 export function getParentShareDiff (parentDifficulty: number, childChainCount: number): BN {
   return (new BN(parentDifficulty, 16)).div(new BN(childChainCount, 16))
@@ -299,9 +299,7 @@ function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], children
 }
 
 function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
-  const previousBlockTimestamps = childrenPreviousBlocks.map(block => block.getTimestamp())
-  const currentBlockTimestamps = childrenCurrentBlocks.map(block => block.getTimestamp())
-  const tsPairs = zip(previousBlockTimestamps, currentBlockTimestamps)
+  const tsPairs = zipWith(call, [map(timestamp), (timestamp)], [childrenPreviousBlocks, childrenCurrentBlocks])
   return all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
 }
 
@@ -354,10 +352,7 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
   const work = blake2bl(
     newChainRoot.xor(
       new BN(
-        Buffer.from(
-          blake2bl(previousBlock.getHash() + previousBlock.getMerkleRoot()),
-          'hex'
-        )
+        toHexBuffer(blockHash(previousBlock))
       )
     ).toString()
   )
