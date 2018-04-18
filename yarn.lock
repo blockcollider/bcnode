@@ -2590,6 +2590,10 @@ circular-append-file@^1.0.1:
   dependencies:
     multistream "^2.1.0"
 
+circular-buffer@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/circular-buffer/-/circular-buffer-1.0.2.tgz#fa0e152ed629f76fe24ddf89e72ebd00786c5a6e"
+
 circular-json@^0.3.1:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.3.tgz#815c99ea84f6809529d2f45791bdf82711352d66"

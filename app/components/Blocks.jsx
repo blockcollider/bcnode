@@ -13,15 +13,15 @@ import Block from './Block'
 
 export default class Blocks extends Component<*> {
   render () {
-    const blocks = take(20, this.props.blocks
+    const blocks = take(24, this.props.blocks
       .sort((a, b) => b.timestamp - a.timestamp))
       .map(block => {
-        return <Block {...block} block={block} key={block.data.hash} />
+        return <Block {...block} block={block} key={block.hash} />
       })
 
     return (
       <div className='d-flex flex-wrap flex-row'>
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Collected blocks (last 20)</h2>
+        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Collected blocks (last 24)</h2>
         {blocks}
       </div>
     )

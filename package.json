@@ -102,6 +102,7 @@
     "body-parser": "^1.18.2",
     "btc-transaction": "^0.1.8",
     "btoa": "^1.1.2",
+    "circular-buffer": "1.0.2",
     "colors": "^1.1.2",
     "commander": "^2.15.0",
     "compute-cosine-distance": "^1.0.0",
