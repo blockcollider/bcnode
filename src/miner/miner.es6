@@ -21,7 +21,7 @@
  */
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
-const { all, zip, splitEvery, reverse, fromPairs } = require('ramda')
+const { map, compose, zipWith, flip, repeat, call, join, invoker, all, zip, splitEvery, reverse, fromPairs } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
 const { Block, BcBlock, BcTransaction, ChildBlockHeader } = require('../protos/core_pb')
@@ -262,10 +262,18 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
  * as seen in bcnode/src/utils/templates/blockchain_fingerprints.json
  *
  */
+const hash = invoker(0, 'getHash')
+const timestamp = invoker(0, 'getTimestamp')
+const merkleRoot = invoker(0, 'getMerkleRoot')
 
-export function getChildrenBlocksHashes (previousBlocks: Block[]): string[] {
-  return previousBlocks.map(block => blake2bl(block.getHash() + block.getMerkleRoot()))
-}
+const blockHash = compose(
+  blake2bl,
+  join(''),
+  zipWith(call, [hash, merkleRoot]),
+  flip(repeat)(2)
+)
+
+export const getChildrenBlocksHashes = map(blockHash)
 
 export function getChildrenRootHash (previousBlockHashes: string[]): BN {
   return previousBlockHashes.reduce((all: BN, blockHash) => {
