@@ -282,19 +282,30 @@ export function getMinimumDifficulty (childChainCount: number): BN {
   return MINIMUM_DIFFICULTY.div(new BN(childChainCount, 16))
 }
 
-// TODO rename arguments to better describe data
-export function getNewPreExpDifficulty (previousBlock: BcBlock, parentShareDiff: BN, minimumDiffShare: BN, childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
-  let handicap = 0
+function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
+  // If none of the chains have increased in height
+  if (allChildBlocksHaveSameTimestamp(childrenPreviousBlocks, childrenCurrentBlocks)) {
+    return 4
+  }
+  return 0
+}
+
+function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
   const previousBlockTimestamps = childrenPreviousBlocks.map(block => block.getTimestamp())
   const currentBlockTimestamps = childrenCurrentBlocks.map(block => block.getTimestamp())
   const tsPairs = zip(previousBlockTimestamps, currentBlockTimestamps)
+  return all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
+}
 
-  const allChildBlocksHaveSameTimestamp = all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
-
-  if (allChildBlocksHaveSameTimestamp) {
-    // If none of the chains have increased in height
-    handicap = 4
-  }
+// TODO rename arguments to better describe data
+export function getNewPreExpDifficulty (
+  previousBlock: BcBlock,
+  parentShareDiff: BN,
+  minimumDiffShare: BN,
+  childrenPreviousBlocks: ChildBlockHeader[],
+  childrenCurrentBlocks: ChildBlockHeader[]
+) {
+  let handicap = calculateHandicap(childrenPreviousBlocks, childrenCurrentBlocks)
 
   const currentChildrenDifficulty = getDiff(
     (Date.now() / 1000) << 0, // TODO inject current date
