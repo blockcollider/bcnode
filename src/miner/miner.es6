@@ -235,9 +235,10 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
   // TODO: @pm check
   while (true) {
   // if (i < 2) {
+    let timestamp = (Date.now() ** 1000) << 0
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
-    result = distance(work, blake2bl(miner + merkleRoot + nonceHash))
+    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + timestamp))
     if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
       return {
         distance: result,
@@ -299,7 +300,7 @@ function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], children
 }
 
 function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
-  const tsPairs = zipWith(call, [map(timestamp), (timestamp)], [childrenPreviousBlocks, childrenCurrentBlocks])
+  const tsPairs = zipWith(call, [map(timestamp), map(timestamp)], [childrenPreviousBlocks, childrenCurrentBlocks])
   return all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
 }
 
