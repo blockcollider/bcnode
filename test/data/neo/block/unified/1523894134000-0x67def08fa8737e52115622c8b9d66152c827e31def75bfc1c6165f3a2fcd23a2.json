@@ -1,0 +1,8 @@
+{
+  "blockchain": "neo",
+  "hash": "0x67def08fa8737e52115622c8b9d66152c827e31def75bfc1c6165f3a2fcd23a2",
+  "previousHash": "0x58a30a99447ac8ff2b72ce3cccfd8e2ddd0acad9d2b23c6c33ecac59e2cac223",
+  "timestamp": 1523894134000,
+  "height": 2153363,
+  "merkleRoot": "0xcd6276f20c16fb7fc66dc523c7546df541e052ecb164b35a9f50c0b17e5ccfd8"
+}

@@ -1,0 +1,8 @@
+{
+  "blockchain": "lsk",
+  "hash": "9545237768975583403",
+  "previousHash": "4812068630600159331",
+  "timestamp": 1523894830000,
+  "height": 5743196,
+  "merkleRoot": "3df81f47048a2c437d49f4ff314012be21f7e9495526918c79d23fcabffae8c21aeb414717d0bf56c781abd8cc9f0ad333e4d4efbcf5fefce3f7848ba9fffead"
+}

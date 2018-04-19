@@ -11,9 +11,13 @@ const { getGenesisBlock } = require('../genesis')
 
 const { mockRandom } = require('jest-mock-random')
 
+const DATA = require('../data')
+
 describe('Miner', () => {
   test('mine()', () => {
     const minerPublicAddress = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
+
+    console.log('getData()', DATA.BLOCKS_MAP)
 
     const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
     const genesisBlock = getGenesisBlock(minerPublicAddress)
