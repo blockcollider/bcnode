@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [Global] - Added benchmark module
 - [Engine] - Add stats/monitor
 - [Rover] - Kill all child rovers at ctrl+c
 - [Global] - Added env variables BC_LOG, BC_DEBUG
