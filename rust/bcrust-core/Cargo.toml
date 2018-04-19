@@ -17,6 +17,7 @@ path = "src/lib.rs"
 protoc-rust-grpc = "0.2.1"
 
 [dependencies]
+afl = { git = "https://github.com/rust-fuzz/afl.rs"}
 blake2-rfc = "0.2"
 grpc = { git = "https://github.com/stepancheg/grpc-rust", rev = "8491d6e731ca9b" }
 env_logger = "0.4"
@@ -30,5 +31,3 @@ strsim = "0.6"
 url = "1.0"
 tls-api = "0.1.14"
 
-[target.'cfg(any(linux,unix))'.dependencies]
-afl = { git = "https://github.com/rust-fuzz/afl.rs"}
