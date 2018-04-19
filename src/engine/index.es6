@@ -8,7 +8,7 @@
  */
 
 const { EventEmitter } = require('events')
-const { xprod, equals, all, values, filter, reject, addIndex } = require('ramda')
+const { equals, all, values } = require('ramda')
 
 const config = require('../../config/config')
 const { debugSaveObject } = require('../debug')
@@ -71,7 +71,6 @@ export default class Engine {
   async init () {
     const roverNames = Object.keys(rovers)
     // TODO get from CLI / config
-    const minerPublicAddress = this._minerKey
     try {
       await this._persistence.open()
       const res = await this.persistence.put('rovers', roverNames)
@@ -82,7 +81,7 @@ export default class Engine {
         await this.persistence.get('bc.block.1')
         this._logger.debug('Genesis block present, everything ok')
       } catch (_) { // genesis block not found
-        const newGenesisBlock = getGenesisBlock(minerPublicAddress)
+        const newGenesisBlock = getGenesisBlock()
         try {
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
@@ -194,6 +193,7 @@ export default class Engine {
         })
       }).then(([currentBlocks, previousBcBlock]) => {
         this._logger.debug(`Starting mining now`)
+
         const work = prepareWork(previousBcBlock, currentBlocks)
         const newBlock = prepareNewBlock(
           previousBcBlock,

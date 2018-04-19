@@ -1491,7 +1491,7 @@ pub struct ChildBlockHeader {
     pub timestamp: u64,
     pub height: u64,
     pub merkle_root: ::std::string::String,
-    pub child_block_confirmations_in_parent: u64,
+    pub child_block_confirmations_in_parent_count: u64,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -1697,27 +1697,27 @@ impl ChildBlockHeader {
         &mut self.merkle_root
     }
 
-    // uint64 child_block_confirmations_in_parent = 7;
+    // uint64 child_block_confirmations_in_parent_count = 7;
 
-    pub fn clear_child_block_confirmations_in_parent(&mut self) {
-        self.child_block_confirmations_in_parent = 0;
+    pub fn clear_child_block_confirmations_in_parent_count(&mut self) {
+        self.child_block_confirmations_in_parent_count = 0;
     }
 
     // Param is passed by value, moved
-    pub fn set_child_block_confirmations_in_parent(&mut self, v: u64) {
-        self.child_block_confirmations_in_parent = v;
+    pub fn set_child_block_confirmations_in_parent_count(&mut self, v: u64) {
+        self.child_block_confirmations_in_parent_count = v;
     }
 
-    pub fn get_child_block_confirmations_in_parent(&self) -> u64 {
-        self.child_block_confirmations_in_parent
+    pub fn get_child_block_confirmations_in_parent_count(&self) -> u64 {
+        self.child_block_confirmations_in_parent_count
     }
 
-    fn get_child_block_confirmations_in_parent_for_reflect(&self) -> &u64 {
-        &self.child_block_confirmations_in_parent
+    fn get_child_block_confirmations_in_parent_count_for_reflect(&self) -> &u64 {
+        &self.child_block_confirmations_in_parent_count
     }
 
-    fn mut_child_block_confirmations_in_parent_for_reflect(&mut self) -> &mut u64 {
-        &mut self.child_block_confirmations_in_parent
+    fn mut_child_block_confirmations_in_parent_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.child_block_confirmations_in_parent_count
     }
 }
 
@@ -1761,7 +1761,7 @@ impl ::protobuf::Message for ChildBlockHeader {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.child_block_confirmations_in_parent = tmp;
+                    self.child_block_confirmations_in_parent_count = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1793,8 +1793,8 @@ impl ::protobuf::Message for ChildBlockHeader {
         if !self.merkle_root.is_empty() {
             my_size += ::protobuf::rt::string_size(6, &self.merkle_root);
         }
-        if self.child_block_confirmations_in_parent != 0 {
-            my_size += ::protobuf::rt::value_size(7, self.child_block_confirmations_in_parent, ::protobuf::wire_format::WireTypeVarint);
+        if self.child_block_confirmations_in_parent_count != 0 {
+            my_size += ::protobuf::rt::value_size(7, self.child_block_confirmations_in_parent_count, ::protobuf::wire_format::WireTypeVarint);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -1820,8 +1820,8 @@ impl ::protobuf::Message for ChildBlockHeader {
         if !self.merkle_root.is_empty() {
             os.write_string(6, &self.merkle_root)?;
         }
-        if self.child_block_confirmations_in_parent != 0 {
-            os.write_uint64(7, self.child_block_confirmations_in_parent)?;
+        if self.child_block_confirmations_in_parent_count != 0 {
+            os.write_uint64(7, self.child_block_confirmations_in_parent_count)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -1898,9 +1898,9 @@ impl ::protobuf::MessageStatic for ChildBlockHeader {
                     ChildBlockHeader::mut_merkle_root_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
-                    "child_block_confirmations_in_parent",
-                    ChildBlockHeader::get_child_block_confirmations_in_parent_for_reflect,
-                    ChildBlockHeader::mut_child_block_confirmations_in_parent_for_reflect,
+                    "child_block_confirmations_in_parent_count",
+                    ChildBlockHeader::get_child_block_confirmations_in_parent_count_for_reflect,
+                    ChildBlockHeader::mut_child_block_confirmations_in_parent_count_for_reflect,
                 ));
                 ::protobuf::reflect::MessageDescriptor::new::<ChildBlockHeader>(
                     "ChildBlockHeader",
@@ -1920,7 +1920,7 @@ impl ::protobuf::Clear for ChildBlockHeader {
         self.clear_timestamp();
         self.clear_height();
         self.clear_merkle_root();
-        self.clear_child_block_confirmations_in_parent();
+        self.clear_child_block_confirmations_in_parent_count();
         self.unknown_fields.clear();
     }
 }
@@ -1955,14 +1955,14 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\x20\x01(\x04R\
     \x14childBlockchainCount\x12D\n\x13child_block_headers\x18\r\x20\x03(\
     \x0b2\x14.bc.ChildBlockHeaderR\x11childBlockHeaders\"#\n\rBcTransaction\
-    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x90\x02\n\x10ChildBlock\
+    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9b\x02\n\x10ChildBlock\
     Header\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\
     \x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\
     \x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttim\
     estamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0b\
-    merkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12L\n#child_block_confirmat\
-    ions_in_parent\x18\x07\x20\x01(\x04R\x1fchildBlockConfirmationsInParentb\
-    \x06proto3\
+    merkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12W\n)child_block_confirmat\
+    ions_in_parent_count\x18\x07\x20\x01(\x04R$childBlockConfirmationsInPare\
+    ntCountb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

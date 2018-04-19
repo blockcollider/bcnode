@@ -1,0 +1,61 @@
+{
+  "hash": "0xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "height": 1,
+  "miner": "0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3",
+  "difficulty": 141129464479256,
+  "timestamp": 1524145655,
+  "merkleRoot": "511d94127384b79e22a900ed4c86f4fda2b824619b00ad59a730aaa2945ca5a6",
+  "chainRoot": "f65d51318cfd348bb66c8893a9583dfbebb475599f862f5bbc3978dd6d7b290f",
+  "distance": 1,
+  "nonce": 0,
+  "txCount": 0,
+  "transactionsList": [],
+  "childBlockchainCount": 5,
+  "childBlockHeadersList": [
+    {
+      "blockchain": "btc",
+      "hash": "0x39499390034",
+      "previousHash": "0xxxxxxxxxxxxxxxxx",
+      "timestamp": 1400000000,
+      "height": 2,
+      "merkleRoot": "0x000x00000",
+      "childBlockConfirmationsInParentCount": 1
+    },
+    {
+      "blockchain": "eth",
+      "hash": "ospoepfkspdfs",
+      "previousHash": "0xxxxxxxxxxxxxxxxx",
+      "timestamp": 1400000000,
+      "height": 2,
+      "merkleRoot": "0x000x00000",
+      "childBlockConfirmationsInParentCount": 1
+    },
+    {
+      "blockchain": "lsk",
+      "hash": "0x39300923i42034",
+      "previousHash": "0xxxxxxxxxxxxxxxxx",
+      "timestamp": 1400000000,
+      "height": 2,
+      "merkleRoot": "0x000x00000",
+      "childBlockConfirmationsInParentCount": 1
+    },
+    {
+      "blockchain": "wav",
+      "hash": "0xsjdfo3i2oifji3o2",
+      "previousHash": "0xxxxxxxxxxxxxxxxx",
+      "timestamp": 1400000000,
+      "height": 2,
+      "merkleRoot": "0x000x00000",
+      "childBlockConfirmationsInParentCount": 1
+    },
+    {
+      "blockchain": "neo",
+      "hash": "0xw3jkfok2jjvijief",
+      "previousHash": "0xxxxxxxxxxxxxxxxx",
+      "timestamp": 1400000000,
+      "height": 2,
+      "merkleRoot": "0x000x00000",
+      "childBlockConfirmationsInParentCount": 1
+    }
+  ]
+}

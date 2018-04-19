@@ -54,6 +54,7 @@ export default class App extends Component<*, State> {
       this.setState(merge(this.state, { connected: true, blocks: [] }))
     }
     this._socket.onmessage = (data) => {
+      // $FlowFixMe
       const payload = JSON.parse(data.data)
       if (payload.type === 'block.snapshot') {
         this.setState(merge(this.state, { blocks: payload.blocks }))

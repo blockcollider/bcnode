@@ -236,7 +236,7 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
 
   // TODO: @pm check
   while (true) {
-    let timestamp = (Date.now() ** 1000) << 0 // TODO should use a date injected from calling context (same one as prepareNewBlock)
+    let timestamp = (Date.now() / 1000) << 0 // TODO should use a date injected from calling context (same one as prepareNewBlock)
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash + timestamp))
@@ -333,8 +333,11 @@ export function getNewPreExpDifficulty (
 ) {
   let handicap = calculateHandicap(childrenPreviousBlocks, childrenCurrentBlocks)
 
+  let timestamp
+
+  timestamp = (Date.now() / 1000) << 0 // TODO inject current date
   const currentChildrenDifficulty = getDiff(
-    (Date.now() / 1000) << 0, // TODO inject current date
+    timestamp,
     previousBlock.getTimestamp(),
     minimumDiffShare,
     MINIMUM_DIFFICULTY,
@@ -359,8 +362,9 @@ export function getNewPreExpDifficulty (
 
   newDifficulty.add(currentChildrenDifficulty)
 
+  timestamp = (Date.now() / 1000) << 0 // TODO inject current date
   const preExpDiff = getDiff(
-    (Date.now() / 1000) << 0, // TODO inject current date
+    timestamp,
     previousBlock.getTimestamp(),
     MINIMUM_DIFFICULTY,
     newDifficulty
