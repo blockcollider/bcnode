@@ -10,7 +10,7 @@
 const { Benchmark } = require('../')
 
 describe('Benchmark', () => {
-  it('run()', (done) => {
+  it.skip('run()', (done) => {
     const benchmark = new Benchmark()
     benchmark
       .run()
