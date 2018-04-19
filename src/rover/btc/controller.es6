@@ -24,8 +24,6 @@ const { swapOrder } = require('../../utils/strings')
 const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
 
-const config = require('../../../config/config')
-
 export default class Controller {
   constructor () {
     this._dpt = false
