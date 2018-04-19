@@ -17,7 +17,7 @@
     "build-native": "neon build",
     "build": "yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files && yarn run webpack",
     "build-windows": "yarn run lint:standard && yarn run transpile --copy-files && yarn run webpack",
-    "dist": "yarn && yarn run build-native && yarn run build && yarn test --ci --coverage && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
+    "dist": "yarn && yarn run proto && yarn run build-native && yarn run build && yarn test --ci --coverage && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
     "dist-windows": "yarn && yarn run build-native && yarn test --ci --coverage && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
     "outdated": "yarn outdated || true",
     "pkg": "pkg package.json --out-path=dist",
