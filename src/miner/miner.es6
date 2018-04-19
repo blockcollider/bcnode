@@ -22,7 +22,24 @@
  */
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
-const { partialRight, reduce, map, compose, zipWith, flip, repeat, call, join, invoker, all, zip, splitEvery, reverse, fromPairs } = require('ramda')
+const {
+  all,
+  call,
+  compose,
+  flip,
+  fromPairs,
+  invoker,
+  join,
+  map,
+  partialRight,
+  reduce,
+  repeat,
+  reverse,
+  splitEvery,
+  transpose,
+  zip,
+  zipWith
+} = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
 const { Block, BcBlock, BcTransaction, ChildBlockHeader } = require('../protos/core_pb')
@@ -304,10 +321,11 @@ export function getMinimumDifficulty (childChainCount: number): BN {
  * @param {ChildBlockHeader[]} childrenCurrentBlocks array of rovered block headers used in last known BC block
  * @return {number} handicap
  */
-function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
+export function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
   if (allChildBlocksHaveSameTimestamp(childrenPreviousBlocks, childrenCurrentBlocks)) {
     return 4
   }
+
   return 0
 }
 
@@ -320,7 +338,7 @@ function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], children
  */
 function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]): bool {
   const tsPairs = zipWith(call, [map(timestamp), map(timestamp)], [childrenPreviousBlocks, childrenCurrentBlocks])
-  return all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
+  return all(r => r, transpose(tsPairs).map(([previousTs, currentTs]) => previousTs === currentTs))
 }
 
 // TODO rename arguments to better describe data

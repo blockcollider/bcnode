@@ -2,6 +2,7 @@ const BN = require('bn.js')
 const { Block } = require('../../protos/core_pb')
 
 const {
+  calculateHandicap,
   prepareNewBlock,
   prepareWork,
   mine
@@ -17,9 +18,25 @@ const TEST_MINER_KEY = GENESIS_MINER_KEY // crypto.randomBytes(32)
 const TEST_DATA = require('../data').BLOCKS_MAP
 
 describe('Miner', () => {
+  test('calculateHandicap() return 0 if any timestamp differs', () => {
+    const headers1 = getGenesisBlock().getChildBlockHeadersList()
+    const headers2 = getGenesisBlock().getChildBlockHeadersList()
+
+    headers2[0].setTimestamp((Date.now() / 1000) << 0)
+    const handicap = calculateHandicap(headers1, headers2)
+    expect(handicap).toEqual(0)
+  })
+
+  test('calculateHandicap() return 4 if all timestamps are same', () => {
+    const genesisBlock = getGenesisBlock()
+    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+
+    const handicap = calculateHandicap(genesisHeaders, genesisHeaders)
+    expect(handicap).toEqual(4)
+  })
+
   test('mine()', () => {
     const genesisBlock = getGenesisBlock()
-
     const genesisHeaders = genesisBlock.getChildBlockHeadersList()
 
     // Convert genesis headers back to raw Block which is returned by miner
@@ -108,12 +125,12 @@ describe('Miner', () => {
       childBlockchainCount: 5,
       childBlockHeadersList: [
         { blockchain: 'btc',
-          hash: '0000000000000000003a77d5927982946004cb0ffdabc356ebf3c1de8cfa82c3',
-          previousHash: '00000000000000000029fa0e75be83699a632ed531a882f7f04e26392c372bf5',
           childBlockConfirmationsInParentCount: genesisHeaders[0].getChildBlockConfirmationsInParentCount() + 1,
-          merkleRoot: 'ea5f5cd60d98846778d39d02a7a49844a93c2bb1608e602eaf6a93675effa5d5',
-          height: 518390,
-          timestamp: 1523829019 },
+          hash: genesisHeaders[0].getHash(),
+          previousHash: genesisHeaders[0].getPreviousHash(),
+          merkleRoot: genesisHeaders[0].getMerkleRoot(),
+          height: genesisHeaders[0].getHeight(),
+          timestamp: genesisHeaders[0].getTimestamp() },
         { blockchain: 'eth',
           childBlockConfirmationsInParentCount: 1,
           hash: testEthBlock.hash,
@@ -123,25 +140,25 @@ describe('Miner', () => {
           timestamp: (testEthBlock.timestamp / 1000) },
         { blockchain: 'lsk',
           childBlockConfirmationsInParentCount: genesisHeaders[2].getChildBlockConfirmationsInParentCount() + 1,
-          hash: '2875516409288438346',
-          previousHash: '6899263519938768036',
-          merkleRoot: '2875516409288438346',
-          height: 5743193,
-          timestamp: 1523894800 },
+          hash: genesisHeaders[2].getHash(),
+          previousHash: genesisHeaders[2].getPreviousHash(),
+          merkleRoot: genesisHeaders[2].getMerkleRoot(),
+          height: genesisHeaders[2].getHeight(),
+          timestamp: genesisHeaders[2].getTimestamp() },
         { blockchain: 'neo',
           childBlockConfirmationsInParentCount: genesisHeaders[3].getChildBlockConfirmationsInParentCount() + 1,
-          hash: '3a7faa52678c965680c65222149e077e9fed1316aa11c05e5f61c9efd9874224',
-          previousHash: 'c734ed02a391207ad22a732d5318b8625bc6ec0a4d7772fcdda2191adb8e4f4f',
-          merkleRoot: '205231ee785064e0407a77553120ca044c5c643f52aa23731a99e008ac719a16',
-          height: 2141254,
-          timestamp: 1523645134 },
+          hash: genesisHeaders[3].getHash(),
+          previousHash: genesisHeaders[3].getPreviousHash(),
+          merkleRoot: genesisHeaders[3].getMerkleRoot(),
+          height: genesisHeaders[3].getHeight(),
+          timestamp: genesisHeaders[3].getTimestamp() },
         { blockchain: 'wav',
           childBlockConfirmationsInParentCount: genesisHeaders[4].getChildBlockConfirmationsInParentCount() + 1,
-          hash: '2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU',
-          previousHash: '57DGUE3gEjKo5WEYLKkHn2dnLiCoZKiEqGvEGZCbiANFYov4qRk3hgh8CruLZ5gYzjYNsFnWuoNmwjzK7GJ9iPmh',
-          merkleRoot: '2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU',
-          height: 962470,
-          timestamp: 1523901811 }
+          hash: genesisHeaders[4].getHash(),
+          previousHash: genesisHeaders[4].getPreviousHash(),
+          merkleRoot: genesisHeaders[4].getMerkleRoot(),
+          height: genesisHeaders[4].getHeight(),
+          timestamp: genesisHeaders[4].getTimestamp() }
       ]
     })
   })

@@ -116,6 +116,7 @@
     "commander": "^2.15.0",
     "compute-cosine-distance": "^1.0.0",
     "convert-hex": "^0.1.0",
+    "deepcopy": "^0.6.3",
     "discovery-swarm": "^4.4.2",
     "ed25519": "0.0.4",
     "ed25519-supercop": "^1.0.2",
