@@ -38,11 +38,11 @@ const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
 /**
  * Determines the singularity height and difficulty
  *
- * @param {BN|Difficulty} x
- * @param {Number} parentBlockHeight
- * @returns {BN|Difficulty}
+ * @param calculatedDifficulty
+ * @param parentBlockHeight
+ * @returns a
  */
-export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: number) {
+export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: number): BN {
   const big1 = new BN(1, 16)
   const big2 = new BN(2, 16)
   const expDiffPeriod = new BN(66000000, 16)
@@ -66,14 +66,14 @@ export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: n
  * FUNCTION: getDiff(t)
  *   Gets the difficulty of a given blockchain without singularity calculation
  *
- * @param {Number|Epoch} currentBlockTime
- * @param {Number|Epoch} previousBlockTime
- * @param {Number} parentDiff
- * @param {Number} minimalDiffulty
- * @param {Number} handicap
- * @returns {BN|Difficulty}
+ * @param currentBlockTime
+ * @param previousBlockTime
+ * @param previousDifficulty
+ * @param minimalDiffulty
+ * @param handicap
+ * @returns
  */
-export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, handicap: number = 0) {
+export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, handicap: number = 0): BN {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 
   let bigMinimalDifficulty = new BN(minimalDiffulty, 16)
@@ -363,7 +363,15 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
  * Create a ChildBlockHeader[] for new BcBlock, before count new confirmation count for each child block.
  *
  * Assumption here is that confirmation count of all headers from previous block is taken and incrementend by one
- * except for the one which caused the new block being mine - for that case is is reset to 0
+ * except for the one which caused the new block being mine - for that case is is reset to 1
+ *
+ * We're starting from 1 here because it is used for dividing
+ *
+ * @param {BcBlock} previousBlock Last known previously mined BC block
+ * @param {Block[]} Last know rovered blocks from each chain
+ * @param {Block} newChainRoot The last rovered block - this one triggered the mining
+ *
+ * @return {ChildBlockHeader[]} Headers of rovered chains with confirmations count calculated
  */
 function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Block[], newChildBlock: Block): ChildBlockHeader[] {
   const newChildBlockConfirmations = fromPairs(previousBlock.getChildBlockHeadersList().map(header => {
@@ -384,6 +392,21 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
   })
 }
 
+/**
+ * Used for preparing yet non existant BC block protobuf structure. Use before mining starts.
+ *
+ * - calculates block difficulty (from previous BC block difficulty and height, rovered chains count, and data in child chains headers) and stores it to structure
+ * - stores headers of child chains (those being rovered)
+ * - calculates new merkle root, hash and stores it to structure
+ * - calculates new block height (previous + 1) and stores it to structure
+ *
+ * @param {BcBlock} previousBlock Last known previously mined BC block
+ * @param {Block[]} childrenCurrentBlocks Last know rovered blocks from each chain
+ * @param {Block} blockWhichTriggeredMining The last rovered block - this one triggered the mining
+ * @param {BcTransaction[]} newTransactions Transactions which will be added to newly mined block
+ * @param {string} minerAddress Public addres to which NRG award for mining the block and transactions will be credited to
+ * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
+ */
 export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
