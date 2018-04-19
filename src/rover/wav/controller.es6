@@ -12,11 +12,12 @@ const { inspect } = require('util')
 const WavesApi = require('waves-api')
 const LRUCache = require('lru-cache')
 
-const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
 const { blake2b } = require('../../utils/crypto')
 const { RpcClient } = require('../../rpc')
+
+const { createUnifiedBlock } = require('../helper')
 
 type WavesTransaction = {
   type: number,
@@ -68,7 +69,7 @@ const getBlock = (api: Object, height: number): Promise<WavesBlock> => {
   return api.API.Node.v1.blocks.at(height).then(b => b)
 }
 
-const _createUnifiedBlock = (block): Block => {
+function _createUnifiedBlock (block): Block {
   const obj = {
     blockNumber: block.height,
     prevHash: block.reference,
@@ -148,10 +149,7 @@ export default class Controller {
             this._logger.info(`Unseen new block '${lastBlock.reference}', height: ${height}`)
             this._blockCache.set(lastBlock.reference)
 
-            const unifiedBlock = _createUnifiedBlock(lastBlock)
-            const blockObj = unifiedBlock.toObject()
-            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
-            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
+            const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {

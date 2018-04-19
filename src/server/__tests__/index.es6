@@ -16,7 +16,7 @@ describe('jsonRpcMiddleware', () => {
 
   let middleware = null
 
-  beforeEach(() =>  {
+  beforeEach(() => {
     middleware = jsonRpcMiddleware(mapping)
   })
 
@@ -52,7 +52,7 @@ describe('jsonRpcMiddleware', () => {
     }
     // This function sets req.rpcBody
     const mockRes = {
-      json: jest.fn(),
+      json: jest.fn()
     }
     middleware(req, mockRes, jest.fn())
 
