@@ -41,7 +41,7 @@ describe('Miner', () => {
       oldHeader.getHash(), // the previous hash from above
       oldHeader.getTimestamp() + 80000000,
       oldHeader.getHeight() + 1,
-      '0x000x00000'
+      oldHeader.getMerkleRoot()
     ])
 
     // Update changed header in header list
@@ -86,12 +86,12 @@ describe('Miner', () => {
     newBlock.setNonce(solution.nonce)
 
     expect(newBlock.toObject()).toEqual({
-      hash: 'fc3d9ba19e4ad2cdcf3dc488a8d167aeb6352e4f647aecd825ff95d706e44427',
+      hash: '27f96ca47666d836d9eac0bd17f30c5bb43e969ebfe0927f33ced1800da3af51',
       height: 2,
-      merkleRoot: '6afe889d6f083c70df22ff7fc5fd02e66d2ade95b214839661046681d6e9592f',
-      difficulty: 32300133975127,
-      chainRoot: '132f52a2ae403c18fd6b5d232af8b6860e7d6f5f52df9504e58c2f39c49d7dd4',
-      distance: 149658936150412,
+      merkleRoot: '75bb4b50a919ef4c3341368668d129b6fcb41429c05812e893b7db2bada383f0',
+      difficulty: 11801971879903,
+      chainRoot: '7fd42cbc938e0f90383d8c8aa31d0f8f356d7e12ec63261cbae73f7fbea483dc',
+      distance: 177300997373305,
       nonce: '0.12137218313968567',
       txCount: 0,
       miner: TEST_MINER_KEY,
@@ -100,40 +100,40 @@ describe('Miner', () => {
       childBlockchainCount: 5,
       childBlockHeadersList: [
         { blockchain: 'btc',
-          hash: '0x39499390034',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
+          hash: '0000000000000000003a77d5927982946004cb0ffdabc356ebf3c1de8cfa82c3',
+          previousHash: '00000000000000000029fa0e75be83699a632ed531a882f7f04e26392c372bf5',
           childBlockConfirmationsInParentCount: 2,
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
+          merkleRoot: 'ea5f5cd60d98846778d39d02a7a49844a93c2bb1608e602eaf6a93675effa5d5',
+          height: 518390,
+          timestamp: 1523829019 },
         { blockchain: 'eth',
           childBlockConfirmationsInParentCount: 1,
           hash: '0xksjiefjisefmnsef',
-          previousHash: 'ospoepfkspdfs',
-          merkleRoot: '0x000x00000',
-          height: 3,
-          timestamp: 1480000000 },
+          previousHash: '0xa0c8290fbbefa0410ea7e727ce1f2a7ee7c6db1495a92e0f8778201c13dcef2b',
+          merkleRoot: '0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347',
+          height: 5451805,
+          timestamp: 1603844539 },
         { blockchain: 'lsk',
           childBlockConfirmationsInParentCount: 2,
-          hash: '0x39300923i42034',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
-        { blockchain: 'wav',
-          childBlockConfirmationsInParentCount: 2,
-          hash: '0xsjdfo3i2oifji3o2',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
+          hash: '2875516409288438346',
+          previousHash: '6899263519938768036',
+          merkleRoot: '2875516409288438346',
+          height: 5743193,
+          timestamp: 1523894800 },
         { blockchain: 'neo',
           childBlockConfirmationsInParentCount: 2,
-          hash: '0xw3jkfok2jjvijief',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 }
+          hash: '3a7faa52678c965680c65222149e077e9fed1316aa11c05e5f61c9efd9874224',
+          previousHash: 'c734ed02a391207ad22a732d5318b8625bc6ec0a4d7772fcdda2191adb8e4f4f',
+          merkleRoot: '205231ee785064e0407a77553120ca044c5c643f52aa23731a99e008ac719a16',
+          height: 2141254,
+          timestamp: 1523645134 },
+        { blockchain: 'wav',
+          childBlockConfirmationsInParentCount: 2,
+          hash: '2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU',
+          previousHash: '57DGUE3gEjKo5WEYLKkHn2dnLiCoZKiEqGvEGZCbiANFYov4qRk3hgh8CruLZ5gYzjYNsFnWuoNmwjzK7GJ9iPmh',
+          merkleRoot: '2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU',
+          height: 962470,
+          timestamp: 1523901811 }
       ]
     })
   })
