@@ -13,11 +13,42 @@ const EthereumBlock = require('ethereumjs-block')
 const EthereumTx = require('ethereumjs-tx')
 var ethUtils = require('ethereumjs-util')
 
-const { debugSaveObject } = require('../../debug')
 const logging = require('../../logger')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
+const { createUnifiedBlock } = require('../helper')
+
+function _createUnifiedBlock (block: EthereumBlock): Block {
+  const d = block.toJSON({ labeled: true })
+  const obj = {
+    blockNumber: parseInt(d.header.number, 16),
+    prevHash: d.header.parentHash,
+    blockHash: '0x' + block.hash().toString('hex'),
+    root: d.header.stateRoot,
+    nonce: parseInt(d.header.nonce, 16),
+    timestamp: parseInt(d.header.timestamp, 16) * 1000,
+    difficulty: parseInt(d.header.difficulty, 16),
+    coinbase: d.header.coinbase,
+    marked: false,
+    transactions: d.transactions.map(function (t) {
+      const tx = new EthereumTx(t)
+      t.txHash = ethUtils.bufferToHex(tx.hash(true))
+
+      return t
+    })
+  }
+
+  const msg = new Block()
+  msg.setBlockchain('eth')
+  msg.setHash(obj.blockHash)
+  msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
+
+  return msg
+}
 
 /**
  * ETH Controller
@@ -39,43 +70,8 @@ export default class Controller {
     return this._interfaces
   }
 
-  _createUnifiedBlock (block: EthereumBlock) {
-    const d = block.toJSON({ labeled: true })
-    const obj = {
-      blockNumber: parseInt(d.header.number, 16),
-      prevHash: d.header.parentHash,
-      blockHash: '0x' + block.hash().toString('hex'),
-      root: d.header.stateRoot,
-      nonce: parseInt(d.header.nonce, 16),
-      timestamp: parseInt(d.header.timestamp, 16) * 1000,
-      difficulty: parseInt(d.header.difficulty, 16),
-      coinbase: d.header.coinbase,
-      marked: false,
-      transactions: d.transactions.map(function (t) {
-        const tx = new EthereumTx(t)
-        t.txHash = ethUtils.bufferToHex(tx.hash(true))
-
-        return t
-      })
-    }
-
-    const msg = new Block()
-    msg.setBlockchain('eth')
-    msg.setHash(obj.blockHash)
-    msg.setPreviousHash(obj.prevHash)
-    msg.setTimestamp(obj.timestamp)
-    msg.setHeight(obj.blockNumber)
-    msg.setMerkleRoot(obj.root)
-
-    return msg
-  }
-
   transmitNewBlock (block: EthereumBlock) {
-    const unifiedBlock = this._createUnifiedBlock(block)
-    const blockObj = unifiedBlock.toObject()
-    this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
-    debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
-
+    const unifiedBlock = createUnifiedBlock(block, _createUnifiedBlock)
     this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
       if (err) {
         this._logger.error(`Error while collecting block ${inspect(err)}`)

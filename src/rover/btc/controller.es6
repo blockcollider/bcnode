@@ -15,16 +15,26 @@ const convBin = require('binstring')
 const process = require('process')
 const logging = require('../../logger')
 
-const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
 const { swapOrder } = require('../../utils/strings')
+const { createUnifiedBlock } = require('../helper')
 
 const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
 
-const config = require('../../../config/config')
+function _createUnifiedBlock (block: Object): Block { // TODO specify block type
+  const msg = new Block()
+  msg.setBlockchain('btc')
+  msg.setHash(block.header.hash)
+  msg.setPreviousHash(swapOrder(block.header.prevHash.toString('hex')))
+  msg.setTimestamp(block.header.time * 1000)
+  msg.setHeight(parseInt(block.blockNumber, 10))
+  msg.setMerkleRoot(block.header.merkleRoot.toString('hex'))
+
+  return msg
+}
 
 export default class Controller {
   constructor () {
@@ -160,11 +170,7 @@ export default class Controller {
           const [isNew, _block] = this._onNewBlock(peer, block)
 
           if (isNew) {
-            const unifiedBlock = this._createUnifiedBlock(_block)
-            const blockObj = unifiedBlock.toObject()
-            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
-            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
-
+            const unifiedBlock = createUnifiedBlock(block, _createUnifiedBlock)
             network.bestHeight = _block.blockNumber
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
@@ -226,39 +232,6 @@ export default class Controller {
     this._txCache.set(tx.hash, true)
     if (tx.isCoinbase() === true) {}
     // this._handleTx(tx);
-  }
-
-  _createUnifiedBlock (block: Object) { // TODO specify block type
-    // return {
-    //   blockNumber: block.blockNumber,
-    //   prevHash: swapOrder(block.header.prevHash.toString('hex')),
-    //   blockHash: block.header.hash,
-    //   root: block.header.merkleRoot,
-    //   timestamp: block.header.time,
-    //   nonce: block.header.nonce,
-    //   version: block.header.version,
-    //   difficulty: block.header.getDifficulty(),
-    //   transactions: block.transactions.reduce((all, t) => {
-    //     const tx = {
-    //       txHash: t.hash,
-    //       // inputs: t.inputs,
-    //       // outputs: t.outputs,
-    //       marked: false
-    //     }
-    //     all.push(tx)
-    //     return all
-    //   }, [])
-    // }
-
-    const msg = new Block()
-    msg.setBlockchain('btc')
-    msg.setHash(block.header.hash)
-    msg.setPreviousHash(swapOrder(block.header.prevHash.toString('hex')))
-    msg.setTimestamp(block.header.time * 1000)
-    msg.setHeight(parseInt(block.blockNumber, 10))
-    msg.setMerkleRoot(block.header.merkleRoot.toString('hex'))
-
-    return msg
   }
 
   // _handleTx (tx) {
