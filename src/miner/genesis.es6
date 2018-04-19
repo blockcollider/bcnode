@@ -17,7 +17,7 @@ const { blake2bl } = require('../utils/crypto')
 export function getGenesisBlock (minerPublicAddress: string) {
   const oldTransactions = []
 
-  const oldBestBlockchainsBlockHeaders = [
+  const oldBestBlockchainsBlockHeaders: ChildBlockHeader[] = [
     new ChildBlockHeader([
       'btc',
       '0x39499390034',
