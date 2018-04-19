@@ -396,9 +396,8 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
  * We're starting from 1 here because it is used for dividing
  *
  * @param {BcBlock} previousBlock Last known previously mined BC block
- * @param {Block[]} Last know rovered blocks from each chain
- * @param {Block} newChainRoot The last rovered block - this one triggered the mining
- *
+ * @param {Block[]} currentBlocks Last know rovered blocks from each chain
+ * @param {Block} newChildBlock The last rovered block - this one triggered the mining
  * @return {ChildBlockHeader[]} Headers of rovered chains with confirmations count calculated
  */
 function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Block[], newChildBlock: Block): ChildBlockHeader[] {
