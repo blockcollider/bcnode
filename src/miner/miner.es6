@@ -230,11 +230,8 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
   threshold = new BN(threshold, 16)
   let result
 
-  // console.log('mining for threshold: ' + threshold)
-
   // TODO: @pm check
   while (true) {
-  // if (i < 2) {
     let timestamp = (Date.now() ** 1000) << 0
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
@@ -307,7 +304,6 @@ function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHead
 // TODO rename arguments to better describe data
 export function getNewPreExpDifficulty (
   previousBlock: BcBlock,
-  parentShareDiff: BN,
   minimumDiffShare: BN,
   childrenPreviousBlocks: ChildBlockHeader[],
   childrenCurrentBlocks: ChildBlockHeader[]
@@ -330,7 +326,7 @@ export function getNewPreExpDifficulty (
       getDiff(
         previousHeader.getTimestamp() + timeBonus,
         previousHeader.getTimestamp(),
-        parentShareDiff,
+        currentChildrenDifficulty,
         minimumDiffShare
       )
     )
@@ -392,11 +388,10 @@ export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: 
 
   const childBlockHeadersList = prepareChildBlockHeadersList(previousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
 
-  const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
+  // const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
   const preExpDiff = getNewPreExpDifficulty(
     previousBlock,
-    parentShareDiff,
     minimumDiffShare,
     previousBlock.getChildBlockHeadersList(),
     childBlockHeadersList
