@@ -5,6 +5,7 @@
   "main": "lib/src/init.js",
   "scripts": {
     "bcnode": "./bin/cli --ws --rovers --ui --node --miner-key ABCDEF",
+    "benchmark": "./bin/benchmark",
     "check": "yarn run dist",
     "doc": "./node_modules/.bin/esdoc",
     "flow:watch": "./node_modules/flow-watch/src/flow-watch.js",
@@ -42,6 +43,7 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "bin": {
+    "benchmark": "bin/benchmark.js",
     "cli": "bin/cli.js"
   },
   "jest": {

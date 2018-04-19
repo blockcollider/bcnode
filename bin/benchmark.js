@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
-const app = require('../lib/benchmark')
+const Benchmark = require('../lib/benchmark').Benchmark
 
 // Run main entry-point
-app.main(process.argv)
+const app = new Benchmark()
+app.run()
