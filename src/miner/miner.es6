@@ -321,7 +321,7 @@ export function getNewPreExpDifficulty (
   const newDifficulty: BN = zip(childrenPreviousBlocks, childrenCurrentBlocks).reduce((sum: BN, [previousHeader, currentHeader]) => {
     // TODO @pm - basic confirmation count is 0 - we can't divide by 0 here, should we start from 1 then?
     const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
-    const timeBonus = (currentHeader.getTimestamp() - previousHeader.getTimestamp()) / confirmationCount
+    const timeBonus = (currentHeader.getTimestamp() - previousBlock.getTimestamp()) / confirmationCount
     return sum.add(
       getDiff(
         previousHeader.getTimestamp() + timeBonus,
