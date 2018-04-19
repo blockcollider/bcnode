@@ -236,7 +236,7 @@ export function mine (work: string, miner: string, merkleRoot: string, threshold
 
   // TODO: @pm check
   while (true) {
-    let timestamp = (Date.now() ** 1000) << 0
+    let timestamp = (Date.now() ** 1000) << 0 // TODO should use a date injected from calling context (same one as prepareNewBlock)
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash + timestamp))
@@ -344,6 +344,8 @@ export function getNewPreExpDifficulty (
   const newDifficulty: BN = zip(childrenPreviousBlocks, childrenCurrentBlocks).reduce((sum: BN, [previousHeader, currentHeader]) => {
     // TODO @pm - basic confirmation count is 0 - we can't divide by 0 here, should we start from 1 then?
     const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
+    // TODO now here is always used previousBlock but in most of childrenCurrentBlocks the previousBlock is not the one in which this rovered block appeared first
+    // in such case we need to have a block (and get timestamp for it) at height = previousBlock.getHeight() - currentHeader.getChildBlockConfirmationsInParentCount() - 1
     const timeBonus = (currentHeader.getTimestamp() - previousBlock.getTimestamp()) / confirmationCount
     return sum.add(
       getDiff(
@@ -358,7 +360,7 @@ export function getNewPreExpDifficulty (
   newDifficulty.add(currentChildrenDifficulty)
 
   const preExpDiff = getDiff(
-    (Date.now() / 1000) << 0,
+    (Date.now() / 1000) << 0, // TODO inject current date
     previousBlock.getTimestamp(),
     MINIMUM_DIFFICULTY,
     newDifficulty
@@ -435,6 +437,8 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
 export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
+  // TODO here we should get a date inserted from calling context as a reference and dont use Date.now() everywhere in the code (this could cause a difference in a notion of 'current time' if
+  // something takes more than 1s. Such cases are market with Todo comment
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
 
@@ -460,14 +464,10 @@ export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: 
   newBlock.setHeight(previousBlock.getHeight() + 1)
   newBlock.setMiner(minerAddress)
   newBlock.setDifficulty(getExpFactorDiff(preExpDiff, previousBlock.getHeight()).toNumber())
-  // TODO remove - should be assigned after mining
-  // newBlock.setTimestamp(Date.now())
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
   newBlock.setDistance(0)
   newBlock.setTxCount(0)
-  // TODO remove - should be assigned after mining
-  // newBlock.setNonce(0)
   newBlock.setTransactionsList(newTransactions)
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
   newBlock.setChildBlockHeadersList(childBlockHeadersList)
