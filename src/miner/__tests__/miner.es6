@@ -2,6 +2,7 @@ const BN = require('bn.js')
 const { Block } = require('../../protos/core_pb')
 
 const {
+  calculateHandicap,
   prepareNewBlock,
   prepareWork,
   mine
@@ -17,9 +18,25 @@ const TEST_MINER_KEY = GENESIS_MINER_KEY // crypto.randomBytes(32)
 const TEST_DATA = require('../data').BLOCKS_MAP
 
 describe('Miner', () => {
+  test('calculateHandicap() return 0 if any timestamp differs', () => {
+    const headers1 = getGenesisBlock().getChildBlockHeadersList()
+    const headers2 = getGenesisBlock().getChildBlockHeadersList()
+
+    headers2[0].setTimestamp((Date.now() / 1000) << 0)
+    const handicap = calculateHandicap(headers1, headers2)
+    expect(handicap).toEqual(0)
+  })
+
+  test('calculateHandicap() return 4 if all timestamps are same', () => {
+    const genesisBlock = getGenesisBlock()
+    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+
+    const handicap = calculateHandicap(genesisHeaders, genesisHeaders)
+    expect(handicap).toEqual(4)
+  })
+
   test('mine()', () => {
     const genesisBlock = getGenesisBlock()
-
     const genesisHeaders = genesisBlock.getChildBlockHeadersList()
 
     // Convert genesis headers back to raw Block which is returned by miner
