@@ -304,6 +304,7 @@ function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHead
 // TODO rename arguments to better describe data
 export function getNewPreExpDifficulty (
   previousBlock: BcBlock,
+  parentShareDiff: BN,
   minimumDiffShare: BN,
   childrenPreviousBlocks: ChildBlockHeader[],
   childrenCurrentBlocks: ChildBlockHeader[]
@@ -324,9 +325,9 @@ export function getNewPreExpDifficulty (
     const timeBonus = (currentHeader.getTimestamp() - previousBlock.getTimestamp()) / confirmationCount
     return sum.add(
       getDiff(
-        previousHeader.getTimestamp() + timeBonus,
-        previousHeader.getTimestamp(),
-        currentChildrenDifficulty,
+        previousBlock.getTimestamp() + timeBonus,
+        previousBlock.getTimestamp(),
+        parentShareDiff,
         minimumDiffShare
       )
     )
@@ -388,10 +389,11 @@ export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: 
 
   const childBlockHeadersList = prepareChildBlockHeadersList(previousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
 
-  // const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
+  const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
   const preExpDiff = getNewPreExpDifficulty(
     previousBlock,
+    parentShareDiff,
     minimumDiffShare,
     previousBlock.getChildBlockHeadersList(),
     childBlockHeadersList
