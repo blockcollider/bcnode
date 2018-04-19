@@ -10,6 +10,7 @@ For technical & mining questions visit: https://www.t.me/blockcollideradvanced
 ## Status
 
 [![Build Status](https://travis-ci.org/blockcollider/bcnode.svg?branch=master)](https://travis-ci.org/blockcollider/bcnode)
+[![Build status](https://ci.appveyor.com/api/projects/status/hfqkjvw3cmxa3y49?svg=true)](https://ci.appveyor.com/project/ArjunRajJain/bcnode)
 
 ## System Requirements
 
