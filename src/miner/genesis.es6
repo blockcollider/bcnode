@@ -6,86 +6,61 @@
  *
  * @flow
  */
-const { Block, BcBlock } = require('../protos/core_pb')
-const {
-  createMerkleRoot,
-  getChildrenBlocksHashes,
-  getChildrenRootHash
-} = require('./miner')
-const { blake2bl } = require('../utils/crypto')
 
-export function getGenesisBlock (minerPublicAddress: string) {
-  const oldTransactions = []
+const path = require('path')
 
-  const oldBestBlockchainsBlockHeaders = [
-    new Block([
-      'btc',
-      '0x39499390034',
-      '0xxxxxxxxxxxxxxxxx',
-      1400000000,
-      2,
-      '0x000x00000'
-    ]),
-    new Block([
-      'eth',
-      'ospoepfkspdfs',
-      '0xxxxxxxxxxxxxxxxx',
-      1400000000,
-      2,
-      '0x000x00000'
-    ]),
-    new Block([
-      'lsk',
-      '0x39300923i42034',
-      '0xxxxxxxxxxxxxxxxx',
-      1400000000,
-      2,
-      '0x000x00000'
-    ]),
-    new Block([
-      'wav',
-      '0xsjdfo3i2oifji3o2',
-      '0xxxxxxxxxxxxxxxxx',
-      1400000000,
-      2,
-      '0x000x00000'
-    ]),
-    new Block([
-      'neo',
-      '0xw3jkfok2jjvijief',
-      '0xxxxxxxxxxxxxxxxx',
-      1400000000,
-      2,
-      '0x000x00000'
-    ])
-  ]
+const { objFromFileSync } = require('../helper/json')
+const { BcBlock } = require('../protos/core_pb')
 
-  const oldBestBlockchainHeaderHashes = getChildrenBlocksHashes(oldBestBlockchainsBlockHeaders)
+export const GENESIS_DATA = objFromFileSync(path.join(__dirname, 'genesis.raw.json'))
 
-  const oldChainRoot = blake2bl(getChildrenRootHash(oldBestBlockchainHeaderHashes).toString())
+export const GENESIS_BLOCK_HEADERS = GENESIS_DATA.childBlockHeadersList
+  .map((header) => {
+    return [
+      header.blockchain,
+      header.hash,
+      header.previousHash,
+      header.timestamp,
+      header.height,
+      header.merkleRoot,
+      header.childBlockConfirmationsInParentCount
+    ]
+  })
 
-  const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
-  const genesisBlock = new BcBlock()
-  genesisBlock.setHash('0xxxxxxxxxxxxxxxxxxxxxxxxx')
-  genesisBlock.setHeight(1)
-  genesisBlock.setMiner(minerPublicAddress)
-  genesisBlock.setDifficulty(141129464479256)
-  genesisBlock.setTimestamp(genesisTimestamp)
-  // blockchains, transactions, miner address, height
-  genesisBlock.setMerkleRoot(
-    createMerkleRoot(
-      oldBestBlockchainHeaderHashes.concat(
-        oldTransactions.concat([minerPublicAddress, '1'])
-      )
-    )
-  )
-  genesisBlock.setChainRoot(oldChainRoot)
-  genesisBlock.setDistance(1)
-  genesisBlock.setTxCount(0)
-  genesisBlock.setNonce(0) // TODO
-  genesisBlock.setTransactionsList(oldTransactions)
-  genesisBlock.setChildBlockchainCount(5)
-  genesisBlock.setChildBlockHeadersList(oldBestBlockchainsBlockHeaders)
+export const GENESIS_BLOCK = new BcBlock([
+  GENESIS_DATA.hash,
+  GENESIS_DATA.height,
+  GENESIS_DATA.miner,
+  GENESIS_DATA.difficulty,
+  GENESIS_DATA.timestamp,
+  GENESIS_DATA.merkleRoot,
+  GENESIS_DATA.chainRoot,
+  GENESIS_DATA.distance,
+  GENESIS_DATA.nonce,
+  GENESIS_DATA.txCount,
+  GENESIS_DATA.transactionsList,
+  GENESIS_BLOCK_HEADERS.length,
+  GENESIS_BLOCK_HEADERS
+])
+
+export const GENESIS_MINER_KEY = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
+
+export function getGenesisBlock () {
+  const genesisBlock = GENESIS_BLOCK
+
+  // const oldBestBlockchainHeaderHashes = getChildrenBlocksHashes(headers)
+  // const oldChainRoot = blake2bl(getChildrenRootHash(oldBestBlockchainHeaderHashes).toString())
+  // const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
+  // genesisBlock.setMiner(minerPublicAddress)
+  // genesisBlock.setMerkleRoot(
+  //   createMerkleRoot(
+  //     oldBestBlockchainHeaderHashes.concat(
+  //       oldTransactions.concat([minerPublicAddress, '1'])
+  //     )
+  //   )
+  // )
+  // genesisBlock.setChainRoot(oldChainRoot)
+  // genesisBlock.setChildBlockHeadersList(oldBestBlockchainsBlockHeaders)
 
   return genesisBlock
 }

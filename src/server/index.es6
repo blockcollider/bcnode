@@ -17,10 +17,11 @@ const expressWinston = require('express-winston')
 const responseTime = require('response-time')
 const serveIndex = require('serve-index')
 const WebSocket = require('ws')
+const CircularBuffer = require('circular-buffer')
 
 const logging = require('../logger')
 const config = require('../../config/config')
-const { Null } = require('../protos/core_pb')
+const { Null, Block } = require('../protos/core_pb')
 const { RpcClient, RpcServer } = require('../rpc')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'public')
@@ -41,6 +42,7 @@ export default class Server {
   _rpcServer: RpcServer
   _server: any
   _logger: Logger
+  _roveredBlocksBuffer: CircularBuffer
 
   constructor (rpcServer: RpcServer) {
     // Create express app instance
@@ -49,6 +51,7 @@ export default class Server {
     this._rpcServer = rpcServer
     this._server = null
     this._logger = logging.getLogger(__filename)
+    this._roveredBlocksBuffer = new CircularBuffer(24)
   }
 
   get app (): express$Application { // eslint-disable-line
@@ -110,17 +113,20 @@ export default class Server {
   initWebSocket () {
     this._wsServer = new WebSocket.Server({ server: this._server, path: '/ws' })
 
+    const blockToWire = (block: Block) => ({
+      timestamp: block.getTimestamp(),
+      blockchain: block.getBlockchain(),
+      hash: block.getHash()
+    })
+
     // setup relaying events from rpc server to websockets
     this._rpcServer.emitter.on('collectBlock', ({ block }) => {
+      this._roveredBlocksBuffer.enq(block)
       this._wsServer.clients.forEach(c => {
         if (c.readyState === WebSocket.OPEN) {
           this._logger.debug(`Sending message to client `)
           try {
-            c.send(JSON.stringify({
-              timestamp: Date.now(),
-              name: 'block.latest',
-              data: { blockchain: block.getBlockchain(), hash: block.getHash() }
-            }), e => {
+            c.send(JSON.stringify({ type: 'block.latest', block: blockToWire(block) }), e => {
               if (e) {
                 this._logger.error(`Could not send\n ${e}`)
                 c.terminate()
@@ -134,6 +140,10 @@ export default class Server {
       })
     })
     this._wsServer.on('connection', (client, req) => {
+      client.send(JSON.stringify({
+        type: 'block.snapshot',
+        blocks: this._roveredBlocksBuffer.toarray().map(blockToWire)
+      }))
       client.on('close', reason => {
         this._logger.info('Client connection closed', req.connection.remoteAddress)
       })

@@ -1,0 +1,8 @@
+{
+  "blockchain": "btc",
+  "hash": "000000000000000000477638181f4dce851cfeb33d98ee296ec082abe1cea867",
+  "previousHash": "0000000000000000003a77d5927982946004cb0ffdabc356ebf3c1de8cfa82c3",
+  "timestamp": 1523836600000,
+  "height": 518391,
+  "merkleRoot": "bbfff06dd07cbd5f0bc1d9d77a5583b85dd967b32380c7179546863961e30a8e"
+}

@@ -9,7 +9,7 @@
 const { type, path } = require('ramda')
 
 const { DbValue } = require('../protos/db_pb')
-const { Block, BcBlock } = require('../protos/core_pb')
+const { Block, BcBlock, ChildBlockHeader } = require('../protos/core_pb')
 
 const BC_MESSAGE_TYPE_REGEX = new RegExp(/^proto\.bc\.(.*)/)
 const _isBCMessageType = (type: string) => BC_MESSAGE_TYPE_REGEX.test(type)
@@ -18,7 +18,8 @@ const DB_VALUES_VERSION = 1
 
 const BC_MESSAGES_MAP = {
   'Block': Block,
-  'BcBlock': BcBlock
+  'BcBlock': BcBlock,
+  'ChildBlockHeader': ChildBlockHeader
 }
 
 /**

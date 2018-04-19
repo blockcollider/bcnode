@@ -93,12 +93,12 @@ dist/
 !assets/dist/
 
 # Block Collider specific data directories
-data
+/_data/
 miner_data
 .wavescache
 
 # Webpack assets
 /public/assets
 
-# Secret variables
+# Secrets
 .env.sh

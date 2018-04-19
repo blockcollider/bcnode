@@ -7,187 +7,141 @@ const {
   mine
 } = require('../miner')
 
-const { getGenesisBlock } = require('../genesis')
+const { getGenesisBlock, GENESIS_MINER_KEY } = require('../genesis')
 
 const { mockRandom } = require('jest-mock-random')
+const mockNow = require('jest-mock-now')
+
+const TEST_MINER_KEY = GENESIS_MINER_KEY // crypto.randomBytes(32)
+
+const TEST_DATA = require('../data').BLOCKS_MAP
 
 describe('Miner', () => {
   test('mine()', () => {
-    const minerPublicAddress = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
+    const genesisBlock = getGenesisBlock()
 
-    const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
-    const genesisBlock = getGenesisBlock(minerPublicAddress)
-    expect(genesisBlock.toObject()).toEqual({
-      hash: '0xxxxxxxxxxxxxxxxxxxxxxxxx',
-      height: 1,
-      miner: '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3',
-      difficulty: 141129464479256,
-      timestamp: genesisTimestamp,
-      merkleRoot: '570905689d00f6b7a15c332e54c02418f22e98db880a675f32e63537531ae48c',
-      chainRoot: 'b4816d65eabac8f1a143805ffc6f4ca148c4548e020de3db21207a4849ea9abe',
-      distance: 1,
-      nonce: 0,
-      txCount: 0,
-      transactionsList: [],
-      childBlockchainCount: 5,
-      childBlockHeadersList: [
-        { blockchain: 'btc',
-          hash: '0x39499390034',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
-        { blockchain: 'eth',
-          hash: 'ospoepfkspdfs',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
-        { blockchain: 'lsk',
-          hash: '0x39300923i42034',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
-        { blockchain: 'wav',
-          hash: '0xsjdfo3i2oifji3o2',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
-        { blockchain: 'neo',
-          hash: '0xw3jkfok2jjvijief',
-          previousHash: '0xxxxxxxxxxxxxxxxx',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 }
-      ]
-    })
+    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
 
-    /* - !!! THIS NEW BLOCK COMES IN !!!
-    {
-        hash: "0x0000000000000000000",
-        merkleRoot: "0x000x00000",
-        height: 3,
-        timestamp: 1400000000
-    }
+    // Convert genesis headers back to raw Block which is returned by miner
+    const headers = genesisHeaders
+      .map((oldHeader) => {
+        return new Block([
+          oldHeader.getBlockchain(),
+          oldHeader.getHash(),
+          oldHeader.getPreviousHash(),
+          oldHeader.getTimestamp(),
+          oldHeader.getHeight(),
+          oldHeader.getMerkleRoot()
+        ])
+      })
 
-    so a database query would gather all of the best blocks below in newBestBlockchainsBlockHeaders to assemble work around it
-    most of the blocks would be the same with the same values
-    */
+    // Pick ethereum header
+    const oldHeader = headers[1]
 
-    const newTransactions = []
-    const newBestBlockchainsBlockHeaders = [
-      new Block([
-        'btc',
-        '0x39499390034',
-        "0xxxxxxxxxxxxxxxxx'",
-        1400000000,
-        2,
-        '0x000x00000'
-      ]),
-      new Block([
-        'eth',
-        '0xksjiefjisefmnsef', // <-------  the new block would update his previous block
-        'ospoepfkspdfs', // the previous hash from above
-        1480000000,
-        3,
-        '0x000x00000'
-      ]),
-      new Block([
-        'lsk',
-        '0x39300923i42034',
-        "0xxxxxxxxxxxxxxxxx'",
-        1400000000,
-        2,
-        '0x000x00000'
-      ]),
-      new Block([
-        'wav',
-        '0xsjdfo3i2oifji3o2',
-        "0xxxxxxxxxxxxxxxxx'",
-        1400000000,
-        2,
-        '0x000x00000'
-      ]),
-      new Block([
-        'neo',
-        '0xw3jkfok2jjvijief',
-        "0xxxxxxxxxxxxxxxxx'",
-        1400000000,
-        2,
-        '0x000x00000'
-      ])
-    ]
+    const testEthBlock = TEST_DATA.eth[0]
+    expect(testEthBlock.previousHash).toEqual(oldHeader.getHash())
 
-    const work = prepareWork(genesisBlock, newBestBlockchainsBlockHeaders)
+    // Change hash, previousHash, timestamp and height
+    const newHeader = new Block([
+      testEthBlock.blockchain,
+      testEthBlock.hash, // <-------  the new block would update his previous block
+      testEthBlock.previousHash, // the previous hash from above
+      testEthBlock.timestamp / 1000,
+      testEthBlock.height,
+      testEthBlock.merkleRoot
+    ])
+
+    // Update changed header in header list
+    headers[1] = newHeader
+
+    // Mock timestamp - 3600 seconds (1 hour) after genesis block
+    let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
+
+    // Prepare work for miner
+    const work = prepareWork(genesisBlock, headers)
+
+    // Create (not yet existing) block
     const newBlock = prepareNewBlock(
       genesisBlock,
-      genesisBlock.getChildBlockHeadersList(),
-      newBestBlockchainsBlockHeaders,
-      newTransactions,
-      minerPublicAddress
+      headers,
+      headers[1],
+      [], // transactions
+      TEST_MINER_KEY
     )
 
+    // Mock timestamp - 3 seconds after work was generated
+    mockedTimestamp = mockNow(new Date(mockedTimestamp + 3000))
     mockRandom([0.12137218313968567])
 
+    // Mine new block
     const solution = mine(
       work,
-      minerPublicAddress,
+      TEST_MINER_KEY,
       newBlock.getMerkleRoot(),
       new BN(newBlock.getDifficulty()).div(new BN(100000, 16)).toString() // divide diff in test by huge number to finish quickly
     )
 
-    const newBlockTimestamp = Date.now() / 1000 << 0
+    // Remove Date.now() mock
+    Date.now.mockRestore()
+
+    // Mocked timestamp - 1 second after mining started
+    const newBlockTimestamp = mockedTimestamp + 1000
+
     // Set timestamp after minings
     newBlock.setTimestamp(newBlockTimestamp)
     newBlock.setDistance(solution.distance)
     newBlock.setNonce(solution.nonce)
 
-    expect(newBlock.toObject()).toEqual({
-      hash: '642759529ceb51fe2141b398da012d07959de22e563ab35a01d4f2424f6f94d0',
+    const newBlockObject = newBlock.toObject()
+    expect(newBlockObject).toEqual({
+      hash: '39bc7bbd2b182eddac2d18d5c998808f64423176975fb5a715d57f8599a4104f',
       height: 2,
-      merkleRoot: '3846bfe390e8d5e887cf9df928e25516ca3209b9f87320ac24628b82276a6acc',
-      difficulty: 169690252393619,
-      chainRoot: '0d6ac1386c1792cedd2066f6e062033788a8a66ddb8c10b1ba9f5339dcafad51',
-      distance: 182925574122964,
+      merkleRoot: '53c85bcd43ade65bba9d2e2d2b5944116526b7c05ba7b7d6425699128548f5ae',
+      difficulty: 11860447342465,
+      chainRoot: 'daf4c73925e7eb4e67a86cabfb7cc1e257a7af63f6a3f0b3f5991839891fc796',
+      distance: 185633463518405,
       nonce: '0.12137218313968567',
       txCount: 0,
-      miner: minerPublicAddress,
+      miner: TEST_MINER_KEY,
       timestamp: newBlockTimestamp,
       transactionsList: [],
       childBlockchainCount: 5,
       childBlockHeadersList: [
         { blockchain: 'btc',
-          hash: '0x39499390034',
-          previousHash: '0xxxxxxxxxxxxxxxxx\'',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
+          hash: '0000000000000000003a77d5927982946004cb0ffdabc356ebf3c1de8cfa82c3',
+          previousHash: '00000000000000000029fa0e75be83699a632ed531a882f7f04e26392c372bf5',
+          childBlockConfirmationsInParentCount: genesisHeaders[0].getChildBlockConfirmationsInParentCount() + 1,
+          merkleRoot: 'ea5f5cd60d98846778d39d02a7a49844a93c2bb1608e602eaf6a93675effa5d5',
+          height: 518390,
+          timestamp: 1523829019 },
         { blockchain: 'eth',
-          hash: '0xksjiefjisefmnsef',
-          previousHash: 'ospoepfkspdfs',
-          merkleRoot: '0x000x00000',
-          height: 3,
-          timestamp: 1480000000 },
+          childBlockConfirmationsInParentCount: 1,
+          hash: testEthBlock.hash,
+          previousHash: testEthBlock.previousHash,
+          merkleRoot: testEthBlock.merkleRoot,
+          height: testEthBlock.height,
+          timestamp: (testEthBlock.timestamp / 1000) },
         { blockchain: 'lsk',
-          hash: '0x39300923i42034',
-          previousHash: '0xxxxxxxxxxxxxxxxx\'',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
-        { blockchain: 'wav',
-          hash: '0xsjdfo3i2oifji3o2',
-          previousHash: '0xxxxxxxxxxxxxxxxx\'',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 },
+          childBlockConfirmationsInParentCount: genesisHeaders[2].getChildBlockConfirmationsInParentCount() + 1,
+          hash: '2875516409288438346',
+          previousHash: '6899263519938768036',
+          merkleRoot: '2875516409288438346',
+          height: 5743193,
+          timestamp: 1523894800 },
         { blockchain: 'neo',
-          hash: '0xw3jkfok2jjvijief',
-          previousHash: '0xxxxxxxxxxxxxxxxx\'',
-          merkleRoot: '0x000x00000',
-          height: 2,
-          timestamp: 1400000000 }
+          childBlockConfirmationsInParentCount: genesisHeaders[3].getChildBlockConfirmationsInParentCount() + 1,
+          hash: '3a7faa52678c965680c65222149e077e9fed1316aa11c05e5f61c9efd9874224',
+          previousHash: 'c734ed02a391207ad22a732d5318b8625bc6ec0a4d7772fcdda2191adb8e4f4f',
+          merkleRoot: '205231ee785064e0407a77553120ca044c5c643f52aa23731a99e008ac719a16',
+          height: 2141254,
+          timestamp: 1523645134 },
+        { blockchain: 'wav',
+          childBlockConfirmationsInParentCount: genesisHeaders[4].getChildBlockConfirmationsInParentCount() + 1,
+          hash: '2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU',
+          previousHash: '57DGUE3gEjKo5WEYLKkHn2dnLiCoZKiEqGvEGZCbiANFYov4qRk3hgh8CruLZ5gYzjYNsFnWuoNmwjzK7GJ9iPmh',
+          merkleRoot: '2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU',
+          height: 962470,
+          timestamp: 1523901811 }
       ]
     })
   })

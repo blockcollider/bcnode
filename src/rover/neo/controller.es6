@@ -13,10 +13,10 @@ const NeoNode = require('@cityofzion/neo-js/dist/node/node')
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 
-const { debugSaveObject } = require('../../debug')
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
 const { RpcClient } = require('../../rpc')
+const { createUnifiedBlock } = require('../helper')
 
 type NeoBlock = { // eslint-disable-line no-undef
   hash: string,
@@ -49,7 +49,7 @@ type NeoBlock = { // eslint-disable-line no-undef
   nextblockhash: string
 }
 
-const _createUnifiedBlock = (block: NeoBlock): Block => {
+function _createUnifiedBlock (block: NeoBlock): Block {
   const obj = {}
 
   obj.blockNumber = block.index
@@ -138,11 +138,9 @@ export default class Controller {
           node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
             this._logger.info(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
-            const unifiedBlock = _createUnifiedBlock(lastBlock)
-            const blockObj = unifiedBlock.toObject()
-            this._logger.debug(`created unified block: ${JSON.stringify(blockObj, null, 4)}`)
-            debugSaveObject(`${blockObj.blockchain}/block/${blockObj.timestamp}-${blockObj.hash}.json`, blockObj)
+            const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
+            this._logger.debug('NEO Going to call this._rpc.rover.collectBlock()')
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
                 this._logger.error(`Error while collecting block ${inspect(err)}`)

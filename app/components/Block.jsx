@@ -12,15 +12,13 @@ export default class Block extends Component<*> {
   // ()
 
   render () {
-    // { timestamp, data: { blockchain, hash } = this.props.block
-    const blockchain = this.props.block.data.blockchain
-    const hash = this.props.block.data.hash
+    const { blockchain, hash } = this.props.block
 
     return (
-      <div className='card' style={{width: '9rem'}}>
-        <img className='card-img-top' style={{ width: '6rem', height: '6rem', marginTop: '0.6em' }} src={getBlockIcon(blockchain)} alt={blockchain} />
+      <div className='card' style={{width: '8.4rem'}}>
+        <img className='card-img-top' style={{ alignSelf: 'center', width: '6rem', height: '6rem', marginTop: '0.6em' }} src={getBlockIcon(blockchain)} alt={blockchain} />
         <div className='card-body'>
-          <p className='card-text'><small>{hash.slice(0, 12)}&hellip;</small></p>
+          <p className='card-text'><small title={hash}>{formatHash(blockchain, hash)}&hellip;</small></p>
           <a href={getBlockLink(blockchain, hash)} target='_blank' className='btn btn-sm'>View block</a>
         </div>
       </div>
@@ -28,6 +26,12 @@ export default class Block extends Component<*> {
   }
 }
 
+const formatHash = (blockchain, hash) => {
+  let final
+  final = (blockchain === 'btc') ? hash.replace(/^0+/, '') : hash
+  final = final.slice(0, 10)
+  return final
+}
 const getBlockLink = (blockchain, hash) => {
   switch (blockchain) {
     case 'btc':

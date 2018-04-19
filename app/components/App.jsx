@@ -55,7 +55,12 @@ export default class App extends Component<*, State> {
     }
     this._socket.onmessage = (data) => {
       // $FlowFixMe
-      this.setState(merge(this.state, { blocks: concat(this.state.blocks, [JSON.parse(data.data)]) }))
+      const payload = JSON.parse(data.data)
+      if (payload.type === 'block.snapshot') {
+        this.setState(merge(this.state, { blocks: payload.blocks }))
+      } else if (payload.type === 'block.latest') {
+        this.setState(merge(this.state, { blocks: concat(this.state.blocks, [payload.block]) }))
+      }
     }
     this._socket.onclose = () => {
       this.setState(merge(this.state, { connected: false }))
