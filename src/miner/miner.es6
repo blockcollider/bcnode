@@ -186,7 +186,7 @@ export function split (t: string): number[] {
 /**
  * Converts cosine similary to cos distance
  */
-export function dist (x: number[], y: number[], clbk: ?Function) {
+export function dist (x: number[], y: number[], clbk: ?Function): number {
   let s
   if (arguments.length > 2) {
     s = similarity(x, y, clbk)
@@ -199,11 +199,11 @@ export function dist (x: number[], y: number[], clbk: ?Function) {
 /**
  * Returns summed distances between two strings broken into of 8 bits
  *
- * @param {Hash} a
- * @param {Hash} b
- * @returns {Number}
+ * @param {string} a
+ * @param {string} b
+ * @returns {number} cosine distance between two strings
  */
-export function distance (a: string, b: string) {
+export function distance (a: string, b: string): number {
   const aChunks = reverse(splitEvery(32, split(a)))
   const bChunks = splitEvery(32, split(b))
   const chunks = zip(aChunks, bChunks)
@@ -224,8 +224,11 @@ export function distance (a: string, b: string) {
 /**
  * Finds the mean of the distances from a provided set of hashed header proofs
  *
- * // @param {Array} work
- * @returns {Object} dist,nonce
+ * @param {string} work reference to find distance > `threshold`
+ * @param {string} miner Public address to which NRG award for mining the block and transactions will be credited to
+ * @param {string} merkleRoot Mekle root of the BC block being mined
+ * @param {number} threshold threshold for the result to be valid
+ * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
 export function mine (work: string, miner: string, merkleRoot: string, threshold: number) {
   threshold = new BN(threshold, 16)
@@ -266,7 +269,11 @@ const hash: ((ChildBlockHeader|Block) => string) = invoker(0, 'getHash')
 const timestamp: ((ChildBlockHeader|Block) => number) = invoker(0, 'getTimestamp')
 const merkleRoot: ((ChildBlockHeader|Block) => string) = invoker(0, 'getMerkleRoot')
 
-// blake2bl(hash + mekleRoot)
+/**
+ * Computes hash form a rovered block header as blake2bl(hash + mekleRoot)
+ * @param {ChildBlockHeader|Block} block to hash
+ * @return {string} hash of the block
+ */
 const blockHash: (ChildBlockHeader|Block => string) = compose(
   blake2bl,
   join(''),
@@ -289,15 +296,29 @@ export function getMinimumDifficulty (childChainCount: number): BN {
   return MINIMUM_DIFFICULTY.div(new BN(childChainCount, 16))
 }
 
+/**
+ * Calculate handicap between headers of previous and latest BC block
+ * If none of the chains have increased in height 4, else 0
+ *
+ * @param {ChildBlockHeader[]} childrenPreviousBlocks array of rovered block headers used in last-1 BC block
+ * @param {ChildBlockHeader[]} childrenCurrentBlocks array of rovered block headers used in last known BC block
+ * @return {number} handicap
+ */
 function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
-  // If none of the chains have increased in height
   if (allChildBlocksHaveSameTimestamp(childrenPreviousBlocks, childrenCurrentBlocks)) {
     return 4
   }
   return 0
 }
 
-function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
+/**
+ * Compares two arrays' of `ChildBlockHeader` timestamps and returns if some of the timestamps did change or all are the same
+ *
+ * @param {ChildBlockHeader[]} childrenPreviousBlocks array of rovered block headers used in last-1 BC block
+ * @param {ChildBlockHeader[]} childrenCurrentBlocks array of rovered block headers used in last known BC block
+ * @return {bool} `false` some of the timestamps did change or `true` all are the same
+ */
+function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]): bool {
   const tsPairs = zipWith(call, [map(timestamp), map(timestamp)], [childrenPreviousBlocks, childrenCurrentBlocks])
   return all(r => r, tsPairs.map(([previousTs, currentTs]) => previousTs === currentTs))
 }
@@ -346,6 +367,13 @@ export function getNewPreExpDifficulty (
   return preExpDiff
 }
 
+/**
+ * Return the `work` - string to which the distance is being guessed while mining
+ *
+ * @param {BcBlock} previousBlock Last known previously mined BC block
+ * @param {Block[]} childrenCurrentBlocks Last know rovered blocks from each chain (one of them is the one which triggered mining)
+ * @return {string} a hash representing the work
+ */
 export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Block[]): string {
   const newChainRoot = getChildrenRootHash(getChildrenBlocksHashes(childrenCurrentBlocks))
   const work = blake2bl(
