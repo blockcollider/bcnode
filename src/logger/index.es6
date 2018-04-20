@@ -12,7 +12,7 @@ const winston = require('winston')
 const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
-const LOG_DIR = resolve(__dirname, '..', '..', 'logs')
+const LOG_DIR = resolve(__dirname, '..', '..', '_logs')
 const logPath = `${LOG_DIR}/`
 const tsFormat = () => new Date().toISOString()
 
