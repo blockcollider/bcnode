@@ -66,7 +66,7 @@ export default class Controller {
     }, NETWORK_TIMEOUT)
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 
@@ -77,7 +77,7 @@ export default class Controller {
 
     pool.on('peerready', (peer, addr) => {
       clearTimeout(poolTimeout)
-      this._logger.info(`connected to pool version: ${peer.version}, subversion: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
+      this._logger.debug(`Connected to pool version: ${peer.version}, subversion: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
 
       if (network.hasQuorum()) {
         try {
@@ -85,7 +85,7 @@ export default class Controller {
           network.discoveredPeers++
           network.addPeer(peer)
         } catch (err) {
-          this._logger.error('error in peerready cb', err)
+          this._logger.error('Error in peerready cb', err)
         }
       } else if (!network.hasQuorum() && peer.subversion.indexOf('/Satoshi:0.1') > -1) {
         try {
@@ -137,18 +137,18 @@ export default class Controller {
     // attach peer events
     pool.on('peerinv', (peer, message) => {
       try {
-        this._logger.info(`PeerINV: ${peer.version}, ${peer.subversion}, ${peer.bestHeight}, ${peer.host}`)
+        this._logger.debug(`Peer INV: ${peer.version}, ${peer.subversion}, ${peer.bestHeight}, ${peer.host}`)
         if (peer.subversion !== undefined && peer.subversion.indexOf('/Satoshi:') > -1) {
           try {
             var peerMessage = new Messages().GetData(message.inventory)
             peer.sendMessage(peerMessage)
           } catch (err) {
-            this._logger.error('error sending message', err)
+            this._logger.error('Error sending message', err)
 
             try {
               pool._removePeer(peer)
             } catch (err) {
-              this._logger.error('error removing peer', err)
+              this._logger.error('Error removing peer', err)
             }
           }
         }
@@ -160,9 +160,9 @@ export default class Controller {
     pool.on('peerblock', (peer, _ref) => {
       const { block } = _ref
 
-      this._logger.info('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
-      this._logger.info('Peer best height submitting block: ' + peer.bestHeight)
-      this._logger.info('Last block' + network.bestHeight)
+      this._logger.debug('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
+      this._logger.debug('Peer best height submitting block: ' + peer.bestHeight)
+      this._logger.debug('Last block' + network.bestHeight)
 
       if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
         block.lastBlock = network.bestHeight
@@ -185,14 +185,14 @@ export default class Controller {
         try {
           pool._removePeer(peer)
         } catch (err) {
-          this._logger.error('error removing peer', err)
+          this._logger.error('Error removing peer', err)
         }
       }
     })
 
     setInterval(() => {
-      this._logger.info('rover peers ' + pool.numberConnected())
-    }, 60000)
+      this._logger.info('Peers ' + pool.numberConnected())
+    }, 60 * 1000)
   }
 
   _onNewBlock (height, block): [boolean, Object] {

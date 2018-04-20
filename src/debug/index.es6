@@ -12,7 +12,9 @@ const mkdirp = require('mkdirp')
 const path = require('path')
 const process = require('process')
 
-const DEBUG_ENABLED = process.env.BC_DEBUG === 'true'
+const BC_DEBUG = process.env.BC_DEBUG
+const DEBUG_ENABLED = BC_DEBUG === 'true' || BC_DEBUG === '1'
+
 const DEBUG_DIR = path.resolve(__dirname, '..', '..', '_debug')
 
 /**

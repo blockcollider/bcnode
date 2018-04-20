@@ -128,10 +128,10 @@ export default class Controller {
   }
 
   init () {
-    this._logger.info('initialized')
+    this._logger.debug('Initialized')
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 
@@ -146,7 +146,7 @@ export default class Controller {
         this._logger.debug(`Got last height '${height}'`)
         getBlock(this._wavesApi, height - 1).then(lastBlock => {
           if (!this._blockCache.has(lastBlock.reference)) {
-            this._logger.info(`Unseen new block '${lastBlock.reference}', height: ${height}`)
+            this._logger.debug(`Unseen new block '${lastBlock.reference}', height: ${height}`)
             this._blockCache.set(lastBlock.reference)
 
             const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)

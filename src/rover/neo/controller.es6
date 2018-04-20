@@ -126,17 +126,17 @@ export default class Controller {
     })
 
     const cycle = () => {
-      this._logger.info('trying to get new block')
+      this._logger.debug('trying to get new block')
       const node = this._neoMesh.getRandomNode()
 
       return node.rpc.getBestBlockHash().then(bestBlockHash => {
-        this._logger.debug(`got best block: "${bestBlockHash}"`)
+        this._logger.debug(`Got best block: "${bestBlockHash}"`)
         if (!this._blockCache.has(bestBlockHash)) {
           this._blockCache.set(bestBlockHash, true)
-          this._logger.debug(`unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
+          this._logger.debug(`Unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
 
           node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
-            this._logger.info(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
+            this._logger.debug(`Collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
             const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
@@ -151,7 +151,7 @@ export default class Controller {
           })
         }
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${e.message}`)
+        this._logger.error(`Error while getting new block, err: ${e.message}`)
       })
     }
 

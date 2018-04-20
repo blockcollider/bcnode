@@ -82,11 +82,11 @@ export default class Node {
   }
 
   broadcastNewBlock (method: string, block: BcBlock) {
-    this._logger.info(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
+    this._logger.debug(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
 
     const url = `${PROTOCOL_PREFIX}/${method}`
     this._peers.getAllArray().map(peer => {
-      this._logger.info(`Sending to peer ${peer}`)
+      this._logger.debug(`Sending to peer ${peer}`)
       this.node.dialProtocol(peer, url, (err, conn) => {
         if (err) {
           this._logger.error('Error sending message to peer', peer, err)
@@ -98,7 +98,7 @@ export default class Node {
   }
 
   _handleEventPeerConnect (node: Bundle, peer: Object) {
-    this._logger.info('Connection established:', peer.id.toB58String())
+    this._logger.debug('Connection established:', peer.id.toB58String())
     node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
       if (err) {
         node.hangUp(peer, () => {
@@ -113,11 +113,11 @@ export default class Node {
 
   _handleEventPeerDisconnect (peer: Object) {
     this._peers.remove(peer)
-    this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
+    this._logger.debug(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
   }
 
   _handleEventPeerDiscovery (node: Bundle, peer: Object) {
-    this._logger.info(`Discovered: ${peer.id.toB58String()}`)
+    this._logger.debug(`Discovered: ${peer.id.toB58String()}`)
     node.dial(peer, (err) => {
       if (err) {
         this._logger.warn(`Error while dialing discovered peer ${peer.id.toB58String()}`)
@@ -160,7 +160,7 @@ export default class Node {
           if (networkId !== NETWORK_ID) {
             this._logger.warn(`Disconnecting peer ${peerId} - network id mismatch ${networkId} / ${NETWORK_ID}`)
             node.hangUp(new PeerId(peerId), () => {
-              this._logger.info(`${peerId} disconnected`)
+              this._logger.debug(`${peerId} disconnected`)
             })
             return
           }
@@ -174,7 +174,7 @@ export default class Node {
             return
           }
           this._peers.put(peer)
-          this._logger.info(`Status handled successfuly, added peer ${peer.id.toB58String()}`)
+          this._logger.debug(`Status handled successfuly, added peer ${peer.id.toB58String()}`)
         })
       })
     )

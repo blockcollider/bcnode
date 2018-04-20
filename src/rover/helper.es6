@@ -26,7 +26,7 @@ export function createUnifiedBlock (block: Object, transform: Function): Block {
   debugSaveObject(path.join(dir, 'unified', filename), unifiedBlock.toObject())
 
   // $FlowFixMe
-  logger.debug(`Created unified block: ${stringifyObject(obj)}`)
+  logger.info(`Created unified block: ${stringifyObject(obj)}`)
 
   return unifiedBlock
 }

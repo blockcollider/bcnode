@@ -133,7 +133,7 @@ export default class Controller {
     this._logger.debug('initialized')
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 
@@ -143,13 +143,13 @@ export default class Controller {
     })
 
     const cycle = () => {
-      this._logger.info('trying to get new block')
+      this._logger.debug('trying to get new block')
 
       return getLastHeight(this._liskApi).then(lastHeight => {
-        this._logger.debug(`got lastHeight: "${lastHeight}"`)
+        this._logger.debug(`Got lastHeight: "${lastHeight}"`)
 
         getBlock(this._liskApi, lastHeight).then(lastBlock => {
-          this._logger.info(`collected new block with id: ${inspect(lastBlock.id)}`)
+          this._logger.debug(`Collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
@@ -174,7 +174,7 @@ export default class Controller {
           }
         })
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${e.message}`)
+        this._logger.error(`Error while getting new block, err: ${e.message}`)
       })
     }
 
@@ -209,8 +209,8 @@ export default class Controller {
     //        return 0
     //      })
 
-    //      log.info('peer sample: ' + response.peers.length)
-    //      log.info('probable lsk block heigh ' + tp[0])
+    //      log.debug('peer sample: ' + response.peers.length)
+    //      log.debug('probable lsk block heigh ' + tp[0])
     //    }
     //  })
     // }, 60000)
