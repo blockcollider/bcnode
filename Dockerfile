@@ -37,8 +37,9 @@ WORKDIR /src
 
 # Support for mounted volumes
 VOLUME /src/_data
+VOLUME /src/_debug
+VOLUME /src/_logs
 VOLUME /src/config
-VOLUME /src/logs
 
 COPY . .
 
