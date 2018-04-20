@@ -65,6 +65,7 @@ export async function main (args: string[]) {
   console.log('version', version)
 
   program
+    // $FlowFixMe
     .version(`${version.npm}#${version.git}`)
     .option('--miner-key [key]', 'Miner key')
     .option('-n, --node', 'Start P2P node')

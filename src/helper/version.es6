@@ -28,6 +28,7 @@ const DEFAULT_VERSION: Object = {
 
 /**
  * Generate version object
+ * @returns {Object} Object repesenting version
  */
 export const genarateVersion = () => {
   const cmds = [
@@ -46,8 +47,9 @@ export const genarateVersion = () => {
     ]
   ]
 
+  let res = null
   try {
-    return cmds.reduce((acc, el) => {
+    res = cmds.reduce((acc, el) => {
       const [key, valFn] = el
       acc[key] = valFn()
 
@@ -55,13 +57,17 @@ export const genarateVersion = () => {
     }, DEFAULT_VERSION)
   } catch (e) {
     logger.warn(`Unable to generate '${VERSION_FILENAME}', reason: ${e.message}`)
-    return DEFAULT_VERSION
+    res = DEFAULT_VERSION
   }
+
+  return objToFile(VERSION_FILE_PATH, res)
 }
 
 /**
  * Get version object
- * @param patht
+ *
+ * @param path
+ * @return {Object}
  */
 export const getVersion = (path: string = VERSION_FILE_PATH) => {
   if (fs.existsSync(path)) {
@@ -92,8 +98,11 @@ export const readVersionFile = (path: string = VERSION_FILE_PATH) => {
 
 /**
  * Write version object to file
+ *
  * @param path
+ * @param version
  */
 export function writeVersionFile (path: string = VERSION_FILE_PATH, version: ?Object = null) {
+  // $FlowFixMe
   return objToFile(VERSION_FILE_PATH, version || getVersion(path))
 }

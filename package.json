@@ -1,6 +1,6 @@
 {
   "name": "bcnode",
-  "version": "0.1.2",
+  "version": "0.5.0",
   "description": "Block Collider with miners and rovers",
   "main": "lib/src/init.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "dist-windows": "yarn && yarn run build-native && yarn test --ci --coverage && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
     "outdated": "yarn outdated || true",
     "pkg": "pkg package.json --out-path=dist",
-    "version:generate": "lib/.scripts/version-generate.js",
+    "version:generate": "node ./scripts/version-generate.js",
     "watch:lint": "onchange src/**/*.es6 -- yarn run lint:standard",
     "watch:transpile": "onchange src/**/*.es6 -- babel {{changed}} --source-maps=true --config-file ./.babelrc --out-dir lib --ignore lib,node_modules",
     "watch:test": "jest --watch",
