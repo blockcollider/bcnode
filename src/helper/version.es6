@@ -26,6 +26,9 @@ const DEFAULT_VERSION: Object = {
   npm: '<unknown>'
 }
 
+/**
+ * Generate version object
+ */
 export const genarateVersion = () => {
   const cmds = [
     [
@@ -56,6 +59,10 @@ export const genarateVersion = () => {
   }
 }
 
+/**
+ * Get version object
+ * @param patht
+ */
 export const getVersion = (path: string = VERSION_FILE_PATH) => {
   if (fs.existsSync(path)) {
     try {
@@ -75,10 +82,18 @@ export const getVersion = (path: string = VERSION_FILE_PATH) => {
   return version
 }
 
+/**
+ * Read version object from file
+ * @param path
+ */
 export const readVersionFile = (path: string = VERSION_FILE_PATH) => {
   return objFromFileSync(path)
 }
 
+/**
+ * Write version object to file
+ * @param path
+ */
 export function writeVersionFile (path: string = VERSION_FILE_PATH, version: ?Object = null) {
   return objToFile(VERSION_FILE_PATH, version || getVersion(path))
 }
