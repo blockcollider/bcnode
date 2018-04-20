@@ -8,7 +8,7 @@
     "benchmark": "./bin/benchmark",
     "check": "yarn run dist",
     "doc": "./node_modules/.bin/esdoc || true",
-    "docker:build": "yarn run transpile && docker -t build blockcollider/bcnode .",
+    "docker:build": "yarn run transpile && docker -t blockcollider/bcnode .",
     "flow:watch": "./node_modules/flow-watch/src/flow-watch.js",
     "lint:standard": "standard src/**/*.es6",
     "lint:flow": "flow",
