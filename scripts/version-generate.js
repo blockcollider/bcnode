@@ -8,3 +8,4 @@ if (genarateVersion) {
 } else {
   console.log('Unable to generate .version.json file')
 }
+c
