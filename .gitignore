@@ -1,11 +1,10 @@
 # IntelliJ Idea Project
 .idea/
 
-# Debug data
-_debug/
-
-# Temp data
+# Various data
 _data/
+_debug/
+_logger/
 
 # Generated doc
 docs/
@@ -93,8 +92,6 @@ dist/
 !assets/dist/
 
 # Block Collider specific data directories
-/_data/
-miner_data
 .wavescache
 
 # Webpack assets
