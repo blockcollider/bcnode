@@ -20,8 +20,8 @@ const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
-const { prepareWork, prepareNewBlock, mine } = require('../miner/miner')
-const { getGenesisBlock } = require('../miner/genesis')
+const { prepareWork, prepareNewBlock, mine } = require('../bc/miner')
+const { getGenesisBlock } = require('../bc/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 
