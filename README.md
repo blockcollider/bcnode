@@ -40,7 +40,7 @@ Following environment variables can be used for advanced tweaking
 
 ### Run official docker image from public repo
 
-***Backround/Daemon**
+***Backround/Daemon***
 
 ```
 $ docker run --name bcnode -d -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
