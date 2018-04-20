@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+'use strict';
+
+process.title = 'bcnode';
+
+if (process.argv.indexOf('--help') !== -1
+    || process.argv.indexOf('-h') !== -1) {
+  console.error('Documentation: https://docs.blockcollider.org');
+  process.exit(1);
+  throw new Error('Could not exit.');
+}
+
+if (process.argv.indexOf('--version') !== -1
+    || process.argv.indexOf('-v') !== -1) {
+  const pkg = require('../package.json');
+  console.log(pkg.version);
+  process.exit(0);
+  throw new Error('Could not exit.');
+}
+
+
+// Temporary hack
+if (!node.config.bool('no-wallet') && !node.has('walletdb')) {
+  const plugin = require('../lib/wallet/plugin');
+  node.use(plugin);
+}
+
+process.on('unhandledRejection', (err, promise) => {
+  throw err;
+});
+
+(async () => {
+  const n = require("../lib/init.js");
+  //await node.open();
+  //await node.connect();
+  //node.startSync();
+})().catch((err) => {
+  console.error(err.stack);
+  process.exit(1);
+});

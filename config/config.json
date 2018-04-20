@@ -1,0 +1,37 @@
+{
+  "grpc": {
+    "host": "127.0.0.1",
+    "port": 50051
+  },
+
+  "persistence": {
+    "path": "_data"
+  },
+
+  "p2p": {
+    "rendezvous": "/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star/"
+  },
+
+  "rovers": {
+    "eth": {
+      "altBootNodes": [
+        {
+          "address": "52.74.57.123",
+          "udpPort": 30303
+        }
+      ]
+    },
+
+    "lsk": {
+      "ssl": true,
+      "randomPeer": true,
+      "testnet": false,
+      "port": "443",
+      "bannedPeers": []
+    }
+  },
+
+  "server": {
+    "port": 3000
+  }
+}

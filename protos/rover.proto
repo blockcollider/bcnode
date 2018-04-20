@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package bc;
+
+import "core.proto";
+
+service Rover {
+    // Sends a greeting
+    rpc CollectBlock (Block) returns (Null) {}
+}

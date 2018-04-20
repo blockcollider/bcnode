@@ -1,0 +1,18 @@
+{
+  "plugins": [
+    "transform-flow-strip-types"
+  ],
+  "presets": [
+    ["env", {
+      "targets": {
+        "node": "8"
+      },
+      "useBuiltIns": true,
+      "exclude": [
+        "babel-plugin-transform-regenerator",
+        "transform-async-to-generator"
+      ]
+    }]
+  ],
+  "sourceMaps": true
+}

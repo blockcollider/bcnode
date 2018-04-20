@@ -1,0 +1,20 @@
+{
+  "blockNumber": 488150,
+  "timestamp": 1507048536,
+  "version": 1,
+  "flags": [],
+  "prevBlockHash": "ead6ef03d61ee60c533d6d450c50a1e559a8a37f6b796a4094cd0dac6b744428",
+  "blockHash": "b5ce50a86313f1a85343f71d2419ee937c9347ff4ad82b87f6ade75271238d2f",
+  "blockWork": "",
+  "blockchainsId": "ef03d61ee6fce2fc4e6826ccbb",
+  "blockDistance": 4893449323,
+  "txDistanceSum": 0, 
+  "steradianId": "",
+  "nTws": 0,
+  "nBlobkchains": 1,
+  "nTransactions": 1,
+  "steradian": [],
+  "tws": [], 
+  "blockchains": [], 
+  "transactions": []
+}

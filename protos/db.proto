@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package bc;
+
+// Represents value stored in key/value database
+// User provided value is automatically (de)serialized
+message DbValue {
+    string type = 1;
+    bytes data = 2;
+    int32 version = 3;
+    bool is_native = 4;
+}

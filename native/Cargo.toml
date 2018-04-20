@@ -1,0 +1,20 @@
+[package]
+name = "bcnode-native"
+version = "0.1.0"
+authors = ["Tomas Korcak <korczis@gmail.com>"]
+license = "MIT"
+build = "build.rs"
+
+[lib]
+name = "bcnode_native"
+crate-type = ["dylib"]
+
+[build-dependencies]
+neon-build = "0.1.22"
+
+[dependencies]
+bcrust-core = { path = "../rust/bcrust-core"}
+env_logger = "0.4"
+log = "0.3"
+neon = "0.1"
+protobuf = "1.4"

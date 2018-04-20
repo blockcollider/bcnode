@@ -1,0 +1,53 @@
+{ 
+    "version": 2,
+    "distance": 0.5,
+    "range": 2200,
+    "hash": "",
+    "ntx": 2, 
+    "ne": 2,
+    "mne": 2, 
+    "miner": "0220d18aeddbf807bed67dcfbe58c171f63aa2df5a65695e6af18ca9710a662245",
+    "input": "0xc8cf59fce963cc498c345f6d8869959d55fb11a6bc7092bf3a8826a94acfd3e4",  
+    "sig":"", 
+    "blockHash": "", 
+    "merkleRoot": "",
+    "txs": [
+        {
+            "type": "01",
+            "value": 2, 
+            "to": "XE5136GAE1KYDL1U9K5NDB25T4G2UXAP2U", 
+            "index": 1 
+        },
+        {
+            "type": "02", 
+            "nonce": 1, 
+            "distance": 0.5,
+            "value": 2, 
+            "fee": 0.001,
+            "compiler": "0xc8cf59fce963cc498c345f6d8869959d55fb11a6bc7092bf3a8826a94acfd3e4",
+            "from": "0220d18aeddbf807bed67dcfbe58c171f63aa2df5a65695e6af18ca9710a662245",
+            "to": "XE5136GAE1KYDL1U9K5NDB25T4G2UXAP2U", 
+            "input": "", 
+            "trust": "",
+            "sig": "", 
+            "miner": "", 
+            "index": 2 
+        }
+    ],
+    "edges": [
+        {
+            "tag":"eth",
+            "org":"0x2e2890dabd2353cc6adc6f39b08fe7241228c7662cca52416a8068a2b664ec7f",
+            "n": 16,
+            "input": "0xe21141a7cd65742e716f8363740b2649b68bd156c55b2304e62643d633f0d42a",
+            "ph": "0xa12638fec0100e2aa05c4d949808fbfef6540923932b190807fc88ae74831451"
+        },
+        {
+            "tag":"btc",
+            "org":"0x231fec41c8433409b352f911bc6b34fed15ddc0ef3a2e15a98ca0365c52559b3",
+            "n": 477727,
+            "input": "000000000000000000d3e789d269a2cbecbf38208c5d9f2242176be02ca911f9",
+            "ph": "0000000000000000009aa4e42f09efe4496f5e48afdc70f8d0184a7c0c504e68"
+        }
+    ]
+}

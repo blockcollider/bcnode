@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package bc;
+
+enum ObjType {
+    BlockHeaders = 0;
+    BlockBodies = 1;
+    BlockTransactions = 2;
+
+    RoverBestHeights = 3;
+    RoverBlockHeaders = 4;
+    RoverBlockBodies = 5;
+    RoverTransactionHeaders = 6;
+    RoverMarkedHeaders = 7;
+}
+
+enum MsgType {
+    GetObjectsRequest = 0;
+}
+
+message MessageGetObjectsRequest {
+    MsgType type = 1;
+    ObjType body = 2;
+}

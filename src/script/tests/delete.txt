@@ -1,0 +1,27 @@
+f8898086--09184e72a000--82271094000000000000000000000000000000000000000080a4--7f7465737432000000000000000000000000000000000000000000000000000000600057--1ca0--8a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075--a0--1ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
+
+8a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075
+
+0x7f7465737432000000000000000000000000000000000000000000000000000000600057
+
+gasPrice: 0x09184e72a000 
+
+nonce: 0x2710
+
+nonce - transaction sequence number fr the sending account
+gasprice - price you are offering to pay
+startgas - maximum amount of gas allowed for the transaction
+to - destination address (account or contract address)
+value - eth to transfer to the destination, if any
+data - all of the interesting stuff goes here
+v - along with r and s makes up the ECDSA signature
+r
+s
+
+-------------------------------------------
+
+var sig = secp256k1.sign(msgHash, privateKey)
+var ret = {}
+	ret.r = sig.signature.slice(0, 32)
+	ret.s = sig.signature.slice(32, 64)
+	ret.v = sig.recovery + 27
