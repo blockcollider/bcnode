@@ -27,6 +27,7 @@ _debug/
 _logs/
 
 # Artifacts
+root/.cargo/
 coverage/
 doc/
 docs/
@@ -36,8 +37,10 @@ native/artifacts.json
 native/index.node
 node_modules/
 public/assets/
+src/native/
 target/
 target/fuzz/artifacts/
 target/fuzz/corpus/
+tmp/
 
 # .version.json
