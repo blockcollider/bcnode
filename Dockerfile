@@ -70,5 +70,5 @@ RUN mkdir -p /src/logs
 
 EXPOSE 3000 9090
 
-ENTRYPOINT [ "./bin/cli" ]
+ENTRYPOINT [ "forever", "./bin/cli" ]
 
