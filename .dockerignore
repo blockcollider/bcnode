@@ -41,6 +41,7 @@ native/index.node
 node_modules/
 public/assets/
 src/native/
+src/native/artifacts.json
 target/
 target/fuzz/artifacts/
 target/fuzz/corpus/
