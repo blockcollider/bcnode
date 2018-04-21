@@ -29,8 +29,13 @@ _logs/
 # Artifacts (root)
 root/.cargo/
 
-# Artifacts
+# Root dirs &files
+/root/
 /root/.cargo/
+/tmp/
+
+# Artifacts
+.cargo/
 coverage
 doc
 docs
@@ -38,15 +43,14 @@ lib
 native/target
 native/artifacts.json
 native/index.node
-node_modules
-public/assets
-root/
-src/native/
+node_modules/
+public/assets/
 src/native/artifacts.json
+src/native/target/
 src/protos/*.js
 target
 target/fuzz/artifacts
 target/fuzz/corpus
-tmp
+tmp/
 
 # .version.json
