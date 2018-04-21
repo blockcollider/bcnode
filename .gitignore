@@ -104,3 +104,6 @@ dist/
 
 # Secrets
 .env.sh
+
+# Version file
+.version.json
