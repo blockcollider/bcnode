@@ -10,8 +10,8 @@ import React, { Component } from 'react'
 
 import ConnectionState from './ConnectionState'
 
-// $FlowFixMe
-import version from '../../.version.json'
+// $FlowFixMermreser
+import VERSION from '../../.version.json'
 
 export default class Navbar extends Component<*> {
   render () {
@@ -25,7 +25,7 @@ export default class Navbar extends Component<*> {
       <nav className='navbar nnavbar-expand-lg navbar-light bg-light'>
         <a className='navbar-brand' href='https://blockcollider.org'>
           <img src='/img/bc-black.png' style={styleBrand} />
-          <span style={{marginLeft: '10px'}}>Block Collider ({version.npm}#{version.git.short})</span>
+          <span style={{marginLeft: '10px'}}>Block Collider ({VERSION.npm}#{VERSION.git.short})</span>
         </a>
         <div className='collapse navbar-collapse' id='navbarText'>
           <a className='nav-link' href='/'>Blocks</a>
@@ -35,3 +35,4 @@ export default class Navbar extends Component<*> {
     )
   }
 }
+

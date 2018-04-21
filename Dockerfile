@@ -40,8 +40,6 @@ VOLUME /src/_data
 VOLUME /src/config
 VOLUME /src/logs
 
-COPY .version.json .
-
 COPY . .
 
 # And build everything

@@ -1,12 +1,10 @@
 #! /usr/bin/env node
 
-const { genarateVersion } = require('../lib/helper/version')
+const { getVersion } = require('../src/helper/version')
 
-if (genarateVersion) {
+if (getVersion) {
   console.log('Generating .version.json file')
-  genarateVersion()
+  getVersion()
 } else {
   console.log('Unable to generate .version.json file')
-
 }
-

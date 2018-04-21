@@ -11,7 +11,7 @@ const execSync = require('child_process').execSync
 const fs = require('fs')
 const path = require('path')
 
-const { objFromFileSync, objToFile } = require('../helper/json')
+const { objFromFileSync, objToFileSync } = require('../helper/json')
 
 const logging = require('../logger')
 const logger: Object = logging.getLogger(__filename)
@@ -47,9 +47,8 @@ export const genarateVersion = () => {
     ]
   ]
 
-  let res = null
   try {
-    res = cmds.reduce((acc, el) => {
+    return cmds.reduce((acc, el) => {
       const [key, valFn] = el
       acc[key] = valFn()
 
@@ -57,10 +56,8 @@ export const genarateVersion = () => {
     }, DEFAULT_VERSION)
   } catch (e) {
     logger.warn(`Unable to generate '${VERSION_FILENAME}', reason: ${e.message}`)
-    res = DEFAULT_VERSION
+    return DEFAULT_VERSION
   }
-
-  return objToFile(VERSION_FILE_PATH, res)
 }
 
 /**
@@ -104,5 +101,5 @@ export const readVersionFile = (path: string = VERSION_FILE_PATH) => {
  */
 export function writeVersionFile (path: string = VERSION_FILE_PATH, version: ?Object = null) {
   // $FlowFixMe
-  return objToFile(VERSION_FILE_PATH, version || getVersion(path))
+  return objToFileSync(VERSION_FILE_PATH, version || getVersion(path))
 }
