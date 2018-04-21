@@ -30,21 +30,23 @@ _logs/
 root/.cargo/
 
 # Artifacts
-.cargo/
-coverage/
-doc/
-docs/
-lib/
-native/target/
+/root/.cargo
+coverage
+doc
+docs
+lib
+native/target
 native/artifacts.json
 native/index.node
-node_modules/
-public/assets/
-src/native/
-src/native/artifacts.json
-target/
-target/fuzz/artifacts/
-target/fuzz/corpus/
-tmp/
+node_modules
+public/assets
+root
+src/native
+/src/native/artifacts.json
+src/protos/*.js
+target
+target/fuzz/artifacts
+target/fuzz/corpus
+tmp
 
 # .version.json
