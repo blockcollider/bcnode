@@ -1,5 +1,21 @@
+# Docker stuff
+.dockerignore
+Dockerfile
+
+# IntelliJ Idea Project
+.idea/
+
+# Downloadedfiles
+protoc-3.5.1-linux-x86_64.zip
+
 # Git stuff
 .git
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # Docker stuff
 *Dockerfile*
@@ -13,6 +29,7 @@ _logs/
 # Artifacts
 coverage/
 doc/
+docs/
 lib/
 native/target/
 native/artifacts.json
