@@ -5,23 +5,16 @@
 *Dockerfile*
 *docker-compose*
 
-# Local data
+# Internal
 _data/
+_debug/
+_logs/
 
-# Coverage
+# Artifacts
 coverage/
-
-# Generated documentation
-docs/
-
-# Logs
-logs/
-*.log
-
-# Node artifacts
-node_modules/
+doc/
 lib/
-
-# Rust artifacts
-target/
 native/target/
+node_modules/
+public/assets/
+target/
