@@ -51,5 +51,5 @@ RUN mkdir -p /src/logs
 
 EXPOSE 3000 9090
 
-ENTRYPOINT [ "forever", "./bin/cli" ]
+ENTRYPOINT [ "./bin/cli" ]
 
