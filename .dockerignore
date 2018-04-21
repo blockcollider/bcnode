@@ -30,7 +30,7 @@ _logs/
 root/.cargo/
 
 # Artifacts
-/root/.cargo
+/root/.cargo/
 coverage
 doc
 docs
