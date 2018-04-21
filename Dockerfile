@@ -41,11 +41,23 @@ VOLUME /src/_debug
 VOLUME /src/_logs
 VOLUME /src/config
 
+# Get JS deps
+COPY ["package.json", "yarn.lock", "./"]
+RUN yarn
+
+# Add and build native (rust) stuff
+ADD native native
+ADD rust rust
+RUN neon build
+
 COPY .version.json .
 COPY . .
 
 # And build everything
 RUN yarn run dist
+
+RUN  rm -rf native/target/
+RUN  rm -rf target/
 
 RUN mkdir -p /src/logs
 
