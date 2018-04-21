@@ -15,8 +15,12 @@ coverage/
 doc/
 lib/
 native/target/
+native/artifacts.json
+native/index.node
 node_modules/
 public/assets/
 target/
+target/fuzz/artifacts/
+target/fuzz/corpus/
 
 .version.json
