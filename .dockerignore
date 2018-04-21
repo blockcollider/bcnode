@@ -44,7 +44,7 @@ src/native/artifacts.json
 src/native/target/
 src/protos/*.js
 root/
-rust/
+rust/target/
 target/
 tmp/
 
