@@ -13,7 +13,7 @@ const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
 const LOG_DIR = resolve(__dirname, '..', '..', '_logs')
-const logPath = `${LOG_DIR}/bcnode-`
+const logPath = `${LOG_DIR}/bcnode`
 const tsFormat = () => new Date().toISOString()
 
 const LOG_LEVEL = process.env.BC_LOG || 'info'

@@ -172,7 +172,7 @@ export async function main (args: string[]) {
         : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
 
     if (!minerKey) {
-      logger.error('logPath required')
+      logger.error('--miner-key required')
       return -1
     }
 
