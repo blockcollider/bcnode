@@ -27,7 +27,7 @@ _debug/
 _logs/
 
 # Artifacts
-root/.cargo/
+.cargo/
 coverage/
 doc/
 docs/
