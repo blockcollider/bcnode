@@ -1,4 +1,9 @@
 const path = require('path')
+// const webpack = require('webpack')
+
+// const fs = require('fs')
+// const GIT_DIR = path.resolve(__dirname, '../.git')
+// const { genarateVersion } = require('../lib/helper/version')
 
 const APP_DIR = path.resolve(__dirname, '../app')
 
@@ -6,7 +11,7 @@ module.exports = {
   mode: 'development', // "production" | "development" | "none"
   // Chosen mode tells webpack to use its built-in optimizations accordingly.
 
-  entry: './app/index.jsx', // string | object | array
+  entry: './app/index', // string | object | array
   // Here the application starts executing
   // and webpack starts bundling
 
@@ -33,7 +38,7 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.js', '.json', '.jsx', '.css'],
+    extensions: ['.es6', '.js', '.json', '.jsx', '.css'],
     modules: [
       'node_modules',
       APP_DIR
@@ -42,7 +47,7 @@ module.exports = {
 
   module: {
     rules: [{
-      test: /.jsx?$/,
+      test: /\.(es6|jsx)$/,
       include: [
         APP_DIR
       ],
@@ -51,7 +56,18 @@ module.exports = {
         presets: ['env', 'react']
       }
     }]
-  }
+  },
+
+  devtool: 'source-map',
+
+  plugins: [
+    // () => {
+    //   if (fs.existsSync(GIT_DIR)) {
+    //     console.log('Generating .version.json')
+    //     genarateVersion()
+    //   }
+    // }
+  ]
 
   // module: {
   //   // configuration regarding modules
