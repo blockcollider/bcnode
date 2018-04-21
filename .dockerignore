@@ -18,3 +18,5 @@ native/target/
 node_modules/
 public/assets/
 target/
+
+.version.json
