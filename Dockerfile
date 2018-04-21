@@ -47,6 +47,7 @@ RUN yarn
 
 # Add and build native (rust) stuff
 ADD native native
+ADD protos protos
 ADD rust rust
 RUN neon build
 
