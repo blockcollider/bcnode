@@ -62,11 +62,9 @@ process.on('uncaughtException', (err) => {
 // eslint-disable-next-line import/prefer-default-export
 export async function main (args: string[]) {
   const version = getVersion()
-  console.log('version', version)
-
   program
     // $FlowFixMe
-    .version(`${version.npm}#${version.git}`)
+    .version(`${version.npm}#${version.git.short}`)
     .option('--miner-key [key]', 'Miner key')
     .option('-n, --node', 'Start P2P node')
     .option('-r, --randezvous-server', 'Start randezvous server')
