@@ -29,11 +29,6 @@ _logs/
 # Artifacts (root)
 root/.cargo/
 
-# Root dirs &files
-/root/
-/root/.cargo/
-/tmp/
-
 # Artifacts
 .cargo/
 coverage
@@ -48,6 +43,7 @@ public/assets/
 src/native/artifacts.json
 src/native/target/
 src/protos/*.js
+root/
 target
 target/fuzz/artifacts
 target/fuzz/corpus
