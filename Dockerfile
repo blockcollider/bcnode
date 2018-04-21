@@ -45,6 +45,9 @@ VOLUME /src/config
 COPY ["package.json", "yarn.lock", "./"]
 RUN yarn
 
+# Create folder for generted JS protos
+RUN mkdir -p src/protos
+
 # Add and build native (rust) stuff
 ADD native native
 ADD protos protos
