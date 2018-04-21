@@ -79,6 +79,7 @@ describe('Miner', () => {
 
     // Create (not yet existing) block
     const newBlock = prepareNewBlock(
+      mockedTimestamp,
       genesisBlock,
       headers,
       headers[1],
@@ -92,6 +93,7 @@ describe('Miner', () => {
 
     // Mine new block
     const solution = mine(
+      mockedTimestamp,
       work,
       TEST_MINER_KEY,
       newBlock.getMerkleRoot(),
@@ -114,9 +116,9 @@ describe('Miner', () => {
       hash: '39bc7bbd2b182eddac2d18d5c998808f64423176975fb5a715d57f8599a4104f',
       height: 2,
       merkleRoot: '53c85bcd43ade65bba9d2e2d2b5944116526b7c05ba7b7d6425699128548f5ae',
-      difficulty: 11860447342465,
+      difficulty: 11801972029294,
       chainRoot: 'daf4c73925e7eb4e67a86cabfb7cc1e257a7af63f6a3f0b3f5991839891fc796',
-      distance: 185633463518405,
+      distance: 195690488822149,
       nonce: '0.12137218313968567',
       txCount: 0,
       miner: TEST_MINER_KEY,

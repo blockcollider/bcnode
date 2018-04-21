@@ -206,8 +206,10 @@ export default class Engine {
       }).then(([currentBlocks, previousBcBlock]) => {
         this._logger.debug(`Mining ${JSON.stringify(this._collectedBlocks, null, 2)}`)
 
+        const currentTimestamp = (Date.now() / 1000) << 0
         const work = prepareWork(previousBcBlock, currentBlocks)
         const newBlock = prepareNewBlock(
+          currentTimestamp,
           previousBcBlock,
           currentBlocks,
           block,
@@ -217,6 +219,7 @@ export default class Engine {
 
         this._mining = true
         const solution = mine(
+          currentTimestamp,
           work,
           this._minerKey,
           newBlock.getMerkleRoot(),
@@ -225,7 +228,7 @@ export default class Engine {
         this._mining = false
 
         // Set timestamp after mining
-        newBlock.setTimestamp(Date.now() / 1000 << 0)
+        newBlock.setTimestamp(currentTimestamp)
         // $FlowFixMe - add annotation to mine method
         newBlock.setDistance(solution.distance)
         // $FlowFixMe - add annotation to mine method

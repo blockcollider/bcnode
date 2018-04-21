@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  * TODO: Fix flow issues
- * @flow-disable
+ * @flow
  */
 
 /**
@@ -241,22 +241,22 @@ export function distance (a: string, b: string): number {
 /**
  * Finds the mean of the distances from a provided set of hashed header proofs
  *
+ * @param {number} currentTimestamp current time reference
  * @param {string} work reference to find distance > `threshold`
  * @param {string} miner Public address to which NRG award for mining the block and transactions will be credited to
  * @param {string} merkleRoot Mekle root of the BC block being mined
  * @param {number} threshold threshold for the result to be valid
  * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
-export function mine (work: string, miner: string, merkleRoot: string, threshold: number) {
+export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number) {
   threshold = new BN(threshold, 16)
   let result
 
   // TODO: @pm check
   while (true) {
-    let timestamp = (Date.now() / 1000) << 0 // TODO should use a date injected from calling context (same one as prepareNewBlock)
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
-    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + timestamp))
+    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentTimestamp))
     if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
       return {
         distance: result,
@@ -343,6 +343,7 @@ function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHead
 
 // TODO rename arguments to better describe data
 export function getNewPreExpDifficulty (
+  currentTimestamp: number,
   previousBlock: BcBlock,
   parentShareDiff: BN,
   minimumDiffShare: BN,
@@ -351,11 +352,8 @@ export function getNewPreExpDifficulty (
 ) {
   let handicap = calculateHandicap(childrenPreviousBlocks, childrenCurrentBlocks)
 
-  let timestamp
-
-  timestamp = (Date.now() / 1000) << 0 // TODO inject current date
   const currentChildrenDifficulty = getDiff(
-    timestamp,
+    currentTimestamp,
     previousBlock.getTimestamp(),
     minimumDiffShare,
     MINIMUM_DIFFICULTY,
@@ -380,9 +378,8 @@ export function getNewPreExpDifficulty (
 
   newDifficulty.add(currentChildrenDifficulty)
 
-  timestamp = (Date.now() / 1000) << 0 // TODO inject current date
   const preExpDiff = getDiff(
-    timestamp,
+    currentTimestamp,
     previousBlock.getTimestamp(),
     MINIMUM_DIFFICULTY,
     newDifficulty
@@ -451,6 +448,7 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
  * - calculates new merkle root, hash and stores it to structure
  * - calculates new block height (previous + 1) and stores it to structure
  *
+ * @param {number} currentTimestamp current timestamp reference
  * @param {BcBlock} previousBlock Last known previously mined BC block
  * @param {Block[]} childrenCurrentBlocks Last know rovered blocks from each chain
  * @param {Block} blockWhichTriggeredMining The last rovered block - this one triggered the mining
@@ -458,9 +456,7 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
  * @param {string} minerAddress Public addres to which NRG award for mining the block and transactions will be credited to
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
-export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
-  // TODO here we should get a date inserted from calling context as a reference and dont use Date.now() everywhere in the code (this could cause a difference in a notion of 'current time' if
-  // something takes more than 1s. Such cases are market with Todo comment
+export function prepareNewBlock (currentTimestamp: number, previousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
 
@@ -469,6 +465,7 @@ export function prepareNewBlock (previousBlock: BcBlock, childrenCurrentBlocks: 
   const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
   const preExpDiff = getNewPreExpDifficulty(
+    currentTimestamp,
     previousBlock,
     parentShareDiff,
     minimumDiffShare,
