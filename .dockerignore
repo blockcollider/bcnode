@@ -26,6 +26,9 @@ _data/
 _debug/
 _logs/
 
+# Artifacts (root)
+/root/.cargo/
+
 # Artifacts
 .cargo/
 coverage/
