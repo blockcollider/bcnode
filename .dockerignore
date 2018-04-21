@@ -40,9 +40,9 @@ native/artifacts.json
 native/index.node
 node_modules
 public/assets
-root
-src/native
-/src/native/artifacts.json
+root/
+src/native/
+src/native/artifacts.json
 src/protos/*.js
 target
 target/fuzz/artifacts
