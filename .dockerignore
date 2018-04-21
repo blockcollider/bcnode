@@ -27,7 +27,7 @@ _debug/
 _logs/
 
 # Artifacts (root)
-/root/.cargo/
+root/.cargo/
 
 # Artifacts
 .cargo/
