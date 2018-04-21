@@ -6,33 +6,27 @@
  *
  * @flow
  */
+
 import React, { Component } from 'react'
 
+import Brand from './Brand'
 import ConnectionState from './ConnectionState'
 
-// $FlowFixMermreser
-import VERSION from '../../.version.json'
+const STYLE = {
+  color: 'black'
+}
 
 export default class Navbar extends Component<*> {
   render () {
-    const styleBrand = {
-      height: '35px',
-      width: '35px',
-      padding: 0
-    }
-
     return (
-      <nav className='navbar nnavbar-expand-lg navbar-light bg-light'>
-        <a className='navbar-brand' href='https://blockcollider.org'>
-          <img src='/img/bc-black.png' style={styleBrand} />
-          <span style={{marginLeft: '10px'}}>Block Collider ({VERSION.npm}#{VERSION.git.short})</span>
-        </a>
+      <nav className='navbar navbar-expand-lg navbar-light bg-light'>
+        <Brand />
         <div className='collapse navbar-collapse' id='navbarText'>
-          <a className='nav-link' href='/'>Blocks</a>
+          <a className='nav-link' href='/#/rover' style={STYLE}>Rover</a>
+          { false && <span className='nav-link' href='/#/wallet' style={STYLE}>Wallet</span> }
         </div>
         <ConnectionState connected={this.props.connected} />
       </nav>
     )
   }
 }
-

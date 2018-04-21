@@ -51,7 +51,7 @@ $ docker run --name bcnode -d -p 3000:3000 -p 9090:9090 blockcollider/bcnode:lat
 $ docker run -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
-### Build and run docker image locally
+### Build docker image locally
 
 ```
 # Clone sources
@@ -65,9 +65,6 @@ $ git checkout release
 
 # Build image locally
 $ docker build -t blockcollider/bcnode .
-
-# Run locally build image
-$ docker run -p 3000:3000 -p 9090:9090 blockcollider/bcnode --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build from source

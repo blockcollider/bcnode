@@ -6,9 +6,11 @@
  *
  * @flow
  */
-import React, { Component } from 'react'
 
-export default class ConnectionState extends Component<*> {
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+
+export class ConnectionState extends Component<*> {
   render () {
     const statusClass = this.props.connected ? 'badge-success' : 'badge-warning'
 
@@ -17,3 +19,9 @@ export default class ConnectionState extends Component<*> {
     )
   }
 }
+
+const component = connect(state => ({
+  connected: state.socket.connected
+}))(ConnectionState)
+
+export default component

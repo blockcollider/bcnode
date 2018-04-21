@@ -8,63 +8,26 @@
  */
 
 import React, { Component } from 'react'
-import { merge, concat } from 'ramda'
 
-import Main from './Main'
 import Navbar from './Navbar'
 
-type State = {
-  blocks: Object[],
-  connected: bool
-}
-
-export default class App extends Component<*, State> {
-  _socket: any
-
-  constructor () {
-    super()
-    this.state = { blocks: [], connected: false }
-  }
-
-  componentDidMount () {
-    this._run()
-  }
-
-  componentWillUnmount () {
-    this._socket.close()
-  }
-
+export default class App extends Component<*> {
   render () {
-    const props = this.state
+    const {children} = this.props
+    let elements = React.Children.map(children,
+      (child) => {
+        return React.cloneElement(child)
+      })
+
     return (
       <div>
-        <Navbar connected={this.state.connected} />
+        <Navbar />
         <div className='container-fluid'>
           <div className='container'>
-            <Main {...props} />
+            {elements}
           </div>
         </div>
       </div>
     )
-  }
-
-  _run () {
-    this._socket = new WebSocket(`ws://${location.hostname}:${location.port}/ws`) // eslint-disable-line
-    this._socket.onopen = () => {
-      this.setState(merge(this.state, { connected: true, blocks: [] }))
-    }
-    this._socket.onmessage = (data) => {
-      // $FlowFixMe
-      const payload = JSON.parse(data.data)
-      if (payload.type === 'block.snapshot') {
-        this.setState(merge(this.state, { blocks: payload.blocks }))
-      } else if (payload.type === 'block.latest') {
-        this.setState(merge(this.state, { blocks: concat(this.state.blocks, [payload.block]) }))
-      }
-    }
-    this._socket.onclose = () => {
-      this.setState(merge(this.state, { connected: false }))
-      window.setTimeout(this._run.bind(this), 1000)
-    }
   }
 }
