@@ -1,6 +1,8 @@
 # IntelliJ Idea Project
 .idea/
 
+/.version.json
+
 # Various data
 _data/
 _debug/

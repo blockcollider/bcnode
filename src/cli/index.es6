@@ -22,7 +22,7 @@ const {
 const { errToObj } = require('../helper/error')
 const logging = require('../logger')
 const Engine = require('../engine').default
-const pkg = require('../../package.json')
+const { getVersion } = require('../helper/version')
 
 // $FlowFixMe
 const native = require('../../native/index.node')
@@ -61,8 +61,10 @@ process.on('uncaughtException', (err) => {
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function main (args: string[]) {
+  const version = getVersion()
   program
-    .version(pkg.version)
+    // $FlowFixMe
+    .version(`${version.npm}#${version.git.short}`)
     .option('--miner-key [key]', 'Miner key')
     .option('-n, --node', 'Start P2P node')
     .option('-r, --randezvous-server', 'Start randezvous server')

@@ -41,6 +41,7 @@ VOLUME /src/_debug
 VOLUME /src/_logs
 VOLUME /src/config
 
+COPY .version.json .
 COPY . .
 
 # And build everything
