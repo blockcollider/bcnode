@@ -31,11 +31,11 @@ root/.cargo/
 
 # Artifacts
 .cargo/
-coverage
-doc
-docs
-lib
-native/target
+coverage/
+doc/
+docs/
+lib/
+native/target/
 native/artifacts.json
 native/index.node
 node_modules/
@@ -44,9 +44,8 @@ src/native/artifacts.json
 src/native/target/
 src/protos/*.js
 root/
-target
-target/fuzz/artifacts
-target/fuzz/corpus
+rust/
+target/
 tmp/
 
 # .version.json
