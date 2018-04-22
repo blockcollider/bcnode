@@ -57,7 +57,9 @@ export default class Node {
     const pipeline = [
       (cb) => PeerInfo.create(cb),
       (peerInfo, cb) => {
-        peerInfo.multiaddrs.add(config.p2p.rendezvous)
+        // const addr = `${config.p2p.rendezvous}ipfs/${peerInfo.id.toB58String()}`
+        const addr = config.p2p.rendezvous
+        peerInfo.multiaddrs.add(addr)
 
         node = new Bundle(peerInfo, this._peers)
         this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
