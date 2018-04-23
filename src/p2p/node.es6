@@ -18,8 +18,8 @@ const pull = require('pull-stream')
 const Engine = require('../engine').default
 const logging = require('../logger')
 const { BcBlock } = require('../protos/core_pb')
-const config = require('../../config/config')
 const Bundle = require('./bundle').default
+const Signaling = require('./signaling').websocket
 
 const PROTOCOL_VERSION = '0.0.1'
 const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
@@ -57,11 +57,12 @@ export default class Node {
     const pipeline = [
       (cb) => PeerInfo.create(cb),
       (peerInfo, cb) => {
-        // const addr = `${config.p2p.rendezvous}ipfs/${peerInfo.id.toB58String()}`
-        const addr = config.p2p.rendezvous
-        peerInfo.multiaddrs.add(addr)
+        peerInfo.multiaddrs.add(Signaling.getAddress(peerInfo))
 
-        node = new Bundle(peerInfo, this._peers)
+        const opts = {
+          signaling: Signaling
+        }
+        node = new Bundle(peerInfo, this._peers, opts)
         this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
         node.start(cb)
 

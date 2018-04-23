@@ -36,6 +36,7 @@ coverage/
 doc/
 docs/
 lib/
+!lib/bc/genesis.raw.json
 native/target/
 native/artifacts.json
 native/index.node

@@ -7,27 +7,22 @@
  * @flow
  */
 
-// const wrtc = require('wrtc')
 const libp2p = require('libp2p')
+const KadDHT = require('libp2p-kad-dht')
 const Mplex = require('libp2p-mplex')
 const SECIO = require('libp2p-secio')
-// const WStar = require('p2p-webrtc-star')
-const WSStar = require('libp2p-websocket-star')
 const PeerInfo = require('peer-info')
 const PeerBook = require('peer-book')
 const TCP = require('libp2p-tcp')
 
 export default class Bundle extends libp2p {
-  constructor (peerInfo: PeerInfo, peerBook: ?PeerBook, options: ?Object) {
-    const ws = new WSStar({
-      // wrtc: wrtc,
-      id: peerInfo.id
-    })
+  constructor (peerInfo: PeerInfo, peerBook: ?PeerBook, options: { signaling: Object }) {
+    const signaling = options.signaling.initialize(peerInfo)
 
     const modules = {
       transport: [
         new TCP(),
-        ws
+        signaling
       ],
       connection: {
         muxer: [
@@ -38,10 +33,11 @@ export default class Bundle extends libp2p {
         ]
       },
       discovery: [
-        ws.discovery
-      ]
+        signaling.discovery
+      ],
+      DHT: KadDHT
     }
 
-    super(modules, peerInfo)
+    super(modules, peerInfo, peerBook, options)
   }
 }
