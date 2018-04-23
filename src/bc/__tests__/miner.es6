@@ -164,4 +164,123 @@ describe('Miner', () => {
       ]
     })
   })
+
+  test('prepareNewBlock()', () => {
+    const genesisBlock = getGenesisBlock()
+    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+
+    // Convert genesis headers back to raw Block which is returned by miner
+    const headers = genesisHeaders
+      .map((oldHeader) => {
+        return new Block([
+          oldHeader.getBlockchain(),
+          oldHeader.getHash(),
+          oldHeader.getPreviousHash(),
+          oldHeader.getTimestamp(),
+          oldHeader.getHeight(),
+          oldHeader.getMerkleRoot()
+        ])
+      })
+
+    // Pick btc header
+
+    let testBtcHeader = TEST_DATA.btc[0]
+    // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
+    // Change hash, previousHash, timestamp and height
+    let newHeader = new Block([
+      testBtcHeader.blockchain,
+      testBtcHeader.hash, // <-------  the new block would update his previous block
+      testBtcHeader.previousHash, // the previous hash from above
+      testBtcHeader.timestamp / 1000,
+      testBtcHeader.height,
+      testBtcHeader.merkleRoot
+    ])
+
+    // Update changed header in header list
+    headers[0] = newHeader
+
+    // Mock timestamp - 3600 seconds (1 hour) after genesis block
+    let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
+
+    // Create (not yet existing) block
+    let newBlock = prepareNewBlock(
+      mockedTimestamp,
+      genesisBlock,
+      headers,
+      headers[0],
+      [], // transactions
+      TEST_MINER_KEY
+    )
+    expect(newBlock.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(2)
+
+    testBtcHeader = TEST_DATA.btc[1]
+    // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
+    // Change hash, previousHash, timestamp and height
+    newHeader = new Block([
+      testBtcHeader.blockchain,
+      testBtcHeader.hash, // <-------  the new block would update his previous block
+      testBtcHeader.previousHash, // the previous hash from above
+      testBtcHeader.timestamp / 1000,
+      testBtcHeader.height,
+      testBtcHeader.merkleRoot
+    ])
+
+    // Update changed header in header list
+    headers[0] = newHeader
+
+    // Mock timestamp - 3600 seconds (1 hour) after genesis block
+    mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
+
+    // Create (not yet existing) block
+    newBlock = prepareNewBlock(
+      mockedTimestamp,
+      newBlock,
+      headers,
+      headers[0],
+      [], // transactions
+      TEST_MINER_KEY
+    )
+    expect(newBlock.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(3)
+
+    let testLskHeader = TEST_DATA.lsk[0]
+    // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
+    // Change hash, previousHash, timestamp and height
+    newHeader = new Block([
+      testLskHeader.blockchain,
+      testLskHeader.hash, // <-------  the new block would update his previous block
+      testLskHeader.previousHash, // the previous hash from above
+      testLskHeader.timestamp / 1000,
+      testLskHeader.height,
+      testLskHeader.merkleRoot
+    ])
+
+    // Update changed header in header list
+    headers[2] = newHeader
+
+    // Mock timestamp - 3600 seconds (1 hour) after genesis block
+    mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
+
+    // Create (not yet existing) block
+    newBlock = prepareNewBlock(
+      mockedTimestamp,
+      newBlock,
+      headers,
+      headers[2],
+      [], // transactions
+      TEST_MINER_KEY
+    )
+    expect(newBlock.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(4)
+  })
 })
