@@ -178,12 +178,19 @@ export default class Engine {
 
     this._emitter.on('collectBlock', ({ block }) => {
       process.nextTick(() => {
-        this.collectBlock(rovers, block)
+        this.collectBlock(rovers, block).then(() => {
+          this._logger.debug('Success in collectBlock event handler')
+          this._mining = false
+        }).catch(err => {
+          const reason = JSON.stringify(errToObj(err), null, 2)
+          this._logger.error(`Mining failed, reason: ${reason}`)
+          this._mining = false
+        })
       })
     })
   }
 
-  collectBlock (rovers: string[], block: BcBlock) {
+  async collectBlock (rovers: string[], block: BcBlock) {
     this._collectedBlocks[block.getBlockchain()] += 1
 
     if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) {
@@ -192,67 +199,80 @@ export default class Engine {
 
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._mining && equals(new Set(this._knownRovers), new Set(rovers))) {
-      const getKeys: string[] = rovers.map(chain => `${chain}.block.latest`)
+      let currentBlocks
+      let lastPreviousBlock
+      let previousBcBlocks
 
-      Promise.all(getKeys.map((key) => {
-        return this._persistence.get(key).then(block => {
-          this._logger.debug(`Got "${key}"`)
-          return block
-        })
-      })).then(currentBlocks => {
+      // get latest block from each child blockchain
+      try {
+        const getKeys: string[] = rovers.map(chain => `${chain}.block.latest`)
+        currentBlocks = await Promise.all(getKeys.map((key) => {
+          return this._persistence.get(key).then(block => {
+            this._logger.debug(`Got "${key}"`)
+            return block
+          })
+        }))
         this._logger.debug(`Got ${currentBlocks.length} blocks from persistence`)
-        return this._persistence.get('bc.block.latest').then(bcBlock => {
-          return [currentBlocks, bcBlock]
-        })
-      }).then(([currentBlocks, lastPreviousBlock]) => {
+      } catch (err) {
+        this._logger.warn(`Error while getting current blocks, reason: ${err.message}`)
+        throw err
+      }
+
+      // get latest known BC block
+      try {
+        lastPreviousBlock = await this._persistence.get('bc.block.latest')
+        this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
+      } catch (err) {
+        this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
+        throw err
+      }
+
+      // get BC blocks to get timestamp for timeBonus calculation for
+      try {
         const lastChildBlockHeaders = lastPreviousBlock.getChildBlockHeadersList()
         const lastBcBlockKeys = lastChildBlockHeaders.map(block => {
           const height = lastPreviousBlock.getHeight() - block.getChildBlockConfirmationsInParentCount() + 1
           return `bc.block.${height}`
         })
-        this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
-        return Promise.all(lastBcBlockKeys.map(key => this._persistence.get(key))).then(blocks => {
-          const previousBcBlocks = fromPairs(blocks.map((block, idx) => ([lastChildBlockHeaders[idx].getBlockchain(), block])))
-          return [currentBlocks, lastPreviousBlock, previousBcBlocks]
-        })
-      }).then(([currentBlocks, lastPreviousBlock, previousBcBlocks]) => {
-        this._logger.debug(`Mining ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+        this._logger.debug(`Getting previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
+        const blocks = await Promise.all(lastBcBlockKeys.map(key => this._persistence.get(key)))
+        previousBcBlocks = fromPairs(blocks.map((block, idx) => ([lastChildBlockHeaders[idx].getBlockchain(), block])))
+        this._logger.debug(`Successfuly got ${previousBcBlocks.length} previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
+      } catch (err) {
+        this._logger.warn(`Error while getting one or more previous BC blocks, reason: ${err.message}`)
+        throw err
+      }
 
-        const currentTimestamp = (Date.now() / 1000) << 0
-        const work = prepareWork(lastPreviousBlock, currentBlocks)
-        const newBlock = prepareNewBlock(
-          currentTimestamp,
-          lastPreviousBlock,
-          previousBcBlocks,
-          currentBlocks,
-          block,
-          [], // TODO add transactions
-          this._minerKey
-        )
+      this._logger.debug(`Mining ${JSON.stringify(this._collectedBlocks, null, 2)}`)
 
-        this._mining = true
-        const solution = mine(
-          currentTimestamp,
-          work,
-          this._minerKey,
-          newBlock.getMerkleRoot(),
-          newBlock.getDifficulty()
-        )
-        this._mining = false
+      const currentTimestamp = (Date.now() / 1000) << 0
+      const work = prepareWork(lastPreviousBlock, currentBlocks)
+      const newBlock = prepareNewBlock(
+        currentTimestamp,
+        lastPreviousBlock,
+        previousBcBlocks,
+        currentBlocks,
+        block,
+        [], // TODO add transactions
+        this._minerKey
+      )
 
-        // Set timestamp after mining
-        newBlock.setTimestamp(currentTimestamp)
-        // $FlowFixMe - add annotation to mine method
-        newBlock.setDistance(solution.distance)
-        // $FlowFixMe - add annotation to mine method
-        newBlock.setNonce(solution.nonce)
+      this._mining = true
+      const solution = mine(
+        currentTimestamp,
+        work,
+        this._minerKey,
+        newBlock.getMerkleRoot(),
+        newBlock.getDifficulty()
+      )
+      this._mining = false
 
-        return this._processMinedBlock(newBlock)
-      }).catch(e => {
-        const reason = JSON.stringify(errToObj(e), null, 2)
-        this._logger.error(`Mining failed, reason: ${reason}`)
-        this._mining = false
-      })
+      // Set timestamp after mining
+      newBlock.setTimestamp(currentTimestamp)
+      newBlock.setDistance(solution.distance)
+      newBlock.setNonce(solution.nonce)
+
+      return this._processMinedBlock(newBlock)
     } else {
       if (!this._canMine) {
         this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)

@@ -249,7 +249,8 @@ export function distance (a: string, b: string): number {
  * @param {number} threshold threshold for the result to be valid
  * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
-export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number) {
+// $FlowFixMe will never return anything else then a mining result
+export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number): { distance: number, nonce: string } {
   threshold = new BN(threshold, 16)
   let result
 
