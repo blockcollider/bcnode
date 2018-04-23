@@ -106,4 +106,4 @@ dist/
 .env.sh
 
 # Version file
-.version.json
+# .version.json
