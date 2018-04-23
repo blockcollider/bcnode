@@ -14,6 +14,7 @@ import { connect } from 'react-redux'
 
 export class PeersContainer extends Component<*> {
   render () {
+    let id = 0
     const peers = this.props.peers.map((peer) => {
       const protocolVersion = peer.status && peer.status.protocolVersion
       const gitVersion = (
@@ -39,7 +40,7 @@ export class PeersContainer extends Component<*> {
 
       return (
         <tr key={peer.id}>
-          <th scope='row'>1</th>
+          <th scope='row'>{id++}</th>
           <td>{peer.id}</td>
           <td>{protocolVersion}</td>
           <td>{version}</td>
