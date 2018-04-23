@@ -8,11 +8,20 @@
  */
 
 import { ACTIONS as ROVER_ACTIONS } from './components/Rover'
+import { ACTIONS as PEER_ACTIONS } from './components/Peers'
 
 export const ACTIONS = {
   SOCKET_CREATED: 'SOCKET_CREATED',
   SOCKET_CONNECTED: 'SOCKET_CONNECTED',
   SOCKET_DISCONNECTED: 'SOCKET_DISCONNECTED'
+}
+
+const DISPATCH_TABLE = {
+  'block.latest': ROVER_ACTIONS.ROVER_ADD_BLOCK,
+  'block.snapshot': ROVER_ACTIONS.ROVER_SET_BLOCKS,
+  'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
+  'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
+  'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS
 }
 
 export const initSocket = (dispatch : (msg : Object) => void) => {
@@ -23,19 +32,19 @@ export const initSocket = (dispatch : (msg : Object) => void) => {
     dispatch({type: ACTIONS.SOCKET_CONNECTED})
   }
 
-  socket.onmessage = (data) => {
-    // $FlowFixMe
-    const payload = JSON.parse(data.data)
-    if (payload.type === 'block.snapshot') {
-      dispatch({type: ROVER_ACTIONS.ROVER_SET_BLOCKS, payload: payload.blocks})
-    } else if (payload.type === 'block.latest') {
-      dispatch({type: ROVER_ACTIONS.ROVER_ADD_BLOCK, payload: payload.block})
-    }
-  }
-
   socket.onclose = () => {
     dispatch({type: ACTIONS.SOCKET_DISCONNECTED})
     window.setTimeout(() => initSocket(dispatch), 1000)
+  }
+
+  socket.onmessage = (data) => {
+    // $FlowFixMe
+    const payload = JSON.parse(data.data)
+
+    const dispatchAction = DISPATCH_TABLE[payload.type]
+    if (dispatchAction) {
+      return dispatch({type: dispatchAction, payload: payload.data})
+    }
   }
 
   return socket

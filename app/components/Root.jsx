@@ -16,6 +16,7 @@ import { Redirect, Route } from 'react-router'
 
 import App from './App'
 import Rover from './Rover'
+import Peers from './Peers'
 
 export default class Root extends Component<*> {
   render () {
@@ -28,6 +29,7 @@ export default class Root extends Component<*> {
               return (<Redirect to='/rover' />)
             }} />
             <Route path='/rover' component={Rover} />
+            <Route path='/peers' component={Peers} />
           </App>
         </ConnectedRouter>
       </Provider>
