@@ -20,8 +20,8 @@ const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
-const { prepareWork, prepareNewBlock, mine } = require('../miner/miner')
-const { getGenesisBlock } = require('../miner/genesis')
+const { prepareWork, prepareNewBlock, mine } = require('../bc/miner')
+const { getGenesisBlock } = require('../bc/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 
@@ -99,7 +99,7 @@ export default class Engine {
       this._monitor.start()
     }
 
-    this._logger.info('Engine initialized')
+    this._logger.debug('Engine initialized')
   }
 
   /**
@@ -192,7 +192,7 @@ export default class Engine {
           return [currentBlocks, bcBlock]
         })
       }).then(([currentBlocks, previousBcBlock]) => {
-        this._logger.debug(`Starting mining now`)
+        this._logger.debug(`Mining ${JSON.stringify(this._collectedBlocks, null, 2)}`)
 
         const work = prepareWork(previousBcBlock, currentBlocks)
         const newBlock = prepareNewBlock(
@@ -227,14 +227,14 @@ export default class Engine {
       })
     } else {
       if (!this._canMine) {
-        this._logger.info(`Not mining because not collected enough blocks from all chains yet (status ${JSON.stringify(this._collectedBlocks)})`)
+        this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
         return
       }
       if (!this._mining) {
-        this._logger.info('Not starting mining new block while already mining one')
+        this._logger.debug('Not starting mining new block while already mining one')
         return
       }
-      this._logger.warn(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
+      this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
     }
   }
 
@@ -273,7 +273,7 @@ export default class Engine {
 
     return Promise.all(tasks)
       .then(() => {
-        this._logger.info('New BC block stored in DB')
+        this._logger.debug('New BC block stored in DB')
 
         // TODO broadcast BC block here
         return this._broadcastMinedBlock(newBlock)

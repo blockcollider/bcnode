@@ -37,11 +37,11 @@ export default class RpcServer {
     this._rpcServer.bind(GRPC_URL, grpc.ServerCredentials.createInsecure())
 
     // Start BcService
-    this._logger.info(`Starting gRPC BcService - ${GRPC_URL}`)
+    this._logger.debug(`Starting gRPC BcService - ${GRPC_URL}`)
     this._rpcServer.addService(BcService, new BcServiceImpl(this))
 
     // Start RoverService
-    this._logger.info(`Starting gRPC RoverService - ${GRPC_URL}`)
+    this._logger.debug(`Starting gRPC RoverService - ${GRPC_URL}`)
     this._rpcServer.addService(RoverService, new RoverServiceImpl(this, this.emitter))
 
     this._rpcServer.start()

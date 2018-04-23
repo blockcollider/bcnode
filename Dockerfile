@@ -37,13 +37,34 @@ WORKDIR /src
 
 # Support for mounted volumes
 VOLUME /src/_data
+VOLUME /src/_debug
+VOLUME /src/_logs
 VOLUME /src/config
-VOLUME /src/logs
 
+# Get JS deps
+COPY ["package.json", "yarn.lock", "./"]
+RUN yarn
+
+# Add and build native (rust) stuff
+ADD native native
+RUN rm -rf native/target
+ADD rust rust
+RUN rm -rf rust/target
+
+ADD protos protos
+ADD src/protos src/protos
+
+RUN neon build
+
+# Git -> .version.json
+COPY .version.json .
 COPY . .
 
 # And build everything
 RUN yarn run dist
+
+RUN  rm -rf native/target/
+RUN  rm -rf target/
 
 RUN mkdir -p /src/logs
 

@@ -94,7 +94,7 @@ export default class Controller {
     this.start()
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 

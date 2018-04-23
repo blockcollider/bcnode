@@ -29,3 +29,15 @@ export function objToFile (path: string, obj: Object, replacer: ?(k: string, v: 
   const json = JSON.stringify(obj, replacer, space)
   fs.writeFile(path, json, () => {})
 }
+
+/**
+ * Synchronously saves object to file as pretty formatted JSON
+ * @param path Path to file to store serialized object
+ * @param obj Object to be serialized
+ * @param replacer Replacer used for transformation
+ * @param space Space settings for prettyfication
+ */
+export function objToFileSync (path: string, obj: Object, replacer: ?(k: string, v: Object) => Object = null, space: number = 2) {
+  const json = JSON.stringify(obj, replacer, space)
+  fs.writeFileSync(path, json, () => {})
+}

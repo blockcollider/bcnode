@@ -160,7 +160,7 @@ export default class Network {
       pool.connect()
       return pool
     } catch (err) {
-      this._logger.error('error while connecting to network', err)
+      this._logger.error('Error while connecting to network', err)
       pool.listen()
       return pool
     }

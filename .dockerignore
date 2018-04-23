@@ -1,27 +1,51 @@
+# Docker stuff
+#.dockerignore
+Dockerfile
+
+# IntelliJ Idea Project
+.idea/
+
+# Downloadedfiles
+protoc-3.5.1-linux-x86_64.zip
+
 # Git stuff
 .git
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # Docker stuff
 *Dockerfile*
 *docker-compose*
 
-# Local data
+# Internal
 _data/
+_debug/
+_logs/
 
-# Coverage
+# Artifacts (root)
+root/.cargo/
+
+# Artifacts
+.cargo/
 coverage/
-
-# Generated documentation
+doc/
 docs/
-
-# Logs
-logs/
-*.log
-
-# Node artifacts
-node_modules/
 lib/
-
-# Rust artifacts
-target/
 native/target/
+native/artifacts.json
+native/index.node
+node_modules/
+public/assets/
+src/native/artifacts.json
+src/native/target/
+src/protos/*.js
+root/
+rust/target/
+target/
+tmp/
+
+# .version.json

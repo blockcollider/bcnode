@@ -73,7 +73,7 @@ export default class Server {
   run (opts: Opts) {
     this._opts = opts
 
-    this._logger.info('Starting Server for Web UI')
+    this._logger.debug('Starting Server for Web UI')
 
     this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
     this._app.use(responseTime())
@@ -145,7 +145,7 @@ export default class Server {
         blocks: this._roveredBlocksBuffer.toarray().map(blockToWire)
       }))
       client.on('close', reason => {
-        this._logger.info('Client connection closed', req.connection.remoteAddress)
+        this._logger.debug('Client connection closed', req.connection.remoteAddress)
       })
 
       client.on('error', error => {

@@ -12,6 +12,12 @@ const os = require('os')
 const Engine = require('../engine').default
 const logging = require('../logger')
 
+// const BC_MONITOR_INTERVAL = process.env.BC_MONITOR_INTERVAL
+// const MONITOR_INTERVAL = (BC_MONITOR_INTERVAL && parseInt(BC_MONITOR_INTERVAL, 10)) || (10 * 60 * 1000)
+
+// Print monitor info once per five minutes
+const MONITOR_INTERVAL = (5 * 60 * 1000)
+
 export default class Monitor {
   _logger: Object; // eslint-disable-line no-undef
   _engine: Engine; // eslint-disable-line no-undef
@@ -25,7 +31,7 @@ export default class Monitor {
   }
 
   start () {
-    this._logger.info('Starting monitor')
+    this._logger.debug('Starting monitor')
 
     if (this._interval) {
       this.stop()
@@ -33,7 +39,7 @@ export default class Monitor {
 
     this._interval = setInterval(() => {
       this._printStats()
-    }, 10000)
+    }, MONITOR_INTERVAL)
   }
 
   stop () {
@@ -41,7 +47,7 @@ export default class Monitor {
       return
     }
 
-    this._logger.info('Stopping monitor')
+    this._logger.debug('Stopping monitor')
     if (this._interval) {
       clearInterval(this._interval)
       this._interval = null

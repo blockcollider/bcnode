@@ -1,11 +1,15 @@
 # IntelliJ Idea Project
 .idea/
 
-# Debug data
-_debug/
+# Downloadedfiles
+protoc-3.5.1-linux-x86_64.zip
 
-# Temp data
+/.version.json
+
+# Various data
 _data/
+_debug/
+_logger/
 
 # Generated doc
 docs/
@@ -93,8 +97,6 @@ dist/
 !assets/dist/
 
 # Block Collider specific data directories
-/_data/
-miner_data
 .wavescache
 
 # Webpack assets
@@ -102,3 +104,6 @@ miner_data
 
 # Secrets
 .env.sh
+
+# Version file
+.version.json

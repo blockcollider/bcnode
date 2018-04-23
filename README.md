@@ -40,8 +40,15 @@ Following environment variables can be used for advanced tweaking
 
 ### Run official docker image from public repo
 
+***Backround/Daemon***
+
 ```
-$ docker run -p 3000:3000 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
+$ docker run --name bcnode -d -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
+```
+
+***Foreground***
+```
+$ docker run -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build and run docker image locally
@@ -60,7 +67,7 @@ $ git checkout release
 $ docker build -t blockcollider/bcnode .
 
 # Run locally build image
-$ docker run -p 3000:3000 blockcollider/bcnode --ws --rovers --ui --node --miner-key ABCDEF
+$ docker run -p 3000:3000 -p 9090:9090 blockcollider/bcnode --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build from source
