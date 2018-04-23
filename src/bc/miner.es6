@@ -31,6 +31,7 @@ const {
   invoker,
   join,
   map,
+  // $FlowFixMe - missing in ramda flow-typed annotation
   partialRight,
   reduce,
   repeat,
@@ -337,7 +338,7 @@ export function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], c
  * @return {bool} `false` some of the timestamps did change or `true` all are the same
  */
 function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]): bool {
-  const tsPairs = zipWith(call, [map(timestamp), map(timestamp)], [childrenPreviousBlocks, childrenCurrentBlocks])
+  const tsPairs = [map(timestamp, childrenPreviousBlocks), map(timestamp, childrenCurrentBlocks)]
   return all(r => r, transpose(tsPairs).map(([previousTs, currentTs]) => previousTs === currentTs))
 }
 
