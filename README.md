@@ -37,6 +37,7 @@ Following environment variables can be used for advanced tweaking
 | BC_LOG        | Override log level; debug/info/warn/error |
 | BC_MINER_KEY  | Miner keyl string                         |
 | BC_MONITOR    | Print Stats periodically; true/false      |
+| BC_UI_PORT    | Web UI port; 0..65535                     |
 
 ### Run official docker image from public repo
 
