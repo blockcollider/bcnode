@@ -4,6 +4,12 @@ MAINTAINER tk@blockcollider.org
 
 # See https://github.com/libp2p/js-libp2p-webrtc-star#rendezvous-server-aka-signalling-server
 
-RUN npm install libp2p-webrtc-star
+# Create /src folder and switch to it
+RUN mkdir /src
+WORKDIR /src
 
-CMD ["./node_modules/.bin/star-signal", "--port=9090", "--host=0.0.0.0"]
+COPY . .
+
+RUN yarn
+
+ENTRYPOINT ["./node_modules/.bin/rendezvous"]
