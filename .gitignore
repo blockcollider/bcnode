@@ -7,7 +7,7 @@ protoc-3.5.1-linux-x86_64.zip
 /.version.json
 
 # Various data
-_data/
+_data*/
 _debug/
 _logger/
 

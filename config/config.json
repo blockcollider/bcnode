@@ -9,7 +9,10 @@
   },
 
   "p2p": {
-    "rendezvous": "/ip4/167.99.251.14/tcp/9090/ws/p2p-websocket-star/"
+    "rendezvous": {
+      "webrtc": "/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star",
+      "websocket": "/dns4/54.89.132.121/tcp/9091/ws/p2p-websocket-star"
+    }
   },
 
   "rovers": {
