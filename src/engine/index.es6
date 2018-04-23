@@ -8,7 +8,7 @@
  */
 
 const { EventEmitter } = require('events')
-const { equals, all, values } = require('ramda')
+const { equals, all, values, fromPairs } = require('ramda')
 
 const config = require('../../config/config')
 const { debugSaveObject } = require('../debug')
@@ -203,14 +203,26 @@ export default class Engine {
         return this._persistence.get('bc.block.latest').then(bcBlock => {
           return [currentBlocks, bcBlock]
         })
-      }).then(([currentBlocks, previousBcBlock]) => {
+      }).then(([currentBlocks, lastPreviousBlock]) => {
+        const lastChildBlockHeaders = lastPreviousBlock.getChildBlockHeadersList()
+        const lastBcBlockKeys = lastChildBlockHeaders.map(block => {
+          const height = lastPreviousBlock.getHeight() - block.getChildBlockConfirmationsInParentCount() + 1
+          return `bc.block.${height}`
+        })
+        this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
+        return Promise.all(lastBcBlockKeys.map(key => this._persistence.get(key))).then(blocks => {
+          const previousBcBlocks = fromPairs(blocks.map((block, idx) => ([lastChildBlockHeaders[idx].getBlockchain(), block])))
+          return [currentBlocks, lastPreviousBlock, previousBcBlocks]
+        })
+      }).then(([currentBlocks, lastPreviousBlock, previousBcBlocks]) => {
         this._logger.debug(`Mining ${JSON.stringify(this._collectedBlocks, null, 2)}`)
 
         const currentTimestamp = (Date.now() / 1000) << 0
-        const work = prepareWork(previousBcBlock, currentBlocks)
+        const work = prepareWork(lastPreviousBlock, currentBlocks)
         const newBlock = prepareNewBlock(
           currentTimestamp,
-          previousBcBlock,
+          lastPreviousBlock,
+          previousBcBlocks,
           currentBlocks,
           block,
           [], // TODO add transactions

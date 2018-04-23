@@ -365,8 +365,8 @@ export function getNewPreExpDifficulty (
   const newDifficulty: BN = zip(childrenPreviousBlocks, childrenCurrentBlocks).reduce((sum: BN, [previousHeader, currentHeader]) => {
     // TODO @pm - basic confirmation count is 0 - we can't divide by 0 here, should we start from 1 then?
     const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
-    // TODO now here is always used previousBlock but in most of childrenCurrentBlocks the previousBlock is not the one in which this rovered block appeared first
-    // in such case we need to have a block (and get timestamp for it) at height = previousBlock.getHeight() - currentHeader.getChildBlockConfirmationsInParentCount() - 1
+    // previousBlocks is a BC block at height = previousBlock.getHeight() - currentHeader.getChildBlockConfirmationsInParentCount() - 1
+    // (that one in which the child blockchain was changes last)
     const timeBonus = (currentHeader.getTimestamp() - previousBlocks[currentHeader.getBlockchain()].getTimestamp()) / confirmationCount
     return sum.add(
       getDiff(
