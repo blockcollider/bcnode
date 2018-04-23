@@ -9,7 +9,7 @@ Restart=always
 ExecStartPre=-/usr/bin/docker stop %n
 ExecStartPre=-/usr/bin/docker rm %n
 ExecStartPre=/usr/bin/docker pull blockcollider/rendezvous-websocket:0.1.0
-ExecStart=/usr/bin/docker run -p 9091:9091 --rm --name %n blockcollider/rendezvous-websocket:0.1.0 --port=9091 --host=0.0.0.0
+ExecStart=/usr/bin/docker run -e DEBUG=libp2p-websocket-star-rendezvous -p 9091:9091 --rm --name %n blockcollider/rendezvous-websocket:0.1.0 --port=9091 --host=0.0.0.0
 ExecStop=/usr/bin/docker stop %n
 StandardOutput=syslog
 StandardError=syslog
