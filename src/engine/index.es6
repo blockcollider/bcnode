@@ -81,13 +81,14 @@ export default class Engine {
         await this.persistence.get('bc.block.1')
         this._logger.debug('Genesis block present, everything ok')
       } catch (_) { // genesis block not found
-        const newGenesisBlock = getGenesisBlock()
         try {
+          const newGenesisBlock = getGenesisBlock()
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
           this._logger.debug('Genesis block was missing so we stored it')
         } catch (e) {
           this._logger.error(`Error while creating genesis block ${e.message}`)
+          this.requestExit()
           process.exit(1)
         }
       }
