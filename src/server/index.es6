@@ -22,10 +22,13 @@ const CircularBuffer = require('circular-buffer')
 const logging = require('../logger')
 const config = require('../../config/config')
 const { Null, Block } = require('../protos/core_pb')
+const Engine = require('../engine').default
 const { RpcClient, RpcServer } = require('../rpc')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'public')
 const docsDir = path.resolve(__dirname, '..', '..', 'docs')
+
+const PORT = (process.env.BC_UI_PORT && parseInt(process.env.BC_UI_PORT, 10)) || config.server.port
 
 type Opts = {|
   ws: bool,
@@ -37,6 +40,7 @@ type Opts = {|
 export default class Server {
   _opts: Opts
   _app: express$Application // eslint-disable-line
+  _engine: Engine
   _wsServer: any
   _rpcClient: RpcClient
   _rpcServer: RpcServer
@@ -44,9 +48,10 @@ export default class Server {
   _logger: Logger
   _roveredBlocksBuffer: CircularBuffer
 
-  constructor (rpcServer: RpcServer) {
+  constructor (engine: Engine, rpcServer: RpcServer) {
     // Create express app instance
     this._app = express()
+    this._engine = engine
     this._rpcClient = new RpcClient()
     this._rpcServer = rpcServer
     this._server = null
@@ -104,46 +109,23 @@ export default class Server {
     }
 
     // Listen for connections
-    const port = config.server.port
-    server.listen(port, () => {
-      this._logger.info(`Server available at http://0.0.0.0:${port}`)
+    server.listen(PORT, () => {
+      this._logger.info(`Server available at http://0.0.0.0:${PORT}`)
     })
   }
 
   initWebSocket () {
     this._wsServer = new WebSocket.Server({ server: this._server, path: '/ws' })
 
-    const blockToWire = (block: Block) => ({
-      timestamp: block.getTimestamp(),
-      blockchain: block.getBlockchain(),
-      hash: block.getHash()
-    })
-
     // setup relaying events from rpc server to websockets
     this._rpcServer.emitter.on('collectBlock', ({ block }) => {
       this._roveredBlocksBuffer.enq(block)
-      this._wsServer.clients.forEach(c => {
-        if (c.readyState === WebSocket.OPEN) {
-          this._logger.debug(`Sending message to client `)
-          try {
-            c.send(JSON.stringify({ type: 'block.latest', block: blockToWire(block) }), e => {
-              if (e) {
-                this._logger.error(`Could not send\n ${e}`)
-                c.terminate()
-              }
-            })
-          } catch (e) {
-            this._logger.error(`Could not send\n ${e.stack}`)
-            c.terminate()
-          }
-        }
-      })
+      this._wsBroadcast({ type: 'block.latest', data: this._transformBlockToWire(block) })
     })
+
     this._wsServer.on('connection', (client, req) => {
-      client.send(JSON.stringify({
-        type: 'block.snapshot',
-        blocks: this._roveredBlocksBuffer.toarray().map(blockToWire)
-      }))
+      this._wsSendIntialState(client)
+
       client.on('close', reason => {
         this._logger.debug('Client connection closed', req.connection.remoteAddress)
       })
@@ -204,6 +186,75 @@ export default class Server {
         icons: true
       })
     )
+  }
+
+  _transformBlockToWire (block: Block) {
+    return {
+      timestamp: block.getTimestamp(),
+      blockchain: block.getBlockchain(),
+      hash: block.getHash()
+    }
+  }
+
+  _transformPeerToWire (peer: Object) {
+    return {
+      id: peer.id.toB58String(),
+      status: peer.status
+    }
+  }
+
+  _wsBroadcast (msg: Object) {
+    const clients = (this._wsServer && this._wsServer.clients) || []
+
+    clients.forEach(c => {
+      if (c.readyState === WebSocket.OPEN) {
+        this._logger.debug(`Sending message to client `)
+        try {
+          c.send(JSON.stringify(msg), e => {
+            if (e) {
+              this._logger.error(`Could not send\n ${e}`)
+              c.terminate()
+            }
+          })
+        } catch (e) {
+          this._logger.error(`Could not send\n ${e.stack}`)
+          c.terminate()
+        }
+      }
+    })
+  }
+
+  _wsBroadcastPeerConnected (peer: Object) {
+    this._wsBroadcast({type: 'peer.connected', data: this._transformPeerToWire(peer)})
+  }
+
+  _wsBroadcastPeerDisonnected (peer: Object) {
+    this._wsBroadcast({type: 'peer.disconnected', data: this._transformPeerToWire(peer)})
+  }
+
+  _wsSendIntialState (client: WebSocket.Client) {
+    let peers = []
+    const peerBook = this._engine._node && this._engine._node._peers
+    if (peerBook) {
+      peers = peerBook.getAllArray().map((peer) => {
+        return this._transformPeerToWire(peer)
+      })
+    }
+
+    const msgs = [
+      {
+        type: 'block.snapshot',
+        data: this._roveredBlocksBuffer.toarray().map(this._transformBlockToWire)
+      },
+      {
+        type: 'peer.snapshot',
+        data: peers
+      }
+    ]
+
+    msgs.forEach((msg) => {
+      client.send(JSON.stringify(msg))
+    })
   }
 }
 

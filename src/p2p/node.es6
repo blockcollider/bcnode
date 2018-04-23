@@ -20,6 +20,7 @@ const logging = require('../logger')
 const { BcBlock } = require('../protos/core_pb')
 const Bundle = require('./bundle').default
 const Signaling = require('./signaling').websocket
+const { getVersion } = require('../helper/version')
 
 const PROTOCOL_VERSION = '0.0.1'
 const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
@@ -42,7 +43,9 @@ export default class Node {
     this._logger = logging.getLogger(__filename)
     this._statusMsg = {
       networkId: NETWORK_ID,
-      peerId: null
+      peerId: null,
+      protocolVersion: PROTOCOL_PREFIX,
+      version: getVersion()
     }
     this._peers = new PeerBook()
   }
@@ -63,7 +66,7 @@ export default class Node {
           signaling: Signaling
         }
         node = new Bundle(peerInfo, this._peers, opts)
-        this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
+        this._logger.info(`Staring p2p node with ${peerInfo.id.toB58String()}`)
         node.start(cb)
 
         this._node = node
@@ -115,12 +118,17 @@ export default class Node {
   }
 
   _handleEventPeerDisconnect (peer: Object) {
-    this._peers.remove(peer)
-    this._logger.debug(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
+    try {
+      this._peers.remove(peer)
+      this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
+      this._engine._emitter.emit('peerDisconnected', { peer })
+    } catch (e) {
+      this._logger.warn(`Unable to remove peer from peer book, reason: ${e.message}`)
+    }
   }
 
   _handleEventPeerDiscovery (node: Bundle, peer: Object) {
-    this._logger.debug(`Discovered: ${peer.id.toB58String()}`)
+    this._logger.info(`Discovered: ${peer.id.toB58String()}`)
     node.dial(peer, (err) => {
       if (err) {
         this._logger.warn(`Error while dialing discovered peer ${peer.id.toB58String()}`)
@@ -157,9 +165,12 @@ export default class Node {
           this._logger.warn('Error while processing status')
           return
         }
+
+        let statusData = {}
+
         try {
-          const data = JSON.parse(wireData.toString())
-          const { networkId, peerId } = data
+          statusData = JSON.parse(wireData.toString())
+          const { networkId, peerId } = statusData
           if (networkId !== NETWORK_ID) {
             this._logger.warn(`Disconnecting peer ${peerId} - network id mismatch ${networkId} / ${NETWORK_ID}`)
             node.hangUp(new PeerId(peerId), () => {
@@ -171,13 +182,19 @@ export default class Node {
           this._logger.error('Error while parsing data')
           return
         }
+
         conn.getPeerInfo((err, peer) => {
           if (err) {
             this._logger.error(`Cannot get peer info ${err}`)
             return
           }
+
+          statusData.connectedAt = Date.now()
+          peer.status = statusData
           this._peers.put(peer)
-          this._logger.debug(`Status handled successfuly, added peer ${peer.id.toB58String()}`)
+          const peerId = peer.id.toB58String()
+          this._logger.info(`Status handled successfully, added peer ${peerId}`)
+          this._engine._emitter.emit('peerConnected', { peer })
         })
       })
     )
