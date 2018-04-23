@@ -158,10 +158,10 @@ export default class Network {
     try {
       this._logger.debug('connected to network')
       pool.connect()
+      pool.listen()
       return pool
     } catch (err) {
       this._logger.error('Error while connecting to network', err)
-      pool.listen()
       return pool
     }
   }
