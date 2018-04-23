@@ -81,6 +81,7 @@ describe('Miner', () => {
     const newBlock = prepareNewBlock(
       mockedTimestamp,
       genesisBlock,
+      { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[1],
       [], // transactions
@@ -206,6 +207,7 @@ describe('Miner', () => {
     let newBlock = prepareNewBlock(
       mockedTimestamp,
       genesisBlock,
+      { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[0],
       [], // transactions
@@ -236,19 +238,20 @@ describe('Miner', () => {
     mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
 
     // Create (not yet existing) block
-    newBlock = prepareNewBlock(
+    let newBlock2 = prepareNewBlock(
       mockedTimestamp,
       newBlock,
+      { 'btc': newBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[0],
       [], // transactions
       TEST_MINER_KEY
     )
-    expect(newBlock.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
-    expect(newBlock.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(3)
-    expect(newBlock.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(3)
-    expect(newBlock.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(3)
-    expect(newBlock.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock2.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(3)
 
     let testLskHeader = TEST_DATA.lsk[0]
     // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
@@ -269,18 +272,19 @@ describe('Miner', () => {
     mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
 
     // Create (not yet existing) block
-    newBlock = prepareNewBlock(
+    let newBlock3 = prepareNewBlock(
       mockedTimestamp,
-      newBlock,
+      newBlock2,
+      { 'btc': newBlock, 'eth': genesisBlock, 'lsk': newBlock2, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[2],
       [], // transactions
       TEST_MINER_KEY
     )
-    expect(newBlock.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
-    expect(newBlock.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(4)
-    expect(newBlock.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(1)
-    expect(newBlock.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(4)
-    expect(newBlock.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock3.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock3.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock3.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock3.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock3.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(4)
   })
 })

@@ -345,7 +345,8 @@ function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHead
 // TODO rename arguments to better describe data
 export function getNewPreExpDifficulty (
   currentTimestamp: number,
-  previousBlock: BcBlock,
+  lastPreviousBlock: BcBlock,
+  previousBlocks: { [blockchain: string]: BcBlock },
   parentShareDiff: BN,
   minimumDiffShare: BN,
   childrenPreviousBlocks: ChildBlockHeader[],
@@ -355,7 +356,7 @@ export function getNewPreExpDifficulty (
 
   const currentChildrenDifficulty = getDiff(
     currentTimestamp,
-    previousBlock.getTimestamp(),
+    lastPreviousBlock.getTimestamp(),
     minimumDiffShare,
     MINIMUM_DIFFICULTY,
     handicap
@@ -366,11 +367,11 @@ export function getNewPreExpDifficulty (
     const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
     // TODO now here is always used previousBlock but in most of childrenCurrentBlocks the previousBlock is not the one in which this rovered block appeared first
     // in such case we need to have a block (and get timestamp for it) at height = previousBlock.getHeight() - currentHeader.getChildBlockConfirmationsInParentCount() - 1
-    const timeBonus = (currentHeader.getTimestamp() - previousBlock.getTimestamp()) / confirmationCount
+    const timeBonus = (currentHeader.getTimestamp() - previousBlocks[currentHeader.getBlockchain()].getTimestamp()) / confirmationCount
     return sum.add(
       getDiff(
-        previousBlock.getTimestamp() + timeBonus,
-        previousBlock.getTimestamp(),
+        previousBlocks[currentHeader.getBlockchain()].getTimestamp() + timeBonus,
+        previousBlocks[currentHeader.getBlockchain()].getTimestamp(),
         parentShareDiff,
         minimumDiffShare
       )
@@ -381,7 +382,7 @@ export function getNewPreExpDifficulty (
 
   const preExpDiff = getDiff(
     currentTimestamp,
-    previousBlock.getTimestamp(),
+    lastPreviousBlock.getTimestamp(),
     MINIMUM_DIFFICULTY,
     newDifficulty
   ) // Calculate the final pre-singularity difficulty adjustment
@@ -450,40 +451,42 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
  * - calculates new block height (previous + 1) and stores it to structure
  *
  * @param {number} currentTimestamp current timestamp reference
- * @param {BcBlock} previousBlock Last known previously mined BC block
+ * @param {BcBlock} lastPreviousBlock Last known previously mined BC block
+ * @param {Object} previousBlocks previous BC block where corresponding blockchain was changed last
  * @param {Block[]} childrenCurrentBlocks Last know rovered blocks from each chain
  * @param {Block} blockWhichTriggeredMining The last rovered block - this one triggered the mining
  * @param {BcTransaction[]} newTransactions Transactions which will be added to newly mined block
  * @param {string} minerAddress Public addres to which NRG award for mining the block and transactions will be credited to
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
-export function prepareNewBlock (currentTimestamp: number, previousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
+export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, previousBlocks: {[blockchain: string]: BcBlock}, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
 
-  const childBlockHeadersList = prepareChildBlockHeadersList(previousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
+  const childBlockHeadersList = prepareChildBlockHeadersList(lastPreviousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
 
-  const parentShareDiff = getParentShareDiff(previousBlock.getDifficulty(), blockHashes.length)
+  const parentShareDiff = getParentShareDiff(lastPreviousBlock.getDifficulty(), blockHashes.length)
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
   const preExpDiff = getNewPreExpDifficulty(
     currentTimestamp,
-    previousBlock,
+    lastPreviousBlock,
+    previousBlocks,
     parentShareDiff,
     minimumDiffShare,
-    previousBlock.getChildBlockHeadersList(),
+    lastPreviousBlock.getChildBlockHeadersList(),
     childBlockHeadersList
   )
 
-  const oldTransactions = previousBlock.getTransactionsList()
+  const oldTransactions = lastPreviousBlock.getTransactionsList()
   const newMerkleRoot = createMerkleRoot(
     blockHashes.concat(oldTransactions.concat([minerAddress, 1]))
   ) // blockchains, transactions, miner address, height
 
   const newBlock = new BcBlock()
-  newBlock.setHash(blake2bl(previousBlock.getHash() + newMerkleRoot))
-  newBlock.setHeight(previousBlock.getHeight() + 1)
+  newBlock.setHash(blake2bl(lastPreviousBlock.getHash() + newMerkleRoot))
+  newBlock.setHeight(lastPreviousBlock.getHeight() + 1)
   newBlock.setMiner(minerAddress)
-  newBlock.setDifficulty(getExpFactorDiff(preExpDiff, previousBlock.getHeight()).toNumber())
+  newBlock.setDifficulty(getExpFactorDiff(preExpDiff, lastPreviousBlock.getHeight()).toNumber())
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
   newBlock.setDistance(0)
