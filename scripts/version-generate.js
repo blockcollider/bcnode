@@ -1,6 +1,6 @@
-#! /usr/bin/env node
+#! /usr/bin/env babel-node
 
-const { getVersion } = require('../lib/helper/version')
+const { getVersion } = require('../src/helper/version')
 
 if (getVersion) {
   console.log('Generating .version.json file')
