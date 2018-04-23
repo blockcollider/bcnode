@@ -171,7 +171,7 @@ export async function main (args: string[]) {
 
     if (!minerKey) {
       logger.error('--miner-key required')
-      return -1
+      process.exit(-1)
     }
 
     engine.startRovers(roversToStart)
