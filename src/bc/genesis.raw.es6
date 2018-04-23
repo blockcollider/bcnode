@@ -1,4 +1,7 @@
-{
+/* eslint-disable */
+// this file is intentionaly named es6 to be copied to the resulting lib folder
+// if named .json babel will not pick it up during transpilation
+module.exports = {
   "hash": "0xxxxxxxxxxxxxxxxxxxxxxxxx",
   "height": 1,
   "miner": "0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3",

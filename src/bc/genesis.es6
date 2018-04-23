@@ -7,9 +7,6 @@
  * @flow
  */
 
-const path = require('path')
-
-const { objFromFileSync } = require('../helper/json')
 const { BcBlock } = require('../protos/core_pb')
 
 export const GENESIS_MINER_KEY = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
@@ -31,7 +28,7 @@ export function getGenesisBlock () {
   // genesisBlock.setChildBlockHeadersList(oldBestBlockchainsBlockHeaders)
   // return genesisBlock
 
-  const GENESIS_DATA = objFromFileSync(path.join(__dirname, 'genesis.raw.json'))
+  const GENESIS_DATA = require('./genesis.raw')
 
   const GENESIS_BLOCK_HEADERS = GENESIS_DATA.childBlockHeadersList
     .map((header) => {
