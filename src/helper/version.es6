@@ -30,7 +30,7 @@ const DEFAULT_VERSION: Object = {
  * Generate version object
  * @returns {Object} Object repesenting version
  */
-export const genarateVersion = () => {
+export const generateVersion = () => {
   const cmds = [
     [
       'npm',
@@ -76,10 +76,10 @@ export const getVersion = (path: string = VERSION_FILE_PATH) => {
     }
   }
 
-  const version = genarateVersion()
+  const version = generateVersion()
 
   if (version) {
-    writeVersionFile(path, genarateVersion())
+    writeVersionFile(path, generateVersion())
   }
 
   return version
