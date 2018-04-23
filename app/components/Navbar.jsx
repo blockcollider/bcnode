@@ -23,7 +23,7 @@ export default class Navbar extends Component<*> {
         <Brand />
         <div className='collapse navbar-collapse' id='navbarText'>
           <a className='nav-link' href='/#/rover' style={STYLE}>Rover</a>
-          { false && <span className='nav-link' href='/#/wallet' style={STYLE}>Wallet</span> }
+          <a className='nav-link' href='/#/peers' style={STYLE}>Peers</a>
         </div>
         <ConnectionState connected={this.props.connected} />
       </nav>
