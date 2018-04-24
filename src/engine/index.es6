@@ -53,7 +53,7 @@ export default class Engine {
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
     this._rpc = new RpcServer(this)
-    this._server = new Server(this._rpc)
+    this._server = new Server(this, this._rpc)
     this._collectedBlocks = {}
     for (let roverName of this._knownRovers) {
       this._collectedBlocks[roverName] = 0
@@ -148,6 +148,18 @@ export default class Engine {
   startNode () {
     this._logger.info('Starting P2P node')
     this.node.start()
+
+    this._emitter.on('peerConnected', ({ peer }) => {
+      if (this._server) {
+        this._server._wsBroadcastPeerConnected(peer)
+      }
+    })
+
+    this._emitter.on('peerDisconnected', ({ peer }) => {
+      if (this._server) {
+        this._server._wsBroadcastPeerDisonnected(peer)
+      }
+    })
   }
 
   /**

@@ -6,19 +6,24 @@
  *
  * @flow
  */
+
 import React, { Component } from 'react'
 
-export default class Block extends Component<*> {
-  // ()
+const inspectBlock = (block) => {
+  console.log('inspectBlock', block)
+}
 
+export default class Block extends Component<*> {
   render () {
     const { blockchain, hash } = this.props.block
 
     return (
-      <div className='card' style={{width: '8.4rem'}}>
+      <div className='card' style={{width: '8.4rem'}} onClick={() => inspectBlock(this.props.block)}>
         <img className='card-img-top' style={{ alignSelf: 'center', width: '6rem', height: '6rem', marginTop: '0.6em' }} src={getBlockIcon(blockchain)} alt={blockchain} />
         <div className='card-body'>
-          <p className='card-text'><small title={hash}>{formatHash(blockchain, hash)}&hellip;</small></p>
+          <p className='card-text'>
+            <small title={hash}>{formatHash(blockchain, hash)}&hellip;</small>
+          </p>
           <a href={getBlockLink(blockchain, hash)} target='_blank' className='btn btn-sm'>View block</a>
         </div>
       </div>

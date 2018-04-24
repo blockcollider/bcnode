@@ -10,6 +10,7 @@ protoc-3.5.1-linux-x86_64.zip
 
 # Git stuff
 .git
+!.git/ORIG_HEAD
 
 # Runtime data
 pids
@@ -35,6 +36,7 @@ coverage/
 doc/
 docs/
 lib/
+!lib/bc/genesis.raw.json
 native/target/
 native/artifacts.json
 native/index.node

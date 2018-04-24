@@ -37,21 +37,22 @@ Following environment variables can be used for advanced tweaking
 | BC_LOG        | Override log level; debug/info/warn/error |
 | BC_MINER_KEY  | Miner keyl string                         |
 | BC_MONITOR    | Print Stats periodically; true/false      |
+| BC_UI_PORT    | Web UI port; 0..65535                     |
 
 ### Run official docker image from public repo
 
 ***Backround/Daemon***
 
 ```
-$ docker run --name bcnode -d -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
+$ docker run --rm --name bcnode -d -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ***Foreground***
 ```
-$ docker run -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
+$ docker run --rm --name bcnode -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
-### Build and run docker image locally
+### Build docker image locally
 
 ```
 # Clone sources
@@ -65,9 +66,6 @@ $ git checkout release
 
 # Build image locally
 $ docker build -t blockcollider/bcnode .
-
-# Run locally build image
-$ docker run -p 3000:3000 -p 9090:9090 blockcollider/bcnode --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build from source
