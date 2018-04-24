@@ -42,6 +42,7 @@ install:
   - 7z e C:\projects\bcnode\protoc-3.5.1-win32.zip -oC:\Users\appveyor\protoc
   - set PATH=%PATH%;C:\Users\appveyor\protoc
   - protoc --version
+  - mkdir _logs
   # - git clone https://github.com/aisouard/libwebrtc.git
   # - cd libwebrtc
   # - mkdir out
