@@ -11,7 +11,6 @@ const { inspect } = require('util')
 
 const PeerId = require('peer-id')
 const PeerInfo = require('peer-info')
-const PeerBook = require('peer-book')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
@@ -19,6 +18,7 @@ const Engine = require('../engine').default
 const logging = require('../logger')
 const { BcBlock } = require('../protos/core_pb')
 const Bundle = require('./bundle').default
+const { BcPeerBook } = require('./peerBook')
 const Signaling = require('./signaling').websocket
 const { getVersion } = require('../helper/version')
 
@@ -35,7 +35,7 @@ export default class Node {
   _logger: Object // eslint-disable-line no-undef
   _engine: Engine // eslint-disable-line no-undef
   _statusMsg: StatusMsg // eslint-disable-line no-undef
-  _peers: PeerBook // eslint-disable-line no-undef
+  _peers: BcPeerBook // eslint-disable-line no-undef
   _node: Bundle // eslint-disable-line no-undef
 
   constructor (engine: Engine) {
@@ -47,7 +47,7 @@ export default class Node {
       protocolVersion: PROTOCOL_PREFIX,
       version: getVersion()
     }
-    this._peers = new PeerBook()
+    this._peers = new BcPeerBook()
   }
 
   get node (): Bundle {

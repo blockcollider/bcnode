@@ -45,8 +45,9 @@ export class PeersContainer extends Component<*> {
 
       const address = (peer.addrs || [])
         .map((addr) => {
+          const key = `${peer.id}.${addr}`
           return (
-            <div>{addr.substring(0, 34)}</div>
+            <div key={key}>{addr.substring(0, 34)}</div>
           )
         })
 
