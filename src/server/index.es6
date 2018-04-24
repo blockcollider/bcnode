@@ -197,9 +197,11 @@ export default class Server {
   }
 
   _transformPeerToWire (peer: Object) {
+    // console.log('peer', peer)
     return {
       id: peer.id.toB58String(),
-      status: peer.status
+      status: peer.status,
+      addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString())
     }
   }
 
