@@ -23,7 +23,7 @@ describe('time', () => {
   describe('sync', () => {
     beforeEach(() => {
       mockNow(new Date(MOCK_DATE_UNIX))
-      Sntp.offset = jest.fn(() => Promise.resolve(1142))
+      Sntp.offset = jest.fn((callback) => { callback(null, 1142) })
       ts.start()
     })
 

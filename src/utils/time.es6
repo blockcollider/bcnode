@@ -12,6 +12,9 @@ const Sntp = require('sntp')
 const { getLogger } = require('../logger/index')
 
 const REFRESH_INTERVAL = 60000 // 60s
+const NTP_OPTIONS = {
+  host: 'ntp.pool.org'
+}
 
 export class TimeService { // export for tests
   _offset: number;
@@ -29,14 +32,16 @@ export class TimeService { // export for tests
 
   ntpGetOffset () {
     this.inFlight = true
-    Sntp.offset().then((offset) => {
+    Sntp.offset((err, offset) => {
+      this.inFlight = false
+      if (err) {
+        this._logger.warn(`Could not get offset from NTP servers, reason ${err.message}`)
+        return
+      }
       this._offset = offset
       this.inFlight = false
       this.lastSyncedAt = Date.now()
       this._logger.debug(`NTP sync successful, got offset: ${offset}`)
-    }, (err) => {
-      this.inFlight = false
-      this._logger.warn(`Could not get offset from NTP servers, reason ${err.message}`)
     })
   }
 
