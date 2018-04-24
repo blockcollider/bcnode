@@ -30,8 +30,15 @@ export class BcPeerBook extends PeerBook {
   put (peerInfo: PeerInfo, replace: boolean = null): PeerInfo {
     this._logger.debug('BcPeerBook.put()')
 
+    const peerId = peerInfo.id.toB58String()
+    const oldPeer = this._peers[peerId]
+
     const res = super.put(peerInfo, replace)
-    res.status = peerInfo.status
+
+    if (oldPeer) {
+      res.status = peerInfo.status || oldPeer.status
+    }
+
     return res
   }
 }
