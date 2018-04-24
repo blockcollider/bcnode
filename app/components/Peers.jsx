@@ -16,7 +16,12 @@ export class PeersContainer extends Component<*> {
   render () {
     let id = 0
     const peers = this.props.peers.map((peer) => {
-      const protocolVersion = peer.status && peer.status.protocolVersion
+      const peerId = `${peer.id.substring(0, 6)}...${peer.id.substr(peer.id.length - 6)}`
+      const protocolVersion = (
+        peer.status &&
+        peer.status.protocolVersion
+      ) || '<unknown>'
+
       const gitVersion = (
         peer.status &&
         peer.status.version &&
@@ -38,10 +43,18 @@ export class PeersContainer extends Component<*> {
         moment(peer.status.connectedAt).fromNow()
       ) || '<unknown>'
 
+      const address = (peer.addrs || [])
+        .map((addr) => {
+          return (
+            <div>{addr.substring(0, 32)}</div>
+          )
+        })
+
       return (
         <tr key={peer.id}>
           <th scope='row'>{id++}</th>
-          <td>{peer.id}</td>
+          <td>{peerId}</td>
+          <td>{address}</td>
           <td>{protocolVersion}</td>
           <td>{version}</td>
           <td>{connectedAgo}</td>
@@ -58,6 +71,7 @@ export class PeersContainer extends Component<*> {
             <tr>
               <th scope='col'>#</th>
               <th scope='col'>ID</th>
+              <th scope='col'>Address</th>
               <th scope='col'>Protocol Version</th>
               <th scope='col'>Version</th>
               <th scope='col'>Connected</th>
