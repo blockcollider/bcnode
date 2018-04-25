@@ -51,3 +51,5 @@ target/
 tmp/
 
 # .version.json
+
+/snippets/

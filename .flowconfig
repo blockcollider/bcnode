@@ -5,6 +5,7 @@
 <PROJECT_ROOT>/node_modules/oboe
 <PROJECT_ROOT>/node_modules/protobufjs
 <PROJECT_ROOT>/node_modules/jest-worker
+<PROJECT_ROOT>/snippets
 
 [include]
 <PROJECT_ROOT>/app/.*
