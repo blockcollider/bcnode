@@ -26,6 +26,7 @@ const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
+const { getVersion } = require('../helper/version')
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 const MONITOR_ENABLED = process.env.BC_MONITOR === 'true'
@@ -75,12 +76,21 @@ export default class Engine {
    */
   async init () {
     const roverNames = Object.keys(rovers)
+    const { npm, git: { long } } = getVersion()
+    const versionData = {
+      npm,
+      commit: long
+    }
     // TODO get from CLI / config
     try {
       await this._persistence.open()
-      const res = await this.persistence.put('rovers', roverNames)
+      let res = await this.persistence.put('rovers', roverNames)
       if (res) {
         this._logger.debug('Stored rovers to persistence')
+      }
+      res = await this.persistence.put('appversion', versionData)
+      if (res) {
+        this._logger.debug('Stored appversion to persistence')
       }
       try {
         await this.persistence.get('bc.block.1')
