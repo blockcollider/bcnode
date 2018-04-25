@@ -574,6 +574,8 @@ pub struct BcBlock {
     pub transactions: ::protobuf::RepeatedField<BcTransaction>,
     pub child_blockchain_count: u64,
     pub child_block_headers: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub child_fingerprint_hash: ::std::string::String,
+    pub previous_hash: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -970,6 +972,74 @@ impl BcBlock {
     fn mut_child_block_headers_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
         &mut self.child_block_headers
     }
+
+    // string child_fingerprint_hash = 14;
+
+    pub fn clear_child_fingerprint_hash(&mut self) {
+        self.child_fingerprint_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_fingerprint_hash(&mut self, v: ::std::string::String) {
+        self.child_fingerprint_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_child_fingerprint_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.child_fingerprint_hash
+    }
+
+    // Take field
+    pub fn take_child_fingerprint_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.child_fingerprint_hash, ::std::string::String::new())
+    }
+
+    pub fn get_child_fingerprint_hash(&self) -> &str {
+        &self.child_fingerprint_hash
+    }
+
+    fn get_child_fingerprint_hash_for_reflect(&self) -> &::std::string::String {
+        &self.child_fingerprint_hash
+    }
+
+    fn mut_child_fingerprint_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.child_fingerprint_hash
+    }
+
+    // string previous_hash = 15;
+
+    pub fn clear_previous_hash(&mut self) {
+        self.previous_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_previous_hash(&mut self, v: ::std::string::String) {
+        self.previous_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_previous_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
+
+    // Take field
+    pub fn take_previous_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.previous_hash, ::std::string::String::new())
+    }
+
+    pub fn get_previous_hash(&self) -> &str {
+        &self.previous_hash
+    }
+
+    fn get_previous_hash_for_reflect(&self) -> &::std::string::String {
+        &self.previous_hash
+    }
+
+    fn mut_previous_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
 }
 
 impl ::protobuf::Message for BcBlock {
@@ -1054,6 +1124,12 @@ impl ::protobuf::Message for BcBlock {
                 13 => {
                     ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.child_block_headers)?;
                 },
+                14 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.child_fingerprint_hash)?;
+                },
+                15 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.previous_hash)?;
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -1107,6 +1183,12 @@ impl ::protobuf::Message for BcBlock {
             let len = value.compute_size();
             my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         };
+        if !self.child_fingerprint_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(14, &self.child_fingerprint_hash);
+        }
+        if !self.previous_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(15, &self.previous_hash);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -1156,6 +1238,12 @@ impl ::protobuf::Message for BcBlock {
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
         };
+        if !self.child_fingerprint_hash.is_empty() {
+            os.write_string(14, &self.child_fingerprint_hash)?;
+        }
+        if !self.previous_hash.is_empty() {
+            os.write_string(15, &self.previous_hash)?;
+        }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -1265,6 +1353,16 @@ impl ::protobuf::MessageStatic for BcBlock {
                     BcBlock::get_child_block_headers_for_reflect,
                     BcBlock::mut_child_block_headers_for_reflect,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "child_fingerprint_hash",
+                    BcBlock::get_child_fingerprint_hash_for_reflect,
+                    BcBlock::mut_child_fingerprint_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "previous_hash",
+                    BcBlock::get_previous_hash_for_reflect,
+                    BcBlock::mut_previous_hash_for_reflect,
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<BcBlock>(
                     "BcBlock",
                     fields,
@@ -1290,6 +1388,8 @@ impl ::protobuf::Clear for BcBlock {
         self.clear_transactions();
         self.clear_child_blockchain_count();
         self.clear_child_block_headers();
+        self.clear_child_fingerprint_hash();
+        self.clear_previous_hash();
         self.unknown_fields.clear();
     }
 }
@@ -1301,6 +1401,1938 @@ impl ::std::fmt::Debug for BcBlock {
 }
 
 impl ::protobuf::reflect::ProtobufValue for BcBlock {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct BtGenesisBcBlock {
+    // message fields
+    pub hash: ::std::string::String,
+    pub previous_hash: ::std::string::String,
+    pub after_target_hash: ::std::string::String,
+    pub after_target_height: u64,
+    pub after_target_miner: ::std::string::String,
+    pub height: u64,
+    pub miner: ::std::string::String,
+    pub difficulty: f32,
+    pub timestamp: u64,
+    pub merkle_root: ::std::string::String,
+    pub chain_root: ::std::string::String,
+    pub distance: u64,
+    pub nonce: ::std::string::String,
+    pub tx_count: u64,
+    pub transactions: ::protobuf::RepeatedField<BcTransaction>,
+    pub child_blockchain_count: u64,
+    pub child_fingerprint_hash: ::std::string::String,
+    pub child_block_headers: ::protobuf::RepeatedField<ChildBlockHeader>,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+// see codegen.rs for the explanation why impl Sync explicitly
+unsafe impl ::std::marker::Sync for BtGenesisBcBlock {}
+
+impl BtGenesisBcBlock {
+    pub fn new() -> BtGenesisBcBlock {
+        ::std::default::Default::default()
+    }
+
+    pub fn default_instance() -> &'static BtGenesisBcBlock {
+        static mut instance: ::protobuf::lazy::Lazy<BtGenesisBcBlock> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const BtGenesisBcBlock,
+        };
+        unsafe {
+            instance.get(BtGenesisBcBlock::new)
+        }
+    }
+
+    // string hash = 1;
+
+    pub fn clear_hash(&mut self) {
+        self.hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_hash(&mut self, v: ::std::string::String) {
+        self.hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+
+    // Take field
+    pub fn take_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.hash, ::std::string::String::new())
+    }
+
+    pub fn get_hash(&self) -> &str {
+        &self.hash
+    }
+
+    fn get_hash_for_reflect(&self) -> &::std::string::String {
+        &self.hash
+    }
+
+    fn mut_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+
+    // string previous_hash = 2;
+
+    pub fn clear_previous_hash(&mut self) {
+        self.previous_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_previous_hash(&mut self, v: ::std::string::String) {
+        self.previous_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_previous_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
+
+    // Take field
+    pub fn take_previous_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.previous_hash, ::std::string::String::new())
+    }
+
+    pub fn get_previous_hash(&self) -> &str {
+        &self.previous_hash
+    }
+
+    fn get_previous_hash_for_reflect(&self) -> &::std::string::String {
+        &self.previous_hash
+    }
+
+    fn mut_previous_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
+
+    // string after_target_hash = 3;
+
+    pub fn clear_after_target_hash(&mut self) {
+        self.after_target_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_after_target_hash(&mut self, v: ::std::string::String) {
+        self.after_target_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_after_target_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.after_target_hash
+    }
+
+    // Take field
+    pub fn take_after_target_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.after_target_hash, ::std::string::String::new())
+    }
+
+    pub fn get_after_target_hash(&self) -> &str {
+        &self.after_target_hash
+    }
+
+    fn get_after_target_hash_for_reflect(&self) -> &::std::string::String {
+        &self.after_target_hash
+    }
+
+    fn mut_after_target_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.after_target_hash
+    }
+
+    // uint64 after_target_height = 4;
+
+    pub fn clear_after_target_height(&mut self) {
+        self.after_target_height = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_after_target_height(&mut self, v: u64) {
+        self.after_target_height = v;
+    }
+
+    pub fn get_after_target_height(&self) -> u64 {
+        self.after_target_height
+    }
+
+    fn get_after_target_height_for_reflect(&self) -> &u64 {
+        &self.after_target_height
+    }
+
+    fn mut_after_target_height_for_reflect(&mut self) -> &mut u64 {
+        &mut self.after_target_height
+    }
+
+    // string after_target_miner = 5;
+
+    pub fn clear_after_target_miner(&mut self) {
+        self.after_target_miner.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_after_target_miner(&mut self, v: ::std::string::String) {
+        self.after_target_miner = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_after_target_miner(&mut self) -> &mut ::std::string::String {
+        &mut self.after_target_miner
+    }
+
+    // Take field
+    pub fn take_after_target_miner(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.after_target_miner, ::std::string::String::new())
+    }
+
+    pub fn get_after_target_miner(&self) -> &str {
+        &self.after_target_miner
+    }
+
+    fn get_after_target_miner_for_reflect(&self) -> &::std::string::String {
+        &self.after_target_miner
+    }
+
+    fn mut_after_target_miner_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.after_target_miner
+    }
+
+    // uint64 height = 6;
+
+    pub fn clear_height(&mut self) {
+        self.height = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_height(&mut self, v: u64) {
+        self.height = v;
+    }
+
+    pub fn get_height(&self) -> u64 {
+        self.height
+    }
+
+    fn get_height_for_reflect(&self) -> &u64 {
+        &self.height
+    }
+
+    fn mut_height_for_reflect(&mut self) -> &mut u64 {
+        &mut self.height
+    }
+
+    // string miner = 7;
+
+    pub fn clear_miner(&mut self) {
+        self.miner.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_miner(&mut self, v: ::std::string::String) {
+        self.miner = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_miner(&mut self) -> &mut ::std::string::String {
+        &mut self.miner
+    }
+
+    // Take field
+    pub fn take_miner(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.miner, ::std::string::String::new())
+    }
+
+    pub fn get_miner(&self) -> &str {
+        &self.miner
+    }
+
+    fn get_miner_for_reflect(&self) -> &::std::string::String {
+        &self.miner
+    }
+
+    fn mut_miner_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.miner
+    }
+
+    // float difficulty = 8;
+
+    pub fn clear_difficulty(&mut self) {
+        self.difficulty = 0.;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_difficulty(&mut self, v: f32) {
+        self.difficulty = v;
+    }
+
+    pub fn get_difficulty(&self) -> f32 {
+        self.difficulty
+    }
+
+    fn get_difficulty_for_reflect(&self) -> &f32 {
+        &self.difficulty
+    }
+
+    fn mut_difficulty_for_reflect(&mut self) -> &mut f32 {
+        &mut self.difficulty
+    }
+
+    // uint64 timestamp = 9;
+
+    pub fn clear_timestamp(&mut self) {
+        self.timestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_timestamp(&mut self, v: u64) {
+        self.timestamp = v;
+    }
+
+    pub fn get_timestamp(&self) -> u64 {
+        self.timestamp
+    }
+
+    fn get_timestamp_for_reflect(&self) -> &u64 {
+        &self.timestamp
+    }
+
+    fn mut_timestamp_for_reflect(&mut self) -> &mut u64 {
+        &mut self.timestamp
+    }
+
+    // string merkle_root = 10;
+
+    pub fn clear_merkle_root(&mut self) {
+        self.merkle_root.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_merkle_root(&mut self, v: ::std::string::String) {
+        self.merkle_root = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_merkle_root(&mut self) -> &mut ::std::string::String {
+        &mut self.merkle_root
+    }
+
+    // Take field
+    pub fn take_merkle_root(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.merkle_root, ::std::string::String::new())
+    }
+
+    pub fn get_merkle_root(&self) -> &str {
+        &self.merkle_root
+    }
+
+    fn get_merkle_root_for_reflect(&self) -> &::std::string::String {
+        &self.merkle_root
+    }
+
+    fn mut_merkle_root_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.merkle_root
+    }
+
+    // string chain_root = 11;
+
+    pub fn clear_chain_root(&mut self) {
+        self.chain_root.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_chain_root(&mut self, v: ::std::string::String) {
+        self.chain_root = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_chain_root(&mut self) -> &mut ::std::string::String {
+        &mut self.chain_root
+    }
+
+    // Take field
+    pub fn take_chain_root(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.chain_root, ::std::string::String::new())
+    }
+
+    pub fn get_chain_root(&self) -> &str {
+        &self.chain_root
+    }
+
+    fn get_chain_root_for_reflect(&self) -> &::std::string::String {
+        &self.chain_root
+    }
+
+    fn mut_chain_root_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.chain_root
+    }
+
+    // uint64 distance = 12;
+
+    pub fn clear_distance(&mut self) {
+        self.distance = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_distance(&mut self, v: u64) {
+        self.distance = v;
+    }
+
+    pub fn get_distance(&self) -> u64 {
+        self.distance
+    }
+
+    fn get_distance_for_reflect(&self) -> &u64 {
+        &self.distance
+    }
+
+    fn mut_distance_for_reflect(&mut self) -> &mut u64 {
+        &mut self.distance
+    }
+
+    // string nonce = 13;
+
+    pub fn clear_nonce(&mut self) {
+        self.nonce.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_nonce(&mut self, v: ::std::string::String) {
+        self.nonce = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_nonce(&mut self) -> &mut ::std::string::String {
+        &mut self.nonce
+    }
+
+    // Take field
+    pub fn take_nonce(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.nonce, ::std::string::String::new())
+    }
+
+    pub fn get_nonce(&self) -> &str {
+        &self.nonce
+    }
+
+    fn get_nonce_for_reflect(&self) -> &::std::string::String {
+        &self.nonce
+    }
+
+    fn mut_nonce_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.nonce
+    }
+
+    // uint64 tx_count = 14;
+
+    pub fn clear_tx_count(&mut self) {
+        self.tx_count = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_tx_count(&mut self, v: u64) {
+        self.tx_count = v;
+    }
+
+    pub fn get_tx_count(&self) -> u64 {
+        self.tx_count
+    }
+
+    fn get_tx_count_for_reflect(&self) -> &u64 {
+        &self.tx_count
+    }
+
+    fn mut_tx_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.tx_count
+    }
+
+    // repeated .bc.BcTransaction transactions = 15;
+
+    pub fn clear_transactions(&mut self) {
+        self.transactions.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_transactions(&mut self, v: ::protobuf::RepeatedField<BcTransaction>) {
+        self.transactions = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_transactions(&mut self) -> &mut ::protobuf::RepeatedField<BcTransaction> {
+        &mut self.transactions
+    }
+
+    // Take field
+    pub fn take_transactions(&mut self) -> ::protobuf::RepeatedField<BcTransaction> {
+        ::std::mem::replace(&mut self.transactions, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_transactions(&self) -> &[BcTransaction] {
+        &self.transactions
+    }
+
+    fn get_transactions_for_reflect(&self) -> &::protobuf::RepeatedField<BcTransaction> {
+        &self.transactions
+    }
+
+    fn mut_transactions_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BcTransaction> {
+        &mut self.transactions
+    }
+
+    // uint64 child_blockchain_count = 16;
+
+    pub fn clear_child_blockchain_count(&mut self) {
+        self.child_blockchain_count = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_blockchain_count(&mut self, v: u64) {
+        self.child_blockchain_count = v;
+    }
+
+    pub fn get_child_blockchain_count(&self) -> u64 {
+        self.child_blockchain_count
+    }
+
+    fn get_child_blockchain_count_for_reflect(&self) -> &u64 {
+        &self.child_blockchain_count
+    }
+
+    fn mut_child_blockchain_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.child_blockchain_count
+    }
+
+    // string child_fingerprint_hash = 17;
+
+    pub fn clear_child_fingerprint_hash(&mut self) {
+        self.child_fingerprint_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_fingerprint_hash(&mut self, v: ::std::string::String) {
+        self.child_fingerprint_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_child_fingerprint_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.child_fingerprint_hash
+    }
+
+    // Take field
+    pub fn take_child_fingerprint_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.child_fingerprint_hash, ::std::string::String::new())
+    }
+
+    pub fn get_child_fingerprint_hash(&self) -> &str {
+        &self.child_fingerprint_hash
+    }
+
+    fn get_child_fingerprint_hash_for_reflect(&self) -> &::std::string::String {
+        &self.child_fingerprint_hash
+    }
+
+    fn mut_child_fingerprint_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.child_fingerprint_hash
+    }
+
+    // repeated .bc.ChildBlockHeader child_block_headers = 18;
+
+    pub fn clear_child_block_headers(&mut self) {
+        self.child_block_headers.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_block_headers(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.child_block_headers = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_child_block_headers(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.child_block_headers
+    }
+
+    // Take field
+    pub fn take_child_block_headers(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.child_block_headers, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_child_block_headers(&self) -> &[ChildBlockHeader] {
+        &self.child_block_headers
+    }
+
+    fn get_child_block_headers_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.child_block_headers
+    }
+
+    fn mut_child_block_headers_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.child_block_headers
+    }
+}
+
+impl ::protobuf::Message for BtGenesisBcBlock {
+    fn is_initialized(&self) -> bool {
+        for v in &self.transactions {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.child_block_headers {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.previous_hash)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.after_target_hash)?;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.after_target_height = tmp;
+                },
+                5 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.after_target_miner)?;
+                },
+                6 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.height = tmp;
+                },
+                7 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.miner)?;
+                },
+                8 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeFixed32 {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_float()?;
+                    self.difficulty = tmp;
+                },
+                9 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.timestamp = tmp;
+                },
+                10 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.merkle_root)?;
+                },
+                11 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.chain_root)?;
+                },
+                12 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.distance = tmp;
+                },
+                13 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nonce)?;
+                },
+                14 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.tx_count = tmp;
+                },
+                15 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.transactions)?;
+                },
+                16 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.child_blockchain_count = tmp;
+                },
+                17 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.child_fingerprint_hash)?;
+                },
+                18 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.child_block_headers)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.hash);
+        }
+        if !self.previous_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(2, &self.previous_hash);
+        }
+        if !self.after_target_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.after_target_hash);
+        }
+        if self.after_target_height != 0 {
+            my_size += ::protobuf::rt::value_size(4, self.after_target_height, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.after_target_miner.is_empty() {
+            my_size += ::protobuf::rt::string_size(5, &self.after_target_miner);
+        }
+        if self.height != 0 {
+            my_size += ::protobuf::rt::value_size(6, self.height, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.miner.is_empty() {
+            my_size += ::protobuf::rt::string_size(7, &self.miner);
+        }
+        if self.difficulty != 0. {
+            my_size += 5;
+        }
+        if self.timestamp != 0 {
+            my_size += ::protobuf::rt::value_size(9, self.timestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.merkle_root.is_empty() {
+            my_size += ::protobuf::rt::string_size(10, &self.merkle_root);
+        }
+        if !self.chain_root.is_empty() {
+            my_size += ::protobuf::rt::string_size(11, &self.chain_root);
+        }
+        if self.distance != 0 {
+            my_size += ::protobuf::rt::value_size(12, self.distance, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.nonce.is_empty() {
+            my_size += ::protobuf::rt::string_size(13, &self.nonce);
+        }
+        if self.tx_count != 0 {
+            my_size += ::protobuf::rt::value_size(14, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
+        }
+        for value in &self.transactions {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        if self.child_blockchain_count != 0 {
+            my_size += ::protobuf::rt::value_size(16, self.child_blockchain_count, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.child_fingerprint_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(17, &self.child_fingerprint_hash);
+        }
+        for value in &self.child_block_headers {
+            let len = value.compute_size();
+            my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.hash.is_empty() {
+            os.write_string(1, &self.hash)?;
+        }
+        if !self.previous_hash.is_empty() {
+            os.write_string(2, &self.previous_hash)?;
+        }
+        if !self.after_target_hash.is_empty() {
+            os.write_string(3, &self.after_target_hash)?;
+        }
+        if self.after_target_height != 0 {
+            os.write_uint64(4, self.after_target_height)?;
+        }
+        if !self.after_target_miner.is_empty() {
+            os.write_string(5, &self.after_target_miner)?;
+        }
+        if self.height != 0 {
+            os.write_uint64(6, self.height)?;
+        }
+        if !self.miner.is_empty() {
+            os.write_string(7, &self.miner)?;
+        }
+        if self.difficulty != 0. {
+            os.write_float(8, self.difficulty)?;
+        }
+        if self.timestamp != 0 {
+            os.write_uint64(9, self.timestamp)?;
+        }
+        if !self.merkle_root.is_empty() {
+            os.write_string(10, &self.merkle_root)?;
+        }
+        if !self.chain_root.is_empty() {
+            os.write_string(11, &self.chain_root)?;
+        }
+        if self.distance != 0 {
+            os.write_uint64(12, self.distance)?;
+        }
+        if !self.nonce.is_empty() {
+            os.write_string(13, &self.nonce)?;
+        }
+        if self.tx_count != 0 {
+            os.write_uint64(14, self.tx_count)?;
+        }
+        for v in &self.transactions {
+            os.write_tag(15, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        if self.child_blockchain_count != 0 {
+            os.write_uint64(16, self.child_blockchain_count)?;
+        }
+        if !self.child_fingerprint_hash.is_empty() {
+            os.write_string(17, &self.child_fingerprint_hash)?;
+        }
+        for v in &self.child_block_headers {
+            os.write_tag(18, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        ::protobuf::MessageStatic::descriptor_static(None::<Self>)
+    }
+}
+
+impl ::protobuf::MessageStatic for BtGenesisBcBlock {
+    fn new() -> BtGenesisBcBlock {
+        BtGenesisBcBlock::new()
+    }
+
+    fn descriptor_static(_: ::std::option::Option<BtGenesisBcBlock>) -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "hash",
+                    BtGenesisBcBlock::get_hash_for_reflect,
+                    BtGenesisBcBlock::mut_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "previous_hash",
+                    BtGenesisBcBlock::get_previous_hash_for_reflect,
+                    BtGenesisBcBlock::mut_previous_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "after_target_hash",
+                    BtGenesisBcBlock::get_after_target_hash_for_reflect,
+                    BtGenesisBcBlock::mut_after_target_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "after_target_height",
+                    BtGenesisBcBlock::get_after_target_height_for_reflect,
+                    BtGenesisBcBlock::mut_after_target_height_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "after_target_miner",
+                    BtGenesisBcBlock::get_after_target_miner_for_reflect,
+                    BtGenesisBcBlock::mut_after_target_miner_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "height",
+                    BtGenesisBcBlock::get_height_for_reflect,
+                    BtGenesisBcBlock::mut_height_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "miner",
+                    BtGenesisBcBlock::get_miner_for_reflect,
+                    BtGenesisBcBlock::mut_miner_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeFloat>(
+                    "difficulty",
+                    BtGenesisBcBlock::get_difficulty_for_reflect,
+                    BtGenesisBcBlock::mut_difficulty_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "timestamp",
+                    BtGenesisBcBlock::get_timestamp_for_reflect,
+                    BtGenesisBcBlock::mut_timestamp_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "merkle_root",
+                    BtGenesisBcBlock::get_merkle_root_for_reflect,
+                    BtGenesisBcBlock::mut_merkle_root_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "chain_root",
+                    BtGenesisBcBlock::get_chain_root_for_reflect,
+                    BtGenesisBcBlock::mut_chain_root_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "distance",
+                    BtGenesisBcBlock::get_distance_for_reflect,
+                    BtGenesisBcBlock::mut_distance_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "nonce",
+                    BtGenesisBcBlock::get_nonce_for_reflect,
+                    BtGenesisBcBlock::mut_nonce_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "tx_count",
+                    BtGenesisBcBlock::get_tx_count_for_reflect,
+                    BtGenesisBcBlock::mut_tx_count_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BcTransaction>>(
+                    "transactions",
+                    BtGenesisBcBlock::get_transactions_for_reflect,
+                    BtGenesisBcBlock::mut_transactions_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "child_blockchain_count",
+                    BtGenesisBcBlock::get_child_blockchain_count_for_reflect,
+                    BtGenesisBcBlock::mut_child_blockchain_count_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "child_fingerprint_hash",
+                    BtGenesisBcBlock::get_child_fingerprint_hash_for_reflect,
+                    BtGenesisBcBlock::mut_child_fingerprint_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "child_block_headers",
+                    BtGenesisBcBlock::get_child_block_headers_for_reflect,
+                    BtGenesisBcBlock::mut_child_block_headers_for_reflect,
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<BtGenesisBcBlock>(
+                    "BtGenesisBcBlock",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+}
+
+impl ::protobuf::Clear for BtGenesisBcBlock {
+    fn clear(&mut self) {
+        self.clear_hash();
+        self.clear_previous_hash();
+        self.clear_after_target_hash();
+        self.clear_after_target_height();
+        self.clear_after_target_miner();
+        self.clear_height();
+        self.clear_miner();
+        self.clear_difficulty();
+        self.clear_timestamp();
+        self.clear_merkle_root();
+        self.clear_chain_root();
+        self.clear_distance();
+        self.clear_nonce();
+        self.clear_tx_count();
+        self.clear_transactions();
+        self.clear_child_blockchain_count();
+        self.clear_child_fingerprint_hash();
+        self.clear_child_block_headers();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for BtGenesisBcBlock {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for BtGenesisBcBlock {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct AtGenesisBcBlock {
+    // message fields
+    pub hash: ::std::string::String,
+    pub previous_hash: ::std::string::String,
+    pub before_target_height: u64,
+    pub before_target_signature: ::std::string::String,
+    pub height: u64,
+    pub miner: ::std::string::String,
+    pub difficulty: f32,
+    pub timestamp: u64,
+    pub merkle_root: ::std::string::String,
+    pub chain_root: ::std::string::String,
+    pub distance: u64,
+    pub nonce: ::std::string::String,
+    pub tx_count: u64,
+    pub transactions: ::protobuf::RepeatedField<BcTransaction>,
+    pub child_blockchain_count: u64,
+    pub child_fingerprint_hash: ::std::string::String,
+    pub child_block_headers: ::protobuf::RepeatedField<ChildBlockHeader>,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+// see codegen.rs for the explanation why impl Sync explicitly
+unsafe impl ::std::marker::Sync for AtGenesisBcBlock {}
+
+impl AtGenesisBcBlock {
+    pub fn new() -> AtGenesisBcBlock {
+        ::std::default::Default::default()
+    }
+
+    pub fn default_instance() -> &'static AtGenesisBcBlock {
+        static mut instance: ::protobuf::lazy::Lazy<AtGenesisBcBlock> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const AtGenesisBcBlock,
+        };
+        unsafe {
+            instance.get(AtGenesisBcBlock::new)
+        }
+    }
+
+    // string hash = 1;
+
+    pub fn clear_hash(&mut self) {
+        self.hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_hash(&mut self, v: ::std::string::String) {
+        self.hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+
+    // Take field
+    pub fn take_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.hash, ::std::string::String::new())
+    }
+
+    pub fn get_hash(&self) -> &str {
+        &self.hash
+    }
+
+    fn get_hash_for_reflect(&self) -> &::std::string::String {
+        &self.hash
+    }
+
+    fn mut_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+
+    // string previous_hash = 2;
+
+    pub fn clear_previous_hash(&mut self) {
+        self.previous_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_previous_hash(&mut self, v: ::std::string::String) {
+        self.previous_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_previous_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
+
+    // Take field
+    pub fn take_previous_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.previous_hash, ::std::string::String::new())
+    }
+
+    pub fn get_previous_hash(&self) -> &str {
+        &self.previous_hash
+    }
+
+    fn get_previous_hash_for_reflect(&self) -> &::std::string::String {
+        &self.previous_hash
+    }
+
+    fn mut_previous_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.previous_hash
+    }
+
+    // uint64 before_target_height = 3;
+
+    pub fn clear_before_target_height(&mut self) {
+        self.before_target_height = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_before_target_height(&mut self, v: u64) {
+        self.before_target_height = v;
+    }
+
+    pub fn get_before_target_height(&self) -> u64 {
+        self.before_target_height
+    }
+
+    fn get_before_target_height_for_reflect(&self) -> &u64 {
+        &self.before_target_height
+    }
+
+    fn mut_before_target_height_for_reflect(&mut self) -> &mut u64 {
+        &mut self.before_target_height
+    }
+
+    // string before_target_signature = 4;
+
+    pub fn clear_before_target_signature(&mut self) {
+        self.before_target_signature.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_before_target_signature(&mut self, v: ::std::string::String) {
+        self.before_target_signature = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_before_target_signature(&mut self) -> &mut ::std::string::String {
+        &mut self.before_target_signature
+    }
+
+    // Take field
+    pub fn take_before_target_signature(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.before_target_signature, ::std::string::String::new())
+    }
+
+    pub fn get_before_target_signature(&self) -> &str {
+        &self.before_target_signature
+    }
+
+    fn get_before_target_signature_for_reflect(&self) -> &::std::string::String {
+        &self.before_target_signature
+    }
+
+    fn mut_before_target_signature_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.before_target_signature
+    }
+
+    // uint64 height = 5;
+
+    pub fn clear_height(&mut self) {
+        self.height = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_height(&mut self, v: u64) {
+        self.height = v;
+    }
+
+    pub fn get_height(&self) -> u64 {
+        self.height
+    }
+
+    fn get_height_for_reflect(&self) -> &u64 {
+        &self.height
+    }
+
+    fn mut_height_for_reflect(&mut self) -> &mut u64 {
+        &mut self.height
+    }
+
+    // string miner = 6;
+
+    pub fn clear_miner(&mut self) {
+        self.miner.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_miner(&mut self, v: ::std::string::String) {
+        self.miner = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_miner(&mut self) -> &mut ::std::string::String {
+        &mut self.miner
+    }
+
+    // Take field
+    pub fn take_miner(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.miner, ::std::string::String::new())
+    }
+
+    pub fn get_miner(&self) -> &str {
+        &self.miner
+    }
+
+    fn get_miner_for_reflect(&self) -> &::std::string::String {
+        &self.miner
+    }
+
+    fn mut_miner_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.miner
+    }
+
+    // float difficulty = 7;
+
+    pub fn clear_difficulty(&mut self) {
+        self.difficulty = 0.;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_difficulty(&mut self, v: f32) {
+        self.difficulty = v;
+    }
+
+    pub fn get_difficulty(&self) -> f32 {
+        self.difficulty
+    }
+
+    fn get_difficulty_for_reflect(&self) -> &f32 {
+        &self.difficulty
+    }
+
+    fn mut_difficulty_for_reflect(&mut self) -> &mut f32 {
+        &mut self.difficulty
+    }
+
+    // uint64 timestamp = 8;
+
+    pub fn clear_timestamp(&mut self) {
+        self.timestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_timestamp(&mut self, v: u64) {
+        self.timestamp = v;
+    }
+
+    pub fn get_timestamp(&self) -> u64 {
+        self.timestamp
+    }
+
+    fn get_timestamp_for_reflect(&self) -> &u64 {
+        &self.timestamp
+    }
+
+    fn mut_timestamp_for_reflect(&mut self) -> &mut u64 {
+        &mut self.timestamp
+    }
+
+    // string merkle_root = 9;
+
+    pub fn clear_merkle_root(&mut self) {
+        self.merkle_root.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_merkle_root(&mut self, v: ::std::string::String) {
+        self.merkle_root = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_merkle_root(&mut self) -> &mut ::std::string::String {
+        &mut self.merkle_root
+    }
+
+    // Take field
+    pub fn take_merkle_root(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.merkle_root, ::std::string::String::new())
+    }
+
+    pub fn get_merkle_root(&self) -> &str {
+        &self.merkle_root
+    }
+
+    fn get_merkle_root_for_reflect(&self) -> &::std::string::String {
+        &self.merkle_root
+    }
+
+    fn mut_merkle_root_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.merkle_root
+    }
+
+    // string chain_root = 10;
+
+    pub fn clear_chain_root(&mut self) {
+        self.chain_root.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_chain_root(&mut self, v: ::std::string::String) {
+        self.chain_root = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_chain_root(&mut self) -> &mut ::std::string::String {
+        &mut self.chain_root
+    }
+
+    // Take field
+    pub fn take_chain_root(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.chain_root, ::std::string::String::new())
+    }
+
+    pub fn get_chain_root(&self) -> &str {
+        &self.chain_root
+    }
+
+    fn get_chain_root_for_reflect(&self) -> &::std::string::String {
+        &self.chain_root
+    }
+
+    fn mut_chain_root_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.chain_root
+    }
+
+    // uint64 distance = 11;
+
+    pub fn clear_distance(&mut self) {
+        self.distance = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_distance(&mut self, v: u64) {
+        self.distance = v;
+    }
+
+    pub fn get_distance(&self) -> u64 {
+        self.distance
+    }
+
+    fn get_distance_for_reflect(&self) -> &u64 {
+        &self.distance
+    }
+
+    fn mut_distance_for_reflect(&mut self) -> &mut u64 {
+        &mut self.distance
+    }
+
+    // string nonce = 12;
+
+    pub fn clear_nonce(&mut self) {
+        self.nonce.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_nonce(&mut self, v: ::std::string::String) {
+        self.nonce = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_nonce(&mut self) -> &mut ::std::string::String {
+        &mut self.nonce
+    }
+
+    // Take field
+    pub fn take_nonce(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.nonce, ::std::string::String::new())
+    }
+
+    pub fn get_nonce(&self) -> &str {
+        &self.nonce
+    }
+
+    fn get_nonce_for_reflect(&self) -> &::std::string::String {
+        &self.nonce
+    }
+
+    fn mut_nonce_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.nonce
+    }
+
+    // uint64 tx_count = 13;
+
+    pub fn clear_tx_count(&mut self) {
+        self.tx_count = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_tx_count(&mut self, v: u64) {
+        self.tx_count = v;
+    }
+
+    pub fn get_tx_count(&self) -> u64 {
+        self.tx_count
+    }
+
+    fn get_tx_count_for_reflect(&self) -> &u64 {
+        &self.tx_count
+    }
+
+    fn mut_tx_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.tx_count
+    }
+
+    // repeated .bc.BcTransaction transactions = 14;
+
+    pub fn clear_transactions(&mut self) {
+        self.transactions.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_transactions(&mut self, v: ::protobuf::RepeatedField<BcTransaction>) {
+        self.transactions = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_transactions(&mut self) -> &mut ::protobuf::RepeatedField<BcTransaction> {
+        &mut self.transactions
+    }
+
+    // Take field
+    pub fn take_transactions(&mut self) -> ::protobuf::RepeatedField<BcTransaction> {
+        ::std::mem::replace(&mut self.transactions, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_transactions(&self) -> &[BcTransaction] {
+        &self.transactions
+    }
+
+    fn get_transactions_for_reflect(&self) -> &::protobuf::RepeatedField<BcTransaction> {
+        &self.transactions
+    }
+
+    fn mut_transactions_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BcTransaction> {
+        &mut self.transactions
+    }
+
+    // uint64 child_blockchain_count = 15;
+
+    pub fn clear_child_blockchain_count(&mut self) {
+        self.child_blockchain_count = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_blockchain_count(&mut self, v: u64) {
+        self.child_blockchain_count = v;
+    }
+
+    pub fn get_child_blockchain_count(&self) -> u64 {
+        self.child_blockchain_count
+    }
+
+    fn get_child_blockchain_count_for_reflect(&self) -> &u64 {
+        &self.child_blockchain_count
+    }
+
+    fn mut_child_blockchain_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.child_blockchain_count
+    }
+
+    // string child_fingerprint_hash = 16;
+
+    pub fn clear_child_fingerprint_hash(&mut self) {
+        self.child_fingerprint_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_fingerprint_hash(&mut self, v: ::std::string::String) {
+        self.child_fingerprint_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_child_fingerprint_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.child_fingerprint_hash
+    }
+
+    // Take field
+    pub fn take_child_fingerprint_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.child_fingerprint_hash, ::std::string::String::new())
+    }
+
+    pub fn get_child_fingerprint_hash(&self) -> &str {
+        &self.child_fingerprint_hash
+    }
+
+    fn get_child_fingerprint_hash_for_reflect(&self) -> &::std::string::String {
+        &self.child_fingerprint_hash
+    }
+
+    fn mut_child_fingerprint_hash_for_reflect(&mut self) -> &mut ::std::string::String {
+        &mut self.child_fingerprint_hash
+    }
+
+    // repeated .bc.ChildBlockHeader child_block_headers = 17;
+
+    pub fn clear_child_block_headers(&mut self) {
+        self.child_block_headers.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_child_block_headers(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.child_block_headers = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_child_block_headers(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.child_block_headers
+    }
+
+    // Take field
+    pub fn take_child_block_headers(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.child_block_headers, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_child_block_headers(&self) -> &[ChildBlockHeader] {
+        &self.child_block_headers
+    }
+
+    fn get_child_block_headers_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.child_block_headers
+    }
+
+    fn mut_child_block_headers_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.child_block_headers
+    }
+}
+
+impl ::protobuf::Message for AtGenesisBcBlock {
+    fn is_initialized(&self) -> bool {
+        for v in &self.transactions {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.child_block_headers {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.previous_hash)?;
+                },
+                3 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.before_target_height = tmp;
+                },
+                4 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.before_target_signature)?;
+                },
+                5 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.height = tmp;
+                },
+                6 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.miner)?;
+                },
+                7 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeFixed32 {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_float()?;
+                    self.difficulty = tmp;
+                },
+                8 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.timestamp = tmp;
+                },
+                9 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.merkle_root)?;
+                },
+                10 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.chain_root)?;
+                },
+                11 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.distance = tmp;
+                },
+                12 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nonce)?;
+                },
+                13 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.tx_count = tmp;
+                },
+                14 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.transactions)?;
+                },
+                15 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.child_blockchain_count = tmp;
+                },
+                16 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.child_fingerprint_hash)?;
+                },
+                17 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.child_block_headers)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.hash);
+        }
+        if !self.previous_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(2, &self.previous_hash);
+        }
+        if self.before_target_height != 0 {
+            my_size += ::protobuf::rt::value_size(3, self.before_target_height, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.before_target_signature.is_empty() {
+            my_size += ::protobuf::rt::string_size(4, &self.before_target_signature);
+        }
+        if self.height != 0 {
+            my_size += ::protobuf::rt::value_size(5, self.height, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.miner.is_empty() {
+            my_size += ::protobuf::rt::string_size(6, &self.miner);
+        }
+        if self.difficulty != 0. {
+            my_size += 5;
+        }
+        if self.timestamp != 0 {
+            my_size += ::protobuf::rt::value_size(8, self.timestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.merkle_root.is_empty() {
+            my_size += ::protobuf::rt::string_size(9, &self.merkle_root);
+        }
+        if !self.chain_root.is_empty() {
+            my_size += ::protobuf::rt::string_size(10, &self.chain_root);
+        }
+        if self.distance != 0 {
+            my_size += ::protobuf::rt::value_size(11, self.distance, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.nonce.is_empty() {
+            my_size += ::protobuf::rt::string_size(12, &self.nonce);
+        }
+        if self.tx_count != 0 {
+            my_size += ::protobuf::rt::value_size(13, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
+        }
+        for value in &self.transactions {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        if self.child_blockchain_count != 0 {
+            my_size += ::protobuf::rt::value_size(15, self.child_blockchain_count, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.child_fingerprint_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(16, &self.child_fingerprint_hash);
+        }
+        for value in &self.child_block_headers {
+            let len = value.compute_size();
+            my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.hash.is_empty() {
+            os.write_string(1, &self.hash)?;
+        }
+        if !self.previous_hash.is_empty() {
+            os.write_string(2, &self.previous_hash)?;
+        }
+        if self.before_target_height != 0 {
+            os.write_uint64(3, self.before_target_height)?;
+        }
+        if !self.before_target_signature.is_empty() {
+            os.write_string(4, &self.before_target_signature)?;
+        }
+        if self.height != 0 {
+            os.write_uint64(5, self.height)?;
+        }
+        if !self.miner.is_empty() {
+            os.write_string(6, &self.miner)?;
+        }
+        if self.difficulty != 0. {
+            os.write_float(7, self.difficulty)?;
+        }
+        if self.timestamp != 0 {
+            os.write_uint64(8, self.timestamp)?;
+        }
+        if !self.merkle_root.is_empty() {
+            os.write_string(9, &self.merkle_root)?;
+        }
+        if !self.chain_root.is_empty() {
+            os.write_string(10, &self.chain_root)?;
+        }
+        if self.distance != 0 {
+            os.write_uint64(11, self.distance)?;
+        }
+        if !self.nonce.is_empty() {
+            os.write_string(12, &self.nonce)?;
+        }
+        if self.tx_count != 0 {
+            os.write_uint64(13, self.tx_count)?;
+        }
+        for v in &self.transactions {
+            os.write_tag(14, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        if self.child_blockchain_count != 0 {
+            os.write_uint64(15, self.child_blockchain_count)?;
+        }
+        if !self.child_fingerprint_hash.is_empty() {
+            os.write_string(16, &self.child_fingerprint_hash)?;
+        }
+        for v in &self.child_block_headers {
+            os.write_tag(17, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        ::protobuf::MessageStatic::descriptor_static(None::<Self>)
+    }
+}
+
+impl ::protobuf::MessageStatic for AtGenesisBcBlock {
+    fn new() -> AtGenesisBcBlock {
+        AtGenesisBcBlock::new()
+    }
+
+    fn descriptor_static(_: ::std::option::Option<AtGenesisBcBlock>) -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "hash",
+                    AtGenesisBcBlock::get_hash_for_reflect,
+                    AtGenesisBcBlock::mut_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "previous_hash",
+                    AtGenesisBcBlock::get_previous_hash_for_reflect,
+                    AtGenesisBcBlock::mut_previous_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "before_target_height",
+                    AtGenesisBcBlock::get_before_target_height_for_reflect,
+                    AtGenesisBcBlock::mut_before_target_height_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "before_target_signature",
+                    AtGenesisBcBlock::get_before_target_signature_for_reflect,
+                    AtGenesisBcBlock::mut_before_target_signature_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "height",
+                    AtGenesisBcBlock::get_height_for_reflect,
+                    AtGenesisBcBlock::mut_height_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "miner",
+                    AtGenesisBcBlock::get_miner_for_reflect,
+                    AtGenesisBcBlock::mut_miner_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeFloat>(
+                    "difficulty",
+                    AtGenesisBcBlock::get_difficulty_for_reflect,
+                    AtGenesisBcBlock::mut_difficulty_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "timestamp",
+                    AtGenesisBcBlock::get_timestamp_for_reflect,
+                    AtGenesisBcBlock::mut_timestamp_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "merkle_root",
+                    AtGenesisBcBlock::get_merkle_root_for_reflect,
+                    AtGenesisBcBlock::mut_merkle_root_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "chain_root",
+                    AtGenesisBcBlock::get_chain_root_for_reflect,
+                    AtGenesisBcBlock::mut_chain_root_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "distance",
+                    AtGenesisBcBlock::get_distance_for_reflect,
+                    AtGenesisBcBlock::mut_distance_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "nonce",
+                    AtGenesisBcBlock::get_nonce_for_reflect,
+                    AtGenesisBcBlock::mut_nonce_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "tx_count",
+                    AtGenesisBcBlock::get_tx_count_for_reflect,
+                    AtGenesisBcBlock::mut_tx_count_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BcTransaction>>(
+                    "transactions",
+                    AtGenesisBcBlock::get_transactions_for_reflect,
+                    AtGenesisBcBlock::mut_transactions_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "child_blockchain_count",
+                    AtGenesisBcBlock::get_child_blockchain_count_for_reflect,
+                    AtGenesisBcBlock::mut_child_blockchain_count_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "child_fingerprint_hash",
+                    AtGenesisBcBlock::get_child_fingerprint_hash_for_reflect,
+                    AtGenesisBcBlock::mut_child_fingerprint_hash_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "child_block_headers",
+                    AtGenesisBcBlock::get_child_block_headers_for_reflect,
+                    AtGenesisBcBlock::mut_child_block_headers_for_reflect,
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<AtGenesisBcBlock>(
+                    "AtGenesisBcBlock",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+}
+
+impl ::protobuf::Clear for AtGenesisBcBlock {
+    fn clear(&mut self) {
+        self.clear_hash();
+        self.clear_previous_hash();
+        self.clear_before_target_height();
+        self.clear_before_target_signature();
+        self.clear_height();
+        self.clear_miner();
+        self.clear_difficulty();
+        self.clear_timestamp();
+        self.clear_merkle_root();
+        self.clear_chain_root();
+        self.clear_distance();
+        self.clear_nonce();
+        self.clear_tx_count();
+        self.clear_transactions();
+        self.clear_child_blockchain_count();
+        self.clear_child_fingerprint_hash();
+        self.clear_child_block_headers();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for AtGenesisBcBlock {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for AtGenesisBcBlock {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -1943,7 +3975,7 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cprevio\
     usHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestamp\x12\x16\n\
     \x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0bmerkle_root\x18\
-    \x06\x20\x01(\tR\nmerkleRoot\"\xc9\x03\n\x07BcBlock\x12\x12\n\x04hash\
+    \x06\x20\x01(\tR\nmerkleRoot\"\xa4\x04\n\x07BcBlock\x12\x12\n\x04hash\
     \x18\x01\x20\x01(\tR\x04hash\x12\x16\n\x06height\x18\x02\x20\x01(\x04R\
     \x06height\x12\x14\n\x05miner\x18\x03\x20\x01(\tR\x05miner\x12\x1e\n\ndi\
     fficulty\x18\x04\x20\x01(\x02R\ndifficulty\x12\x1c\n\ttimestamp\x18\x05\
@@ -1954,15 +3986,48 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     ount\x125\n\x0ctransactions\x18\x0b\x20\x03(\x0b2\x11.bc.BcTransactionR\
     \x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\x20\x01(\x04R\
     \x14childBlockchainCount\x12D\n\x13child_block_headers\x18\r\x20\x03(\
-    \x0b2\x14.bc.ChildBlockHeaderR\x11childBlockHeaders\"#\n\rBcTransaction\
-    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9b\x02\n\x10ChildBlock\
-    Header\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\
-    \x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\
-    \x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttim\
-    estamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0b\
-    merkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12W\n)child_block_confirmat\
-    ions_in_parent_count\x18\x07\x20\x01(\x04R$childBlockConfirmationsInPare\
-    ntCountb\x06proto3\
+    \x0b2\x14.bc.ChildBlockHeaderR\x11childBlockHeaders\x124\n\x16child_fing\
+    erprint_hash\x18\x0e\x20\x01(\tR\x14childFingerprintHash\x12#\n\rpreviou\
+    s_hash\x18\x0f\x20\x01(\tR\x0cpreviousHash\"\xb7\x05\n\x10BtGenesisBcBlo\
+    ck\x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\
+    \x18\x02\x20\x01(\tR\x0cpreviousHash\x12*\n\x11after_target_hash\x18\x03\
+    \x20\x01(\tR\x0fafterTargetHash\x12.\n\x13after_target_height\x18\x04\
+    \x20\x01(\x04R\x11afterTargetHeight\x12,\n\x12after_target_miner\x18\x05\
+    \x20\x01(\tR\x10afterTargetMiner\x12\x16\n\x06height\x18\x06\x20\x01(\
+    \x04R\x06height\x12\x14\n\x05miner\x18\x07\x20\x01(\tR\x05miner\x12\x1e\
+    \n\ndifficulty\x18\x08\x20\x01(\x02R\ndifficulty\x12\x1c\n\ttimestamp\
+    \x18\t\x20\x01(\x04R\ttimestamp\x12\x1f\n\x0bmerkle_root\x18\n\x20\x01(\
+    \tR\nmerkleRoot\x12\x1d\n\nchain_root\x18\x0b\x20\x01(\tR\tchainRoot\x12\
+    \x1a\n\x08distance\x18\x0c\x20\x01(\x04R\x08distance\x12\x14\n\x05nonce\
+    \x18\r\x20\x01(\tR\x05nonce\x12\x19\n\x08tx_count\x18\x0e\x20\x01(\x04R\
+    \x07txCount\x125\n\x0ctransactions\x18\x0f\x20\x03(\x0b2\x11.bc.BcTransa\
+    ctionR\x0ctransactions\x124\n\x16child_blockchain_count\x18\x10\x20\x01(\
+    \x04R\x14childBlockchainCount\x124\n\x16child_fingerprint_hash\x18\x11\
+    \x20\x01(\tR\x14childFingerprintHash\x12D\n\x13child_block_headers\x18\
+    \x12\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x11childBlockHeaders\"\x97\
+    \x05\n\x10AtGenesisBcBlock\x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\
+    \x12#\n\rprevious_hash\x18\x02\x20\x01(\tR\x0cpreviousHash\x120\n\x14bef\
+    ore_target_height\x18\x03\x20\x01(\x04R\x12beforeTargetHeight\x126\n\x17\
+    before_target_signature\x18\x04\x20\x01(\tR\x15beforeTargetSignature\x12\
+    \x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x14\n\x05miner\x18\
+    \x06\x20\x01(\tR\x05miner\x12\x1e\n\ndifficulty\x18\x07\x20\x01(\x02R\nd\
+    ifficulty\x12\x1c\n\ttimestamp\x18\x08\x20\x01(\x04R\ttimestamp\x12\x1f\
+    \n\x0bmerkle_root\x18\t\x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain_root\
+    \x18\n\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x0b\x20\x01(\x04\
+    R\x08distance\x12\x14\n\x05nonce\x18\x0c\x20\x01(\tR\x05nonce\x12\x19\n\
+    \x08tx_count\x18\r\x20\x01(\x04R\x07txCount\x125\n\x0ctransactions\x18\
+    \x0e\x20\x03(\x0b2\x11.bc.BcTransactionR\x0ctransactions\x124\n\x16child\
+    _blockchain_count\x18\x0f\x20\x01(\x04R\x14childBlockchainCount\x124\n\
+    \x16child_fingerprint_hash\x18\x10\x20\x01(\tR\x14childFingerprintHash\
+    \x12D\n\x13child_block_headers\x18\x11\x20\x03(\x0b2\x14.bc.ChildBlockHe\
+    aderR\x11childBlockHeaders\"#\n\rBcTransaction\x12\x12\n\x04hash\x18\x01\
+    \x20\x01(\tR\x04hash\"\x9b\x02\n\x10ChildBlockHeader\x12\x1e\n\nblockcha\
+    in\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\
+    \x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cpreviousHash\x12\
+    \x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestamp\x12\x16\n\x06height\
+    \x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0bmerkle_root\x18\x06\x20\
+    \x01(\tR\nmerkleRoot\x12W\n)child_block_confirmations_in_parent_count\
+    \x18\x07\x20\x01(\x04R$childBlockConfirmationsInParentCountb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
