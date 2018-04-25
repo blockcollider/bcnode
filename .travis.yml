@@ -73,7 +73,7 @@ install:
   - rustup component add rust-src
   - export RUST_SRC_PATH=`rustc --print sysroot`/lib/rustlib/src/rust/src
   - export RUST_BACKTRACE=1
-  - mkdir logs
+  - mkdir _logs
 
 script:
   - yarn

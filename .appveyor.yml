@@ -42,6 +42,7 @@ install:
   - 7z e C:\projects\bcnode\protoc-3.5.1-win32.zip -oC:\Users\appveyor\protoc
   - set PATH=%PATH%;C:\Users\appveyor\protoc
   - protoc --version
+  - mkdir _logs
   # - git clone https://github.com/aisouard/libwebrtc.git
   # - cd libwebrtc
   # - mkdir out
@@ -59,7 +60,7 @@ build: false
 # TODO modify this phase as you see fit
 test_script:
   - yarn run dist-windows
-  - pkg package.json --out-path=dist --target=node9-win-x64
+  # - pkg package.json --out-path=dist --target=node9-win-x64
   # - cargo build --verbose
   # - cargo run
   # - cargo test

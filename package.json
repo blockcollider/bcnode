@@ -1,6 +1,6 @@
 {
   "name": "bcnode",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Block Collider with miners and rovers",
   "main": "lib/src/init.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "transpile": "babel src --source-maps=true --config-file ./.babelrc --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "test": "jest",
     "build-native": "neon build",
-     "build": "yarn run version:generate && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files && yarn run webpack",
+    "build": "yarn run version:generate && yarn run lint:flow && yarn run lint:standard && yarn run transpile --copy-files && yarn run webpack",
     "build-windows": "yarn run version:generate && yarn run lint:standard && yarn run transpile --copy-files && yarn run webpack",
     "dist": "yarn && yarn run proto && yarn run build-native && yarn run build && yarn test --ci --coverage && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
     "dist-windows": "yarn && yarn run build-native && yarn test --ci --coverage && yarn run nsp check --threshold 7 && yarn run outdated && yarn run doc",
@@ -188,6 +188,7 @@
     "secp256k1": "^3.5.0",
     "serve-index": "^1.9.1",
     "sha3": "^1.2.0",
+    "sntp": "2.1.0",
     "socket.io": "^2.1.0",
     "socket.io-client": "^2.1.0",
     "tar": "^4.4.0",
