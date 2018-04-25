@@ -45,8 +45,7 @@
   },
   "homepage": "https://github.com/blockcollider/bcnode#readme",
   "bin": {
-    "benchmark": "bin/benchmark.js",
-    "cli": "bin/cli.js"
+    "cli": "lib/cli/main.js"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -120,7 +119,8 @@
     "compute-cosine-distance": "^1.0.0",
     "convert-hex": "^0.1.0",
     "deepcopy": "^0.6.3",
-    "discovery-swarm": "^4.4.2",
+    "deepmerge": "^2.1.0",
+    "discovery-swarm": "^5.1.1",
     "ed25519": "0.0.4",
     "ed25519-supercop": "^1.0.2",
     "eth-block-tracker": "^2.3.0",

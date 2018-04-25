@@ -7,4 +7,4 @@
  * @flow
  */
 
-export { default as Benchmark } from './benchmark'
+export { Benchmark } from './benchmark'

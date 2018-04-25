@@ -9,7 +9,7 @@
 
 const { Suite } = require('benchmark')
 
-export default class Benchmark {
+export class Benchmark {
   _suite: Suite // eslint-disable-line no-undef
 
   constructor () {
