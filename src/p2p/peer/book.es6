@@ -7,13 +7,18 @@
  * @flow
  */
 
-const PeerBook = require('peer-book')
+import type { Logger } from 'winston'
+
+const Book = require('peer-book')
 const PeerInfo = require('peer-info')
 
-const logging = require('../logger')
+const logging = require('../../logger')
 
-export class BcPeerBook extends PeerBook {
-  _logger: Object // eslint-disable-line no-undef
+/**
+ * PeerBook with extensions
+ */
+export class BcPeerBook extends Book {
+  _logger: Logger // eslint-disable-line no-undef
 
   constructor () {
     super()
@@ -22,21 +27,28 @@ export class BcPeerBook extends PeerBook {
     this._logger.debug('Creating BcPeerBook')
   }
 
+  /**
+   * Get set of peers as an array
+   * @return {*}
+   */
   getAllArray () {
-    const res = super.getAllArray()
-    return res
+    return super.getAllArray()
   }
 
-  put (peerInfo: PeerInfo, replace: boolean = null): PeerInfo {
-    this._logger.debug('BcPeerBook.put()')
-
+  /**
+   * Add peer to book
+   * @param peerInfo
+   * @param replace
+   * @return {PeerInfo}
+   */
+  put (peerInfo: PeerInfo, replace: null | boolean = null): PeerInfo {
     const peerId = peerInfo.id.toB58String()
     const oldPeer = this._peers[peerId]
 
     const res = super.put(peerInfo, replace)
 
     if (oldPeer) {
-      res.status = peerInfo.status || oldPeer.status
+      res.meta = peerInfo.meta || oldPeer.meta
     }
 
     return res
