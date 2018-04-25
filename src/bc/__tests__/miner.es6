@@ -108,21 +108,25 @@ describe('Miner', () => {
     newBlock.setTimestamp(newBlockTimestamp)
     newBlock.setDistance(solution.distance)
     newBlock.setNonce(solution.nonce)
+    newBlock.setPreviousHash("b6615809ca3ff24562ce2724ef010e369a976cb9068570074f88919eaddcd08f")
+
 
     const newBlockObject = newBlock.toObject()
     expect(newBlockObject).toEqual({
-      hash: '39bc7bbd2b182eddac2d18d5c998808f64423176975fb5a715d57f8599a4104f',
+      hash: '0591e1ab8028590e778577888d20b7c5bcb5584a84d56a1956eebf2b6b39d525',
+      previousHash: "b6615809ca3ff24562ce2724ef010e369a976cb9068570074f88919eaddcd08f",
       height: 2,
       merkleRoot: '53c85bcd43ade65bba9d2e2d2b5944116526b7c05ba7b7d6425699128548f5ae',
       difficulty: 11860447342465,
       chainRoot: 'daf4c73925e7eb4e67a86cabfb7cc1e257a7af63f6a3f0b3f5991839891fc796',
-      distance: 185633463518405,
+      distance: 169035714005756,
       nonce: '0.12137218313968567',
       txCount: 0,
       miner: TEST_MINER_KEY,
       timestamp: newBlockTimestamp,
       transactionsList: [],
       childBlockchainCount: 5,
+      childFingerprintHash: "86120e6b6c3bcc31204ebb7f7fdacf62cbcc1408191092ee2f8f5b3cc5082db1",
       childBlockHeadersList: [
         { blockchain: 'btc',
           childBlockConfirmationsInParentCount: genesisHeaders[0].getChildBlockConfirmationsInParentCount() + 1,
