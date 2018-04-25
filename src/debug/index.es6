@@ -20,8 +20,8 @@ const DEBUG_DIR = path.resolve(__dirname, '..', '..', '_debug')
 /**
  * Creates _debug directory if does not exists
 */
-export function ensureDebugDir () {
-  if (!isDebugEnabled()) {
+export function ensureDebugDir (force: boolean = false) {
+  if (!isDebugEnabled() && (!force)) {
     return
   }
 
