@@ -9,6 +9,10 @@
   },
 
   "p2p": {
+    "blacklist": {
+      "defaultTtl": 60,
+      "purgeInterval": 10
+    },
     "rendezvous": {
       "webrtc": "/dns4/rendezvous.blockcollider.org/tcp/9090/ws/p2p-webrtc-star",
       "websocket": "/dns4/rendezvous.blockcollider.org/tcp/9091/ws/p2p-websocket-star"
