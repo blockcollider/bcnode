@@ -1,5 +1,9 @@
 {
-  "hash": "0xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "hash": "5105a4cffbe8b107d61b4e58d897e707be7c0578b7e7db6a811fb39cf2a2bd57",
+  "previousHash": "b6615809ca3ff24562ce2724ef010e369a976cb9068570074f88919eaddcd08f",
+  "afterTargetHash": "6f641871680978619176212f0000a40d8d0ae784ad35918ce677a5111a776cf9",
+  "afterTargetHeight": 1000066,
+  "afterTargetMiner":"0x083cc41690bbd89d33f3b2e71b9012904426eb0c",
   "height": 1,
   "miner": "0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3",
   "difficulty": 141129464479256,
@@ -11,6 +15,7 @@
   "txCount": 0,
   "transactionsList": [],
   "childBlockchainCount": 5,
+  "childFingerprintsHash":"86120e6b6c3bcc31204ebb7f7fdacf62cbcc1408191092ee2f8f5b3cc5082db1",
   "childBlockHeadersList": [
     {
       "blockchain": "btc",
