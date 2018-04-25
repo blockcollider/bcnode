@@ -80,7 +80,9 @@ export default class Server {
 
     this._logger.debug('Starting Server for Web UI')
 
-    this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
+    if (config.server.logCalls) {
+      this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
+    }
     this._app.use(responseTime())
     this._app.use(bodyParser.json())
 
