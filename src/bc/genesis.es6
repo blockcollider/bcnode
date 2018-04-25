@@ -10,7 +10,7 @@
 const path = require('path')
 
 const { objFromFileSync } = require('../helper/json')
-const { BcBlock } = require('../protos/core_pb')
+const { BtGenesisBcBlock } = require('../protos/core_pb')
 
 export const GENESIS_MINER_KEY = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
 
@@ -46,8 +46,12 @@ export function getGenesisBlock () {
       ]
     })
 
-  const GENESIS_BLOCK = new BcBlock([
+  const GENESIS_BLOCK = new BtGenesisBcBlock([
     GENESIS_DATA.hash,
+    GENESIS_DATA.previousHash,
+    GENESIS_DATA.afterTargetHash,
+    GENESIS_DATA.afterTargetHeight,
+    GENESIS_DATA.afterTargetMiner,
     GENESIS_DATA.height,
     GENESIS_DATA.miner,
     GENESIS_DATA.difficulty,
@@ -59,6 +63,7 @@ export function getGenesisBlock () {
     GENESIS_DATA.txCount,
     GENESIS_DATA.transactionsList,
     GENESIS_BLOCK_HEADERS.length,
+    GENESIS_DATA.childFingerprintHash,
     GENESIS_BLOCK_HEADERS
   ])
 
