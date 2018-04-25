@@ -348,38 +348,27 @@ export function getNewPreExpDifficulty (
   currentTimestamp: number,
   lastPreviousBlock: BcBlock,
   previousBlocks: { [blockchain: string]: BcBlock },
-  parentShareDiff: BN,
   minimumDiffShare: BN,
   childrenPreviousBlocks: ChildBlockHeader[],
   childrenCurrentBlocks: ChildBlockHeader[]
 ) {
   let handicap = calculateHandicap(childrenPreviousBlocks, childrenCurrentBlocks)
 
-  const currentChildrenDifficulty = getDiff(
-    currentTimestamp,
-    lastPreviousBlock.getTimestamp(),
-    minimumDiffShare,
-    MINIMUM_DIFFICULTY,
-    handicap
-  )
-
   const newDifficulty: BN = zip(childrenPreviousBlocks, childrenCurrentBlocks).reduce((sum: BN, [previousHeader, currentHeader]) => {
     // TODO @pm - basic confirmation count is 0 - we can't divide by 0 here, should we start from 1 then?
     const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
     // previousBlocks is a BC block at height = previousBlock.getHeight() - currentHeader.getChildBlockConfirmationsInParentCount() - 1
     // (that one in which the child blockchain was changes last)
-    const timeBonus = (currentHeader.getTimestamp() - previousBlocks[currentHeader.getBlockchain()].getTimestamp()) / confirmationCount
-    return sum.add(
-      getDiff(
-        previousBlocks[currentHeader.getBlockchain()].getTimestamp() + timeBonus,
-        previousBlocks[currentHeader.getBlockchain()].getTimestamp(),
-        parentShareDiff,
-        minimumDiffShare
-      )
+    const timeBonus = (currentHeader.getTimestamp() / 1000 << 0 - previousBlocks[currentHeader.getBlockchain()].getTimestamp()) / confirmationCount
+    const childPart = getDiff(
+      previousBlocks[currentHeader.getBlockchain()].getTimestamp() + timeBonus,
+      previousBlocks[currentHeader.getBlockchain()].getTimestamp(),
+      minimumDiffShare, // previous
+      MINIMUM_DIFFICULTY, // minimal
+      handicap
     )
+    return sum.add(childPart)
   }, new BN(0))
-
-  newDifficulty.add(currentChildrenDifficulty)
 
   const preExpDiff = getDiff(
     currentTimestamp,
@@ -466,13 +455,11 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
 
   const childBlockHeadersList = prepareChildBlockHeadersList(lastPreviousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
 
-  const parentShareDiff = getParentShareDiff(lastPreviousBlock.getDifficulty(), blockHashes.length)
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
   const preExpDiff = getNewPreExpDifficulty(
     currentTimestamp,
     lastPreviousBlock,
     previousBlocks,
-    parentShareDiff,
     minimumDiffShare,
     lastPreviousBlock.getChildBlockHeadersList(),
     childBlockHeadersList

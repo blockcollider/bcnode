@@ -199,6 +199,7 @@ export default class Engine {
 
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._mining && equals(new Set(this._knownRovers), new Set(rovers))) {
+      this._mining = true
       let currentBlocks
       let lastPreviousBlock
       let previousBcBlocks
@@ -237,13 +238,13 @@ export default class Engine {
         this._logger.debug(`Getting previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
         const blocks = await Promise.all(lastBcBlockKeys.map(key => this._persistence.get(key)))
         previousBcBlocks = fromPairs(blocks.map((block, idx) => ([lastChildBlockHeaders[idx].getBlockchain(), block])))
-        this._logger.debug(`Successfuly got ${previousBcBlocks.length} previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
+        this._logger.debug(`Successfuly got ${blocks.length} previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
       } catch (err) {
         this._logger.warn(`Error while getting one or more previous BC blocks, reason: ${err.message}`)
         throw err
       }
 
-      this._logger.debug(`Mining ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+      this._logger.debug(`Preparing new block `)
 
       const currentTimestamp = (Date.now() / 1000) << 0
       const work = prepareWork(lastPreviousBlock, currentBlocks)
@@ -257,7 +258,8 @@ export default class Engine {
         this._minerKey
       )
 
-      this._mining = true
+      this._logger.debug(`Mining with work: "${work}", difficutly: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+
       const solution = mine(
         currentTimestamp,
         work,
@@ -265,7 +267,6 @@ export default class Engine {
         newBlock.getMerkleRoot(),
         newBlock.getDifficulty()
       )
-      this._mining = false
 
       // Set timestamp after mining
       newBlock.setTimestamp(currentTimestamp)
