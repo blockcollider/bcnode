@@ -15,7 +15,7 @@
   "txCount": 0,
   "transactionsList": [],
   "childBlockchainCount": 5,
-  "childFingerprintsHash":"86120e6b6c3bcc31204ebb7f7fdacf62cbcc1408191092ee2f8f5b3cc5082db1",
+  "childFingerprintHash":"86120e6b6c3bcc31204ebb7f7fdacf62cbcc1408191092ee2f8f5b3cc5082db1",
   "childBlockHeadersList": [
     {
       "blockchain": "btc",
