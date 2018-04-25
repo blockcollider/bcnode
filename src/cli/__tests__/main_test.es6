@@ -6,3 +6,11 @@
  *
  * @flow
  */
+
+const { main } = require('../main')
+
+describe('cli', () => {
+  it('main()', () => {
+    expect(main).toBeInstanceOf(Function)
+  })
+})
