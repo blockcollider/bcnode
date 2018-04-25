@@ -126,7 +126,7 @@ export default class Server {
     })
 
     this._wsServer.on('connection', (client, req) => {
-      this._wsSendIntialState(client)
+      this._wsSendInitialState(client)
 
       client.on('close', reason => {
         this._logger.debug('Client connection closed', req.connection.remoteAddress)
@@ -202,7 +202,7 @@ export default class Server {
     // console.log('peer', peer)
     return {
       id: peer.id.toB58String(),
-      status: peer.status,
+      meta: peer.meta,
       addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString())
     }
   }
@@ -236,7 +236,7 @@ export default class Server {
     this._wsBroadcast({type: 'peer.disconnected', data: this._transformPeerToWire(peer)})
   }
 
-  _wsSendIntialState (client: WebSocket.Client) {
+  _wsSendInitialState (client: WebSocket.Client) {
     let peers = []
     const peerBook = this._engine._node && this._engine._node._peers
     if (peerBook) {
