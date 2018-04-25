@@ -547,7 +547,7 @@ async-eventemitter@^0.2.2:
   dependencies:
     async "^2.4.0"
 
-"async-eventemitter@github:ahultgren/async-eventemitter#fa06e39e56786ba541c180061dbf2c0a5bbf951c":
+async-eventemitter@ahultgren/async-eventemitter#fa06e39e56786ba541c180061dbf2c0a5bbf951c:
   version "0.2.3"
   resolved "https://codeload.github.com/ahultgren/async-eventemitter/tar.gz/fa06e39e56786ba541c180061dbf2c0a5bbf951c"
   dependencies:
@@ -1451,7 +1451,7 @@ backo2@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
 
-"bagpipe@github:Ivshti/bagpipe#ae11730ef59364b20868287fb3ce0970a87dc8c8":
+bagpipe@Ivshti/bagpipe#ae11730ef59364b20868287fb3ce0970a87dc8c8:
   version "0.3.7"
   resolved "https://codeload.github.com/Ivshti/bagpipe/tar.gz/ae11730ef59364b20868287fb3ce0970a87dc8c8"
   dependencies:
@@ -2253,7 +2253,7 @@ buffer@^5.0.5:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-"buffers@github:bitpay/node-buffers#v0.1.2-bitpay", buffers@~0.1.1:
+buffers@bitpay/node-buffers#v0.1.2-bitpay, buffers@~0.1.1:
   version "0.1.1"
   resolved "https://codeload.github.com/bitpay/node-buffers/tar.gz/04f4c4264e0d105db2b99b786843ed64f23230d8"
 
@@ -3359,6 +3359,10 @@ deepcopy@^0.6.3:
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/deepcopy/-/deepcopy-0.6.3.tgz#634780f2f8656ab771af8fa8431ed1ccee55c7b0"
 
+deepmerge@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-2.1.0.tgz#511a54fff405fc346f0240bb270a3e9533a31102"
+
 default-require-extensions@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/default-require-extensions/-/default-require-extensions-1.0.0.tgz#f37ea15d3e13ffd9b437d33e1a75b5fb97874cb8"
@@ -3506,7 +3510,7 @@ diffie-hellman@^5.0.0:
     miller-rabin "^4.0.0"
     randombytes "^2.0.0"
 
-discovery-channel@^5.3.0:
+discovery-channel@^5.5.1:
   version "5.5.1"
   resolved "https://registry.yarnpkg.com/discovery-channel/-/discovery-channel-5.5.1.tgz#9af6fc7f8cecdff40dbe4f13a49463718d4cd676"
   dependencies:
@@ -3517,19 +3521,19 @@ discovery-channel@^5.3.0:
     pretty-hash "^1.0.1"
     thunky "^0.1.0"
 
-discovery-swarm@^4.4.2:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/discovery-swarm/-/discovery-swarm-4.4.2.tgz#5d3160a46019e50e874195765df7d601ee55a813"
+discovery-swarm@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/discovery-swarm/-/discovery-swarm-5.1.1.tgz#5d8a11b46148f745da5a373b0fca367a4ef0750b"
   dependencies:
     buffer-equals "^1.0.3"
     connections "^1.4.2"
     debug "^2.4.5"
-    discovery-channel "^5.3.0"
+    discovery-channel "^5.5.1"
     length-prefixed-message "^3.0.3"
     pump "^1.0.1"
     to-buffer "^1.0.1"
   optionalDependencies:
-    utp-native "^1.2.2"
+    utp-native "^1.7.0"
 
 dlv@^1.1.0:
   version "1.1.1"
@@ -6759,9 +6763,9 @@ js-beautify@^1.5.4:
     mkdirp "~0.5.0"
     nopt "~3.0.1"
 
-"js-nacl@github:liskhq/js-nacl#6dc1417":
+js-nacl@LiskHQ/js-nacl#6dc1417:
   version "1.2.1"
-  resolved "https://codeload.github.com/liskhq/js-nacl/tar.gz/6dc1417057cd81381d332b370e82ceab1f2416af"
+  resolved "https://codeload.github.com/LiskHQ/js-nacl/tar.gz/6dc1417057cd81381d332b370e82ceab1f2416af"
 
 js-scrypt@^0.2.0:
   version "0.2.0"
@@ -12449,7 +12453,7 @@ util@0.10.3, util@^0.10.3:
   dependencies:
     inherits "2.0.1"
 
-"util@github:Ivshti/node-util":
+util@Ivshti/node-util:
   version "0.10.3"
   resolved "https://codeload.github.com/Ivshti/node-util/tar.gz/97b6beed8e0e478cd4184965ac94bf316f94e5f5"
   dependencies:
@@ -12470,7 +12474,7 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
 
-utp-native@^1.2.2:
+utp-native@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/utp-native/-/utp-native-1.7.0.tgz#08bca3f278e56db440aadab692b931708b820105"
   dependencies:

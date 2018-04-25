@@ -57,10 +57,18 @@ ADD src/protos src/protos
 RUN neon build
 
 # Git -> .version.json
-COPY .version.json .
 COPY . .
 
-# And build everything
+# Install packages
+RUN yarn
+
+# Copy .version.json
+COPY .version.json .
+
+# Initial transpile
+RUN yarn transpile
+
+# Build all
 RUN yarn run dist
 
 RUN  rm -rf native/target/
