@@ -120,6 +120,6 @@ class LoggingContext {
   }
 }
 
-export const getLogger = (path: string, meta: ?Object) => {
+export const getLogger = (path: string, meta: ?Object): Logger => {
   return new LoggingContext(logger, pathToLogPrefix(path), meta)
 }
