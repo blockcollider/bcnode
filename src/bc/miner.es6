@@ -253,9 +253,13 @@ export function distance (a: string, b: string): number {
 export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number): { distance: number, nonce: string } {
   threshold = new BN(threshold, 16)
   let result
+  const maxCalculationEnd = Date.now() + (10 * 1000)
 
   // TODO: @pm check
   while (true) {
+    if (maxCalculationEnd < Date.now()) {
+      throw Error('Mining took more than 10s, ending...')
+    }
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentTimestamp))

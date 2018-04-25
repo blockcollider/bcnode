@@ -9,6 +9,8 @@
 
 const { EventEmitter } = require('events')
 const { equals, all, values, fromPairs } = require('ramda')
+const { fork, ChildProcess } = require('child_process')
+const { resolve } = require('path')
 
 const config = require('../../config/config')
 const { debugSaveObject } = require('../debug')
@@ -20,13 +22,14 @@ const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { RpcServer } = require('../rpc/index')
-const { prepareWork, prepareNewBlock, mine } = require('../bc/miner')
+const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 const MONITOR_ENABLED = process.env.BC_MONITOR === 'true'
+const MINER_WORKER_PATH = resolve(__filename, '..', '..', 'bc', 'miner_worker.js')
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
@@ -42,6 +45,8 @@ export default class Engine {
   _collectedBlocks: Object; // eslint-disable-line no-undef
   _canMine: bool; // eslint-disable-line no-undef
   _mining: bool;
+  _workerProcess: ?ChildProcess
+  _unfinishedBlock: ?BcBlock
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -178,13 +183,13 @@ export default class Engine {
 
     this._emitter.on('collectBlock', ({ block }) => {
       process.nextTick(() => {
-        this.collectBlock(rovers, block).then(() => {
-          this._logger.debug('Success in collectBlock event handler')
-          this._mining = false
+        this.collectBlock(rovers, block).then((pid: number|false) => {
+          if (pid !== false) {
+            this._logger.debug(`collectBlock handler: successfuly send to mining worker (PID: ${pid})`)
+          }
         }).catch(err => {
           const reason = JSON.stringify(errToObj(err), null, 2)
-          this._logger.error(`Mining failed, reason: ${reason}`)
-          this._mining = false
+          this._logger.error(`Could not send to mining worker, reason: ${reason}`)
         })
       })
     })
@@ -257,34 +262,57 @@ export default class Engine {
         [], // TODO add transactions
         this._minerKey
       )
-
-      this._logger.debug(`Mining with work: "${work}", difficutly: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
-
-      const solution = mine(
-        currentTimestamp,
-        work,
-        this._minerKey,
-        newBlock.getMerkleRoot(),
-        newBlock.getDifficulty()
-      )
-
-      // Set timestamp after mining
       newBlock.setTimestamp(currentTimestamp)
-      newBlock.setDistance(solution.distance)
-      newBlock.setNonce(solution.nonce)
+      this._unfinishedBlock = newBlock
 
-      return this._processMinedBlock(newBlock)
+      this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+      this._workerProcess = fork(MINER_WORKER_PATH)
+      this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
+      this._workerProcess.on('error', this._handleWorkerError.bind(this))
+      this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
+      this._workerProcess.send({currentTimestamp, work, minerKey: this._minerKey, merkleRoot: newBlock.getMerkleRoot(), difficulty: newBlock.getDifficulty()})
+      return Promise.resolve(this._workerProcess.pid)
     } else {
       if (!this._canMine) {
         this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
-        return
+        return Promise.resolve(false)
       }
-      if (!this._mining) {
-        this._logger.debug('Not starting mining new block while already mining one')
-        return
+      if (this._mining) {
+        this._logger.info('Not starting mining new block while already mining one')
+        return Promise.resolve(false)
       }
       this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
+      return Promise.resolve(false)
     }
+  }
+
+  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string }) {
+    if (!this._unfinishedBlock) {
+      throw new Error(`There is not unfininshed block to use solution for`)
+    }
+    this._unfinishedBlock.setNonce(solution.nonce)
+    this._unfinishedBlock.setDistance(solution.distance)
+
+    this._processMinedBlock(this._unfinishedBlock)
+  }
+
+  _handleWorkerError (error: Error) {
+    this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
+    this._unfinishedBlock = undefined
+    this._mining = false
+    this._workerProcess.kill('SIGKILL')
+    this._workerProcess = undefined
+  }
+
+  _handleWorkerExit (code: number, signal: string) {
+    if (code !== 0) {
+      this._logger.warn(`Mining worker process exited with code ${code}, signal ${signal}`)
+      this._unfinishedBlock = undefined
+      this._mining = false
+    } else {
+      this._logger.debug(`Mining worker fininshed its work (code: ${code})`)
+    }
+    this._workerProcess = undefined
   }
 
   /**
@@ -305,6 +333,8 @@ export default class Engine {
 
     const method = 'newblock'
     this.node.broadcastNewBlock(method, newBlock)
+    this._unfinishedBlock = undefined
+    this._mining = false
 
     return Promise.resolve(true)
   }
