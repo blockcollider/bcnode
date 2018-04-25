@@ -107,3 +107,7 @@ dist/
 
 # Version file
 # .version.json
+
+# Local snippets
+/snippets/
+
