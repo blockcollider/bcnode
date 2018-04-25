@@ -41,4 +41,8 @@ export class BcPeerBook extends PeerBook {
 
     return res
   }
+
+  getPeersCount (): number {
+    return Object.keys(this._peers).length
+  }
 }
