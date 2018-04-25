@@ -65,6 +65,7 @@ export async function main (args: string[]) {
   program
     // $FlowFixMe
     .version(`${version.npm}#${version.git.short}`)
+    .option('-i, --info', 'Print OS info at startup')
     .option('--miner-key [key]', 'Miner key')
     .option('-n, --node', 'Start P2P node')
     .option('-r, --randezvous-server', 'Start randezvous server')
@@ -105,7 +106,9 @@ export async function main (args: string[]) {
 
   const logger: Object = logging.getLogger(__filename)
 
-  logger.info(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
+  if (program.opts().info) {
+    logger.info(`OS Info: ${JSON.stringify(getOsInfo(), null, 2)}`)
+  }
 
   // Create instance of engine
   const minerKey = process.env.BC_MINER_KEY || program.opts().minerKey
