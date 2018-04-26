@@ -120,7 +120,6 @@
     "convert-hex": "^0.1.0",
     "debug": "^3.1.0",
     "deepcopy": "^0.6.3",
-    "deepmerge": "^2.1.0",
     "discovery-swarm": "^5.1.1",
     "ed25519": "0.0.4",
     "ed25519-supercop": "^1.0.2",
