@@ -26,6 +26,7 @@ const { getGenesisBlock } = require('../bc/genesis')
 const { BcBlock } = require('../protos/core_pb')
 const { errToObj } = require('../helper/error')
 const { getVersion } = require('../helper/version')
+const ts = require('../utils/time').default // ES6 default export
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 const MONITOR_ENABLED = process.env.BC_MONITOR === 'true'
@@ -65,6 +66,8 @@ export default class Engine {
     }
     this._canMine = false
     this._mining = false
+    // Start NTP sync
+    ts.start()
   }
 
   /**
@@ -261,7 +264,7 @@ export default class Engine {
 
       this._logger.debug(`Preparing new block `)
 
-      const currentTimestamp = (Date.now() / 1000) << 0
+      const currentTimestamp = ts.nowSeconds()
       const work = prepareWork(lastPreviousBlock, currentBlocks)
       const newBlock = prepareNewBlock(
         currentTimestamp,
@@ -346,6 +349,7 @@ export default class Engine {
   }
 
   requestExit () {
+    ts.stop()
     return this._rovers.killRovers()
   }
 
