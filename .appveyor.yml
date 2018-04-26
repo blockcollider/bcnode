@@ -13,6 +13,7 @@ environment:
   matrix:
     - TARGET: x86_64-pc-windows-msvc
       CHANNEL: nightly
+      nodejs_version: "8"
 
 init:
   - "@echo on"
