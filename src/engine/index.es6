@@ -6,7 +6,6 @@
  *
  * @flow
  */
-
 const { EventEmitter } = require('events')
 const { equals, all, values, fromPairs } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
@@ -78,8 +77,9 @@ export default class Engine {
     const roverNames = Object.keys(rovers)
     const { npm, git: { long } } = getVersion()
     const versionData = {
-      npm,
-      commit: long
+      version: npm,
+      commit: long,
+      db_version: 1
     }
     // TODO get from CLI / config
     try {
@@ -276,12 +276,21 @@ export default class Engine {
       this._unfinishedBlock = newBlock
 
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
-      this._workerProcess = fork(MINER_WORKER_PATH)
-      this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
-      this._workerProcess.on('error', this._handleWorkerError.bind(this))
-      this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
-      this._workerProcess.send({currentTimestamp, work, minerKey: this._minerKey, merkleRoot: newBlock.getMerkleRoot(), difficulty: newBlock.getDifficulty()})
-      return Promise.resolve(this._workerProcess.pid)
+      const proc: ChildProcess = fork(MINER_WORKER_PATH)
+      this._workerProcess = proc
+      if (this._workerProcess !== null) {
+        // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+        this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
+        // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+        this._workerProcess.on('error', this._handleWorkerError.bind(this))
+        // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+        this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
+        // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+        this._workerProcess.send({currentTimestamp, work, minerKey: this._minerKey, merkleRoot: newBlock.getMerkleRoot(), difficulty: newBlock.getDifficulty()})
+        // $FlowFixMe - Flow can't properly find worker pid
+        return Promise.resolve(this._workerProcess.pid)
+      }
+      return Promise.resolve(false)
     } else {
       if (!this._canMine) {
         this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
@@ -301,6 +310,7 @@ export default class Engine {
       throw new Error(`There is not unfininshed block to use solution for`)
     }
     this._unfinishedBlock.setNonce(solution.nonce)
+    // $FlowFixMe
     this._unfinishedBlock.setDistance(solution.distance)
 
     this._processMinedBlock(this._unfinishedBlock)
@@ -310,6 +320,7 @@ export default class Engine {
     this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
     this._unfinishedBlock = undefined
     this._mining = false
+    // $FlowFixMe - Flow can't properly find worker pid
     this._workerProcess.kill('SIGKILL')
     this._workerProcess = undefined
   }
@@ -356,7 +367,7 @@ export default class Engine {
 
     const tasks = [
       // FIXME: This collides with genesis block
-      // this.persistence.put('bc.block.latest', newBlock),
+      this.persistence.put('bc.block.latest', newBlock),
       this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
     ]
 
