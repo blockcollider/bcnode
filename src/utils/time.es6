@@ -43,9 +43,11 @@ export class TimeService { // export for tests
   }
 
   start () {
-    this._logger.info('Starting NTP time sync')
-    this.ntpGetOffset()
-    this.intervalHandler = setInterval(this.ntpGetOffset.bind(this), REFRESH_INTERVAL)
+    if (this.intervalHandler === undefined) {
+      this._logger.info('Starting NTP time sync')
+      this.ntpGetOffset()
+      this.intervalHandler = setInterval(this.ntpGetOffset.bind(this), REFRESH_INTERVAL)
+    }
   }
 
   stop () {
@@ -69,6 +71,13 @@ export class TimeService { // export for tests
       this._logger.warn('TimeService did not sync in last five minutes, there is an error in NTP sync')
     }
     return Date.now() + this._offset
+  }
+
+  /**
+   * @return unix timestamp in seconds
+   */
+  nowSeconds (): number {
+    return (this.now() / 1000) << 0
   }
 
   getDate (): Date {
