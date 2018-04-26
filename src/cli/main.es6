@@ -132,7 +132,7 @@ const initErrorHandlers = (logger: Logger) => {
 
       console.log(`Exception was saved in ${EXCEPTION_PATH}`)
       console.log('Exiting...')
-      return process.exit(-1)
+      // return process.exit(-1)
     })
   })
 }
