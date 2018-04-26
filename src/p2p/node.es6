@@ -7,9 +7,9 @@
  * @flow
  */
 
-const merge = require('deepmerge')
 const { inspect } = require('util')
 
+const { mergeDeepRight } = require('ramda')
 const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
@@ -301,7 +301,7 @@ export default class Node {
             return
           }
 
-          peer.meta = merge(meta, {
+          peer.meta = mergeDeepRight(meta, {
             ts: {
               connectedAt: Date.now()
             }
