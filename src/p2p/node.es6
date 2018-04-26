@@ -126,7 +126,7 @@ export default class Node {
         return this._node.dial(peer, (err) => {
           if (err) {
             this._logger.warn(`Error while dialing discovered peer ${peerId}`)
-            throw err
+            return err
           }
         })
       })
@@ -137,7 +137,7 @@ export default class Node {
       this._node.on('peer:connect', (peer) => {
         if (err) {
           this._logger.error(err)
-          throw err
+          return err
         }
 
         const peerId = peer.id.toB58String()
