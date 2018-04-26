@@ -50,9 +50,7 @@ export const main = async (args: string[] = process.argv) => {
     .description('Configuration file(s)')
     .usage('<options>')
     .option('--show', 'Show config file used')
-    .action((cmd, options) => {
-      console.log('cmd', cmd)
-      console.log('options', options)
+    .action((cmd) => {
       return cmdConfig(cmd)
     })
 
