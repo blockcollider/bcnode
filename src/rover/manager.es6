@@ -21,8 +21,8 @@ const ROVER_RESTART_TIMEOUT = 5000
  * @type {{btc: *, eth: *, lsk: *}}
  */
 export const rovers = {
-  btc: path.resolve(__dirname, 'btc', 'rover.js'),
-  eth: path.resolve(__dirname, 'eth', 'rover.js'),
+  // btc: path.resolve(__dirname, 'btc', 'rover.js'),
+  // eth: path.resolve(__dirname, 'eth', 'rover.js'),
   lsk: path.resolve(__dirname, 'lsk', 'rover.js'),
   neo: path.resolve(__dirname, 'neo', 'rover.js'),
   wav: path.resolve(__dirname, 'wav', 'rover.js')
@@ -58,7 +58,6 @@ export default class RoverManager {
     }
 
     this._logger.info(`Starting rover '${roverName}'`)
-
     const rover = fork(
       roverPath,
       [],
