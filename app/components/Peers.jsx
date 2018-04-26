@@ -17,31 +17,9 @@ export class PeersContainer extends Component<*> {
     let id = 0
     const peers = this.props.peers.map((peer) => {
       const peerId = `${peer.id.substring(0, 6)}...${peer.id.substr(peer.id.length - 6)}`
-      const protocolVersion = (
-        peer.status &&
-        peer.status.protocolVersion
-      ) || '<unknown>'
 
-      const gitVersion = (
-        peer.status &&
-        peer.status.version &&
-        peer.status.version.git &&
-        peer.status.version.git.short
-      ) || '<unknown>'
-
-      const npmVersion = (
-        peer.status &&
-        peer.status.version &&
-        peer.status.version.npm
-      ) || '<unknown>'
-
-      const version = `${npmVersion}/${gitVersion}`
-
-      const connectedAgo = (
-        peer.status &&
-        peer.status.connectedAt &&
-        moment(peer.status.connectedAt).fromNow()
-      ) || '<unknown>'
+      const meta = peer.meta || {}
+      const metaVersion = meta.version || {}
 
       const address = (peer.addrs || [])
         .map((addr) => {
@@ -51,6 +29,46 @@ export class PeersContainer extends Component<*> {
           )
         })
 
+      const protocolVersion = (
+        metaVersion.protocol
+      ) || '<unknown>'
+
+      const gitVersion = (
+        metaVersion.git &&
+        metaVersion.git.short
+      ) || '<unknown>'
+
+      const npmVersion = (
+        metaVersion.npm
+      ) || '<unknown>'
+
+      const version = `${npmVersion}/${gitVersion}`
+
+      const startedAgo = (
+        meta &&
+        meta.ts &&
+        meta.ts.startedAt &&
+        moment(meta.ts.startedAt).fromNow()
+      )
+
+      const connectedAgo = (
+        meta &&
+        meta.ts &&
+        meta.ts.connectedAt &&
+        moment(meta.ts.connectedAt).fromNow()
+      )
+
+      const keyStartedAt = `${peer.id}.ts.startedAt`
+      const keyConnectedAt = `${peer.id}.ts.connectedAt`
+      const timestamp = () => {
+        return (
+          <div>
+            <div key={keyStartedAt}>{startedAgo}</div>
+            <div key={keyConnectedAt}>{connectedAgo}</div>
+          </div>
+        )
+      }
+
       return (
         <tr key={peer.id}>
           <th scope='row'>{id++}</th>
@@ -58,7 +76,7 @@ export class PeersContainer extends Component<*> {
           <td>{address}</td>
           <td>{protocolVersion}</td>
           <td>{version}</td>
-          <td>{connectedAgo}</td>
+          <td>{timestamp()}</td>
         </tr>
       )
     })
@@ -88,9 +106,16 @@ export class PeersContainer extends Component<*> {
 }
 
 const transformFromWire = (obj: Object): Object => {
-  const connectedAt = obj && obj.status && obj.status.connectedAt
+  const meta = (obj && obj.meta) || {}
+
+  const connectedAt = meta.ts && meta.ts.connectedAt
   if (connectedAt) {
-    obj.status.connectedAt = new Date(connectedAt)
+    meta.ts.connectedAt = new Date(connectedAt)
+  }
+
+  const startedAt = meta.ts && meta.ts.startedAt
+  if (connectedAt) {
+    meta.ts.startedAt = new Date(startedAt)
   }
 
   return obj
