@@ -206,7 +206,8 @@ export default class Node {
       this._logger.debug(`Sending to peer ${peer}`)
       this._node.dialProtocol(peer, url, (err, conn) => {
         if (err) {
-          this._logger.error('Error sending message to peer', peer, err)
+          this._logger.error('Error sending message to peer', peer.id.toB58String(), err)
+          return err
         }
 
         pull(pull.values([block.serializeBinary()]), conn)
