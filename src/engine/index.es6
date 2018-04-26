@@ -203,6 +203,8 @@ export default class Engine {
         }).catch(err => {
           const reason = JSON.stringify(errToObj(err), null, 2)
           this._logger.error(`Could not send to mining worker, reason: ${reason}`)
+          this._mining = false
+          this._unfinishedBlock = undefined
         })
       })
     })
