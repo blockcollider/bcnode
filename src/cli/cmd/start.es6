@@ -17,8 +17,6 @@ const Engine = require('../../engine').default
 const ROVERS = Object.keys(require('../../rover/manager').rovers)
 
 export const cmd = async (program: typeof Command) => {
-  console.log('program', program)
-
   const {
     node,
     rovers,

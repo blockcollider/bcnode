@@ -83,13 +83,13 @@ export default class Node {
         }
         this._node = new Bundle(peerInfo, this._peers, opts)
 
-        this._registerEventHandlers()
-        this._registerMessageHandlers()
-
         this._node.start((err) => {
           if (err) {
             return cb(err)
           }
+
+          this._registerEventHandlers()
+          this._registerMessageHandlers()
 
           cb(null)
         })
@@ -102,6 +102,7 @@ export default class Node {
         throw err
       }
 
+      uf (this._peers.getPeersCount() >= PEERS_MAX_CUNT)
       /**
        * Peer discovered
        */
