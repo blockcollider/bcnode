@@ -118,6 +118,7 @@
     "commander": "^2.15.0",
     "compute-cosine-distance": "^1.0.0",
     "convert-hex": "^0.1.0",
+    "debug": "^3.1.0",
     "deepcopy": "^0.6.3",
     "deepmerge": "^2.1.0",
     "discovery-swarm": "^5.1.1",

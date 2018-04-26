@@ -32,6 +32,8 @@ const NETWORK_ID = 1
 
 const DATETIME_NOW = Date.now()
 
+// const debug = require('debug')('p2p')('node')
+
 // type StatusMsg = {
 //   networkId: number,
 //   peerId: ?string,
@@ -102,7 +104,10 @@ export default class Node {
         throw err
       }
 
-      uf (this._peers.getPeersCount() >= PEERS_MAX_CUNT)
+      // if (this._peers.getPeersCount() >= PEERS_MAX_COUNT) {
+      //   return
+      // }
+
       /**
        * Peer discovered
        */
