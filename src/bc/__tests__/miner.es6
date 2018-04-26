@@ -71,8 +71,8 @@ describe('Miner', () => {
     // Update changed header in header list
     headers[1] = newHeader
 
-    // Mock timestamp - 3600 seconds (1 hour) after genesis block
-    let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
+    // Mock timestamp - 5 seconds after genesis block
+    let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 5 * 1000)) / 1000 << 0
 
     // Prepare work for miner
     const work = prepareWork(genesisBlock, headers)
@@ -89,7 +89,7 @@ describe('Miner', () => {
     )
 
     // Mock timestamp - 3 seconds after work was generated
-    mockedTimestamp = mockNow(new Date(mockedTimestamp + 3000))
+    mockedTimestamp = mockNow(new Date(mockedTimestamp + 3000)) / 1000 << 0
     mockRandom([0.12137218313968567])
 
     // Mine new block
@@ -117,9 +117,9 @@ describe('Miner', () => {
       hash: '39bc7bbd2b182eddac2d18d5c998808f64423176975fb5a715d57f8599a4104f',
       height: 2,
       merkleRoot: '53c85bcd43ade65bba9d2e2d2b5944116526b7c05ba7b7d6425699128548f5ae',
-      difficulty: 11801972029294,
+      difficulty: 11801972029398,
       chainRoot: 'daf4c73925e7eb4e67a86cabfb7cc1e257a7af63f6a3f0b3f5991839891fc796',
-      distance: 195690488822149,
+      distance: 186475791516929,
       nonce: '0.12137218313968567',
       txCount: 0,
       miner: TEST_MINER_KEY,

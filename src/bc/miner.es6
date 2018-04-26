@@ -367,8 +367,8 @@ export function getNewPreExpDifficulty (
     const childPart = getDiff(
       previousBlocks[currentHeader.getBlockchain()].getTimestamp() + timeBonus,
       previousBlocks[currentHeader.getBlockchain()].getTimestamp(),
-      minimumDiffShare, // previous
-      MINIMUM_DIFFICULTY, // minimal
+      minimumDiffShare, // previous difficulty
+      MINIMUM_DIFFICULTY, // minimal difficulty
       handicap
     )
     return sum.add(childPart)
