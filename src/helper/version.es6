@@ -77,9 +77,23 @@ export const getVersion = (path: string = VERSION_FILE_PATH) => {
   }
 
   const version = generateVersion()
-
   if (version) {
-    writeVersionFile(path, generateVersion())
+    writeVersionFile(path, version)
+  }
+
+  return generateVersionFile(path)
+}
+
+/**
+ * Get version object
+ *
+ * @param path
+ * @return {Object}
+ */
+export const generateVersionFile = (path: string = VERSION_FILE_PATH) => {
+  const version = generateVersion()
+  if (version) {
+    writeVersionFile(path, version)
   }
 
   return version
