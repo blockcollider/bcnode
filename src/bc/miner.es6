@@ -247,6 +247,7 @@ export function distance (a: string, b: string): number {
  * @param {string} miner Public address to which NRG award for mining the block and transactions will be credited to
  * @param {string} merkleRoot Mekle root of the BC block being mined
  * @param {number} threshold threshold for the result to be valid
+ * @param {function} difficultyCalculator function for recalculating difficulty at given timestamp
  * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
 // $FlowFixMe will never return anything else then a mining result
