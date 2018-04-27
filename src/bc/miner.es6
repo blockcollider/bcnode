@@ -250,7 +250,7 @@ export function distance (a: string, b: string): number {
  * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
 // $FlowFixMe will never return anything else then a mining result
-export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number, difficultyCalculator: ?Function): { distance: number, nonce: string, timestap: number } {
+export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number, difficultyCalculator: ?Function): { distance: number, nonce: string, timestamp: number, difficulty: number } {
   let difficulty = new BN(threshold, 16)
   let result
   // TODO use timeservice
@@ -276,8 +276,9 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
     if (new BN(result, 16).gt(new BN(difficulty, 16)) === true) {
       return {
         distance: result,
-        nonce: nonce,
-        timestamp: currentLoopTimestamp
+        nonce,
+        timestamp: currentLoopTimestamp,
+        difficulty
       }
     }
   }

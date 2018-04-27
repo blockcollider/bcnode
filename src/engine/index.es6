@@ -324,13 +324,15 @@ export default class Engine {
     }
   }
 
-  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string }) {
+  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number }) {
     if (!this._unfinishedBlock) {
       throw new Error(`There is not unfininshed block to use solution for`)
     }
     this._unfinishedBlock.setNonce(solution.nonce)
     // $FlowFixMe
     this._unfinishedBlock.setDistance(solution.distance)
+    this._unfinishedBlock.setTimestamp(solution.timestamp)
+    this._unfinishedBlock.setDifficulty(solution.difficulty)
 
     this._processMinedBlock(this._unfinishedBlock)
   }
