@@ -273,7 +273,7 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
     }
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
-    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentTimestamp))
+    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentLoopTimestamp))
     if (new BN(result, 16).gt(new BN(difficulty, 16)) === true) {
       return {
         distance: result,
