@@ -331,7 +331,9 @@ export default class Engine {
     this._unfinishedBlock.setNonce(solution.nonce)
     // $FlowFixMe
     this._unfinishedBlock.setDistance(solution.distance)
+    // $FlowFixMe
     this._unfinishedBlock.setTimestamp(solution.timestamp)
+    // $FlowFixMe
     this._unfinishedBlock.setDifficulty(solution.difficulty)
 
     this._processMinedBlock(this._unfinishedBlock)
@@ -388,7 +390,6 @@ export default class Engine {
     debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
 
     const tasks = [
-      // FIXME: This collides with genesis block
       this.persistence.put('bc.block.latest', newBlock),
       this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
     ]

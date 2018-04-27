@@ -251,7 +251,7 @@ export function distance (a: string, b: string): number {
  */
 // $FlowFixMe will never return anything else then a mining result
 export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number, difficultyCalculator: ?Function): { distance: number, nonce: string, timestamp: number, difficulty: number } {
-  let difficulty = new BN(threshold, 16)
+  let difficulty = threshold
   let result
   // TODO use timeservice
   const maxCalculationEnd = Date.now() + (10 * 1000)
