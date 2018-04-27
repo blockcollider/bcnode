@@ -31,7 +31,7 @@ const main = () => {
 
   process.on('message', ({currentTimestamp, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
     // Deserialize buffers from parent process, buffer will be serialized as object of this shape { <idx>: byte } - so use Object.values on it
-    const deserialize = (buffer: Buffer, clazz: BcBlock|ChildBlockHeader) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer)))
+    const deserialize = (buffer: { [string]: number }, clazz: BcBlock|ChildBlockHeader) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
 
     // function with all difficultyData closed in scope and
     // send it to mine with all arguments except of timestamp and use it
