@@ -250,23 +250,34 @@ export function distance (a: string, b: string): number {
  * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
 // $FlowFixMe will never return anything else then a mining result
-export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number): { distance: number, nonce: string } {
-  threshold = new BN(threshold, 16)
+export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number, difficultyCalculator: ?Function): { distance: number, nonce: string, timestap: number } {
+  let difficulty = new BN(threshold, 16)
   let result
+  // TODO use timeservice
   const maxCalculationEnd = Date.now() + (10 * 1000)
+  let currentLoopTimestamp = currentTimestamp
 
-  // TODO: @pm check
   while (true) {
     if (maxCalculationEnd < Date.now()) {
       throw Error('Mining took more than 10s, ending...')
     }
+    // TODO optimize not to count each single loop
+    // TODO use time service
+    let now = (Date.now() / 1000 << 0)
+    // recalculate difficulty each second
+    if (difficultyCalculator && currentLoopTimestamp < now) {
+      currentLoopTimestamp = now
+      difficulty = difficultyCalculator(now)
+      console.log(`In timestamp: ${currentLoopTimestamp} recalculated difficulty is: ${difficulty}`)
+    }
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentTimestamp))
-    if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
+    if (new BN(result, 16).gt(new BN(difficulty, 16)) === true) {
       return {
         distance: result,
-        nonce: nonce
+        nonce: nonce,
+        timestamp: currentLoopTimestamp
       }
     }
   }
