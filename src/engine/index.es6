@@ -291,7 +291,21 @@ export default class Engine {
         // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
         this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
         // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-        this._workerProcess.send({currentTimestamp, work, minerKey: this._minerKey, merkleRoot: newBlock.getMerkleRoot(), difficulty: newBlock.getDifficulty()})
+        this._workerProcess.send({
+          currentTimestamp,
+          work,
+          minerKey: this._minerKey,
+          merkleRoot: newBlock.getMerkleRoot(),
+          difficulty: newBlock.getDifficulty(),
+          difficultyData: {
+            currentTimestamp,
+            lastPreviousBlock: lastPreviousBlock.serializeBinary(),
+            // $FlowFixMe
+            previousBcBlocks: Object.entries(previousBcBlocks).map(([chain, block: BcBlock]) => [chain, block.serializeBinary()]),
+            currentBlocks: currentBlocks.map(block => block.serializeBinary()),
+            block: block.serializeBinary(),
+            newBlockHeaders: newBlock.getChildBlockHeadersList().map(header => header.serializeBinary())
+          }})
         // $FlowFixMe - Flow can't properly find worker pid
         return Promise.resolve(this._workerProcess.pid)
       }
