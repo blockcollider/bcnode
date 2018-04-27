@@ -9,8 +9,7 @@ Dockerfile
 protoc-3.5.1-linux-x86_64.zip
 
 # Git stuff
-.git
-!.git/ORIG_HEAD
+# .git
 
 # Runtime data
 pids
@@ -46,10 +45,10 @@ src/native/artifacts.json
 src/native/target/
 src/protos/*.js
 root/
-rust/target/
+rust/bcrust-core/target/
 target/
 tmp/
 
-# .version.json
+.version.json
 
 /snippets/

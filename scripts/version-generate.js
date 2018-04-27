@@ -1,11 +1,12 @@
 #! /usr/bin/env babel-node
 
-const { getVersion } = require('../src/helper/version')
+const { generateVersionFile } = require('../lib/helper/version')
 
-if (getVersion) {
+if (generateVersionFile) {
   try {
     console.log('Generating .version.json file')
-    getVersion()
+    var version = generateVersionFile()
+    console.log(JSON.stringify(version, null, 2))
   } catch (err) {
     console.log('Unable to generate .version.json file', err)
   }
