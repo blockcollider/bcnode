@@ -44,12 +44,12 @@ Following environment variables can be used for advanced tweaking
 ***Backround/Daemon***
 
 ```
-$ docker run --rm --name bcnode -d -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
+$ docker run --rm --name bcnode -d -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest start --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ***Foreground***
 ```
-$ docker run --rm --name bcnode -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest --ws --rovers --ui --node --miner-key ABCDEF
+$ docker run --rm --name bcnode -p 3000:3000 -p 9090:9090 blockcollider/bcnode:latest start --ws --rovers --ui --node --miner-key ABCDEF
 ```
 
 ### Build docker image locally
