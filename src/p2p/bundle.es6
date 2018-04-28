@@ -22,15 +22,16 @@ export default class Bundle extends libp2p {
   options: Object
 
   constructor (peerInfo: PeerInfo, peerBook: BcPeerBook, opts: Object) {
-    const signaling = opts.signaling.initialize(peerInfo)
-
+    const signaling = opts.signaling
     const modules = {
       transport: [
         new TCP(),
         signaling
       ],
       connection: {
-        muxer: [ Mplex ],
+        muxer: [
+          Mplex
+        ],
         crypto: [ SECIO ]
       },
       discovery: [

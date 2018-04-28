@@ -358,10 +358,15 @@ export default class Engine {
   _broadcastMinedBlock (newBlock: BcBlock): Promise<*> {
     this._logger.info('Broadcasting mined block')
 
-    const method = 'newblock'
-    this.node.broadcastNewBlock(method, newBlock)
+    this.node.broadcastNewBlock(newBlock)
     this._unfinishedBlock = undefined
     this._mining = false
+
+    try {
+      this._server._wsBroadcast({ type: 'block.mined', data: newBlock.toObject() })
+    } catch (e) {
+      console.log('ERROR BROADCASTING', e)
+    }
 
     return Promise.resolve(true)
   }
