@@ -10,6 +10,7 @@
 import moment from 'moment'
 import { reject } from 'ramda'
 import React, { Component } from 'react'
+import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 
 export class PeersContainer extends Component<*> {
@@ -83,6 +84,10 @@ export class PeersContainer extends Component<*> {
 
     return (
       <div className='d-flex flex-wrap flex-row'>
+        <Helmet>
+          <title>Peers</title>
+        </Helmet>
+
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Peers</h2>
 
         <table className='table table-light table-striped'>

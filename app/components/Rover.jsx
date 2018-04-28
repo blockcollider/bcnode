@@ -7,6 +7,7 @@
  * @flow
  */
 import React, { Component } from 'react'
+import { Helmet } from 'react-helmet'
 import { take } from 'ramda'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
@@ -22,6 +23,10 @@ export class RoverContainer extends Component<*> {
 
     return (
       <div className='d-flex flex-wrap flex-row'>
+        <Helmet>
+          <title>Rover</title>
+        </Helmet>
+
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Collected blocks (last 24)</h2>
         {blocks}
       </div>

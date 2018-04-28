@@ -22,6 +22,8 @@ export default class Navbar extends Component<*> {
       <nav className='navbar navbar-expand-lg navbar-light bg-light'>
         <Brand />
         <div className='collapse navbar-collapse' id='navbarText'>
+          { false && <a className='nav-link' href='/#/blocks' style={STYLE}>Blocks</a> }
+          <a className='nav-link' href='/#/miner' style={STYLE}>Miner</a>
           <a className='nav-link' href='/#/rover' style={STYLE}>Rover</a>
           <a className='nav-link' href='/#/peers' style={STYLE}>Peers</a>
         </div>

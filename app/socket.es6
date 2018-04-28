@@ -7,8 +7,9 @@
  * @flow
  */
 
-import { ACTIONS as ROVER_ACTIONS } from './components/Rover'
+import { ACTIONS as MINER_ACTIONS } from './components/Miner'
 import { ACTIONS as PEER_ACTIONS } from './components/Peers'
+import { ACTIONS as ROVER_ACTIONS } from './components/Rover'
 
 export const ACTIONS = {
   SOCKET_CREATED: 'SOCKET_CREATED',
@@ -17,6 +18,7 @@ export const ACTIONS = {
 }
 
 const DISPATCH_TABLE = {
+  'block.mined': MINER_ACTIONS.MINER_ADD_BLOCK,
   'block.latest': ROVER_ACTIONS.ROVER_ADD_BLOCK,
   'block.snapshot': ROVER_ACTIONS.ROVER_SET_BLOCKS,
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,

@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react'
-
+import { Helmet } from 'react-helmet'
 import Navbar from './Navbar'
 
 export default class App extends Component<*> {
@@ -21,6 +21,10 @@ export default class App extends Component<*> {
 
     return (
       <div>
+        <Helmet titleTemplate='Block Colider: %s'>
+          <title>App</title>
+        </Helmet>
+
         <Navbar />
         <div className='container-fluid'>
           <div className='container'>
