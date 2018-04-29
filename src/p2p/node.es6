@@ -45,7 +45,7 @@ export default class Node {
   // _blacklist: Blacklist // eslint-disable-line no-undef
   _interval: IntervalID // eslint-disable-line no-undef
   _peers: BcPeerBook // eslint-disable-line no-undef
-  _node: Bundle // eslint-disable-line no-undef
+  _bundle: Bundle // eslint-disable-line no-undef
 
   constructor (engine: Engine) {
     this._engine = engine
@@ -60,8 +60,8 @@ export default class Node {
     }
   }
 
-  get node (): Bundle {
-    return this._node
+  get bundle (): Bundle {
+    return this._bundle
   }
 
   _pipelineStartNode () {
@@ -90,16 +90,16 @@ export default class Node {
           signaling: Signaling.initialize(peerInfo),
           relay: false
         }
-        this._node = new Bundle(peerInfo, this._peers, opts)
+        this._bundle = new Bundle(peerInfo, this._peers, opts)
 
-        cb(null, this._node)
+        cb(null, this._bundle)
       },
 
       // Register event handlers
       (bundle: Object, cb: Function) => {
         this._logger.info('Registering event handlers')
 
-        this._node.on('peer:discovery', (peer) => {
+        this.bundle.on('peer:discovery', (peer) => {
           const peerId = peer.id.toB58String()
           console.log('Event - peer:discovery', peerId)
 
@@ -109,7 +109,7 @@ export default class Node {
             return
           }
 
-          this._node.dial(peer, (err) => {
+          this.bundle.dial(peer, (err) => {
             if (err) {
               this._logger.warn(`Error while dialing discovered peer ${peerId}`)
               return err
@@ -119,7 +119,7 @@ export default class Node {
           })
         })
 
-        this._node.on('peer:connect', (peer) => {
+        this.bundle.on('peer:connect', (peer) => {
           const peerId = peer.id.toB58String()
           console.log('Event - peer:connect', peerId)
 
@@ -129,7 +129,7 @@ export default class Node {
             }
           }
 
-          this._node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
+          this.bundle.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
             if (err) {
               console.log('ERROR', err)
               throw err
@@ -151,7 +151,7 @@ export default class Node {
           })
         })
 
-        this._node.on('peer:disconnect', (peer) => {
+        this.bundle.on('peer:disconnect', (peer) => {
           console.log('Event - peer:disconnect', peer.id.toB58String())
 
           if (this._peers.has(peer)) {
@@ -168,7 +168,7 @@ export default class Node {
       (cb: Function) => {
         this._logger.info('Registering protocols')
 
-        this._node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
+        this.bundle.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
           const status = {
             p2p: {
               networkId: NETWORK_ID
@@ -185,7 +185,7 @@ export default class Node {
           pull(pull.values([JSON.stringify(status)]), conn)
         })
 
-        this._node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
+        this.bundle.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
           pull(
             conn,
             pull.collect((err, wireData) => {
@@ -213,7 +213,7 @@ export default class Node {
       (cb: Function) => {
         this._logger.info('Starting P2P node')
 
-        this._node.start((err) => { cb(err, this._node) })
+        this.bundle.start((err) => { cb(err, this.bundle) })
       }
     ]
   }
@@ -237,7 +237,7 @@ export default class Node {
     const url = `${PROTOCOL_PREFIX}/newblock`
     this._peers.getAllArray().map(peer => {
       this._logger.debug(`Sending to peer ${peer}`)
-      this._node.dialProtocol(peer, url, (err, conn) => {
+      this.bundle.dialProtocol(peer, url, (err, conn) => {
         if (err) {
           this._logger.error('Error sending message to peer', peer.id.toB58String(), err)
           return err
