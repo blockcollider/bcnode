@@ -47,9 +47,7 @@ RUN yarn
 
 # Add and build native (rust) stuff
 ADD native native
-RUN rm -rf native/target
 ADD rust rust
-RUN rm -rf rust/target
 
 ADD protos protos
 ADD src/protos src/protos
@@ -61,9 +59,6 @@ COPY . .
 
 # Install packages
 RUN yarn
-
-# Copy .version.json
-COPY .version.json .
 
 # Initial transpile
 RUN yarn transpile
