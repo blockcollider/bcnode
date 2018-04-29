@@ -9,17 +9,20 @@
 
 const debug = require('debug')('bcnode:p2p:manager')
 
-const { BcPeerBook } = require('./peer/book')
+const { PeerBook } = require('./book')
+const { PeerNode } = require('./node')
 
 export class PeerManager {
-  _peerBook: BcPeerBook // eslint-disable-line no-undef
+  _peerBook: PeerBook // eslint-disable-line no-undef
+  _peerNode: PeerNode // eslint-disable-line no-undef
 
-  constructor () {
+  constructor (node: PeerNode) {
     debug('constructor()')
-    this._peerBook = new BcPeerBook()
+    this._peerNode = node
+    this._peerBook = new PeerBook()
   }
 
-  get peerBook (): BcPeerBook {
+  get peerBook (): PeerBook {
     return this._peerBook
   }
 }

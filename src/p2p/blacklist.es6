@@ -11,7 +11,7 @@ const PeerInfo = require('peer-info')
 
 const config = require('../../config/config')
 const logging = require('../logger')
-const { BcPeerBook } = require('./peer/book')
+const { PeerBook } = require('./book')
 const Node = require('./node').default
 
 export const REASON_LIST = [
@@ -49,7 +49,7 @@ export class Blacklist {
   _logger: Object // eslint-disable-line no-undef
   _node: Node // eslint-disable-line no-undef
   _interval: IntervalID // eslint-disable-line no-undef
-  _peers: BcPeerBook // eslint-disable-line no-undef
+  _peers: PeerBook // eslint-disable-line no-undef
 
   /**
    * Creates new instance of blacklist
@@ -57,7 +57,7 @@ export class Blacklist {
    */
   constructor (node: Node) {
     this._node = node
-    this._peers = new BcPeerBook()
+    this._peers = new PeerBook()
 
     this._logger = logging.getLogger(__filename)
     this._logger.info('Initializing p2p blacklist')
@@ -69,7 +69,7 @@ export class Blacklist {
    * Get list of blacklisted peers
    * @return {BcPeerBook}
    */
-  get peers () : BcPeerBook {
+  get peers () : PeerBook {
     return this._peers
   }
 

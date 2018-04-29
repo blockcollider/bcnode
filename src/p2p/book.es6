@@ -12,12 +12,12 @@ import type { Logger } from 'winston'
 const Book = require('peer-book')
 const PeerInfo = require('peer-info')
 
-const logging = require('../../logger')
+const logging = require('../logger')
 
 /**
  * PeerBook with extensions
  */
-export class BcPeerBook extends Book {
+export class PeerBook extends Book {
   _logger: Logger // eslint-disable-line no-undef
 
   constructor () {

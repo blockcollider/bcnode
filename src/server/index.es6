@@ -203,6 +203,7 @@ export default class Server {
     return {
       id: peer.id.toB58String(),
       meta: peer.meta,
+      // addr: peer.multiaddrs._connectedMultiaddr.toString(),
       addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString())
     }
   }
@@ -238,7 +239,7 @@ export default class Server {
 
   _wsSendInitialState (client: WebSocket.Client) {
     let peers = []
-    const peerBook = this._engine._node && this._engine._node._peers
+    const peerBook = this._engine._node && this._engine._node.peerBook
     if (peerBook) {
       peers = peerBook.getAllArray().map((peer) => {
         return this._transformPeerToWire(peer)

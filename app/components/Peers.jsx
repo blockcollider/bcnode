@@ -98,7 +98,7 @@ export class PeersContainer extends Component<*> {
               <th scope='col'>Address</th>
               <th scope='col'>Protocol Version</th>
               <th scope='col'>Version</th>
-              <th scope='col'>Connected</th>
+              <th scope='col'>Timestamp</th>
             </tr>
           </thead>
           <tbody>

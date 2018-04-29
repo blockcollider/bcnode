@@ -19,12 +19,11 @@ const { getVersion } = require('../helper/version')
 const logging = require('../logger')
 
 const { BcBlock } = require('../protos/core_pb')
-const { BcPeerBook } = require('./peer/book')
-// const { Blacklist } = require('./blacklist')
-// const BLACKLIST_REASON = require('./blacklist').REASON
+const { PeerBook } = require('./book')
 const Bundle = require('./bundle').default
 const Engine = require('../engine').default
 const Signaling = require('./signaling').websocket
+const PeerManager = require('./manager').PeerManager
 
 const PROTOCOL_VERSION = '0.0.1'
 const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
@@ -39,29 +38,35 @@ const DATETIME_NOW = Date.now()
 //   peerId: ?string,
 // }
 
-export default class Node {
+export class PeerNode {
   _logger: Object // eslint-disable-line no-undef
   _engine: Engine // eslint-disable-line no-undef
-  // _blacklist: Blacklist // eslint-disable-line no-undef
   _interval: IntervalID // eslint-disable-line no-undef
-  _peers: BcPeerBook // eslint-disable-line no-undef
   _bundle: Bundle // eslint-disable-line no-undef
+  _manager: PeerManager // eslint-disable-line no-undef
 
   constructor (engine: Engine) {
     this._engine = engine
     this._logger = logging.getLogger(__filename)
-    // this._blacklist = new Blacklist(this)
-    this._peers = new BcPeerBook()
+    this._manager = new PeerManager(this)
 
     if (config.p2p.stats.enabled) {
       this._interval = setInterval(() => {
-        this._logger.info(`Peers count ${this._peers.getPeersCount()}`)
+        this._logger.info(`Peers count ${this.peerBook.getPeersCount()}`)
       }, config.p2p.stats.interval * 1000)
     }
   }
 
   get bundle (): Bundle {
     return this._bundle
+  }
+
+  get manager (): PeerManager {
+    return this._manager
+  }
+
+  get peerBook (): PeerBook {
+    return this.manager.peerBook
   }
 
   _pipelineStartNode () {
@@ -90,7 +95,7 @@ export default class Node {
           signaling: Signaling.initialize(peerInfo),
           relay: false
         }
-        this._bundle = new Bundle(peerInfo, this._peers, opts)
+        this._bundle = new Bundle(peerInfo, this.peerBook, opts)
 
         cb(null, this._bundle)
       },
@@ -103,9 +108,9 @@ export default class Node {
           const peerId = peer.id.toB58String()
           console.log('Event - peer:discovery', peerId)
 
-          if (this._peers.has(peer)) {
+          if (this.peerBook.has(peer)) {
             console.log(`Discovered peer ${peerId} already in PeerBook`)
-            // console.log(this._peers.get(peer))
+            // console.log(this.peerBook.get(peer))
             return
           }
 
@@ -154,8 +159,8 @@ export default class Node {
         this.bundle.on('peer:disconnect', (peer) => {
           console.log('Event - peer:disconnect', peer.id.toB58String())
 
-          if (this._peers.has(peer)) {
-            this._peers.remove(peer)
+          if (this.peerBook.has(peer)) {
+            this.peerBook.remove(peer)
           }
 
           this._engine._emitter.emit('peerDisconnected', { peer })
@@ -235,7 +240,7 @@ export default class Node {
     this._logger.debug(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
 
     const url = `${PROTOCOL_PREFIX}/newblock`
-    this._peers.getAllArray().map(peer => {
+    this.peerBook.getAllArray().map(peer => {
       this._logger.debug(`Sending to peer ${peer}`)
       this.bundle.dialProtocol(peer, url, (err, conn) => {
         if (err) {
@@ -248,3 +253,5 @@ export default class Node {
     })
   }
 }
+
+export default PeerNode
