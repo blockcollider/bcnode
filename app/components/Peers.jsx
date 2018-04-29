@@ -139,7 +139,9 @@ export const ACTIONS = {
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
     case ACTIONS.PEERS_ADD_PEER:
-      return { ...state, peers: [ ...state.peers, transformFromWire(action.payload) ] }
+      const newPeer = transformFromWire(action.payload)
+      const oldPeers = reject((peer) => peer.id === newPeer.id, state.peers)
+      return { ...state, peers: [ ...oldPeers, newPeer ] }
 
     case ACTIONS.PEERS_REMOVE_PEER:
       return { ...state, peers: reject((peer) => peer.id === action.payload.id, state.peers) }
