@@ -15,6 +15,7 @@ import { ConnectedRouter } from 'react-router-redux'
 import { Redirect, Route } from 'react-router'
 
 import App from './App'
+import Block from './Block'
 import Blocks from './Blocks'
 import Miner from './Miner'
 import Rover from './Rover'
@@ -30,6 +31,7 @@ export default class Root extends Component<*> {
             <Route exact path='/' component={() => {
               return (<Redirect to='/rover' />)
             }} />
+            <Route path='/block/:id' component={Block} />
             <Route path='/blocks' component={Blocks} />
             <Route path='/miner' component={Miner} />
             <Route path='/rover' component={Rover} />
