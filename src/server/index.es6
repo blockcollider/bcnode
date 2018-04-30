@@ -128,6 +128,45 @@ export default class Server {
     this._wsServer.on('connection', (client, req) => {
       this._wsSendInitialState(client)
 
+      const dispatcher = {
+        'block.get': (client, payload) => {
+          const id = `bc.block.${payload.data.id}`
+          this._engine.persistence.get(id)
+            .then((block) => {
+              client.send(JSON.stringify({
+                type: 'block.set',
+                data: block.toObject()
+              }))
+            })
+            .catch((err) => {
+              if (err) {
+                this._logger.error("Unable to 'get.block'")
+                console.log(err)
+              }
+            })
+        }
+      }
+
+      client.on('message', (msg) => {
+        this._logger.info('Received WS message', msg)
+
+        let payload
+        try {
+          payload = JSON.parse(msg)
+        } catch (e) {
+          this._logger.warn('Unable to decode WS message', e)
+          return
+        }
+
+        const action = dispatcher[payload.type]
+        if (!action) {
+          this._logger.warn('Invalid message received', payload)
+          return
+        }
+
+        action(client, payload)
+      })
+
       client.on('close', reason => {
         this._logger.debug('Client connection closed', req.connection.remoteAddress)
       })
