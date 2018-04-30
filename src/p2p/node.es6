@@ -44,6 +44,7 @@ export class PeerNode {
   _interval: IntervalID // eslint-disable-line no-undef
   _bundle: Bundle // eslint-disable-line no-undef
   _manager: PeerManager // eslint-disable-line no-undef
+  _peer: PeerInfo // eslint-disable-line no-undef
 
   constructor (engine: Engine) {
     this._engine = engine
@@ -65,6 +66,10 @@ export class PeerNode {
     return this._manager
   }
 
+  get peer (): PeerInfo {
+    return this._peer
+  }
+
   get peerBook (): PeerBook {
     return this.manager.peerBook
   }
@@ -84,6 +89,8 @@ export class PeerNode {
 
         peerInfo.multiaddrs.add(Signaling.getAddress(peerInfo))
         peerInfo.multiaddrs.add(`/ip4/0.0.0.0/tcp/0/ipfs/${peerId}`)
+
+        this._peer = peerInfo
 
         cb(null, peerInfo)
       },
