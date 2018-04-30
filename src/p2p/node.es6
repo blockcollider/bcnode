@@ -88,7 +88,7 @@ export class PeerNode {
         cb(null, peerInfo)
       },
 
-      // Crate node
+      // Create node
       (peerInfo: PeerInfo, cb: Function) => {
         this._logger.info('Creating P2P node')
         const opts = {
@@ -158,12 +158,14 @@ export class PeerNode {
 
         this.bundle.on('peer:disconnect', (peer) => {
           console.log('Event - peer:disconnect', peer.id.toB58String())
-
-          if (this.peerBook.has(peer)) {
-            this.peerBook.remove(peer)
-          }
-
-          this._engine._emitter.emit('peerDisconnected', { peer })
+          // wait for 1s for both libp2p-switch/dial and libp2p-switch/connection muxedConn `close` handlers
+          // to finish
+          setTimeout(() => {
+            if (this.peerBook.has(peer)) {
+              this.peerBook.remove(peer)
+            }
+            this._engine._emitter.emit('peerDisconnected', { peer })
+          }, 1000)
         })
 
         cb(null)
