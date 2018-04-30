@@ -9,7 +9,7 @@
 
 import { render } from './components/Root'
 import { createHistory, createStore } from './store'
-import { initSocket } from './socket'
+import { initSocket } from './socket/socket'
 
 // Create history
 const history = createHistory()
