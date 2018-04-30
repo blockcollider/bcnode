@@ -12,7 +12,7 @@ import { take } from 'ramda'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import RoverBlock from './RoverBlock'
+import RoverBlock from '../components/RoverBlock'
 
 export class RoverContainer extends Component<*> {
   render () {

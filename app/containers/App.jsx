@@ -9,7 +9,7 @@
 
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
-import Navbar from './Navbar'
+import Navbar from '../components/Navbar'
 
 export default class App extends Component<*> {
   render () {

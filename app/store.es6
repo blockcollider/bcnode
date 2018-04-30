@@ -12,10 +12,10 @@ import { routerMiddleware, routerReducer } from 'react-router-redux'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import { applyMiddleware, combineReducers, createStore as createReduxStore } from 'redux'
 
-import { reducer as blockReducer } from './components/Block'
-import { reducer as minerReducer } from './components/Miner'
-import { reducer as peersReducer } from './components/Peers'
-import { reducer as roverReducer } from './components/Rover'
+import { reducer as blockReducer } from './containers/Block'
+import { reducer as minerReducer } from './containers/Miner'
+import { reducer as peersReducer } from './containers/Peers'
+import { reducer as roverReducer } from './containers/Rover'
 import { reducer as socketReducer } from './socket/socket'
 
 export const createHistory = () => {

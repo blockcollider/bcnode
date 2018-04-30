@@ -7,7 +7,7 @@
  * @flow
  */
 
-import { render } from './components/Root'
+import { render } from './containers/Root'
 import { createHistory, createStore } from './store'
 import { initSocket } from './socket/socket'
 

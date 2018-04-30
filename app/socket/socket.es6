@@ -7,10 +7,10 @@
  * @flow
  */
 
-import { ACTIONS as BLOCK_ACTIONS } from '../components/Block'
-import { ACTIONS as MINER_ACTIONS } from '../components/Miner'
-import { ACTIONS as PEER_ACTIONS } from '../components/Peers'
-import { ACTIONS as ROVER_ACTIONS } from '../components/Rover'
+import { ACTIONS as BLOCK_ACTIONS } from '../containers/Block'
+import { ACTIONS as MINER_ACTIONS } from '../containers/Miner'
+import { ACTIONS as PEER_ACTIONS } from '../containers/Peers'
+import { ACTIONS as ROVER_ACTIONS } from '../containers/Rover'
 import { ACTIONS } from './actions'
 
 const DISPATCH_TABLE = {
