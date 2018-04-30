@@ -7,19 +7,16 @@
  * @flow
  */
 
-import { ACTIONS as MINER_ACTIONS } from './components/Miner'
-import { ACTIONS as PEER_ACTIONS } from './components/Peers'
-import { ACTIONS as ROVER_ACTIONS } from './components/Rover'
-
-export const ACTIONS = {
-  SOCKET_CREATED: 'SOCKET_CREATED',
-  SOCKET_CONNECTED: 'SOCKET_CONNECTED',
-  SOCKET_DISCONNECTED: 'SOCKET_DISCONNECTED'
-}
+import { ACTIONS as BLOCK_ACTIONS } from '../components/Block'
+import { ACTIONS as MINER_ACTIONS } from '../components/Miner'
+import { ACTIONS as PEER_ACTIONS } from '../components/Peers'
+import { ACTIONS as ROVER_ACTIONS } from '../components/Rover'
+import { ACTIONS } from './actions'
 
 const DISPATCH_TABLE = {
   'block.mined': MINER_ACTIONS.MINER_ADD_BLOCK,
   'block.latest': ROVER_ACTIONS.ROVER_ADD_BLOCK,
+  'block.set': BLOCK_ACTIONS.BLOCK_SET,
   'block.snapshot': ROVER_ACTIONS.ROVER_SET_BLOCKS,
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
   'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
@@ -28,10 +25,9 @@ const DISPATCH_TABLE = {
 
 export const initSocket = (dispatch : (msg : Object) => void) => {
   const socket = new WebSocket(`ws://${location.hostname}:${location.port}/ws`) // eslint-disable-line
-  dispatch({type: ACTIONS.SOCKET_CREATED, payload: socket})
 
   socket.onopen = () => {
-    dispatch({type: ACTIONS.SOCKET_CONNECTED})
+    setTimeout(() => dispatch({type: ACTIONS.SOCKET_CONNECTED}), 1)
   }
 
   socket.onclose = () => {
@@ -49,12 +45,15 @@ export const initSocket = (dispatch : (msg : Object) => void) => {
     }
   }
 
+  dispatch({type: ACTIONS.SOCKET_CREATED, payload: socket})
+
   return socket
 }
 
 const initialState = {
   socket: null,
-  connected: false
+  connected: false,
+  buffer: []
 }
 
 export const reducer = (state: Object = initialState, action: Object) => {
@@ -63,10 +62,20 @@ export const reducer = (state: Object = initialState, action: Object) => {
       return { ...state, socket: action.payload }
 
     case ACTIONS.SOCKET_CONNECTED:
-      return { ...state, connected: true }
+      state.buffer.forEach((msg) => {
+        state.socket.send(JSON.stringify(msg))
+      })
+      return { ...state, connected: true, buffer: [] }
 
     case ACTIONS.SOCKET_DISCONNECTED:
       return { ...state, connected: false }
+
+    case ACTIONS.SOCKET_SEND:
+      if (state.connected) {
+        state.socket.send(JSON.stringify(action.payload))
+        return state
+      }
+      return { ...state, buffer: [...state.buffer, action.payload] }
 
     default:
       return state
