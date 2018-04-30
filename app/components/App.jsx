@@ -23,6 +23,7 @@ export default class App extends Component<*> {
       <div>
         <Helmet titleTemplate='Block Colider: %s'>
           <title>App</title>
+          <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.10/css/all.css' />
         </Helmet>
 
         <Navbar />
