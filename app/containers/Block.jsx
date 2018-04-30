@@ -10,7 +10,6 @@
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
-// import { push } from 'react-router-redux'
 import { bindActionCreators } from 'redux'
 
 import { ACTIONS as SOCKET_ACTIONS } from '../socket/actions'

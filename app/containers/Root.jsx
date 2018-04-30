@@ -14,12 +14,14 @@ import { Provider } from 'react-redux'
 import { ConnectedRouter } from 'react-router-redux'
 import { Redirect, Route } from 'react-router'
 
-import App from './App'
-import Block from './Block'
-import Blocks from './Blocks'
-import Miner from './Miner'
-import Rover from './Rover'
-import Peers from './Peers'
+import {
+  App,
+  Block,
+  Blocks,
+  Miner,
+  Rover,
+  Peers
+} from './'
 
 export default class Root extends Component<*> {
   render () {

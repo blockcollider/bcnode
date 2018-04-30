@@ -26,8 +26,7 @@ export class MinerContainer extends Component<*> {
           <th scope='row'>{id++}</th>
           <td>{block.height}</td>
           <td>
-            <a
-              href='javascript:void(0)'
+            <a href='javascript:void(0)'
               onClick={() => this.props.actions.showBlock(block)}
               style={{color: 'black'}}
             >
