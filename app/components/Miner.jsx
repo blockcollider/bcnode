@@ -9,11 +9,12 @@
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { push } from 'react-router-redux'
 import moment from 'moment'
-
-// import { take } from 'ramda'
-
 import CircularBuffer from 'circular-buffer'
+
+import { ACTIONS as BLOCK_ACTIONS } from './Block'
 
 export class MinerContainer extends Component<*> {
   render () {
@@ -24,7 +25,15 @@ export class MinerContainer extends Component<*> {
         <tr key={block.hash}>
           <th scope='row'>{id++}</th>
           <td>{block.height}</td>
-          <td>{block.hash}</td>
+          <td>
+            <a
+              href='javascript:void(0)'
+              onClick={() => this.props.actions.showBlock(block)}
+              style={{color: 'black'}}
+            >
+              {block.hash}
+            </a>
+          </td>
           <td>{moment(block.timestamp).format('HH:mm:ss')}</td>
         </tr>
       )
@@ -70,13 +79,33 @@ export const reducer = (state: Object = initialState, action: Object) => {
       action.payload.timestamp = new Date(action.payload.timestamp * 1000)
       data.enq(action.payload)
       return { ...state, blocks: data, blocksArray: data.toarray() }
-  }
 
-  return state
+    default:
+      return state
+  }
 }
 
-const component = connect(state => ({
-  blocks: state.miner.blocks.toarray()
-}))(MinerContainer)
+const actions = (dispatch) => {
+  return {
+    showBlock: (block: Object) => {
+      dispatch(push(`/block/${block.height}`))
+      return {
+        type: BLOCK_ACTIONS.BLOCK_SET,
+        payload: block
+      }
+    }
+  }
+}
+
+function mapDispatchToProps (dispatch) {
+  return { actions: bindActionCreators(actions(dispatch), dispatch) }
+}
+
+const component = connect(
+  state => ({
+    blocks: state.miner.blocks.toarray()
+  }),
+  mapDispatchToProps
+)(MinerContainer)
 
 export default component
