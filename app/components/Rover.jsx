@@ -12,13 +12,13 @@ import { take } from 'ramda'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import Block from './Block'
+import RoverBlock from './RoverBlock'
 
 export class RoverContainer extends Component<*> {
   render () {
     const blocks = take(24, this.props.blocks.sort((a, b) => b.timestamp - a.timestamp))
       .map(block => {
-        return <Block {...block} block={block} key={block.hash} />
+        return <RoverBlock {...block} block={block} key={block.hash} />
       })
 
     return (
