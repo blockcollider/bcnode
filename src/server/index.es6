@@ -24,6 +24,7 @@ const config = require('../../config/config')
 const { Null, Block } = require('../protos/core_pb')
 const Engine = require('../engine').default
 const { RpcClient, RpcServer } = require('../rpc')
+const { dispatcher: socketDispatcher } = require('./socket')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'public')
 const docsDir = path.resolve(__dirname, '..', '..', 'docs')
@@ -128,28 +129,7 @@ export default class Server {
     this._wsServer.on('connection', (client, req) => {
       this._wsSendInitialState(client)
 
-      const dispatcher = {
-        'block.get': (client, payload) => {
-          const id = `bc.block.${payload.data.id}`
-          this._engine.persistence.get(id)
-            .then((block) => {
-              client.send(JSON.stringify({
-                type: 'block.set',
-                data: block.toObject()
-              }))
-            })
-            .catch((err) => {
-              if (err) {
-                this._logger.error("Unable to 'get.block'")
-                console.log(err)
-              }
-            })
-        }
-      }
-
       client.on('message', (msg) => {
-        this._logger.info('Received WS message', msg)
-
         let payload
         try {
           payload = JSON.parse(msg)
@@ -158,13 +138,7 @@ export default class Server {
           return
         }
 
-        const action = dispatcher[payload.type]
-        if (!action) {
-          this._logger.warn('Invalid message received', payload)
-          return
-        }
-
-        action(client, payload)
+        socketDispatcher(this, client, payload)
       })
 
       client.on('close', reason => {
