@@ -47,7 +47,7 @@ class BlocksTable extends Component<*> {
           <td>{block.difficulty}</td>
           <td>{block.distance}</td>
           <td>{block.nonce}</td>
-          <td>{moment(block.timestamp).format('HH:mm:ss')}</td>
+          <td>{moment(block.timestamp * 1000).format('HH:mm:ss')}</td>
         </tr>
       )
     })
