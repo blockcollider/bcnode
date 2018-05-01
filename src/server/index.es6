@@ -252,11 +252,19 @@ export default class Server {
 
   _wsSendInitialState (client: WebSocket.Client) {
     let peers = []
-    const peerBook = this._engine._node && this._engine._node.peerBook
+
+    const node = this._engine._node
+    const peerBook = node && node.peerBook
     if (peerBook) {
       peers = peerBook.getAllArray().map((peer) => {
         return this._transformPeerToWire(peer)
       })
+    }
+
+    let peer = null
+    if (node && node.peer) {
+      peer = this._transformPeerToWire(node.peer)
+      peers = [peer, ...peers]
     }
 
     const msgs = [
@@ -267,6 +275,12 @@ export default class Server {
       {
         type: 'peer.snapshot',
         data: peers
+      },
+      {
+        type: 'profile.set',
+        data: {
+          peer
+        }
       }
     ]
 

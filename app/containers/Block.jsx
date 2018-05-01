@@ -16,7 +16,7 @@ import { ACTIONS as SOCKET_ACTIONS } from '../socket/actions'
 
 export class BlockContainer extends Component<*> {
   _fetchBlock (id: String) {
-    if (!this.props.block || id !== String(this.props.block.height)) {
+    if (!this.props.block || (id !== String(this.props.block.height))) {
       this.props.actions.getBlock(id)
     }
   }

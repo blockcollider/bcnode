@@ -90,6 +90,19 @@ export class PeerNode {
         peerInfo.multiaddrs.add(Signaling.getAddress(peerInfo))
         peerInfo.multiaddrs.add(`/ip4/0.0.0.0/tcp/0/ipfs/${peerId}`)
 
+        peerInfo.meta = {
+          p2p: {
+            networkId: NETWORK_ID
+          },
+          ts: {
+            connectedAt: DATETIME_NOW,
+            startedAt: DATETIME_NOW
+          },
+          version: {
+            protocol: PROTOCOL_PREFIX,
+            ...getVersion()
+          }
+        }
         this._peer = peerInfo
 
         cb(null, peerInfo)

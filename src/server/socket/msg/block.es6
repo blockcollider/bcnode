@@ -13,7 +13,8 @@ const logger = logging.getLogger(__filename)
 module.exports = {
   get: (server: Object, client: Object, payload: Object) => {
     const id = `bc.block.${payload.data.id}`
-    server.persistence.get(id)
+    const persistence = server._engine.persistence
+    persistence.get(id)
       .then((block) => {
         client.send(JSON.stringify({
           type: 'block.set',

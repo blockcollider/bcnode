@@ -11,6 +11,7 @@ import { ACTIONS as BLOCK_ACTIONS } from '../containers/Block'
 import { ACTIONS as BLOCKS_ACTIONS } from '../containers/Blocks'
 import { ACTIONS as MINER_ACTIONS } from '../containers/Miner'
 import { ACTIONS as PEER_ACTIONS } from '../containers/Peers'
+import { ACTIONS as PROFILE_ACTIONS } from '../reducers/profile'
 import { ACTIONS as ROVER_ACTIONS } from '../containers/Rover'
 import { ACTIONS } from './actions'
 
@@ -22,7 +23,8 @@ const DISPATCH_TABLE = {
   'blocks.set': BLOCKS_ACTIONS.BLOCKS_SET,
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
   'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
-  'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS
+  'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS,
+  'profile.set': PROFILE_ACTIONS.PROFILE_SET
 }
 
 export const initSocket = (dispatch : (msg : Object) => void) => {
