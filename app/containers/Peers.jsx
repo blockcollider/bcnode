@@ -27,12 +27,6 @@ export class PeersContainer extends Component<*> {
         </Helmet>
 
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
-          You
-        </h2>
-
-        <PeersTable peers={peer} />
-
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
           Peers
         </h2>
         <PeersTable peers={this.props.peers} />
