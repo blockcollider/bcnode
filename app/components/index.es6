@@ -12,6 +12,7 @@ import Brand from './Brand'
 import ConnectionState from './ConnectionState'
 import Ellipsis from './Ellipsis'
 import Navbar from './Navbar'
+import PeersTable from './PeersTable'
 import RoverBlock from './RoverBlock'
 import VersionLink from './VersionLink'
 
@@ -21,6 +22,7 @@ export {
   ConnectionState,
   Ellipsis,
   Navbar,
+  PeersTable,
   RoverBlock,
   VersionLink
 }

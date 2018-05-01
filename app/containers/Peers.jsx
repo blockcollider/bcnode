@@ -12,89 +12,30 @@ import { reject } from 'ramda'
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
-import { VersionLink } from '../components'
+import { VersionLink, PeersTable } from '../components'
 
 export class PeersContainer extends Component<*> {
   render () {
-    let id = 0
-    const peers = this.props.peers.map((peer) => {
-      const peerId = `${peer.id.substring(0, 6)}...${peer.id.substr(peer.id.length - 6)}`
-
-      const meta = peer.meta || {}
-      const metaVersion = meta.version || {}
-
-      const address = (peer.addrs || [])
-        .map((addr) => {
-          const key = `${peer.id}.${addr}`
-          return (
-            <div key={key}>{addr.substring(0, 34)}</div>
-          )
-        })
-
-      const protocolVersion = (
-        metaVersion.protocol
-      ) || '<unknown>'
-
-      const startedAgo = (
-        meta &&
-        meta.ts &&
-        meta.ts.startedAt &&
-        moment(meta.ts.startedAt).fromNow()
-      )
-
-      const connectedAgo = (
-        meta &&
-        meta.ts &&
-        meta.ts.connectedAt &&
-        moment(meta.ts.connectedAt).fromNow()
-      )
-
-      const keyStartedAt = `${peer.id}.ts.startedAt`
-      const keyConnectedAt = `${peer.id}.ts.connectedAt`
-      const timestamp = () => {
-        return (
-          <div>
-            <div key={keyStartedAt}>{startedAgo}</div>
-            <div key={keyConnectedAt}>{connectedAgo}</div>
-          </div>
-        )
-      }
-
-      return (
-        <tr key={peer.id}>
-          <th scope='row'>{id++}</th>
-          <td>{peerId}</td>
-          <td>{address}</td>
-          <td>{protocolVersion}</td>
-          <td><VersionLink version={metaVersion} /></td>
-          <td>{timestamp()}</td>
-        </tr>
-      )
-    })
-
+    let peer = []
+    if (this.props.peer) {
+      peer = [this.props.peer]
+    }
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
           <title>Peers</title>
         </Helmet>
 
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Peers</h2>
+        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
+          You
+        </h2>
 
-        <table className='table table-light table-striped'>
-          <thead className='thead-light'>
-            <tr>
-              <th scope='col'>#</th>
-              <th scope='col'>ID</th>
-              <th scope='col'>Address</th>
-              <th scope='col'>Protocol Version</th>
-              <th scope='col'>Version</th>
-              <th scope='col'>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            { peers}
-          </tbody>
-        </table>
+        <PeersTable peers={peer} />
+
+        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
+          Peers
+        </h2>
+        <PeersTable peers={this.props.peers} />
       </div>
     )
   }
@@ -117,6 +58,7 @@ const transformFromWire = (obj: Object): Object => {
 }
 
 const initialState = {
+  peer: null,
   peers: []
 }
 
@@ -144,6 +86,7 @@ export const reducer = (state: Object = initialState, action: Object) => {
 }
 
 export const Peers = connect(state => ({
+  peer: state.profile.peer,
   peers: state.peers.peers
 }))(PeersContainer)
 
