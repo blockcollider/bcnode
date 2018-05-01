@@ -33,8 +33,8 @@ export class Root extends Component<*> {
             <Route exact path='/' component={() => {
               return (<Redirect to='/rover' />)
             }} />
-            <Route path='/block/:id' component={Block} />
-            <Route path='/blocks/:id' component={Blocks} />
+            <Route path='/block/:id/' component={Block} />
+            <Route path='/blocks/:id/' component={Blocks} />
             <Route path='/miner' component={Miner} />
             <Route path='/rover' component={Rover} />
             <Route path='/peers' component={Peers} />

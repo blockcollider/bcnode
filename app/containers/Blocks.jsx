@@ -24,7 +24,6 @@ export class BlocksContainer extends Component<*> {
        id === 'latest' ||
        id !== String(blocks[0].id)
     ) {
-      console.log('Fetching blocks')
       action(id)
     }
   }
@@ -41,6 +40,8 @@ export class BlocksContainer extends Component<*> {
   }
 
   render () {
+    const getLink = (id: number) => `/blocks/${id}`
+
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
@@ -50,6 +51,19 @@ export class BlocksContainer extends Component<*> {
           Blocks
         </h2>
         <BlocksTable blocks={this.props.blocks} onClick={this.props.actions.showBlock} />
+
+        { this.props.blocks[0] && <nav aria-label='Blocks pagination'>
+          <ul className='pagination justify-content-end'>
+            <li className='page-item'>
+              <a className='page-link'
+                href={'/#' + getLink(this.props.blocks[0].height + this.props.count)}>Previous</a>
+            </li>
+            <li className='page-item'>
+              <a className='page-link'
+                href={'/#' + getLink(this.props.blocks[0].height - this.props.count)}>Next</a>
+            </li>
+          </ul>
+        </nav>}
       </div>
     )
   }
@@ -57,7 +71,8 @@ export class BlocksContainer extends Component<*> {
 
 const initialState = {
   id: null,
-  blocks: []
+  blocks: [],
+  count: 20
 }
 
 export const ACTIONS = {
@@ -66,13 +81,14 @@ export const ACTIONS = {
 
 const actions = (dispatch) => {
   return {
-    getBlocks: (block: Object) => {
+    getBlocks: (id: Object, count: number = initialState.count) => {
       return {
         type: SOCKET_ACTIONS.SOCKET_SEND,
         payload: {
           type: 'blocks.get',
           data: {
-            id: block
+            id,
+            count
           }
         }
       }
@@ -91,7 +107,7 @@ const actions = (dispatch) => {
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
     case ACTIONS.BLOCKS_SET:
-      return {...state, blocks: action.payload}
+      return {...state, id: action.payload[0].height, blocks: action.payload}
   }
 
   return state
@@ -103,11 +119,12 @@ function mapDispatchToProps (dispatch, ownProps) {
 }
 const Blocks = connect(
   (state, ownProps) => {
-    const id = ownProps.match.params.id
+    const id = ownProps.match.params.id || 'latest'
     let blocks = state.blocks.blocks
-
+    let count = state.blocks.count
     return {
       id,
+      count,
       blocks
     }
   },
