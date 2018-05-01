@@ -38,7 +38,7 @@ const main = () => {
       )
 
       // send solution and exit
-      globalLog.debug(`Solution found: ${JSON.stringify(solution, null, 2)}`)
+      globalLog.info(`Solution found: ${JSON.stringify(solution, null, 2)}`)
       process.send(solution)
       process.exit(0)
     } catch (e) {

@@ -253,10 +253,12 @@ export function distance (a: string, b: string): number {
 export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number): { distance: number, nonce: string } {
   threshold = new BN(threshold, 16)
   let result
-  const maxCalculationEnd = Date.now() + (10 * 1000)
+  const tsStart = Date.now()
+  const maxCalculationEnd = tsStart + (10 * 1000)
 
+  let i = 1
   // TODO: @pm check
-  while (true) {
+  while (i++) {
     if (maxCalculationEnd < Date.now()) {
       throw Error('Mining took more than 10s, ending...')
     }
@@ -266,7 +268,9 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
     if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
       return {
         distance: result,
-        nonce: nonce
+        nonce: nonce,
+        iterations: i,
+        timeDiff: Date.now() - tsStart
       }
     }
   }

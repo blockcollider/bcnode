@@ -264,7 +264,6 @@ export default class Server {
     let peer = null
     if (node && node.peer) {
       peer = this._transformPeerToWire(node.peer)
-      peers = peers
     }
 
     const msgs = [

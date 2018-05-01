@@ -45,7 +45,7 @@ export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
     case ACTIONS.MINER_ADD_BLOCK:
       let data = state.blocks
-      action.payload.timestamp = new Date(action.payload.timestamp * 1000)
+      action.payload.timestamp = new Date(action.payload.timestamp)
       data.enq(action.payload)
       return { ...state, blocks: data, blocksArray: data.toarray() }
 
