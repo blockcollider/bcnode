@@ -8,6 +8,7 @@
  */
 
 import { ACTIONS as BLOCK_ACTIONS } from '../containers/Block'
+import { ACTIONS as BLOCKS_ACTIONS } from '../containers/Blocks'
 import { ACTIONS as MINER_ACTIONS } from '../containers/Miner'
 import { ACTIONS as PEER_ACTIONS } from '../containers/Peers'
 import { ACTIONS as ROVER_ACTIONS } from '../containers/Rover'
@@ -18,6 +19,7 @@ const DISPATCH_TABLE = {
   'block.latest': ROVER_ACTIONS.ROVER_ADD_BLOCK,
   'block.set': BLOCK_ACTIONS.BLOCK_SET,
   'block.snapshot': ROVER_ACTIONS.ROVER_SET_BLOCKS,
+  'blocks.set': BLOCKS_ACTIONS.BLOCKS_SET,
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
   'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
   'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS

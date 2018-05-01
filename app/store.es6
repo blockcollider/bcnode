@@ -13,6 +13,7 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import { applyMiddleware, combineReducers, createStore as createReduxStore } from 'redux'
 
 import { reducer as blockReducer } from './containers/Block'
+import { reducer as blocksReducer } from './containers/Blocks'
 import { reducer as minerReducer } from './containers/Miner'
 import { reducer as peersReducer } from './containers/Peers'
 import { reducer as roverReducer } from './containers/Rover'
@@ -28,6 +29,7 @@ export const createStore = (history: Object, reducers: Object = {}) => {
   const store = createReduxStore(
     combineReducers({
       block: blockReducer,
+      blocks: blocksReducer,
       miner: minerReducer,
       peers: peersReducer,
       router: routerReducer,
