@@ -16,7 +16,7 @@ const STYLE = {
   color: 'black'
 }
 
-export default class Navbar extends Component<*> {
+export class Navbar extends Component<*> {
   render () {
     return (
       <nav className='navbar navbar-expand-lg navbar-light bg-light'>
@@ -26,8 +26,7 @@ export default class Navbar extends Component<*> {
             <i className='fas fa-user' /> Profile
           </a> }
 
-          { false && <a className='nav-link' href='/#/blocks' style={STYLE}>Blocks</a> }
-
+          <a className='nav-link' href='/#/blocks/latest' style={STYLE}>Blocks</a>
           <a className='nav-link' href='/#/miner' style={STYLE}>Miner</a>
           <a className='nav-link' href='/#/rover' style={STYLE}>Rover</a>
           <a className='nav-link' href='/#/peers' style={STYLE}>Peers</a>
@@ -37,3 +36,5 @@ export default class Navbar extends Component<*> {
     )
   }
 }
+
+export default Navbar

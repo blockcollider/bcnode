@@ -86,7 +86,7 @@ function mapDispatchToProps (dispatch, ownProps) {
   return res
 }
 
-const component = connect(
+export const Block = connect(
   (state, ownProps) => {
     const id = ownProps.match.params.id
     let block = state.block.block
@@ -99,4 +99,4 @@ const component = connect(
   mapDispatchToProps
 )(BlockContainer)
 
-export default component
+export default Block

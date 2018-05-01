@@ -59,8 +59,8 @@ export const reducer = (state: Object = initialState, action: Object) => {
   return state
 }
 
-const component = connect(state => ({
+export const Rover = connect(state => ({
   blocks: state.rover.blocks
 }))(RoverContainer)
 
-export default component
+export default Rover

@@ -11,7 +11,7 @@ import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import Navbar from '../components/Navbar'
 
-export default class App extends Component<*> {
+export class App extends Component<*> {
   render () {
     const {children} = this.props
     let elements = React.Children.map(children,
@@ -36,3 +36,5 @@ export default class App extends Component<*> {
     )
   }
 }
+
+export default App

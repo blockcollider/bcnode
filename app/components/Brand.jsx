@@ -25,7 +25,7 @@ const FIELD_STYLE = {
 
 const linkGithub = `https://github.com/blockcollider/bcnode/tree/${VERSION.git.short}`
 
-export default class Brand extends Component<*> {
+export class Brand extends Component<*> {
   render () {
     return (
       <div className='navbar-brand'>
@@ -42,3 +42,5 @@ export default class Brand extends Component<*> {
     )
   }
 }
+
+export default Brand

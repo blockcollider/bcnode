@@ -12,6 +12,7 @@ import { reject } from 'ramda'
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
+import { VersionLink } from '../components'
 
 export class PeersContainer extends Component<*> {
   render () {
@@ -33,17 +34,6 @@ export class PeersContainer extends Component<*> {
       const protocolVersion = (
         metaVersion.protocol
       ) || '<unknown>'
-
-      const gitVersion = (
-        metaVersion.git &&
-        metaVersion.git.short
-      ) || '<unknown>'
-
-      const npmVersion = (
-        metaVersion.npm
-      ) || '<unknown>'
-
-      const version = `${npmVersion}/${gitVersion}`
 
       const startedAgo = (
         meta &&
@@ -76,7 +66,7 @@ export class PeersContainer extends Component<*> {
           <td>{peerId}</td>
           <td>{address}</td>
           <td>{protocolVersion}</td>
-          <td>{version}</td>
+          <td><VersionLink version={metaVersion} /></td>
           <td>{timestamp()}</td>
         </tr>
       )
@@ -153,8 +143,8 @@ export const reducer = (state: Object = initialState, action: Object) => {
   return state
 }
 
-const component = connect(state => ({
+export const Peers = connect(state => ({
   peers: state.peers.peers
 }))(PeersContainer)
 
-export default component
+export default Peers

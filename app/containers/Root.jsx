@@ -23,7 +23,7 @@ import {
   Peers
 } from './'
 
-export default class Root extends Component<*> {
+export class Root extends Component<*> {
   render () {
     const {history, store} = this.props
     return (
@@ -34,7 +34,7 @@ export default class Root extends Component<*> {
               return (<Redirect to='/rover' />)
             }} />
             <Route path='/block/:id' component={Block} />
-            <Route path='/blocks' component={Blocks} />
+            <Route path='/blocks/:id' component={Blocks} />
             <Route path='/miner' component={Miner} />
             <Route path='/rover' component={Rover} />
             <Route path='/peers' component={Peers} />
@@ -55,3 +55,5 @@ export const render = (id: string, history: Object, store: Object) => {
     console.error('Cannot find element with id "app"')
   }
 }
+
+export default Root

@@ -13,7 +13,7 @@ const inspectBlock = (block) => {
   console.log('inspectBlock', block)
 }
 
-export default class RoverBlock extends Component<*> {
+export class RoverBlock extends Component<*> {
   render () {
     const { blockchain, hash } = this.props.block
 
@@ -70,3 +70,5 @@ const getBlockIcon = (blockchain: string) => {
       throw new Error('Unkown blockchain')
   }
 }
+
+export default RoverBlock

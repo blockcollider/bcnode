@@ -11,53 +11,23 @@ import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { push } from 'react-router-redux'
-import moment from 'moment'
 import CircularBuffer from 'circular-buffer'
 
 import { ACTIONS as BLOCK_ACTIONS } from './Block'
+import { BlocksTable } from '../components'
 
 export class MinerContainer extends Component<*> {
   render () {
-    let id = 0
-
-    const blocks = this.props.blocks.map((block) => {
-      return (
-        <tr key={block.hash}>
-          <th scope='row'>{id++}</th>
-          <td>{block.height}</td>
-          <td>
-            <a href='javascript:void(0)'
-              onClick={() => this.props.actions.showBlock(block)}
-              style={{color: 'black'}}
-            >
-              {block.hash}
-            </a>
-          </td>
-          <td>{moment(block.timestamp).format('HH:mm:ss')}</td>
-        </tr>
-      )
-    })
-
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
           <title>Miner</title>
         </Helmet>
 
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Mined blocks (last 20)</h2>
-        <table className='table table-light table-striped'>
-          <thead className='thead-light'>
-            <tr>
-              <th scope='col'>#</th>
-              <th scope='col'>Height</th>
-              <th scope='col'>Hash</th>
-              <th scope='col'>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            { blocks }
-          </tbody>
-        </table>
+        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
+          Mined blocks (last 20)
+        </h2>
+        <BlocksTable blocks={this.props.blocks} onClick={this.props.actions.showBlock} />
       </div>
     )
   }
@@ -100,11 +70,11 @@ function mapDispatchToProps (dispatch) {
   return { actions: bindActionCreators(actions(dispatch), dispatch) }
 }
 
-const component = connect(
+export const Miner = connect(
   state => ({
     blocks: state.miner.blocks.toarray()
   }),
   mapDispatchToProps
 )(MinerContainer)
 
-export default component
+export default Miner
