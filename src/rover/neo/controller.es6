@@ -94,6 +94,7 @@ export default class Controller {
   _config: Object;
   _neoMesh: Object;
   _intervalDescriptor: IntervalID;
+  _networkRefreshIntervalDescriptor: IntervalID;
   /* eslint-enable */
 
   constructor (config: Object) {
@@ -127,7 +128,7 @@ export default class Controller {
 
     const cycle = () => {
       this._logger.debug('trying to get new block')
-      const node = this._neoMesh.getRandomNode()
+      const node = this._neoMesh.getHighestNode()
 
       return node.rpc.getBestBlockHash().then(bestBlockHash => {
         this._logger.debug(`Got best block: "${bestBlockHash}"`)
@@ -135,7 +136,7 @@ export default class Controller {
           this._blockCache.set(bestBlockHash, true)
           this._logger.debug(`Unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
 
-          node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
+          return node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
             this._logger.debug(`Collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
             const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
@@ -155,6 +156,40 @@ export default class Controller {
       })
     }
 
+    const pingNode = (node: NeoNode) => {
+      this._logger.debug('pingNode triggered.', `node: [${node.domain}:${node.port}]`)
+      const t0 = Date.now()
+      node.pendingRequests += 1
+      node.rpc.getBlockCount()
+        .then((res) => {
+          this._logger.debug('getBlockCount success:', res)
+          const blockCount = res
+          node.blockHeight = blockCount
+          node.index = blockCount - 1
+          node.active = true
+          node.age = Date.now()
+          node.latency = node.age - t0
+          node.pendingRequests -= 1
+          this._logger.debug('node.latency:', node.latency)
+        })
+        .catch((err) => {
+          this._logger.debug(`getBlockCount failed, ${err.reason}`)
+          node.active = false
+          node.age = Date.now()
+          node.pendingRequests -= 1
+        })
+    }
+    // Ping all nodes in order to setup their height and latency
+    this._neoMesh.nodes.forEach((node) => {
+      pingNode(node)
+    })
+
+    // Ping a random node periodically
+    // TODO: apply some sort of priority to ping inactive node less frequent
+    this._networkRefreshIntervalDescriptor = setInterval(() => {
+      pingNode(this._neoMesh.getRandomNode())
+    }, 4000)
+
     this._logger.debug('tick')
     this._intervalDescriptor = setInterval(() => {
       cycle().then(() => {
@@ -165,5 +200,6 @@ export default class Controller {
 
   close () {
     this._intervalDescriptor && clearInterval(this._intervalDescriptor)
+    this._networkRefreshIntervalDescriptor && clearInterval(this._networkRefreshIntervalDescriptor)
   }
 }

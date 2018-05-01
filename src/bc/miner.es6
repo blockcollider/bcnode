@@ -247,30 +247,39 @@ export function distance (a: string, b: string): number {
  * @param {string} miner Public address to which NRG award for mining the block and transactions will be credited to
  * @param {string} merkleRoot Mekle root of the BC block being mined
  * @param {number} threshold threshold for the result to be valid
+ * @param {function} difficultyCalculator function for recalculating difficulty at given timestamp
  * @returns {Object} result containing found `nonce` and `distance` where distance is > `threshold` provided as parameter
  */
 // $FlowFixMe will never return anything else then a mining result
-export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number): { distance: number, nonce: string } {
-  threshold = new BN(threshold, 16)
+export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number, difficultyCalculator: ?Function): { distance: number, nonce: string, timestamp: number, difficulty: number } {
+  let difficulty = threshold
   let result
-  const tsStart = Date.now()
-  const maxCalculationEnd = tsStart + (10 * 1000)
+  // TODO use timeservice
+  const maxCalculationEnd = Date.now() + (10 * 1000)
+  let currentLoopTimestamp = currentTimestamp
 
-  let i = 1
-  // TODO: @pm check
-  while (i++) {
+  while (true) {
     if (maxCalculationEnd < Date.now()) {
       throw Error('Mining took more than 10s, ending...')
     }
+    // TODO optimize not to count each single loop
+    // TODO use time service
+    let now = (Date.now() / 1000 << 0)
+    // recalculate difficulty each second
+    if (difficultyCalculator && currentLoopTimestamp < now) {
+      currentLoopTimestamp = now
+      difficulty = difficultyCalculator(now)
+      console.log(`In timestamp: ${currentLoopTimestamp} recalculated difficulty is: ${difficulty}`)
+    }
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
-    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentTimestamp))
-    if (new BN(result, 16).gt(new BN(threshold, 16)) === true) {
+    result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentLoopTimestamp))
+    if (new BN(result, 16).gt(new BN(difficulty, 16)) === true) {
       return {
         distance: result,
-        nonce: nonce,
-        iterations: i,
-        timeDiff: Date.now() - tsStart
+        nonce,
+        timestamp: currentLoopTimestamp,
+        difficulty
       }
     }
   }

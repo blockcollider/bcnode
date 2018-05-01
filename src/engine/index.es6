@@ -291,7 +291,21 @@ export default class Engine {
         // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
         this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
         // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-        this._workerProcess.send({currentTimestamp, work, minerKey: this._minerKey, merkleRoot: newBlock.getMerkleRoot(), difficulty: newBlock.getDifficulty()})
+        this._workerProcess.send({
+          currentTimestamp,
+          work,
+          minerKey: this._minerKey,
+          merkleRoot: newBlock.getMerkleRoot(),
+          difficulty: newBlock.getDifficulty(),
+          difficultyData: {
+            currentTimestamp,
+            lastPreviousBlock: lastPreviousBlock.serializeBinary(),
+            // $FlowFixMe
+            previousBcBlocks: Object.entries(previousBcBlocks).map(([chain, block: BcBlock]) => [chain, block.serializeBinary()]),
+            currentBlocks: currentBlocks.map(block => block.serializeBinary()),
+            block: block.serializeBinary(),
+            newBlockHeaders: newBlock.getChildBlockHeadersList().map(header => header.serializeBinary())
+          }})
         // $FlowFixMe - Flow can't properly find worker pid
         return Promise.resolve(this._workerProcess.pid)
       }
@@ -310,13 +324,17 @@ export default class Engine {
     }
   }
 
-  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string }) {
+  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number }) {
     if (!this._unfinishedBlock) {
       throw new Error(`There is not unfininshed block to use solution for`)
     }
     this._unfinishedBlock.setNonce(solution.nonce)
     // $FlowFixMe
     this._unfinishedBlock.setDistance(solution.distance)
+    // $FlowFixMe
+    this._unfinishedBlock.setTimestamp(solution.timestamp)
+    // $FlowFixMe
+    this._unfinishedBlock.setDifficulty(solution.difficulty)
 
     this._processMinedBlock(this._unfinishedBlock)
   }
@@ -377,7 +395,6 @@ export default class Engine {
     debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
 
     const tasks = [
-      // FIXME: This collides with genesis block
       this.persistence.put('bc.block.latest', newBlock),
       this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
     ]
