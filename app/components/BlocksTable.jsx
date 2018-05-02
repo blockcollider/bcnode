@@ -33,6 +33,11 @@ class BlocksTable extends Component<*> {
   render () {
     let i = 0
     const blocks = this.props.blocks.map((block) => {
+      const extraFields = (this.props.extraCols || []).map((colName, idx) => (<td key={idx}>{block[colName[1]]}</td>))
+
+      const fixedStyle = {
+        fontFamily: 'monospace'
+      }
       return (
         <tr key={block.hash}>
           <th scope='row'>{i++}</th>
@@ -44,13 +49,16 @@ class BlocksTable extends Component<*> {
               <Ellipsis text={block.hash} />
             </BlockLink>
           </td>
-          <td>{block.difficulty}</td>
-          <td>{block.distance}</td>
+          <td style={fixedStyle}>{block.difficulty}</td>
+          <td style={fixedStyle}>{block.distance}</td>
           <td>{block.nonce}</td>
+          {extraFields}
           <td>{moment(block.timestamp * 1000).format('HH:mm:ss')}</td>
         </tr>
       )
     })
+
+    const extraHeaders = (this.props.extraCols || []).map((colName, idx) => (<th key={idx} scope='col'>{colName[0]}</th>))
 
     return (
       <div className='table-responsive'>
@@ -63,6 +71,7 @@ class BlocksTable extends Component<*> {
               <th scope='col'>Difficulty</th>
               <th scope='col'>Distance</th>
               <th scope='col'>Nonce</th>
+              {extraHeaders}
               <th scope='col'>Timestamp</th>
             </tr>
           </thead>

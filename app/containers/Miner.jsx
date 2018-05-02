@@ -18,6 +18,11 @@ import { BlocksTable } from '../components'
 
 export class MinerContainer extends Component<*> {
   render () {
+    const extraCols = [
+      ['Iterations', 'iterations'],
+      ['Time Diff', 'timeDiff']
+    ]
+
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
@@ -27,7 +32,7 @@ export class MinerContainer extends Component<*> {
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
           Mined blocks (last 20)
         </h2>
-        <BlocksTable blocks={this.props.blocks} onClick={this.props.actions.showBlock} />
+        <BlocksTable blocks={this.props.blocks} extraCols={extraCols} onClick={this.props.actions.showBlock} />
       </div>
     )
   }

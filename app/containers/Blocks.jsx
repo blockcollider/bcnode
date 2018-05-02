@@ -56,11 +56,11 @@ export class BlocksContainer extends Component<*> {
           <ul className='pagination justify-content-end'>
             <li className='page-item'>
               <a className='page-link'
-                href={'/#' + getLink(this.props.blocks[0].height + this.props.count)}>Previous</a>
+                href={'/#' + getLink(this.props.blocks[0].height + this.props.count)}>Newer</a>
             </li>
             <li className='page-item'>
               <a className='page-link'
-                href={'/#' + getLink(this.props.blocks[0].height - this.props.count)}>Next</a>
+                href={'/#' + getLink(this.props.blocks[0].height - this.props.count)}>Older</a>
             </li>
           </ul>
         </nav>}
