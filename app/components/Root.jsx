@@ -11,27 +11,15 @@ import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
 import { Provider } from 'react-redux'
-import { ConnectedRouter } from 'react-router-redux'
-import { Redirect, Route } from 'react-router'
 
-import App from './App'
-import Rover from './Rover'
-import Peers from './Peers'
+import { Router } from './Router'
 
-export default class Root extends Component<*> {
+export class Root extends Component<*> {
   render () {
     const {history, store} = this.props
     return (
       <Provider store={store}>
-        <ConnectedRouter history={history} >
-          <App>
-            <Route exact path='/' component={() => {
-              return (<Redirect to='/rover' />)
-            }} />
-            <Route path='/rover' component={Rover} />
-            <Route path='/peers' component={Peers} />
-          </App>
-        </ConnectedRouter>
+        <Router history={history} />
       </Provider>
     )
   }
@@ -47,3 +35,5 @@ export const render = (id: string, history: Object, store: Object) => {
     console.error('Cannot find element with id "app"')
   }
 }
+
+export default Root

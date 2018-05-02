@@ -7,16 +7,22 @@
  * @flow
  */
 
+// $FlowFixMe
 const WSStar = require('libp2p-websocket-star')
 const PeerInfo = require('peer-info')
 
 const config = require('../../../config/config')
 
+class BcWSStar extends WSStar {
+}
+
 export default {
   initialize: (peerInfo: PeerInfo) => {
-    return new WSStar({
+    const wsstar = new BcWSStar({
       id: peerInfo.id
     })
+
+    return wsstar
   },
 
   getAddress: (peerInfo: PeerInfo) => {

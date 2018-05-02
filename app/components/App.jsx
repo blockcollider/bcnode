@@ -8,10 +8,10 @@
  */
 
 import React, { Component } from 'react'
+import { Helmet } from 'react-helmet'
+import Navbar from '../components/Navbar'
 
-import Navbar from './Navbar'
-
-export default class App extends Component<*> {
+export class App extends Component<*> {
   render () {
     const {children} = this.props
     let elements = React.Children.map(children,
@@ -21,6 +21,11 @@ export default class App extends Component<*> {
 
     return (
       <div>
+        <Helmet titleTemplate='Block Colider: %s'>
+          <title>App</title>
+          <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.10/css/all.css' />
+        </Helmet>
+
         <Navbar />
         <div className='container-fluid'>
           <div className='container'>
@@ -31,3 +36,5 @@ export default class App extends Component<*> {
     )
   }
 }
+
+export default App

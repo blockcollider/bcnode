@@ -24,6 +24,7 @@ const config = require('../../config/config')
 const { Null, Block } = require('../protos/core_pb')
 const Engine = require('../engine').default
 const { RpcClient, RpcServer } = require('../rpc')
+const { dispatcher: socketDispatcher } = require('./socket')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'public')
 const docsDir = path.resolve(__dirname, '..', '..', 'docs')
@@ -128,6 +129,18 @@ export default class Server {
     this._wsServer.on('connection', (client, req) => {
       this._wsSendInitialState(client)
 
+      client.on('message', (msg) => {
+        let payload
+        try {
+          payload = JSON.parse(msg)
+        } catch (e) {
+          this._logger.warn('Unable to decode WS message', e)
+          return
+        }
+
+        socketDispatcher(this, client, payload)
+      })
+
       client.on('close', reason => {
         this._logger.debug('Client connection closed', req.connection.remoteAddress)
       })
@@ -203,6 +216,7 @@ export default class Server {
     return {
       id: peer.id.toB58String(),
       meta: peer.meta,
+      // addr: peer.multiaddrs._connectedMultiaddr.toString(),
       addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString())
     }
   }
@@ -238,11 +252,18 @@ export default class Server {
 
   _wsSendInitialState (client: WebSocket.Client) {
     let peers = []
-    const peerBook = this._engine._node && this._engine._node._peers
+
+    const node = this._engine._node
+    const peerBook = node && node.peerBook
     if (peerBook) {
       peers = peerBook.getAllArray().map((peer) => {
         return this._transformPeerToWire(peer)
       })
+    }
+
+    let peer = null
+    if (node && node.peer) {
+      peer = this._transformPeerToWire(node.peer)
     }
 
     const msgs = [
@@ -253,6 +274,12 @@ export default class Server {
       {
         type: 'peer.snapshot',
         data: peers
+      },
+      {
+        type: 'profile.set',
+        data: {
+          peer
+        }
       }
     ]
 

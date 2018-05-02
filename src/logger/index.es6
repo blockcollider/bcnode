@@ -59,7 +59,22 @@ const logger = new winston.Logger({
     //   formatter: format,
     //   level: LOG_LEVEL
     // })
-  ]
+  ],
+  exceptionHandlers: [
+    new winston.transports.File({
+      filename: `${logPath}-exceptions.log`,
+      json: false,
+      formatter: (options) => {
+        const msg = {
+          msg: options.message,
+          date: options.meta.date,
+          stack: options.meta.stack
+        }
+        return JSON.stringify(msg, null, 2)
+      }
+    })
+  ],
+  exitOnError: false
 })
 
 const pathToLogPrefix = (path, topLevelDir = 'lib') => {

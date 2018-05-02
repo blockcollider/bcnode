@@ -7,14 +7,9 @@
  * @flow
  */
 
-import React, { Component } from 'react'
-
-export default class Empty extends Component<*> {
-  render () {
-    return (
-      <div>
-        I am empty
-      </div>
-    )
-  }
+export const ACTIONS = {
+  SOCKET_CREATED: 'SOCKET_CREATED',
+  SOCKET_CONNECTED: 'SOCKET_CONNECTED',
+  SOCKET_DISCONNECTED: 'SOCKET_DISCONNECTED',
+  SOCKET_SEND: 'SOCKET_SEND'
 }
