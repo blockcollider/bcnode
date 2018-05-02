@@ -30,9 +30,11 @@ export function errToObj (err: Error) {
     return acc
   }, {})
 
-  obj.stack = obj.stack
-    .split('\n')
-    .map((line) => line.trim())
+  if (obj && obj.stack && obj.stack.split) {
+    obj.stack = obj.stack
+      .split('\n')
+      .map((line) => line.trim())
+  }
 
   return obj
 }
