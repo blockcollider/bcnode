@@ -79,8 +79,10 @@ $ docker build -t blockcollider/bcnode .
 - [boost](http://www.boost.org/) Boost 1.66.0+
 
 ```
-$ git clone https://github.com/blockcollider/bcnode
 # Clone sources
+$ git clone https://github.com/blockcollider/bcnode
+
+# Change folder
 $ cd bcnode
 
 # Install dependencies
