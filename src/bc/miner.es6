@@ -255,12 +255,17 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
   let difficulty = threshold
   let result
   // TODO use timeservice
-  const maxCalculationEnd = Date.now() + (10 * 1000)
+  const tsStart = Date.now()
+  const maxCalculationEnd = tsStart + (10 * 1000)
   let currentLoopTimestamp = currentTimestamp
 
+  let iterations = 0
+  let res = null
   while (true) {
+    iterations += 1
+
     if (maxCalculationEnd < Date.now()) {
-      throw Error('Mining took more than 10s, ending...')
+      break
     }
     // TODO optimize not to count each single loop
     // TODO use time service
@@ -275,14 +280,25 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentLoopTimestamp))
     if (new BN(result, 16).gt(new BN(difficulty, 16)) === true) {
-      return {
+      res = {
         distance: result,
         nonce,
         timestamp: currentLoopTimestamp,
-        difficulty
+        difficulty,
+        iterations,
+        timeDiff: Date.now() - tsStart
       }
+      break
     }
   }
+
+  const tsEnd = Date.now()
+  const tsDiff = tsEnd - tsStart
+  if (res === null) {
+    throw Error(`Mining took more than 10s, iterations: ${iterations}, tsDiff: ${tsDiff} ending...`)
+  }
+
+  return res
 }
 
 /// /////////////////////////////////////////////////////////////////////
