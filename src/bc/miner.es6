@@ -276,6 +276,7 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
       difficulty = difficultyCalculator(now)
       console.log(`In timestamp: ${currentLoopTimestamp} recalculated difficulty is: ${difficulty}`)
     }
+
     let nonce = String(Math.random()) // random string
     let nonceHash = blake2bl(nonce)
     result = distance(work, blake2bl(miner + merkleRoot + nonceHash + currentLoopTimestamp))
@@ -285,6 +286,7 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
         nonce,
         timestamp: currentLoopTimestamp,
         difficulty,
+        // NOTE: Following fields are for debug purposes only
         iterations,
         timeDiff: Date.now() - tsStart
       }
