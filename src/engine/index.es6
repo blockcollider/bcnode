@@ -336,7 +336,7 @@ export default class Engine {
     // $FlowFixMe
     this._unfinishedBlock.setDifficulty(solution.difficulty)
 
-    this._processMinedBlock(this._unfinishedBlock)
+    this._processMinedBlock(this._unfinishedBlock, solution)
   }
 
   _handleWorkerError (error: Error) {
@@ -373,7 +373,7 @@ export default class Engine {
     return this._rovers.killRovers()
   }
 
-  _broadcastMinedBlock (newBlock: BcBlock): Promise<*> {
+  _broadcastMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     this._logger.info('Broadcasting mined block')
 
     this.node.broadcastNewBlock(newBlock)
@@ -381,7 +381,13 @@ export default class Engine {
     this._mining = false
 
     try {
-      this._server._wsBroadcast({ type: 'block.mined', data: newBlock.toObject() })
+      const newBlockObj = {
+        ...newBlock.toObject(),
+        iterations: solution.iterations,
+        timeDiff: solution.timeDiff
+      }
+
+      this._server._wsBroadcast({ type: 'block.mined', data: newBlockObj })
     } catch (e) {
       console.log('ERROR BROADCASTING', e)
     }
@@ -389,7 +395,7 @@ export default class Engine {
     return Promise.resolve(true)
   }
 
-  _processMinedBlock (newBlock: BcBlock): Promise<*> {
+  _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     const newBlockObj = newBlock.toObject()
     this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
     debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
@@ -404,7 +410,7 @@ export default class Engine {
         this._logger.debug('New BC block stored in DB')
 
         // TODO broadcast BC block here
-        return this._broadcastMinedBlock(newBlock)
+        return this._broadcastMinedBlock(newBlock, solution)
       })
       .catch((err) => {
         this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
