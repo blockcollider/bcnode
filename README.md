@@ -56,7 +56,7 @@ $ docker run --rm --name bcnode -p 3000:3000 -p 9090:9090 blockcollider/bcnode:l
 
 ```
 # Clone sources
-$ https://github.com/blockcollider/bcnode.git
+$ git clone https://github.com/blockcollider/bcnode.git
 
 # Change folder
 $ cd bcnode
@@ -80,9 +80,14 @@ $ docker build -t blockcollider/bcnode .
 
 ```
 $ git clone https://github.com/blockcollider/bcnode
+# Clone sources
 $ cd bcnode
-$ npm install
-$ npm run dist
+
+# Install dependencies
+$ yarn
+
+# Build bcnode
+$ yarn run dist
 ```
 
 ### Run From Command Line
