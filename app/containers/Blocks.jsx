@@ -13,7 +13,7 @@ import { connect } from 'react-redux'
 import { BlocksTable } from '../components'
 import { bindActionCreators } from 'redux'
 
-import { ACTIONS as SOCKET_ACTIONS } from '../socket/actions'
+import { ACTIONS as SOCKET_ACTIONS } from '../reducers/socket/actions'
 import { push } from 'react-router-redux'
 import { ACTIONS as BLOCK_ACTIONS } from './Block'
 

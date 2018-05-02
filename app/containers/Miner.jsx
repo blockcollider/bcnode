@@ -18,10 +18,13 @@ import { BlocksTable } from '../components'
 
 export class MinerContainer extends Component<*> {
   render () {
-    const extraCols = [
-      ['Iterations', 'iterations'],
-      ['Time Diff', 'timeDiff']
-    ]
+    let extraCols = []
+    if (this.props.config.debug) {
+      extraCols = [
+        ['Iterations', 'iterations'],
+        ['Time Diff', 'timeDiff']
+      ]
+    }
 
     return (
       <div className='d-flex flex-wrap flex-row'>
@@ -77,6 +80,7 @@ function mapDispatchToProps (dispatch) {
 
 export const Miner = connect(
   state => ({
+    config: state.app.config,
     blocks: state.miner.blocks.toarray()
   }),
   mapDispatchToProps

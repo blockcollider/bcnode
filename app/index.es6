@@ -9,7 +9,9 @@
 
 import { render } from './containers/Root'
 import { createHistory, createStore } from './store'
-import { initSocket } from './socket/socket'
+
+import { init as initAppReducer } from './reducers/app'
+import { init as initSocketReducer } from './reducers/socket/socket'
 
 // Create history
 const history = createHistory()
@@ -17,8 +19,11 @@ const history = createHistory()
 // Create store
 const store = createStore(history)
 
+// Initialize internal app reducer
+initAppReducer(store.dispatch)
+
 // Initialize socket
-initSocket(store.dispatch)
+initSocketReducer(store.dispatch)
 
 // Render topmost component
 render('app', history, store)

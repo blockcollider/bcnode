@@ -7097,6 +7097,10 @@ keccakjs@^0.2.0, keccakjs@^0.2.1:
     browserify-sha3 "^0.0.1"
     sha3 "^1.1.0"
 
+keyboardjs@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/keyboardjs/-/keyboardjs-2.4.1.tgz#7c5ad28695a21b6c4d066681c127376a60f9acd1"
+
 keypair@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/keypair/-/keypair-1.0.1.tgz#7603719270afb6564ed38a22087a06fc9aa4ea1b"

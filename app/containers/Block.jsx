@@ -12,7 +12,7 @@ import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-import { ACTIONS as SOCKET_ACTIONS } from '../socket/actions'
+import { ACTIONS as SOCKET_ACTIONS } from '../reducers/socket/actions'
 
 export class BlockContainer extends Component<*> {
   _fetchBlock (id: String) {

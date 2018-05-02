@@ -7,12 +7,12 @@
  * @flow
  */
 
-import { ACTIONS as BLOCK_ACTIONS } from '../containers/Block'
-import { ACTIONS as BLOCKS_ACTIONS } from '../containers/Blocks'
-import { ACTIONS as MINER_ACTIONS } from '../containers/Miner'
-import { ACTIONS as PEER_ACTIONS } from '../containers/Peers'
-import { ACTIONS as PROFILE_ACTIONS } from '../reducers/profile'
-import { ACTIONS as ROVER_ACTIONS } from '../containers/Rover'
+import { ACTIONS as BLOCK_ACTIONS } from '../../containers/Block'
+import { ACTIONS as BLOCKS_ACTIONS } from '../../containers/Blocks'
+import { ACTIONS as MINER_ACTIONS } from '../../containers/Miner'
+import { ACTIONS as PEER_ACTIONS } from '../../containers/Peers'
+import { ACTIONS as PROFILE_ACTIONS } from '../profile'
+import { ACTIONS as ROVER_ACTIONS } from '../../containers/Rover'
 import { ACTIONS } from './actions'
 
 const DISPATCH_TABLE = {
@@ -27,7 +27,7 @@ const DISPATCH_TABLE = {
   'profile.set': PROFILE_ACTIONS.PROFILE_SET
 }
 
-export const initSocket = (dispatch : (msg : Object) => void) => {
+export const init = (dispatch : (msg : Object) => void) => {
   const socket = new WebSocket(`ws://${location.hostname}:${location.port}/ws`) // eslint-disable-line
 
   socket.onopen = () => {
@@ -36,7 +36,7 @@ export const initSocket = (dispatch : (msg : Object) => void) => {
 
   socket.onclose = () => {
     dispatch({type: ACTIONS.SOCKET_DISCONNECTED})
-    window.setTimeout(() => initSocket(dispatch), 1000)
+    window.setTimeout(() => init(dispatch), 1000)
   }
 
   socket.onmessage = (data) => {

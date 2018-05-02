@@ -17,8 +17,9 @@ import { reducer as blocksReducer } from './containers/Blocks'
 import { reducer as minerReducer } from './containers/Miner'
 import { reducer as peersReducer } from './containers/Peers'
 import { reducer as roverReducer } from './containers/Rover'
-import { reducer as socketReducer } from './socket/socket'
+import { reducer as socketReducer } from './reducers/socket/socket'
 
+import { reducer as appReducer } from './reducers/app'
 import { reducer as profileReducer } from './reducers/profile'
 
 export const createHistory = () => {
@@ -30,6 +31,7 @@ export const createHistory = () => {
 export const createStore = (history: Object, reducers: Object = {}) => {
   const store = createReduxStore(
     combineReducers({
+      app: appReducer,
       block: blockReducer,
       blocks: blocksReducer,
       miner: minerReducer,
