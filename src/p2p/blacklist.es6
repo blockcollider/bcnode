@@ -11,7 +11,7 @@ const PeerInfo = require('peer-info')
 
 const config = require('../../config/config')
 const logging = require('../logger')
-const { PeerBook } = require('./book')
+const PeerBook = require('peer-book')
 const Node = require('./node').default
 
 export const REASON_LIST = [
@@ -57,7 +57,7 @@ export class Blacklist {
    */
   constructor (node: Node) {
     this._node = node
-    this._peers = new PeerBook()
+    this._peers = new PeerBook(null)
 
     this._logger = logging.getLogger(__filename)
     this._logger.info('Initializing p2p blacklist')

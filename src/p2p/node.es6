@@ -14,6 +14,7 @@ const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
+const debug = require('debug')('bcnode:p2p:node')
 const config = require('../../config/config')
 const { getVersion } = require('../helper/version')
 const logging = require('../logger')
@@ -126,10 +127,10 @@ export class PeerNode {
 
         this.bundle.on('peer:discovery', (peer) => {
           const peerId = peer.id.toB58String()
-          console.log('Event - peer:discovery', peerId)
+          debug('Event - peer:discovery', peerId)
 
           if (this.peerBook.has(peer)) {
-            console.log(`Discovered peer ${peerId} already in PeerBook`)
+            debug(`Discovered peer ${peerId} already in PeerBook`)
             // console.log(this.peerBook.get(peer))
             return
           }
@@ -140,13 +141,13 @@ export class PeerNode {
               return err
             }
 
-            console.log(`Discovered peer successfully dialed ${peerId}`)
+            this._logger.info(`Discovered peer successfully dialed ${peerId}`)
           })
         })
 
         this.bundle.on('peer:connect', (peer) => {
           const peerId = peer.id.toB58String()
-          console.log('Event - peer:connect', peerId)
+          debug('Event - peer:connect', peerId)
 
           const meta = {
             ts: {
@@ -154,9 +155,12 @@ export class PeerNode {
             }
           }
 
+          // this.peerBook.put(peer)
+
+          // FIXME: This should be done as part of discovery, not after ANOTHER CLIENT CONNECTED TO US
           this.bundle.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
             if (err) {
-              console.log('ERROR', err)
+              this._logger.error('Error dialing /status protocol', peerId)
               throw err
             }
 
@@ -177,11 +181,13 @@ export class PeerNode {
         })
 
         this.bundle.on('peer:disconnect', (peer) => {
-          console.log('Event - peer:disconnect', peer.id.toB58String())
+          const peerId = peer.id.toB58String()
+          debug('Event - peer:disconnect', peerId)
           // wait for 1s for both libp2p-switch/dial and libp2p-switch/connection muxedConn `close` handlers
           // to finish
           setTimeout(() => {
             if (this.peerBook.has(peer)) {
+              this._logger.info('Peer disconnected', peerId)
               this.peerBook.remove(peer)
             }
             this._engine._emitter.emit('peerDisconnected', { peer })
@@ -226,6 +232,7 @@ export class PeerNode {
                 const raw = new Uint8Array(bytes)
                 const block = BcBlock.deserializeBinary(raw)
                 this._logger.info('Received new block from peer', block.toObject())
+                // TODO: Validate new block mined by peer
               } catch (e) {
                 this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
               }

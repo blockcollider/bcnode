@@ -19,7 +19,7 @@ export class PeerManager {
   constructor (node: PeerNode) {
     debug('constructor()')
     this._peerNode = node
-    this._peerBook = new PeerBook()
+    this._peerBook = new PeerBook(this)
   }
 
   get peerBook (): PeerBook {
