@@ -7,22 +7,26 @@
  * @flow
  */
 
+import App from './App'
 import BlocksTable from './BlocksTable'
 import Brand from './Brand'
 import ConnectionState from './ConnectionState'
 import Ellipsis from './Ellipsis'
 import Navbar from './Navbar'
 import PeersTable from './PeersTable'
+import Root from './Root'
 import RoverBlock from './RoverBlock'
 import VersionLink from './VersionLink'
 
 export {
+  App,
   BlocksTable,
   Brand,
   ConnectionState,
   Ellipsis,
   Navbar,
   PeersTable,
+  Root,
   RoverBlock,
   VersionLink
 }

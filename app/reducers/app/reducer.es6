@@ -7,17 +7,9 @@
  * @flow
  */
 
-const keyboard = require('keyboardjs')
-
-const initialState = {
-  config: {
-    debug: false
-  }
-}
-
-export const ACTIONS = {
-  APP_DEBUG_TOGGLE: 'APP_DEBUG_TOGGLE'
-}
+import keyboard from 'keyboardjs'
+import { ACTIONS } from './actions'
+import { initialState } from './state'
 
 export const init = (dispatch : (msg : Object) => void) => {
   keyboard.bind('d', (e) => {

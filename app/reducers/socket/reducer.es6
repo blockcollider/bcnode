@@ -7,13 +7,15 @@
  * @flow
  */
 
-import { ACTIONS as BLOCK_ACTIONS } from '../../containers/Block'
-import { ACTIONS as BLOCKS_ACTIONS } from '../../containers/Blocks'
-import { ACTIONS as MINER_ACTIONS } from '../../containers/Miner'
-import { ACTIONS as PEER_ACTIONS } from '../../containers/Peers'
-import { ACTIONS as PROFILE_ACTIONS } from '../profile'
-import { ACTIONS as ROVER_ACTIONS } from '../../containers/Rover'
+import { ACTIONS as PROFILE_ACTIONS } from '../profile/actions'
+import { ACTIONS as BLOCK_ACTIONS } from '../block/actions'
+import { ACTIONS as BLOCKS_ACTIONS } from '../blocks/actions'
+import { ACTIONS as MINER_ACTIONS } from '../miner/actions'
+import { ACTIONS as PEER_ACTIONS } from '../peers/actions'
+import { ACTIONS as ROVER_ACTIONS } from '../rover/actions'
+
 import { ACTIONS } from './actions'
+import { initialState } from './state'
 
 const DISPATCH_TABLE = {
   'block.mined': MINER_ACTIONS.MINER_ADD_BLOCK,
@@ -52,12 +54,6 @@ export const init = (dispatch : (msg : Object) => void) => {
   dispatch({type: ACTIONS.SOCKET_CREATED, payload: socket})
 
   return socket
-}
-
-const initialState = {
-  socket: null,
-  connected: false,
-  buffer: []
 }
 
 export const reducer = (state: Object = initialState, action: Object) => {

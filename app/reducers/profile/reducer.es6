@@ -7,13 +7,8 @@
  * @flow
  */
 
-const initialState = {
-  peer: null
-}
-
-export const ACTIONS = {
-  PROFILE_SET: 'PROFILE_SET'
-}
+import { ACTIONS } from './actions'
+import { initialState } from './state'
 
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {

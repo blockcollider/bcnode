@@ -10,11 +10,10 @@ import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { push } from 'react-router-redux'
-import CircularBuffer from 'circular-buffer'
 
-import { ACTIONS as BLOCK_ACTIONS } from './Block'
 import { BlocksTable } from '../components'
+
+import { actions } from '../reducers/miner/actions'
 
 export class MinerContainer extends Component<*> {
   render () {
@@ -38,39 +37,6 @@ export class MinerContainer extends Component<*> {
         <BlocksTable blocks={this.props.blocks} extraCols={extraCols} onClick={this.props.actions.showBlock} />
       </div>
     )
-  }
-}
-
-const initialState = {
-  blocks: new CircularBuffer(20)
-}
-
-export const ACTIONS = {
-  MINER_ADD_BLOCK: 'MINER_ADD_BLOCK'
-}
-
-export const reducer = (state: Object = initialState, action: Object) => {
-  switch (action.type) {
-    case ACTIONS.MINER_ADD_BLOCK:
-      let data = state.blocks
-      action.payload.timestamp = new Date(action.payload.timestamp)
-      data.enq(action.payload)
-      return { ...state, blocks: data, blocksArray: data.toarray() }
-
-    default:
-      return state
-  }
-}
-
-const actions = (dispatch) => {
-  return {
-    showBlock: (block: Object) => {
-      dispatch(push(`/block/${block.height}`))
-      return {
-        type: BLOCK_ACTIONS.BLOCK_SET,
-        payload: block
-      }
-    }
   }
 }
 

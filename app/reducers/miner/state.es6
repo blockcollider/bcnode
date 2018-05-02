@@ -7,16 +7,8 @@
  * @flow
  */
 
-import Block from './Block'
-import Blocks from './Blocks'
-import Miner from './Miner'
-import Peers from './Peers'
-import Rover from './Rover'
+import CircularBuffer from 'circular-buffer'
 
-export {
-  Block,
-  Blocks,
-  Miner,
-  Peers,
-  Rover
+export const initialState = {
+  blocks: new CircularBuffer(20)
 }

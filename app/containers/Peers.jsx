@@ -7,19 +7,13 @@
  * @flow
  */
 
-import moment from 'moment'
-import { reject } from 'ramda'
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
-import { VersionLink, PeersTable } from '../components'
+import { PeersTable } from '../components'
 
 export class PeersContainer extends Component<*> {
   render () {
-    let peer = []
-    if (this.props.peer) {
-      peer = [this.props.peer]
-    }
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
@@ -33,50 +27,6 @@ export class PeersContainer extends Component<*> {
       </div>
     )
   }
-}
-
-const transformFromWire = (obj: Object): Object => {
-  const meta = (obj && obj.meta) || {}
-
-  const connectedAt = meta.ts && meta.ts.connectedAt
-  if (connectedAt) {
-    meta.ts.connectedAt = new Date(connectedAt)
-  }
-
-  const startedAt = meta.ts && meta.ts.startedAt
-  if (connectedAt) {
-    meta.ts.startedAt = new Date(startedAt)
-  }
-
-  return obj
-}
-
-const initialState = {
-  peer: null,
-  peers: []
-}
-
-export const ACTIONS = {
-  PEERS_ADD_PEER: 'PEERS_ADD_PEER',
-  PEERS_REMOVE_PEER: 'PEERS_REMOVE_PEER',
-  PEERS_SET_PEERS: 'PEERS_SET_PEERS'
-}
-
-export const reducer = (state: Object = initialState, action: Object) => {
-  switch (action.type) {
-    case ACTIONS.PEERS_ADD_PEER:
-      const newPeer = transformFromWire(action.payload)
-      const oldPeers = reject((peer) => peer.id === newPeer.id, state.peers)
-      return { ...state, peers: [ ...oldPeers, newPeer ] }
-
-    case ACTIONS.PEERS_REMOVE_PEER:
-      return { ...state, peers: reject((peer) => peer.id === action.payload.id, state.peers) }
-
-    case ACTIONS.PEERS_SET_PEERS:
-      return { ...state, peers: action.payload.map(transformFromWire) }
-  }
-
-  return state
 }
 
 export const Peers = connect(state => ({

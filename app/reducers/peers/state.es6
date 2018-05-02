@@ -7,16 +7,7 @@
  * @flow
  */
 
-import Block from './Block'
-import Blocks from './Blocks'
-import Miner from './Miner'
-import Peers from './Peers'
-import Rover from './Rover'
-
-export {
-  Block,
-  Blocks,
-  Miner,
-  Peers,
-  Rover
+export const initialState = {
+  peer: null,
+  peers: []
 }

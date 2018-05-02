@@ -7,11 +7,11 @@
  * @flow
  */
 
-import { render } from './containers/Root'
+import { render } from './components/Root'
 import { createHistory, createStore } from './store'
 
-import { init as initAppReducer } from './reducers/app'
-import { init as initSocketReducer } from './reducers/socket/socket'
+import { init as initAppReducer } from './reducers/app/reducer'
+import { init as initSocketReducer } from './reducers/socket/reducer'
 
 // Create history
 const history = createHistory()

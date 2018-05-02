@@ -12,7 +12,7 @@ import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
-import { ACTIONS as SOCKET_ACTIONS } from '../reducers/socket/actions'
+import { actions } from '../reducers/block/actions'
 
 export class BlockContainer extends Component<*> {
   _fetchBlock (id: String) {
@@ -47,38 +47,6 @@ export class BlockContainer extends Component<*> {
       </div>
     )
   }
-}
-
-const actions = {
-  getBlock: (block: Object) => {
-    return {
-      type: SOCKET_ACTIONS.SOCKET_SEND,
-      payload: {
-        type: 'block.get',
-        data: { id: block }
-      }
-    }
-  }
-}
-
-export const ACTIONS = {
-  BLOCK_GET: 'BLOCK_GET',
-  BLOCK_SET: 'BLOCK_SET'
-}
-
-const initialState = {
-  id: null,
-  block: null
-}
-
-export const reducer = (state: Object = initialState, action: Object) => {
-  switch (action.type) {
-    case ACTIONS.BLOCK_SET:
-      const id = action.payload && action.payload.height
-      return {...state, id, block: action.payload}
-  }
-
-  return state
 }
 
 function mapDispatchToProps (dispatch, ownProps) {

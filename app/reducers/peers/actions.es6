@@ -7,16 +7,8 @@
  * @flow
  */
 
-import Block from './Block'
-import Blocks from './Blocks'
-import Miner from './Miner'
-import Peers from './Peers'
-import Rover from './Rover'
-
-export {
-  Block,
-  Blocks,
-  Miner,
-  Peers,
-  Rover
+export const ACTIONS = {
+  PEERS_ADD_PEER: 'PEERS_ADD_PEER',
+  PEERS_REMOVE_PEER: 'PEERS_REMOVE_PEER',
+  PEERS_SET_PEERS: 'PEERS_SET_PEERS'
 }
