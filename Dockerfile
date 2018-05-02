@@ -73,7 +73,5 @@ RUN mkdir -p /src/logs
 
 EXPOSE 3000 9090
 
-RUN cat ./lib/bc/genesis.raw.json
-
 ENTRYPOINT [ "./bin/cli" ]
 
