@@ -15,6 +15,7 @@ const LRUCache = require('lru-cache')
 
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
+const { errToString } = require('../../helper/error')
 const { RpcClient } = require('../../rpc')
 const { createUnifiedBlock } = require('../helper')
 
@@ -121,8 +122,8 @@ export default class Controller {
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
 

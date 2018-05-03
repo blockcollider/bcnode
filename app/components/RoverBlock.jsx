@@ -40,7 +40,7 @@ const formatHash = (blockchain, hash) => {
 const getBlockLink = (blockchain, hash) => {
   switch (blockchain) {
     case 'btc':
-      return `https://blockchain.info/block/${hash}`
+      return `https://blockchair.com/bitcoin/block/${hash}`
     case 'eth':
       return `https://etherscan.io/block/${hash}`
     case 'lsk':

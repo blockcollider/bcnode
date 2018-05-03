@@ -7,9 +7,11 @@
  * @flow
  */
 
-const logging = require('../logger')
 const { fork } = require('child_process')
 const path = require('path')
+
+const logging = require('../logger')
+const { errToString } = require('../helper/error')
 
 const ROVER_RESTART_TIMEOUT = 5000
 
@@ -69,9 +71,9 @@ export default class RoverManager {
 
     rover.on('exit', (code, signal) => {
       this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting in ${ROVER_RESTART_TIMEOUT / 1000}s`)
+      delete this._rovers[roverName]
       // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
       setTimeout(() => {
-        delete this._rovers[roverName]
         this.startRover(roverName)
       }, ROVER_RESTART_TIMEOUT)
     })
@@ -98,9 +100,12 @@ export default class RoverManager {
    * @private
    */
   _killRover (roverName: string) {
-    const rover = this._rovers[roverName]
-    const pid = rover.pid
+    const { pid } = this._rovers[roverName]
     this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
-    process.kill(pid, 'SIGHUP')
+    try {
+      process.kill(pid, 'SIGHUP')
+    } catch (err) {
+      this._logger.warn(`Error while killing rover '${roverName}', PID: ${pid}, error: ${errToString(err)}`)
+    }
   }
 }
