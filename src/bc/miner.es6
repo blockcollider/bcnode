@@ -483,21 +483,35 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
  * @param {string} minerAddress Public addres to which NRG award for mining the block and transactions will be credited to
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
-export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, previousBlocks: {[blockchain: string]: BcBlock}, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): BcBlock {
+export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, previousBlocks: {[blockchain: string]: BcBlock}, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): [BcBlock, number] {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
 
   const childBlockHeadersList = prepareChildBlockHeadersList(lastPreviousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
 
   const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
-  const preExpDiff = getNewPreExpDifficulty(
-    currentTimestamp,
-    lastPreviousBlock,
-    previousBlocks,
-    minimumDiffShare,
-    lastPreviousBlock.getChildBlockHeadersList(),
-    childBlockHeadersList
-  )
+  let finalDifficulty
+  let finalTimestamp = currentTimestamp
+
+  // recalculate difficulty to be < 2^53-1
+  while (true) {
+    try {
+      const preExpDiff = getNewPreExpDifficulty(
+        finalTimestamp,
+        lastPreviousBlock,
+        previousBlocks,
+        minimumDiffShare,
+        lastPreviousBlock.getChildBlockHeadersList(),
+        childBlockHeadersList
+      )
+      finalDifficulty = getExpFactorDiff(preExpDiff, lastPreviousBlock.getHeight()).toNumber()
+      break
+    } catch (e) {
+      finalTimestamp += 1
+      console.log(`Recalculating difficulty in prepareNewBlock with new finalTimestamp: ${finalTimestamp}`)
+      continue
+    }
+  }
 
   const oldTransactions = lastPreviousBlock.getTransactionsList()
   const newMerkleRoot = createMerkleRoot(
@@ -508,7 +522,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   newBlock.setHash(blake2bl(lastPreviousBlock.getHash() + newMerkleRoot))
   newBlock.setHeight(lastPreviousBlock.getHeight() + 1)
   newBlock.setMiner(minerAddress)
-  newBlock.setDifficulty(getExpFactorDiff(preExpDiff, lastPreviousBlock.getHeight()).toNumber())
+  newBlock.setDifficulty(finalDifficulty)
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
   newBlock.setDistance(0)
@@ -517,5 +531,5 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
   newBlock.setChildBlockHeadersList(childBlockHeadersList)
 
-  return newBlock
+  return [newBlock, finalTimestamp]
 }
