@@ -7,9 +7,11 @@
  * @flow
  */
 
-const logging = require('../logger')
 const { fork } = require('child_process')
 const path = require('path')
+
+const logging = require('../logger')
+const { errToString } = require('../helper/error')
 
 const ROVER_RESTART_TIMEOUT = 5000
 
@@ -98,9 +100,12 @@ export default class RoverManager {
    * @private
    */
   _killRover (roverName: string) {
-    const rover = this._rovers[roverName]
-    const pid = rover.pid
+    const { pid } = this._rovers[roverName]
     this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
-    process.kill(pid, 'SIGHUP')
+    try {
+      process.kill(pid, 'SIGHUP')
+    } catch (err) {
+      this._logger.warn(`Error while killing rover '${roverName}', PID: ${pid}, error: ${errToString(err)}`)
+    }
   }
 }
