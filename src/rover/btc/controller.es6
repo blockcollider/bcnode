@@ -61,7 +61,6 @@ export default class Controller {
     const network = new Network(config)
     this._interfaces.push(network)
 
-    this._logger.error('init()')
     const pool = network.pool
 
     process.on('disconnect', () => {
