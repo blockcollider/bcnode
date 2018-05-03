@@ -14,6 +14,7 @@ const EthereumTx = require('ethereumjs-tx')
 var ethUtils = require('ethereumjs-util')
 
 const logging = require('../../logger')
+const { errToString } = require('../../helper/error')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
@@ -98,8 +99,8 @@ export default class Controller {
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
   }

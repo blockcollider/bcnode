@@ -6,15 +6,15 @@
  *
  * @disable-flow
  */
-
 const { pathOr } = require('ramda')
 const { Messages } = require('bitcore-p2p')
 const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
 const process = require('process')
-const logging = require('../../logger')
 
+const logging = require('../../logger')
+const { errToString } = require('../../helper/error')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
@@ -36,6 +36,8 @@ function _createUnifiedBlock (block: Object): Block { // TODO specify block type
   return msg
 }
 
+const isSatoshiPeer = (peer: { subversion: string }) => (peer.subversion && peer.subversion.indexOf('/Satoshi:0.1') > -1)
+
 export default class Controller {
   constructor () {
     this._dpt = false
@@ -44,7 +46,6 @@ export default class Controller {
     this._blockCache = new LRUCache({ max: 110 })
     this._blocksNumberCache = new LRUCache({ max: 110 })
     this._txCache = new LRUCache({ max: 3000 })
-
     this._rpc = new RpcClient()
   }
 
@@ -60,23 +61,21 @@ export default class Controller {
     const network = new Network(config)
     this._interfaces.push(network)
 
-    const pool = network.connect()
-    const poolTimeout = setTimeout(function () {
-      pool.disconnect().connect()
-    }, NETWORK_TIMEOUT)
+    const pool = network.pool
 
     process.on('disconnect', () => {
       this._logger.info('Parent exited')
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
 
     pool.on('peerready', (peer, addr) => {
-      clearTimeout(poolTimeout)
+      poolTimeout && clearTimeout(poolTimeout)
+      poolTimeout = undefined
       this._logger.debug(`Connected to pool version: ${peer.version}, subversion: ${peer.subversion}, bestHeight: ${peer.bestHeight}, host: ${peer.host}`)
 
       if (network.hasQuorum()) {
@@ -87,9 +86,10 @@ export default class Controller {
         } catch (err) {
           this._logger.error('Error in peerready cb', err)
         }
-      } else if (!network.hasQuorum() && peer.subversion.indexOf('/Satoshi:0.1') > -1) {
+      } else if (!network.hasQuorum() && isSatoshiPeer(peer)) {
         try {
           network.discoveredPeers++
+          network.satoshiPeers++
           network.addPeer(peer)
         } catch (err) {
           if (peer !== undefined && peer.status !== undefined) {
@@ -102,13 +102,17 @@ export default class Controller {
             peer.disconnect()
           }
         } catch (err) {
-          this._logger.error('Could not disconnect from network', err)
+          this._logger.error('Could not disconnect from peer', err)
         }
       }
     })
 
     pool.on('peerdisconnect', (peer, addr) => {
       this._logger.debug(`Removing peer ${pathOr('', ['ip', 'v4'], addr)}:${addr.port}`)
+      network.discoveredPeers--
+      if (isSatoshiPeer(peer)) {
+        network.satoshiPeers--
+      }
       try {
         network.removePeer(peer)
       } catch (e) {
@@ -116,22 +120,20 @@ export default class Controller {
       }
     })
 
-    pool.on('peererror', function (peer, err) {
-      // log.error("Peer Error");
-      // log.error(err);
+    pool.on('peererror', (peer, err) => {
+      this._logger.debug(`Peer Error, err: ${errToString(err)}`)
     })
-
     pool.on('seederror', (err) => {
-      this._logger.error('Seed Error', err)
+      this._logger.error(`Seed Error, err: ${errToString(err)}`)
     })
     pool.on('peertimeout', (err) => {
-      this._logger.error('Seed Error', err)
+      this._logger.debug(`Peer timeout, err ${errToString(err)}`)
     })
     pool.on('timeout', (err) => {
-      this._logger.error('Seed Error', err)
+      this._logger.debug(`Timeout, err ${errToString(err)}`)
     })
     pool.on('error', (err) => {
-      this._logger.error('Seed Error', err)
+      this._logger.error(`Generic error, err ${errToString(err)}`)
     })
 
     // attach peer events
@@ -144,7 +146,6 @@ export default class Controller {
             peer.sendMessage(peerMessage)
           } catch (err) {
             this._logger.error('Error sending message', err)
-
             try {
               pool._removePeer(peer)
             } catch (err) {
@@ -163,6 +164,11 @@ export default class Controller {
       this._logger.debug('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
       this._logger.debug('Peer best height submitting block: ' + peer.bestHeight)
       this._logger.debug('Last block' + network.bestHeight)
+
+      if (!network.hasQuorum()) {
+        this._logger.debug(`Got new block but we don't have quorum yet, peer count: ${network.discoveredPeers}`)
+        return
+      }
 
       if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
         block.lastBlock = network.bestHeight
@@ -190,9 +196,16 @@ export default class Controller {
       }
     })
 
+    let poolTimeout = setTimeout(function () {
+      network.disconnect()
+      network.connect()
+    }, NETWORK_TIMEOUT)
+
+    network.connect()
+
     setInterval(() => {
-      this._logger.info('Peers ' + pool.numberConnected())
-    }, 60 * 1000)
+      this._logger.info(`Peer count ${pool.numberConnected()}`)
+    }, 10 * 1000)
   }
 
   _onNewBlock (height, block): [boolean, Object] {
