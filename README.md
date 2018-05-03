@@ -56,7 +56,7 @@ $ docker run --rm --name bcnode -p 3000:3000 -p 9090:9090 blockcollider/bcnode:l
 
 ```
 # Clone sources
-$ https://github.com/blockcollider/bcnode.git
+$ git clone https://github.com/blockcollider/bcnode.git
 
 # Change folder
 $ cd bcnode
@@ -79,10 +79,17 @@ $ docker build -t blockcollider/bcnode .
 - [boost](http://www.boost.org/) Boost 1.66.0+
 
 ```
+# Clone sources
 $ git clone https://github.com/blockcollider/bcnode
+
+# Change folder
 $ cd bcnode
-$ npm install
-$ npm run dist
+
+# Install dependencies
+$ yarn
+
+# Build bcnode
+$ yarn run dist
 ```
 
 ### Run From Command Line
@@ -90,36 +97,34 @@ $ npm run dist
 #### Show the help
 
 ```
-$ ./bin/cli -h
+$ ./bin/cli start -h
 
-  Usage: cli [options]
+  Usage: start [opts]
+
+  Start Block Collider
 
   Options:
 
-    -V, --version                    output the version number
-    --miner-key [key]                Miner key
-    -n, --node                       Start P2P node
-    -r, --randezvous-server          Start randezvous server
-    --randezvous-server-bind [ip]    Randezvous server bind IP (default: 0.0.0.0)
-    --randezvous-server-port [port]  Randezvous server port (default: 9090)
-    --rovers [items]                 start rover (default: lsk, neo)
-    -R, --no-rovers                  do not start any rover
-    --rpc                            enable RPC
-    --ui                             enable Web UI
-    --ws                             enable WebSocket
-    -h, --help                       output usage information
+    --miner-key [key]  Miner key
+    -n, --node         Start P2P node
+    --rovers [items]   start rover (default: btc, eth, lsk, neo, wav)
+    -R, --no-rovers    do not start any rover
+    --rpc              enable RPC
+    --ui               enable Web UI
+    --ws               enable WebSocket
+    -h, --help         output usage information
 ```
 
 #### Startup node with rover GUI & BTC & LSK rovers
 
 ```
-$ ./bin/cli --ui --rovers btc,lsk
+$ ./bin/cli start --ui --ws --rovers btc,lsk
 ```
 
-#### Run node with all rovers, GUI, and socket stream   
+#### Run node with all rovers, GUI, and socket stream
 
 ```
-$ ./bin/cli --ui --ws
+$ ./bin/cli start --ui --ws
 ```
 
 ### Development

@@ -24,7 +24,7 @@ const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
 const { BcBlock } = require('../protos/core_pb')
-const { errToObj } = require('../helper/error')
+const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
 const ts = require('../utils/time').default // ES6 default export
 
@@ -201,8 +201,7 @@ export default class Engine {
             this._logger.debug(`collectBlock handler: successfuly send to mining worker (PID: ${pid})`)
           }
         }).catch(err => {
-          const reason = JSON.stringify(errToObj(err), null, 2)
-          this._logger.error(`Could not send to mining worker, reason: ${reason}`)
+          this._logger.error(`Could not send to mining worker, reason: ${errToString(err)}`)
           this._mining = false
           this._unfinishedBlock = undefined
         })
