@@ -32,7 +32,7 @@ export function errToObj (err: Error): Object {
     return acc
   }, {})
 
-  obj.stack = obj.stack
+  obj.stack = obj.stack && obj.stack
     .split('\n')
     .map((line) => line.trim())
     .filter(line => line !== '')
