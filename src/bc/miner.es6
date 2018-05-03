@@ -44,6 +44,7 @@ const {
 
 const { blake2bl } = require('../utils/crypto')
 const { Block, BcBlock, BcTransaction, ChildBlockHeader } = require('../protos/core_pb')
+const ts = require('../utils/time').default // ES6 default export
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
 
@@ -254,8 +255,7 @@ export function distance (a: string, b: string): number {
 export function mine (currentTimestamp: number, work: string, miner: string, merkleRoot: string, threshold: number, difficultyCalculator: ?Function): { distance: number, nonce: string, timestamp: number, difficulty: number } {
   let difficulty = threshold
   let result
-  // TODO use timeservice
-  const tsStart = Date.now()
+  const tsStart = ts.now()
   const maxCalculationEnd = tsStart + (10 * 1000)
   let currentLoopTimestamp = currentTimestamp
 
@@ -264,12 +264,11 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
   while (true) {
     iterations += 1
 
-    if (maxCalculationEnd < Date.now()) {
+    if (maxCalculationEnd < ts.now()) {
       break
     }
     // TODO optimize not to count each single loop
-    // TODO use time service
-    let now = (Date.now() / 1000 << 0)
+    let now = ts.nowSeconds()
     // recalculate difficulty each second
     if (difficultyCalculator && currentLoopTimestamp < now) {
       currentLoopTimestamp = now
@@ -288,13 +287,13 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
         difficulty,
         // NOTE: Following fields are for debug purposes only
         iterations,
-        timeDiff: Date.now() - tsStart
+        timeDiff: ts.now() - tsStart
       }
       break
     }
   }
 
-  const tsEnd = Date.now()
+  const tsEnd = ts.now()
   const tsDiff = tsEnd - tsStart
   if (res === null) {
     throw Error(`Mining took more than 10s, iterations: ${iterations}, tsDiff: ${tsDiff} ending...`)
