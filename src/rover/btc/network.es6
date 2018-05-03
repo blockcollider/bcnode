@@ -187,4 +187,19 @@ export default class Network {
       this._logger.warn('Pool is already connected')
     }
   }
+
+  disconnect () {
+    if (this._poolConnected) {
+      // connect to the network
+      try {
+        this.pool.disconnect()
+        this._poolConnected = false
+        this._logger.debug('Disconnected from network')
+      } catch (err) {
+        this._logger.error('Error while disconnecting from network', err)
+      }
+    } else {
+      this._logger.warn('Pool was not connected')
+    }
+  }
 }

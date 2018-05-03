@@ -197,7 +197,8 @@ export default class Controller {
     })
 
     let poolTimeout = setTimeout(function () {
-      pool.disconnect().connect()
+      network.disconnect()
+      network.connect()
     }, NETWORK_TIMEOUT)
 
     network.connect()
