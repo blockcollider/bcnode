@@ -18,6 +18,7 @@ const DEFAULT_STATE = {
   // TODO: Read from configs
   maximumPeers: 96,
   discoveredPeers: 0,
+  satoshiPeers: 0,
   lastBlock: false,
   quorum: 31,
   peers: {},
@@ -30,21 +31,24 @@ const DEFAULT_STATE = {
   }
 }
 
-type Peer = { // eslint-disable-line no-undef
+export type Peer = { // eslint-disable-line no-undef
   host: string,
   bestHeight: number,
   version: number,
-  subversion: number,
+  subversion: string,
   updated?: number
 }
 
 export default class Network {
   _state: Object; // eslint-disable-line no-undef
   _logger: Object; // eslint-disable-line no-undef
+  _pool: ?Pool; // eslint-disable-line no-undef
+  _poolConnected: bool; // eslint-disable-line no-undef
 
   constructor (config: Object = {}) {
     this._logger = logging.getLogger(__filename)
     this._state = merge(DEFAULT_STATE, config)
+    this._poolConnected = false
   }
 
   get quorum (): number {
@@ -57,6 +61,14 @@ export default class Network {
 
   set discoveredPeers (count: number): void {
     this._state.discoveredPeers = count
+  }
+
+  get satoshiPeers (): number {
+    return this._state.satoshiPeers
+  }
+
+  set satoshiPeers (count: number): void {
+    this._state.satoshiPeers = count
   }
 
   get lastBlock (): boolean {
@@ -76,7 +88,8 @@ export default class Network {
   }
 
   hasQuorum () {
-    return this._state.discoveredPeers >= this._state.quorum
+    return this._state.discoveredPeers >= this._state.quorum &&
+      this._state.satoshiPeers >= this._state.quorum
   }
 
   addPeer (peer: Peer) {
@@ -147,22 +160,31 @@ export default class Network {
     return ranks[0]
   }
 
-  connect () {
-    const pool = new Pool({
-      network: Networks.livenet,
-      maxSize: this._state.maximumPeers,
-      relay: false
-    })
+  get pool (): Pool {
+    if (!this._pool) {
+      this._pool = new Pool({
+        network: Networks.livenet,
+        maxSize: this._state.maximumPeers,
+        relay: false
+      })
+    }
 
-    // connect to the network
-    try {
-      this._logger.debug('connected to network')
-      pool.connect()
-      pool.listen()
-      return pool
-    } catch (err) {
-      this._logger.error('Error while connecting to network', err)
-      return pool
+    return this._pool
+  }
+
+  connect () {
+    if (!this._poolConnected) {
+      // connect to the network
+      try {
+        this.pool.connect()
+        this.pool.listen()
+        this._poolConnected = true
+        this._logger.debug('Connected to network')
+      } catch (err) {
+        this._logger.error('Error while connecting to network', err)
+      }
+    } else {
+      this._logger.warn('Pool is already connected')
     }
   }
 }
