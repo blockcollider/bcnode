@@ -20,7 +20,7 @@ const program = require('commander')
 const logging = require('../logger')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
-const { errToObj } = require('../helper/error')
+const { errToString } = require('../helper/error')
 const { cmd: cmdConfig } = require('./cmd/config')
 const { cmd: cmdInfo } = require('./cmd/info')
 const { cmd: cmdStart } = require('./cmd/start')
@@ -121,10 +121,10 @@ const initErrorHandlers = (logger: Logger) => {
     logger.error(`Rejected promise, trace:\n${err.stack}`)
   })
 
-  process.on('uncaughtException', (err) => {
-    console.log('UNCAUGHT EXCEPTION, saving in exception.log', err)
+  process.on('uncaughtException', (uncaughtError) => {
+    console.log('UNCAUGHT EXCEPTION, saving in exception.log', uncaughtError)
 
-    fs.writeFile(EXCEPTION_PATH, JSON.stringify(errToObj(err), null, 2), (err) => {
+    fs.writeFile(EXCEPTION_PATH, errToString(uncaughtError), (err) => {
       if (err) {
         console.log(`Unable to save ${EXCEPTION_PATH}`, err)
         return process.exit(-1)
