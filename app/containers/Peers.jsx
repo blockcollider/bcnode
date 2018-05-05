@@ -10,7 +10,11 @@
 import React, { Component } from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { compose, prop, sortBy, toLower } from 'ramda'
+
 import { PeersTable } from '../components'
+import { actions } from '../reducers/peers/actions'
 
 export class PeersContainer extends Component<*> {
   render () {
@@ -23,15 +27,25 @@ export class PeersContainer extends Component<*> {
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
           Peers
         </h2>
-        <PeersTable peers={this.props.peers} />
+        <PeersTable peers={this.props.peers} onClick={this.props.actions.showPeer} />
       </div>
     )
   }
 }
 
-export const Peers = connect(state => ({
-  peer: state.profile.peer,
-  peers: state.peers.peers
-}))(PeersContainer)
+function mapDispatchToProps (dispatch, ownProps) {
+  return {
+    actions: bindActionCreators(actions(dispatch), dispatch)
+  }
+}
+const Peers = connect(
+  (state) => {
+    let peers = sortBy(compose(toLower, prop('id')), state.peers.peers || [])
+    return {
+      peers
+    }
+  },
+  mapDispatchToProps
+)(PeersContainer)
 
 export default Peers

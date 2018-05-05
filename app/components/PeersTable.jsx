@@ -12,6 +12,23 @@ import moment from 'moment'
 
 import { VersionLink } from './VersionLink'
 
+const PeerLink = (props: Object) => {
+  const peer = props.peer
+  const linkProps = {
+    href: `/#/peer/${peer.id}`,
+    onClick: (e) => {
+      e.preventDefault()
+      props.onClick(peer)
+    },
+    style: {
+      color: 'black'
+    }
+  }
+  return (
+    <a {...linkProps}>{props.children}</a>
+  )
+}
+
 export class PeersTable extends Component<*> {
   render () {
     let id = 0
@@ -61,7 +78,9 @@ export class PeersTable extends Component<*> {
       return (
         <tr key={peer.id}>
           <th scope='row'>{id++}</th>
-          <td>{peerId}</td>
+          <td>
+            <PeerLink peer={peer} onClick={this.props.onClick}>{peerId}</PeerLink>
+          </td>
           <td>{address}</td>
           <td>{protocolVersion}</td>
           <td><VersionLink version={metaVersion} /></td>

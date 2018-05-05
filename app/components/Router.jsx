@@ -17,6 +17,7 @@ import {
   Block,
   Blocks,
   Miner,
+  Peer,
   Peers,
   Rover
 } from '../containers/index'
@@ -33,6 +34,7 @@ export class Router extends Component<*> {
           <Route path='/blocks/:id/' component={Blocks} />
           <Route path='/miner' component={Miner} />
           <Route path='/rover' component={Rover} />
+          <Route path='/peer/:id/' component={Peer} />
           <Route path='/peers' component={Peers} />
         </App>
       </ConnectedRouter>

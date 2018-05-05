@@ -7,6 +7,6 @@
  * @flow
  */
 
-export const initialState = {
-  peers: []
+export const ACTIONS = {
+  PEER_SET: 'PEER_SET'
 }
