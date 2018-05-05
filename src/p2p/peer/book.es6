@@ -8,13 +8,13 @@
  */
 
 import type { Logger } from 'winston'
-import type { PeerManager } from './manager'
+import type { PeerManager } from '../manager/manager'
 
 const debug = require('debug')('bcnode:p2p:book')
 const Book = require('peer-book')
 const PeerInfo = require('peer-info')
 
-const logging = require('../logger')
+const logging = require('../../logger')
 
 const getPeerId = (peerInfo: PeerInfo): string => {
   return (peerInfo && peerInfo.id && peerInfo.id.toB58String()) || '<null>'

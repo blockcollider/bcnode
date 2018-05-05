@@ -6,7 +6,7 @@
  *
  * @flow
  */
-import { PeerBook } from './book'
+import { PeerBook } from './peer/book'
 
 const libp2p = require('libp2p')
 const KadDHT = require('libp2p-kad-dht')
@@ -16,7 +16,7 @@ const SECIO = require('libp2p-secio')
 const PeerInfo = require('peer-info')
 const TCP = require('libp2p-tcp')
 
-export default class Bundle extends libp2p {
+export class Bundle extends libp2p {
   peerInfo: PeerBook
   peerBook: ?PeerBook
   options: Object
@@ -44,3 +44,5 @@ export default class Bundle extends libp2p {
     super(modules, peerInfo, peerBook, opts)
   }
 }
+
+export default Bundle

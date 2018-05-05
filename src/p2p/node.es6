@@ -9,7 +9,6 @@
 
 const { inspect } = require('util')
 
-const { mergeDeepRight } = require('ramda')
 const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
@@ -20,24 +19,16 @@ const { getVersion } = require('../helper/version')
 const logging = require('../logger')
 
 const { BcBlock } = require('../protos/core_pb')
-const { PeerBook } = require('./book')
+const { PeerBook } = require('./peer/book')
 const Bundle = require('./bundle').default
 const Engine = require('../engine').default
 const Signaling = require('./signaling').websocket
-const PeerManager = require('./manager').PeerManager
+const PeerManager = require('./manager/manager').PeerManager
 
-const PROTOCOL_VERSION = '0.0.1'
-const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
+const { PROTOCOL_PREFIX } = require('./protocol/version')
 const NETWORK_ID = 1
 
 const DATETIME_NOW = Date.now()
-
-// const debug = require('debug')('p2p')('node')
-
-// type StatusMsg = {
-//   networkId: number,
-//   peerId: ?string,
-// }
 
 export class PeerNode {
   _logger: Object // eslint-disable-line no-undef
@@ -76,6 +67,8 @@ export class PeerNode {
   }
 
   _pipelineStartNode () {
+    debug('_pipelineStartNode')
+
     return [
       // Create PeerInfo for local node
       (cb: Function) => {
@@ -126,72 +119,15 @@ export class PeerNode {
         this._logger.info('Registering event handlers')
 
         this.bundle.on('peer:discovery', (peer) => {
-          const peerId = peer.id.toB58String()
-          debug('Event - peer:discovery', peerId)
-
-          if (this.peerBook.has(peer)) {
-            debug(`Discovered peer ${peerId} already in PeerBook`)
-            // console.log(this.peerBook.get(peer))
-            return
-          }
-
-          this.bundle.dial(peer, (err) => {
-            if (err) {
-              this._logger.warn(`Error while dialing discovered peer ${peerId}`)
-              return err
-            }
-
-            this._logger.info(`Discovered peer successfully dialed ${peerId}`)
-          })
+          return this.manager.onPeerDiscovery(peer)
         })
 
         this.bundle.on('peer:connect', (peer) => {
-          const peerId = peer.id.toB58String()
-          debug('Event - peer:connect', peerId)
-
-          const meta = {
-            ts: {
-              connectedAt: Date.now()
-            }
-          }
-
-          // this.peerBook.put(peer)
-
-          // FIXME: This should be done as part of discovery, not after ANOTHER CLIENT CONNECTED TO US
-          this.bundle.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
-            if (err) {
-              this._logger.error('Error dialing /status protocol', peerId)
-              throw err
-            }
-
-            pull(
-              conn,
-              pull.collect((err, wireData) => {
-                if (err) {
-                  throw err
-                }
-
-                const status = JSON.parse(wireData[0])
-                peer.meta = mergeDeepRight(meta, status)
-
-                this._engine._emitter.emit('peerConnected', { peer })
-              })
-            )
-          })
+          return this.manager.onPeerConnect(peer)
         })
 
         this.bundle.on('peer:disconnect', (peer) => {
-          const peerId = peer.id.toB58String()
-          debug('Event - peer:disconnect', peerId)
-          // wait for 1s for both libp2p-switch/dial and libp2p-switch/connection muxedConn `close` handlers
-          // to finish
-          setTimeout(() => {
-            if (this.peerBook.has(peer)) {
-              this._logger.info('Peer disconnected', peerId)
-              this.peerBook.remove(peer)
-            }
-            this._engine._emitter.emit('peerDisconnected', { peer })
-          }, 1000)
+          return this.manager.onPeerDisconnect(peer)
         })
 
         cb(null)
@@ -231,7 +167,8 @@ export class PeerNode {
                 const bytes = wireData[0]
                 const raw = new Uint8Array(bytes)
                 const block = BcBlock.deserializeBinary(raw)
-                this._logger.info('Received new block from peer', block.toObject())
+                const blockObj = block.toObject()
+                this._logger.info('Received new block from peer', blockObj.height, blockObj.miner)
                 // TODO: Validate new block mined by peer
               } catch (e) {
                 this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
