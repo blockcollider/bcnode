@@ -20,7 +20,6 @@ const program = require('commander')
 const logging = require('../logger')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
-const { errToString } = require('../helper/error')
 const { cmd: cmdConfig } = require('./cmd/config')
 const { cmd: cmdInfo } = require('./cmd/info')
 const { cmd: cmdStart } = require('./cmd/start')
@@ -28,7 +27,6 @@ const { cmd: cmdStart } = require('./cmd/start')
 // $FlowFixMe
 const native = require('../../native/index.node')
 
-const EXCEPTION_PATH = path.resolve(__dirname, '..', '..', 'exception.log')
 const LOG_DIR = path.resolve(__dirname, '..', '..', '_logs')
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
@@ -121,19 +119,8 @@ const initErrorHandlers = (logger: Logger) => {
     logger.error(`Rejected promise, trace:\n${err.stack}`)
   })
 
-  process.on('uncaughtException', (uncaughtError) => {
-    console.log('UNCAUGHT EXCEPTION, saving in exception.log', uncaughtError)
-
-    fs.writeFile(EXCEPTION_PATH, errToString(uncaughtError), (err) => {
-      if (err) {
-        console.log(`Unable to save ${EXCEPTION_PATH}`, err)
-        return process.exit(-1)
-      }
-
-      console.log(`Exception was saved in ${EXCEPTION_PATH}`)
-      console.log('Exiting...')
-      // return process.exit(-1)
-    })
+  process.on('uncaughtException', (err) => {
+    console.log('UNCAUGHT EXCEPTION', err)
   })
 }
 
