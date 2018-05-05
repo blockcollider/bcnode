@@ -22,7 +22,7 @@ const DISPATCH_TABLE = {
   'block.latest': ROVER_ACTIONS.ROVER_ADD_BLOCK,
   'block.set': BLOCK_ACTIONS.BLOCK_SET,
   'block.snapshot': ROVER_ACTIONS.ROVER_SET_BLOCKS,
-  'blocks.set': BLOCKS_ACTIONS.BLOCKS_SET,
+  'blocks.set': BLOCKS_ACTIONS.BLOCKS_STORED_SET,
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
   'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
   'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS,

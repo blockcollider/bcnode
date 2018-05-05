@@ -10,6 +10,7 @@
 import Block from './Block'
 import Blocks from './Blocks'
 import Miner from './Miner'
+import Peer from './Peer'
 import Peers from './Peers'
 import Rover from './Rover'
 
@@ -17,6 +18,7 @@ export {
   Block,
   Blocks,
   Miner,
+  Peer,
   Peers,
   Rover
 }

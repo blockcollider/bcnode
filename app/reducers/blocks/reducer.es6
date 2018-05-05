@@ -12,8 +12,15 @@ import { initialState } from './state'
 
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
-    case ACTIONS.BLOCKS_SET:
-      return {...state, id: action.payload[0].height, blocks: action.payload}
+    case ACTIONS.BLOCKS_STORED_SET:
+      return {
+        ...state,
+        stored: {
+          ...state.stored,
+          id: action.payload[0].height,
+          blocks: action.payload
+        }
+      }
   }
 
   return state

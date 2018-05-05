@@ -8,7 +8,15 @@
  */
 
 export const initialState = {
-  id: null,
-  blocks: [],
-  count: 20
+  stored: {
+    id: null,
+    blocks: [],
+    count: 20
+  },
+  announced: {
+    blocks: []
+  },
+  mined: {
+    blocks: []
+  }
 }

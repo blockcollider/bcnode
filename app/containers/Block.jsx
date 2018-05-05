@@ -50,8 +50,9 @@ export class BlockContainer extends Component<*> {
 }
 
 function mapDispatchToProps (dispatch, ownProps) {
-  const res = { actions: bindActionCreators(actions, dispatch) }
-  return res
+  return {
+    actions: bindActionCreators(actions, dispatch)
+  }
 }
 
 export const Block = connect(
