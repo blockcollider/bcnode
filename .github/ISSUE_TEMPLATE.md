@@ -23,14 +23,25 @@ For more information, see the `CONTRIBUTING` guide.
 
 ### Versions
 
+#### Application (required)
+
 You can get this information:
 
 - from executing `docker ps` if running docker
-- from executing `grep '"version"' package.json` if building from source
+- from executing `./bin/cli --version` if building from source
+- in UI in the Navbar on top:
+
+![UI version](ui-version.png)
 
 ```
 (replace with output from command above)
 ```
+
+#### Environment (optional but helpful)
+
+- OS Version (ie. Win10 Home)
+- Nodejs (ie. `v8.9.4`)
+- Rust (ie. `rustc 1.25.0-nightly (45fba43b3 2018-02-10)`)
 
 ### Logs
 
