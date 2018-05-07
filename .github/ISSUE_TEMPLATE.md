@@ -22,5 +22,11 @@ For more information, see the `CONTRIBUTING` guide.
 
 ### Versions
 
-You can get this information from executing `yarn version` (paste output here).
+You can get this information:
 
+- from executing `docker ps` if running docker
+- from executing `grep '"version"' package.json` if building from source
+
+```
+(replace with output from command above)
+```
