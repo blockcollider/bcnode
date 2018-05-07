@@ -16,6 +16,7 @@ import { round } from 'mathjs'
 
 import {
   BlocksTable,
+  Ellipsis,
   PeersTable
 } from '../components'
 import { actions } from '../reducers/peers/actions'
@@ -31,6 +32,12 @@ export class PeersContainer extends Component<*> {
     //   </div>
     // )
 
+    const renderBlockMiner = (block) => {
+      return (
+        <Ellipsis text={block.miner} />
+      )
+    }
+
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
@@ -45,7 +52,7 @@ export class PeersContainer extends Component<*> {
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
           Announced blocks (last {this.props.blocks.capacity()} of {this.props.blocksCount}, BPS: {round(this.props.blocksCount / this.props.timeDiff, 3)})
         </h2>
-        <BlocksTable blocks={this.props.blocks.toarray()} extraCols={[['Miner', 'miner']]} onClick={() => {}} />
+        <BlocksTable blocks={this.props.blocks.toarray()} extraCols={[['Miner', renderBlockMiner]]} onClick={() => {}} />
       </div>
     )
   }
