@@ -19,7 +19,7 @@ const { getVersion } = require('../helper/version')
 const logging = require('../logger')
 
 const { BcBlock } = require('../protos/core_pb')
-const { PeerBook } = require('./peer/book')
+const { ManagedPeerBook } = require('./book')
 const Bundle = require('./bundle').default
 const Engine = require('../engine').default
 const Signaling = require('./signaling').websocket
@@ -62,7 +62,7 @@ export class PeerNode {
     return this._peer
   }
 
-  get peerBook (): PeerBook {
+  get peerBook (): ManagedPeerBook {
     return this.manager.peerBook
   }
 
@@ -167,9 +167,7 @@ export class PeerNode {
                 const bytes = wireData[0]
                 const raw = new Uint8Array(bytes)
                 const block = BcBlock.deserializeBinary(raw)
-                const blockObj = block.toObject()
-                this._logger.info('Received new block from peer', blockObj.height, blockObj.miner)
-                // TODO: Validate new block mined by peer
+                this._engine.blockFromPeer(block)
               } catch (e) {
                 this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
               }

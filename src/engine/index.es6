@@ -323,6 +323,14 @@ export default class Engine {
     }
   }
 
+  blockFromPeer (block: Object) {
+    const blockObj = block.toObject()
+    this._logger.info('Received new block from peer', blockObj.height, blockObj.miner, blockObj)
+    // TODO: Validate new block mined by peer
+
+    this._server._wsBroadcast({ type: 'block.announced', data: blockObj })
+  }
+
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number }) {
     if (!this._unfinishedBlock) {
       throw new Error(`There is not unfininshed block to use solution for`)

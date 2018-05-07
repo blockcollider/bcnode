@@ -6,7 +6,7 @@
  *
  * @flow
  */
-import { PeerBook } from './peer/book'
+import { ManagedPeerBook } from './book'
 
 const libp2p = require('libp2p')
 const KadDHT = require('libp2p-kad-dht')
@@ -17,11 +17,11 @@ const PeerInfo = require('peer-info')
 const TCP = require('libp2p-tcp')
 
 export class Bundle extends libp2p {
-  peerInfo: PeerBook
-  peerBook: ?PeerBook
+  peerInfo: ManagedPeerBook
+  peerBook: ?ManagedPeerBook
   options: Object
 
-  constructor (peerInfo: PeerInfo, peerBook: PeerBook, opts: Object) {
+  constructor (peerInfo: PeerInfo, peerBook: ManagedPeerBook, opts: Object) {
     const signaling = opts.signaling
     const modules = {
       transport: [

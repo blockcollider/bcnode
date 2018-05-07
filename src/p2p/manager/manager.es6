@@ -14,7 +14,7 @@ const { mergeDeepRight } = require('ramda')
 const PeerInfo = require('peer-info')
 const pull = require('pull-stream')
 
-const { PeerBook } = require('../peer/book')
+const { ManagedPeerBook } = require('../book/book')
 const { PeerNode } = require('../node')
 const logging = require('../../logger')
 
@@ -22,14 +22,14 @@ const { PROTOCOL_PREFIX } = require('../protocol/version')
 
 export class PeerManager {
   _logger: Object // eslint-disable-line no-undef
-  _peerBook: PeerBook // eslint-disable-line no-undef
+  _peerBook: ManagedPeerBook // eslint-disable-line no-undef
   _peerNode: PeerNode // eslint-disable-line no-undef
 
   constructor (node: PeerNode) {
     debug('constructor()')
     this._logger = logging.getLogger(__filename)
     this._peerNode = node
-    this._peerBook = new PeerBook(this)
+    this._peerBook = new ManagedPeerBook(this, 'main')
   }
 
   get bundle (): Bundle {
@@ -40,7 +40,7 @@ export class PeerManager {
     return this.peerNode._engine
   }
 
-  get peerBook (): PeerBook {
+  get peerBook (): ManagedPeerBook {
     return this._peerBook
   }
 

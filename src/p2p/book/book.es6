@@ -10,7 +10,7 @@
 import type { Logger } from 'winston'
 import type { PeerManager } from '../manager/manager'
 
-const debug = require('debug')('bcnode:p2p:book')
+const _debug = require('debug')('bcnode:p2p:book')
 const Book = require('peer-book')
 const PeerInfo = require('peer-info')
 
@@ -23,21 +23,28 @@ const getPeerId = (peerInfo: PeerInfo): string => {
 /**
  * PeerBook with extensions
  */
-export class PeerBook extends Book {
+export class ManagedPeerBook extends Book {
   _logger: Logger // eslint-disable-line no-undef
   _manager: PeerManager // eslint-disable-line no-undef
+  _id: string // eslint-disable-line no-undef
 
-  constructor (manager: PeerManager) {
+  constructor (manager: PeerManager, id: string) {
     super()
 
+    const logId = `<${id}>`
+    this._debug = (...args) => _debug(logId, ...args)
     this._logger = logging.getLogger(__filename)
     this._manager = manager
-    this._logger.debug('Creating BcPeerBook')
+    this._id = id
+    this._logger.debug('ManagedPeerBook constructor()')
+  }
+
+  get debug (): Function {
+    return this._debug
   }
 
   getAll (): Object {
-    debug('getAllArray')
-
+    this.debug('getAll')
     return super.getAll()
   }
   /**
@@ -45,21 +52,21 @@ export class PeerBook extends Book {
    * @return {*}
    */
   getAllArray (): Object {
-    debug('getAllArray')
+    this.debug('getAllArray')
 
     return super.getAllArray()
   }
 
   getMultiaddrs (peerInfo: PeerInfo): Object {
     const peerId = getPeerId(peerInfo)
-    debug('getMultiaddrs', peerId)
+    this.debug('getMultiaddrs', peerId)
 
     return super.getMultiaddrs(peerInfo)
   }
 
   has (peerInfo: PeerInfo): PeerInfo {
     const peerId = getPeerId(peerInfo)
-    debug('has', peerId)
+    this.debug('has', peerId)
 
     return super.has(peerInfo)
   }
@@ -72,7 +79,7 @@ export class PeerBook extends Book {
    */
   put (peerInfo: PeerInfo, replace: null | boolean = null): PeerInfo {
     const peerId = getPeerId(peerInfo)
-    debug('put', peerId, replace)
+    this.debug('put', peerId, replace)
 
     // console.log(peerInfo)
 
@@ -88,19 +95,22 @@ export class PeerBook extends Book {
 
   get (peerInfo: PeerInfo): PeerInfo {
     const peerId = getPeerId(peerInfo)
-    debug('get', peerId)
+    this.debug('get', peerId)
 
     return super.get(peerInfo)
   }
 
   remove (peerInfo: PeerInfo): PeerInfo {
     const peerId = getPeerId(peerInfo)
-    debug('remove', peerId)
+    this.debug('remove', peerId)
 
     return super.remove(peerInfo)
   }
 
   getPeersCount (): number {
+    this.debug('getPeersCount')
     return Object.keys(this._peers).length
   }
 }
+
+export default ManagedPeerBook
