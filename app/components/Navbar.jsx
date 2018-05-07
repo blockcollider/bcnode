@@ -19,7 +19,7 @@ const STYLE = {
 export class Navbar extends Component<*> {
   render () {
     return (
-      <nav className='navbar navbar-expand-lg navbar-light bg-light'>
+      <nav className='navbar navbar-expand-sm navbar-light bg-light'>
         <Brand />
         <div className='collapse navbar-collapse' id='navbarText'>
           { false && <a className='nav-link' href='/#/miner' style={STYLE}>
