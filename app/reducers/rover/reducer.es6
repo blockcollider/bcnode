@@ -13,10 +13,23 @@ import { initialState } from './state'
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
     case ACTIONS.ROVER_ADD_BLOCK:
-      return { ...state, blocks: [ ...state.blocks, action.payload ] }
+      const blocks = state.blocks
+      blocks.enq(action.payload)
+      return {
+        ...state,
+        count: state.count + 1,
+        blocks
+      }
 
     case ACTIONS.ROVER_SET_BLOCKS:
-      return { ...state, blocks: action.payload }
+      return {
+        ...state,
+        count: state.count + action.payload.length,
+        blocks: action.payload.reduce((acc, el) => {
+          acc.enq(el)
+          return acc
+        }, state.blocks)
+      }
   }
 
   return state

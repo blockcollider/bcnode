@@ -8,15 +8,35 @@
  */
 
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-export class ConnectionState extends Component<*> {
-  render () {
-    const statusClass = this.props.connected ? 'badge-success' : 'badge-warning'
+import { Dot } from './Dot'
 
-    return (
-      <span className={`badge ${statusClass}`}>{this.props.connected ? 'CONNECTED' : 'DICONNECTED'}</span>
-    )
+export class ConnectionState extends Component<*> {
+  static defaultProps = {
+    type: 'badge'
+  }
+
+  static propTypes = {
+    type: PropTypes.oneOf(['dot', 'badge'])
+  }
+
+  render () {
+    const connected = this.props.connected
+    switch (this.props.type) {
+      case 'dot':
+        const color = connected ? 'green' : 'red'
+        return (
+          <Dot color={color} size={15} />
+        )
+
+      case 'badge':
+        const statusClass = connected ? 'badge-success' : 'badge-warning'
+        return (
+          <span className={`badge ${statusClass}`}>{connected ? 'CONNECTED' : 'DISCONNECTED'}</span>
+        )
+    }
   }
 }
 

@@ -10,9 +10,7 @@
 import { push } from 'react-router-redux'
 import { ACTIONS as BLOCK_ACTIONS } from '../block/actions'
 
-export const ACTIONS = {
-  MINER_ADD_BLOCK: 'MINER_ADD_BLOCK'
-}
+export const ACTIONS = {}
 
 export const actions = (dispatch: Function) => {
   return {

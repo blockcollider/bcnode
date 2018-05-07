@@ -26,12 +26,12 @@ export class Navbar extends Component<*> {
             <i className='fas fa-user' /> Profile
           </a> }
 
-          <a className='nav-link' href='/#/blocks/latest' style={STYLE}>BC Chain</a>
-          <a className='nav-link' href='/#/miner' style={STYLE}>Miner</a>
-          <a className='nav-link' href='/#/rover' style={STYLE}>Rover</a>
-          <a className='nav-link' href='/#/peers' style={STYLE}>Peers</a>
+          <a className='nav-item nav-link active' href='/#/blocks/latest' style={STYLE}>BC Chain</a>
+          <a className='nav-item nav-link' href='/#/miner' style={STYLE}>Miner</a>
+          <a className='nav-item nav-link' href='/#/rover' style={STYLE}>Rover</a>
+          <a className='nav-item nav-link' href='/#/peers' style={STYLE}>Peers</a>
         </div>
-        <ConnectionState connected={this.props.connected} />
+        <ConnectionState connected={this.props.connected} type='dot' />
       </nav>
     )
   }

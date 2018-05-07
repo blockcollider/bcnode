@@ -16,7 +16,7 @@ import RoverBlock from '../components/RoverBlock'
 
 export class RoverContainer extends Component<*> {
   render () {
-    const blocks = take(24, this.props.blocks.sort((a, b) => b.timestamp - a.timestamp))
+    const blocks = take(24, this.props.blocks.toarray().sort((a, b) => b.timestamp - a.timestamp))
       .map(block => {
         return <RoverBlock {...block} block={block} key={block.hash} />
       })
@@ -27,7 +27,9 @@ export class RoverContainer extends Component<*> {
           <title>Rover</title>
         </Helmet>
 
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Collected blocks (last 24)</h2>
+        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
+          Collected blocks (last {this.props.blocks.capacity()} of {this.props.blocksCount})
+        </h2>
         {blocks}
       </div>
     )
@@ -39,7 +41,8 @@ RoverContainer.propTypes = {
 }
 
 export const Rover = connect(state => ({
-  blocks: state.rover.blocks
+  blocks: state.rover.blocks,
+  blocksCount: state.rover.count
 }))(RoverContainer)
 
 export default Rover
