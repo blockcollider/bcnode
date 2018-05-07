@@ -28,13 +28,13 @@ export class ConnectionState extends Component<*> {
       case 'dot':
         const color = connected ? 'green' : 'red'
         return (
-          <Dot color={color} size={15} />
+          <Dot style={this.props.style} color={color} size={15} />
         )
 
       case 'badge':
         const statusClass = connected ? 'badge-success' : 'badge-warning'
         return (
-          <span className={`badge ${statusClass}`}>{connected ? 'CONNECTED' : 'DISCONNECTED'}</span>
+          <span style={this.props.style} className={`badge ${statusClass}`}>{connected ? 'CONNECTED' : 'DISCONNECTED'}</span>
         )
     }
   }

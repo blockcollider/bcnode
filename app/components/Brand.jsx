@@ -38,6 +38,8 @@ export class Brand extends Component<*> {
         <a style={FIELD_STYLE} href={linkGithub}>
           ({VERSION.npm}/{VERSION.git.short})
         </a>
+
+        {this.props.children}
       </div>
     )
   }

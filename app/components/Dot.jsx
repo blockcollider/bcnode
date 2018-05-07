@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react'
+import { merge } from 'ramda'
 
 export class Dot extends Component<*> {
   render () {
@@ -21,7 +22,7 @@ export class Dot extends Component<*> {
     }
 
     return (
-      <span style={style} />
+      <span style={merge(style, this.props.style || {})} />
     )
   }
 }

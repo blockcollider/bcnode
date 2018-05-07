@@ -20,7 +20,9 @@ export class Navbar extends Component<*> {
   render () {
     return (
       <nav className='navbar navbar-expand-lg navbar-light bg-light'>
-        <Brand />
+        <Brand>
+          <ConnectionState style={{marginLeft: '10px'}} connected={this.props.connected} type='dot' />
+        </Brand>
         <div className='collapse navbar-collapse' id='navbarText'>
           { false && <a className='nav-link' href='/#/miner' style={STYLE}>
             <i className='fas fa-user' /> Profile
@@ -31,7 +33,6 @@ export class Navbar extends Component<*> {
           <a className='nav-item nav-link' href='/#/rover' style={STYLE}>Rover</a>
           <a className='nav-item nav-link' href='/#/peers' style={STYLE}>Peers</a>
         </div>
-        <ConnectionState connected={this.props.connected} type='dot' />
       </nav>
     )
   }
