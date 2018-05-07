@@ -27,11 +27,11 @@ For more information, see the `CONTRIBUTING` guide.
 
 You can get this information:
 
-- from executing `docker ps` if running docker
+- from executing `docker run blockcollider/bcnode --version` if running docker
 - from executing `./bin/cli --version` if building from source
 - in UI in the Navbar on top:
 
-![UI version](ui-version.png)
+![UI version](./ui-version.png)
 
 ```
 (replace with output from command above)
