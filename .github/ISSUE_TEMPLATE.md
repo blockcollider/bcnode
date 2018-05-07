@@ -40,7 +40,7 @@ You can get this information:
 #### Environment (optional but helpful)
 
 - OS Version (ie. Win10 Home)
-- Nodejs (ie. `v8.9.4`, use `node --version``)
+- Nodejs (ie. `v8.9.4`, use `node --version`)
 - Rust (ie. `rustc 1.25.0-nightly (45fba43b3 2018-02-10)`, use `rustc --version`)
 
 ### Logs
