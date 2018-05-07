@@ -19,7 +19,7 @@ const STYLE = {
 export class Navbar extends Component<*> {
   render () {
     return (
-      <nav className='navbar navbar-expand-lg navbar-light bg-light'>
+      <nav className='navbar navbar-expand-sm navbar-light bg-light'>
         <Brand>
           <ConnectionState style={{marginLeft: '10px'}} connected={this.props.connected} type='dot' />
         </Brand>

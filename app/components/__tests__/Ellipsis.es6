@@ -11,12 +11,11 @@ const {
   ellipsisLeft,
   ellipsisMiddle,
   ellipsisRight,
-  formatText
 } = require('../Ellipsis.jsx')
 
 const TEXT_NUMBERS = '0123456789'
 // const TEXT_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-const TEXT_LONG = 'The quick brown fox jumps over the lazy dog'
+// const TEXT_LONG = 'The quick brown fox jumps over the lazy dog'
 
 describe('Ellipsis', () => {
   describe('ellipsisLeft', () => {
@@ -37,13 +36,6 @@ describe('Ellipsis', () => {
     it('properly formats text', () => {
       const res = ellipsisRight(TEXT_NUMBERS, 6, '...')
       expect(res).toEqual('012...')
-    })
-  })
-
-  describe('formatText', () => {
-    it('properly formats text', () => {
-      const res = formatText(TEXT_LONG, 12, '...')
-      expect(res).toEqual('The qu...zy dog')
     })
   })
 })

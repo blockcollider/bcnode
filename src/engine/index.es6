@@ -267,7 +267,7 @@ export default class Engine {
 
       const currentTimestamp = ts.nowSeconds()
       const work = prepareWork(lastPreviousBlock, currentBlocks)
-      const newBlock = prepareNewBlock(
+      const [newBlock, finalTimestamp] = prepareNewBlock(
         currentTimestamp,
         lastPreviousBlock,
         previousBcBlocks,
@@ -276,7 +276,7 @@ export default class Engine {
         [], // TODO add transactions
         this._minerKey
       )
-      newBlock.setTimestamp(currentTimestamp)
+      newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
 
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
