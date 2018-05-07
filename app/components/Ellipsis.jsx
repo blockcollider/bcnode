@@ -42,6 +42,13 @@ export const ellipsisRight = (text: string, length: number, ellipsis: string): s
   return `${left}${ellipsis}`
 }
 
+/**
+ * Formats using ellipsis in middle
+ * @param text Text to format
+ * @param length Length of output (formatted) text
+ * @param ellipsis Ellipsis text
+ * @return {string} Formatted string
+ */
 export const ellipsisMiddle = (text: string, length: number, ellipsis: string): string => {
   const tl = text.length
   if (tl <= length) {
@@ -57,19 +64,6 @@ export const ellipsisMiddle = (text: string, length: number, ellipsis: string): 
   const pl = Math.ceil(sl / 2)
   const left = text.slice(0, pl)
   const right = text.slice(-(length - el - pl))
-  return `${left}${ellipsis}${right}`
-}
-
-/**
- * Formats using ellipsis in middle
- * @param text Text to format
- * @param length Length of output (formatted) text
- * @param ellipsis Ellipsis text
- * @return {string} Formatted string
- */
-export const formatText = (text: string, length: number, ellipsis: string): string => {
-  const left = text.slice(0, length / 2)
-  const right = text.slice(-length / 2)
   return `${left}${ellipsis}${right}`
 }
 
@@ -97,7 +91,7 @@ export class Ellipsis extends Component<*> {
   render () {
     return (
       <span style={STYLE}>
-        {formatText(this.props.text, this.props.length, this.props.ellipsis)}
+        {ellipsisMiddle(this.props.text, this.props.length, this.props.ellipsis)}
       </span>
     )
   }
