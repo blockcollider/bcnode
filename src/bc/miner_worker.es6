@@ -12,6 +12,7 @@ const process = require('process')
 const { fromPairs } = require('ramda')
 const { getExpFactorDiff, getNewPreExpDifficulty, getMinimumDifficulty, mine } = require('./miner')
 const { ChildBlockHeader, BcBlock } = require('../protos/core_pb')
+const ts = require('../utils/time').default // ES6 default export
 
 const logging = require('../logger')
 
@@ -28,6 +29,7 @@ process.on('unhandledRejection', (err) => {
 const main = () => {
   process.title = 'bc-miner-worker'
   globalLog.debug('Starting miner worker')
+  ts.start()
 
   process.on('message', ({currentTimestamp, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
     // Deserialize buffers from parent process, buffer will be serialized as object of this shape { <idx>: byte } - so use Object.values on it
@@ -71,9 +73,11 @@ const main = () => {
       // send solution and exit
       globalLog.info(`Solution found: ${JSON.stringify(solution, null, 2)}`)
       process.send(solution)
+      ts.stop()
       process.exit(0)
     } catch (e) {
       globalLog.warn(`Mining failed with reason: ${e.message}, stack ${e.stack}`)
+      ts.stop()
       process.exit(1)
     }
   })

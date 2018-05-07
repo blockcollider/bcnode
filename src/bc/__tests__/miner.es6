@@ -78,7 +78,7 @@ describe('Miner', () => {
     const work = prepareWork(genesisBlock, headers)
 
     // Create (not yet existing) block
-    const newBlock = prepareNewBlock(
+    const [newBlock, _] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       genesisBlock,
       { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
@@ -204,7 +204,7 @@ describe('Miner', () => {
     let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
 
     // Create (not yet existing) block
-    let newBlock = prepareNewBlock(
+    let [newBlock, _] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       genesisBlock,
       { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
@@ -238,7 +238,7 @@ describe('Miner', () => {
     mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
 
     // Create (not yet existing) block
-    let newBlock2 = prepareNewBlock(
+    let [newBlock2, _2] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       newBlock,
       { 'btc': newBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
@@ -272,7 +272,7 @@ describe('Miner', () => {
     mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
 
     // Create (not yet existing) block
-    let newBlock3 = prepareNewBlock(
+    let [newBlock3, _3] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       newBlock2,
       { 'btc': newBlock, 'eth': genesisBlock, 'lsk': newBlock2, 'neo': genesisBlock, 'wav': genesisBlock },

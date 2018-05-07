@@ -99,7 +99,6 @@
     "base58": "^1.0.1",
     "bcoin": "^1.0.0-beta.15",
     "benchmark": "^2.1.4",
-    "big.js": "^5.0.3",
     "binstring": "^0.2.1",
     "bitcoin-net": "^5.0.0",
     "bitcoin-script": "^0.1.1",
