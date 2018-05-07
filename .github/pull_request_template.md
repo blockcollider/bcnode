@@ -22,4 +22,4 @@
 ### If fixing bug
 
 - [ ] Did you add test so that we don't introduce it again?
-- [ ] If fixing existing GitHub issue does this PR contain `Closes #<PR>` reference
+- [ ] If fixing existing GitHub issue does this PR contain `Closes #<PR>` reference?
