@@ -10,6 +10,7 @@ const { EventEmitter } = require('events')
 const { equals, all, values } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
+const { writeFileSync } = require('fs')
 
 const config = require('../../config/config')
 const { debugSaveObject } = require('../debug')
@@ -50,6 +51,7 @@ export default class Engine {
   _mining: bool;
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
+  _unfinishedBlockData: ?Object
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -211,6 +213,7 @@ export default class Engine {
           this._logger.error(`Could not send to mining worker, reason: ${errToString(err)}`)
           this._mining = false
           this._unfinishedBlock = undefined
+          this._unfinishedBlockData = undefined
         })
       })
     })
@@ -267,6 +270,7 @@ export default class Engine {
       )
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
+      this._unfinishedBlockData = { lastPreviousBlock, previousBcBlocks, currentBlocks: fromPairs(newBlock.getChildBlockHeadersList().map(b => [b.getBlockchain(), b])), block }
 
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
       const proc: ChildProcess = fork(MINER_WORKER_PATH)
@@ -320,6 +324,8 @@ export default class Engine {
     this._unfinishedBlock.setTimestamp(solution.timestamp)
     // $FlowFixMe
     this._unfinishedBlock.setDifficulty(solution.difficulty)
+    this._unfinishedBlockData.iterations = solution.iterations
+    this._unfinishedBlockData.timeDiff = solution.timeDiff
 
     this._processMinedBlock(this._unfinishedBlock, solution)
   }
@@ -327,6 +333,7 @@ export default class Engine {
   _handleWorkerError (error: Error) {
     this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
     this._unfinishedBlock = undefined
+    this._unfinishedBlockData = undefined
     this._mining = false
     // $FlowFixMe - Flow can't properly find worker pid
     this._workerProcess.kill('SIGKILL')
@@ -337,6 +344,7 @@ export default class Engine {
     if (code !== 0) {
       this._logger.warn(`Mining worker process exited with code ${code}, signal ${signal}`)
       this._unfinishedBlock = undefined
+      this._unfinishedBlockData = undefined
       this._mining = false
     } else {
       this._logger.debug(`Mining worker fininshed its work (code: ${code})`)
@@ -362,7 +370,19 @@ export default class Engine {
     this._logger.info('Broadcasting mined block')
 
     this.node.broadcastNewBlock(newBlock)
+    // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, btc_first_appeared_timestamp, eth_confirmation_count, eth_current_timestamp, eth_first_appeared_timestamp, lsk_confirmation_count, lsk_current_timestamp, lsk_first_appeared_timestamp, neo_confirmation_count, neo_current_timestamp, neo_first_appeared_timestamp, wav_confirmation_count, wav_current_timestamp, wav_first_appeared_timestamp
+    const row = [
+      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
+    ]
+
+    const roverNames = ['btc', 'eth', 'lsk', 'neo', 'wav'].forEach(roverName => {
+      row.push(this._unfinishedBlockData.currentBlocks[roverName].getChildBlockConfirmationsInParentCount())
+      row.push(this._unfinishedBlockData.currentBlocks[roverName].getTimestamp() / 1000 << 0)
+      row.push(this._unfinishedBlockData.previousBcBlocks[roverName].getTimestamp())
+    })
+    writeFileSync(resolve(__dirname, '..', '..', 'mining-data.csv'), `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
     this._unfinishedBlock = undefined
+    this._unfinishedBlockData = undefined
     this._mining = false
 
     try {
