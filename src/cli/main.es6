@@ -33,6 +33,8 @@ const LOG_DIR = path.resolve(__dirname, '..', '..', '_logs')
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 export const main = async (args: string[] = process.argv) => {
+  process.title = 'bcnode'
+
   const version = getVersion()
 
   program
