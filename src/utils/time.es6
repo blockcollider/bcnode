@@ -56,6 +56,12 @@ export class TimeService { // export for tests
     this.intervalHandler = undefined
   }
 
+  offsetOverride (offset: number) {
+    this._logger.info('Offset overriden')
+    this._offset = offset
+    this.lastSyncedAt = Date.now()
+  }
+
   get isStarted (): bool {
     return this.intervalHandler !== undefined
   }

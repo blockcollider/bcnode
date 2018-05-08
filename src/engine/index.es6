@@ -292,6 +292,7 @@ export default class Engine {
         // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
         this._workerProcess.send({
           currentTimestamp,
+          offset: ts.offset,
           work,
           minerKey: this._minerKey,
           merkleRoot: newBlock.getMerkleRoot(),
