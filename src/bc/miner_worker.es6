@@ -29,9 +29,9 @@ process.on('unhandledRejection', (err) => {
 const main = () => {
   process.title = 'bc-miner-worker'
   globalLog.debug('Starting miner worker')
-  ts.start()
 
-  process.on('message', ({currentTimestamp, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
+  process.on('message', ({currentTimestamp, offset, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
+    ts.offsetOverride(offset)
     // Deserialize buffers from parent process, buffer will be serialized as object of this shape { <idx>: byte } - so use Object.values on it
     const deserialize = (buffer: { [string]: number }, clazz: BcBlock|ChildBlockHeader) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
 
@@ -73,11 +73,9 @@ const main = () => {
       // send solution and exit
       globalLog.info(`Solution found: ${JSON.stringify(solution, null, 2)}`)
       process.send(solution)
-      ts.stop()
       process.exit(0)
     } catch (e) {
       globalLog.warn(`Mining failed with reason: ${e.message}, stack ${e.stack}`)
-      ts.stop()
       process.exit(1)
     }
   })
