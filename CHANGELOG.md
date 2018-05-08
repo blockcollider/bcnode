@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [CLI] - Name the process - bcnode
 - [Global] - Added benchmark module
 - [Engine] - Add stats/monitor
 - [Rover] - Kill all child rovers at ctrl+c
