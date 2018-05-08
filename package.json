@@ -200,6 +200,7 @@
     "response-time": "^2.3.2",
     "rlp-encoding": "^3.0.0",
     "rocksdb": "^2.0.0",
+    "rx-pubsub": "0.2.1",
     "secp256k1": "^3.5.0",
     "serve-index": "^1.9.1",
     "sha3": "^1.2.2",
