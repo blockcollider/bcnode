@@ -64,6 +64,10 @@ export default class Server {
     return this._app
   }
 
+  get engine (): Engine {
+    return this._engine
+  }
+
   get opts (): Opts {
     return this._opts
   }
@@ -201,6 +205,8 @@ export default class Server {
         icons: true
       })
     )
+
+    this.engine.pubsub.subscribe('block.mined', 'server', (block: Object) => this._wsBroadcast(block))
   }
 
   _transformBlockToWire (block: Block) {
