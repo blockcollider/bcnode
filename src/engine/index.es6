@@ -73,7 +73,7 @@ export default class Engine {
     ts.start()
   }
 
-  get pubsub(): Pubsub {
+  get pubsub (): PubSub {
     return this._pubsub
   }
 
