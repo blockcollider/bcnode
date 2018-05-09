@@ -39,7 +39,8 @@ const {
   splitEvery,
   transpose,
   zip,
-  zipWith
+  zipWith,
+  sum
 } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
@@ -89,10 +90,11 @@ export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: n
  * @param previousBlockTime
  * @param previousDifficulty
  * @param minimalDiffulty
+ * @param newBlockCount
  * @param handicap
  * @returns
  */
-export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, handicap: number = 0): BN {
+export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, newBlockCount: number, handicap: number = 0): BN {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 
   let bigMinimalDifficulty = new BN(minimalDiffulty, 16)
@@ -101,59 +103,36 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   const bigPreviousDifficulty = new BN(previousDifficulty, 16)
   const bigCurentBlockTime = new BN(currentBlockTime, 16)
   const bigMinus99 = new BN(-99, 16)
-  const big7 = new BN(7, 16)
-  const big6 = new BN(6, 16)
-  const big3 = new BN(3, 16)
   const big1 = new BN(1, 16)
   const big0 = new BN(0, 16)
-  const elapsedTime = bigCurentBlockTime.sub(bigPreviousBlockTime)
+  let elapsedTime = bigCurentBlockTime.sub(bigPreviousBlockTime)
 
-  // if elapsedTime !== 0
-  if (elapsedTime.eq(big0) === false) {
-    // minimalDiffulty = minimalDiffulty / elapsedTime
-    bigMinimalDifficulty = bigMinimalDifficulty.div(elapsedTime)
-  } else {
-    // minimalDiffulty = 1
-    bigMinimalDifficulty = big1
+  // elapsedTime + ((elapsedTime - 4) * newBlocks)
+  const elapsedTimeBonus = elapsedTime.add(elapsedTime.sub(new BN(4, 16).mul(new BN(newBlockCount, 16))))
+
+  if (elapsedTimeBonus.gt(big0)) {
+    elapsedTime = elapsedTimeBonus
   }
 
-  let x
+  // x = 1 - floor(x / handicap)
+  let x = big1.sub(elapsedTime.div(new BN(handicap))) // div floors by default
   let y
 
-  // x = 1 - (elapsedTime / 6) + handicap
-  x = elapsedTime // Get the window of time between bigCurentBlockTime - bigPreviousBlockTime
-  x = x.div(big6) // Divide this difference by the seconds (in BN)
-  x = big1.sub(x) // Move X to a negative / 0 val integer
-  x = x.add(new BN(handicap, 16))
-
-  // x = (x < 99) ? - 99 : x
-  if (x.lt(bigMinus99) === true) {
+  // x < -99 ? -99 : x
+  if (x.lt(bigMinus99)) {
     x = bigMinus99
   }
 
-  // x === 0 && elapsedTime > 7
-  if (x.eq(big0) === true && elapsedTime.gt(big7) === true) {
-    // x = x - 1
-    x = x.sub(big1) // Move X to a negative factor
-  } else if (x.gt(big0) === true) {
-    // x = (x * (6 - elapsedTime)) ^ 3
-    x = x.mul(big6.sub(elapsedTime)).pow(big3) // Significantly decrease difficulty for slower blocks
-  }
+  // y = previousDifficulty / 148 // 148 = 74 * 2 or the maximum absolute distance of two characters converted from ASCII code.
+  y = bigPreviousDifficulty.div(new BN(148))
+  // x = x * y
+  x = x.mul(y)
+  // x = x + previousDifficulty
+  x = x.add(bigPreviousDifficulty)
 
-  // Divide the previous difficulty by the minimum difficulty
-  if (bigMinimalDifficulty.eq(big0)) {
-    y = big1
-  } else {
-    y = bigPreviousDifficulty.div(bigMinimalDifficulty)
-  }
-
-  // x = (x * y) + previousDifficulty
-  x = x.mul(y) // Multiple the purposed difficulty by the minimalDiffulty bound
-  x = x.add(bigPreviousDifficulty) // Add the previous parents difficulty to the purposed difficulty
-
-  // x = Math.max(x, minimumDiff)
-  if (x.lt(bigMinimalDifficulty) === true) {
-    x = bigMinimalDifficulty // Force minimum difficulty
+  // x < minimalDiffulty
+  if (x.lt(bigMinimalDifficulty)) {
+    return bigMinimalDifficulty
   }
 
   return x
@@ -351,7 +330,7 @@ export function getMinimumDifficulty (childChainCount: number): BN {
 
 /**
  * Calculate handicap between headers of previous and latest BC block
- * If none of the chains have increased in height 4, else 0
+ * If none of the chains have increased in height 4, else 1
  *
  * @param {ChildBlockHeader[]} childrenPreviousBlocks array of rovered block headers used in last-1 BC block
  * @param {ChildBlockHeader[]} childrenCurrentBlocks array of rovered block headers used in last known BC block
@@ -359,10 +338,10 @@ export function getMinimumDifficulty (childChainCount: number): BN {
  */
 export function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
   if (allChildBlocksHaveSameTimestamp(childrenPreviousBlocks, childrenCurrentBlocks)) {
-    return 4
+    return childrenCurrentBlocks.length - 1
   }
 
-  return 0
+  return 1
 }
 
 /**
@@ -381,34 +360,19 @@ function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHead
 export function getNewPreExpDifficulty (
   currentTimestamp: number,
   lastPreviousBlock: BcBlock,
-  previousBlocks: { [blockchain: string]: BcBlock },
-  minimumDiffShare: BN,
   childrenPreviousBlocks: ChildBlockHeader[],
-  childrenCurrentBlocks: ChildBlockHeader[]
+  childrenCurrentBlocks: ChildBlockHeader[],
+  newBlockCount: number
 ) {
   let handicap = calculateHandicap(childrenPreviousBlocks, childrenCurrentBlocks)
-
-  const newDifficulty: BN = zip(childrenPreviousBlocks, childrenCurrentBlocks).reduce((sum: BN, [previousHeader, currentHeader]) => {
-    // TODO @pm - basic confirmation count is 0 - we can't divide by 0 here, should we start from 1 then?
-    const confirmationCount = (currentHeader.getChildBlockConfirmationsInParentCount()) ? currentHeader.getChildBlockConfirmationsInParentCount() : 1
-    // previousBlocks is a BC block at height = previousBlock.getHeight() - currentHeader.getChildBlockConfirmationsInParentCount() - 1
-    // (that one in which the child blockchain was changes last)
-    const timeBonus = (currentHeader.getTimestamp() / 1000 << 0 - previousBlocks[currentHeader.getBlockchain()].getTimestamp()) / confirmationCount
-    const childPart = getDiff(
-      previousBlocks[currentHeader.getBlockchain()].getTimestamp() + timeBonus,
-      previousBlocks[currentHeader.getBlockchain()].getTimestamp(),
-      minimumDiffShare, // previous difficulty
-      MINIMUM_DIFFICULTY, // minimal difficulty
-      handicap
-    )
-    return sum.add(childPart)
-  }, new BN(0))
 
   const preExpDiff = getDiff(
     currentTimestamp,
     lastPreviousBlock.getTimestamp(),
+    lastPreviousBlock.getDifficulty(),
     MINIMUM_DIFFICULTY,
-    newDifficulty
+    newBlockCount,
+    handicap
   ) // Calculate the final pre-singularity difficulty adjustment
 
   return preExpDiff
@@ -467,6 +431,19 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
 }
 
 /**
+ * Returns sum off differences of heights between child block headers is last valid BC block and currently mined BC block
+ */
+export function getNewBlockCount (previousBlockHeaders: ChildBlockHeader[], currentBlockHeaders: ChildBlockHeader[]) {
+  if (previousBlockHeaders.length !== currentBlockHeaders.length) {
+    throw new Error(`Previous and current headers have to have the same length, got prev: ${previousBlockHeaders.length}, current: ${currentBlockHeaders.length}`)
+  }
+  const previousBlocksMap = fromPairs(previousBlockHeaders.map(header => [header.getBlockchain(), header]))
+  return sum(currentBlockHeaders.map(current => {
+    return current.getHeight() - previousBlocksMap[current.getBlockchain()].getHeight()
+  }))
+}
+
+/**
  * Used for preparing yet non existant BC block protobuf structure. Use before mining starts.
  *
  * - calculates block difficulty (from previous BC block difficulty and height, rovered chains count, and data in child chains headers) and stores it to structure
@@ -476,20 +453,19 @@ function prepareChildBlockHeadersList (previousBlock: BcBlock, currentBlocks: Bl
  *
  * @param {number} currentTimestamp current timestamp reference
  * @param {BcBlock} lastPreviousBlock Last known previously mined BC block
- * @param {Object} previousBlocks previous BC block where corresponding blockchain was changed last
  * @param {Block[]} childrenCurrentBlocks Last know rovered blocks from each chain
  * @param {Block} blockWhichTriggeredMining The last rovered block - this one triggered the mining
  * @param {BcTransaction[]} newTransactions Transactions which will be added to newly mined block
  * @param {string} minerAddress Public addres to which NRG award for mining the block and transactions will be credited to
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
-export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, previousBlocks: {[blockchain: string]: BcBlock}, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): [BcBlock, number] {
+export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string): [BcBlock, number] {
   const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
   const newChainRoot = getChildrenRootHash(blockHashes)
 
   const childBlockHeadersList = prepareChildBlockHeadersList(lastPreviousBlock, childrenCurrentBlocks, blockWhichTriggeredMining)
+  const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeadersList(), childBlockHeadersList)
 
-  const minimumDiffShare = getMinimumDifficulty(blockHashes.length)
   let finalDifficulty
   let finalTimestamp = currentTimestamp
 
@@ -499,10 +475,9 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
       const preExpDiff = getNewPreExpDifficulty(
         finalTimestamp,
         lastPreviousBlock,
-        previousBlocks,
-        minimumDiffShare,
         lastPreviousBlock.getChildBlockHeadersList(),
-        childBlockHeadersList
+        childBlockHeadersList,
+        newBlockCount
       )
       finalDifficulty = getExpFactorDiff(preExpDiff, lastPreviousBlock.getHeight()).toNumber()
       break

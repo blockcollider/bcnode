@@ -24,7 +24,7 @@ describe('Miner', () => {
 
     headers2[0].setTimestamp((Date.now() / 1000) << 0)
     const handicap = calculateHandicap(headers1, headers2)
-    expect(handicap).toEqual(0)
+    expect(handicap).toEqual(1)
   })
 
   test('calculateHandicap() return 4 if all timestamps are same', () => {
@@ -81,7 +81,6 @@ describe('Miner', () => {
     const [newBlock, _] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       genesisBlock,
-      { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[1],
       [], // transactions
@@ -117,7 +116,7 @@ describe('Miner', () => {
       hash: '39bc7bbd2b182eddac2d18d5c998808f64423176975fb5a715d57f8599a4104f',
       height: 2,
       merkleRoot: '53c85bcd43ade65bba9d2e2d2b5944116526b7c05ba7b7d6425699128548f5ae',
-      difficulty: 11801972029398,
+      difficulty: 136361577165771,
       chainRoot: 'daf4c73925e7eb4e67a86cabfb7cc1e257a7af63f6a3f0b3f5991839891fc796',
       distance: 186475791516929,
       nonce: '0.12137218313968567',
@@ -207,7 +206,6 @@ describe('Miner', () => {
     let [newBlock, _] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       genesisBlock,
-      { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[0],
       [], // transactions
@@ -241,7 +239,6 @@ describe('Miner', () => {
     let [newBlock2, _2] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       newBlock,
-      { 'btc': newBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[0],
       [], // transactions
@@ -275,7 +272,6 @@ describe('Miner', () => {
     let [newBlock3, _3] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       newBlock2,
-      { 'btc': newBlock, 'eth': genesisBlock, 'lsk': newBlock2, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[2],
       [], // transactions
