@@ -36,10 +36,11 @@ export const main = async (args: string[] = process.argv) => {
   process.title = 'bcnode'
 
   const version = getVersion()
+  const versionString = `${version.npm}#${version.git.short}`
 
   program
     // $FlowFixMe
-    .version(`${version.npm}#${version.git.short}`)
+    .version(versionString)
     .usage('<cmd>')
     .action((cmd) => {
       console.log(colors.red(`Invalid command '${cmd}'`))
@@ -100,7 +101,7 @@ export const main = async (args: string[] = process.argv) => {
   native.initLogger()
 
   // Initialize error handlers
-  initErrorHandlers(logger)
+  initErrorHandlers(logger, versionString)
 
   // Parse command line
   return program.parse(args)
@@ -116,9 +117,11 @@ const initDirs = () => {
   }
 }
 
-const initErrorHandlers = (logger: Logger) => {
+const initErrorHandlers = (logger: Logger, versionString: string) => {
   if (config.sentry.enabled) {
-    Raven.config(config.sentry.url).install()
+    Raven.config(config.sentry.url, {
+      release: versionString
+    }).install()
   }
 
   // setup logging of unhandled rejections
