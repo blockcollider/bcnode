@@ -228,7 +228,6 @@ export default class Engine {
       this._mining = true
       let currentBlocks
       let lastPreviousBlock
-      let previousBcBlocks
 
       // get latest block from each child blockchain
       try {
@@ -254,22 +253,6 @@ export default class Engine {
         throw err
       }
 
-      // get BC blocks to get timestamp for timeBonus calculation for
-      try {
-        const lastChildBlockHeaders = lastPreviousBlock.getChildBlockHeadersList()
-        const lastBcBlockKeys = lastChildBlockHeaders.map(block => {
-          const height = lastPreviousBlock.getHeight() - block.getChildBlockConfirmationsInParentCount() + 1
-          return `bc.block.${height}`
-        })
-        this._logger.debug(`Getting previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
-        const blocks = await Promise.all(lastBcBlockKeys.map(key => this._persistence.get(key)))
-        previousBcBlocks = fromPairs(blocks.map((block, idx) => ([lastChildBlockHeaders[idx].getBlockchain(), block])))
-        this._logger.debug(`Successfuly got ${blocks.length} previous bc blocks with keys: ${JSON.stringify(lastBcBlockKeys)}`)
-      } catch (err) {
-        this._logger.warn(`Error while getting one or more previous BC blocks, reason: ${err.message}`)
-        throw err
-      }
-
       this._logger.debug(`Preparing new block `)
 
       const currentTimestamp = ts.nowSeconds()
@@ -277,7 +260,6 @@ export default class Engine {
       const [newBlock, finalTimestamp] = prepareNewBlock(
         currentTimestamp,
         lastPreviousBlock,
-        previousBcBlocks,
         currentBlocks,
         block,
         [], // TODO add transactions
@@ -307,10 +289,6 @@ export default class Engine {
           difficultyData: {
             currentTimestamp,
             lastPreviousBlock: lastPreviousBlock.serializeBinary(),
-            // $FlowFixMe
-            previousBcBlocks: Object.entries(previousBcBlocks).map(([chain, block: BcBlock]) => [chain, block.serializeBinary()]),
-            currentBlocks: currentBlocks.map(block => block.serializeBinary()),
-            block: block.serializeBinary(),
             newBlockHeaders: newBlock.getChildBlockHeadersList().map(header => header.serializeBinary())
           }})
         // $FlowFixMe - Flow can't properly find worker pid
