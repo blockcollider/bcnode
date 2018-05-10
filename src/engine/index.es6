@@ -270,7 +270,7 @@ export default class Engine {
       )
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
-      this._unfinishedBlockData = { lastPreviousBlock, previousBcBlocks, currentBlocks: fromPairs(newBlock.getChildBlockHeadersList().map(b => [b.getBlockchain(), b])), block }
+      this._unfinishedBlockData = { lastPreviousBlock, currentBlocks: fromPairs(newBlock.getChildBlockHeadersList().map(b => [b.getBlockchain(), b])), block }
 
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
       const proc: ChildProcess = fork(MINER_WORKER_PATH)
@@ -370,7 +370,7 @@ export default class Engine {
     this._logger.info('Broadcasting mined block')
 
     this.node.broadcastNewBlock(newBlock)
-    // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, btc_first_appeared_timestamp, eth_confirmation_count, eth_current_timestamp, eth_first_appeared_timestamp, lsk_confirmation_count, lsk_current_timestamp, lsk_first_appeared_timestamp, neo_confirmation_count, neo_current_timestamp, neo_first_appeared_timestamp, wav_confirmation_count, wav_current_timestamp, wav_first_appeared_timestamp
+    // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
     const row = [
       newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
     ]
@@ -378,7 +378,6 @@ export default class Engine {
     const roverNames = ['btc', 'eth', 'lsk', 'neo', 'wav'].forEach(roverName => {
       row.push(this._unfinishedBlockData.currentBlocks[roverName].getChildBlockConfirmationsInParentCount())
       row.push(this._unfinishedBlockData.currentBlocks[roverName].getTimestamp() / 1000 << 0)
-      row.push(this._unfinishedBlockData.previousBcBlocks[roverName].getTimestamp())
     })
     writeFileSync(resolve(__dirname, '..', '..', 'mining-data.csv'), `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
     this._unfinishedBlock = undefined
