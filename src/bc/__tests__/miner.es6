@@ -5,7 +5,9 @@ const {
   calculateHandicap,
   prepareNewBlock,
   prepareWork,
-  mine
+  mine,
+  getNewPreExpDifficulty,
+  getNewBlockCount
 } = require('../miner')
 
 const { getGenesisBlock, GENESIS_MINER_KEY } = require('../genesis')
@@ -24,7 +26,7 @@ describe('Miner', () => {
 
     headers2[0].setTimestamp((Date.now() / 1000) << 0)
     const handicap = calculateHandicap(headers1, headers2)
-    expect(handicap).toEqual(1)
+    expect(handicap).toEqual(0)
   })
 
   test('calculateHandicap() return 4 if all timestamps are same', () => {
@@ -282,5 +284,84 @@ describe('Miner', () => {
     expect(newBlock3.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(1)
     expect(newBlock3.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(4)
     expect(newBlock3.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(4)
+  })
+
+  test('getNewPreExpDifficulty()', () => {
+    const genesisBlock = getGenesisBlock()
+    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+
+    // Convert genesis headers back to raw Block which is returned by miner
+    const headers = genesisHeaders
+      .map((oldHeader) => {
+        return new Block([
+          oldHeader.getBlockchain(),
+          oldHeader.getHash(),
+          oldHeader.getPreviousHash(),
+          oldHeader.getTimestamp(),
+          oldHeader.getHeight(),
+          oldHeader.getMerkleRoot()
+        ])
+      })
+
+    const oldHeader = headers[1]
+
+    // Change hash, previousHash, timestamp and height
+    const newHeader = new Block([
+      'eth',
+      '0x5ea3859a785636dc4894a03e02633f33160269d2fb50366c997e0f3e1e3d0010', // <-------  the new block would update his previous block
+      oldHeader.getHash(), // the previous hash from above
+      oldHeader.getTimestamp() + 2 * 1000, // <-- new ETH block came 2s after previous one
+      oldHeader.getHeight() + 1,
+      '0xb1f411fc1bf9a951b33c9c730ff44310782f587828dd89f2d56e40565cdcd488'
+    ])
+
+    // Update changed header in header list
+    headers[1] = newHeader
+
+    // Mock timestamp - 5 seconds after genesis block
+    let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 2015)) / 1000 << 0 // <-- now is 15 ms after the ETH block came in
+
+    // Create (not yet existing) block
+    let [newBlock, _] = prepareNewBlock( // eslint-disable-line
+      mockedTimestamp,
+      genesisBlock,
+      headers,
+      headers[1],
+      [], // transactions
+      TEST_MINER_KEY
+    )
+
+    const newBlockCount = getNewBlockCount(genesisBlock.getChildBlockHeadersList(), newBlock.getChildBlockHeadersList())
+
+    expect(newBlockCount).toBe(1)
+
+    const preExpDiff1 = getNewPreExpDifficulty(
+      mockedTimestamp,
+      genesisBlock,
+      genesisBlock.getChildBlockHeadersList(),
+      newBlock.getChildBlockHeadersList(),
+      newBlockCount
+    )
+
+    expect(preExpDiff1.toNumber()).toBe(140175887016559)
+
+    const preExpDiff2 = getNewPreExpDifficulty(
+      mockedTimestamp + 1000,
+      genesisBlock,
+      genesisBlock.getChildBlockHeadersList(),
+      newBlock.getChildBlockHeadersList(),
+      newBlockCount
+    )
+    expect(preExpDiff2.toNumber()).toBe(46725295672253) // <-- stales on this difficulty
+
+    const preExpDiff3 = getNewPreExpDifficulty(
+      mockedTimestamp + 2000,
+      genesisBlock,
+      genesisBlock.getChildBlockHeadersList(),
+      newBlock.getChildBlockHeadersList(),
+      newBlockCount + 1
+    )
+    // TODO probably not correct - should be even lower (1s after previous one and +1 block changed)
+    expect(preExpDiff3.toNumber()).toBe(46725295672253)
   })
 })

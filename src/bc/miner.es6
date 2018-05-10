@@ -108,14 +108,20 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   let elapsedTime = bigCurentBlockTime.sub(bigPreviousBlockTime)
 
   // elapsedTime + ((elapsedTime - 4) * newBlocks)
-  const elapsedTimeBonus = elapsedTime.add(elapsedTime.sub(new BN(4, 16).mul(new BN(newBlockCount, 16))))
+  const elapsedTimeBonus = elapsedTime.add(elapsedTime.sub(new BN(4, 16)).mul(new BN(newBlockCount, 16)))
 
   if (elapsedTimeBonus.gt(big0)) {
     elapsedTime = elapsedTimeBonus
   }
 
-  // x = 1 - floor(x / handicap)
-  let x = big1.sub(elapsedTime.div(new BN(handicap))) // div floors by default
+  let x
+  // TODO unclear if correct - handicap is almost always 0 (because there was a change in timestamp of at least one child chain last block)
+  if (handicap === 0) {
+    x = big1.sub(elapsedTime)
+  } else {
+    // x = 1 - floor(x / handicap)
+    x = big1.sub(elapsedTime.div(new BN(handicap))) // div floors by default
+  }
   let y
 
   // x < -99 ? -99 : x
@@ -341,7 +347,7 @@ export function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], c
     return childrenCurrentBlocks.length - 1
   }
 
-  return 1
+  return 0
 }
 
 /**
