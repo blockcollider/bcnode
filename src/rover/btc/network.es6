@@ -12,24 +12,6 @@ const { Pool } = require('bitcore-p2p')
 const { merge } = require('ramda')
 
 const logging = require('../../logger')
-const { getPrivateKey } = require('../utils')
-
-const DEFAULT_STATE = {
-  // TODO: Read from configs
-  maximumPeers: 96,
-  discoveredPeers: 0,
-  satoshiPeers: 0,
-  lastBlock: false,
-  quorum: 31,
-  peers: {},
-  bestHeight: null,
-  peerData: {},
-  key: getPrivateKey(),
-  identity: {
-    // TODO: This should not be hardcoded
-    identityPath: '/Users/mtxodus1/Library/Application Support/.blockcollider'
-  }
-}
 
 export type Peer = { // eslint-disable-line no-undef
   host: string,
@@ -39,7 +21,23 @@ export type Peer = { // eslint-disable-line no-undef
   updated?: number
 }
 
-export default class Network {
+type State = {
+  maximumPeers: number,
+  quorum: number,
+  peers: { [host: string]: Peer },
+  bestHeight: ?number
+}
+
+const DEFAULT_STATE: State = {
+  maximumPeers: 96,
+  quorum: 31,
+  peers: {},
+  bestHeight: null
+}
+
+export const isSatoshiPeer = (peer: Peer) => (peer.subversion && peer.subversion.indexOf('/Satoshi:0.1') > -1)
+
+export class Network {
   _state: Object; // eslint-disable-line no-undef
   _logger: Object; // eslint-disable-line no-undef
   _pool: ?Pool; // eslint-disable-line no-undef
@@ -56,27 +54,13 @@ export default class Network {
   }
 
   get discoveredPeers (): number {
-    return this._state.discoveredPeers
-  }
-
-  set discoveredPeers (count: number): void {
-    this._state.discoveredPeers = count
+    return Object.keys(this._state.peers).length
   }
 
   get satoshiPeers (): number {
-    return this._state.satoshiPeers
-  }
-
-  set satoshiPeers (count: number): void {
-    this._state.satoshiPeers = count
-  }
-
-  get lastBlock (): boolean {
-    return this._state.lastBlock
-  }
-
-  set lastBlock (lastBlock: boolean) {
-    this._state.lastBlock = lastBlock
+    const peerPairs = Object.entries(this._state.peers)
+    // $FlowFixMe Object.entries returns type Array<[string, mixed]>, should be a generic
+    return peerPairs.filter(([host, peer]) => isSatoshiPeer(peer)).length
   }
 
   get bestHeight (): number {
@@ -84,15 +68,22 @@ export default class Network {
   }
 
   set bestHeight (height: number) {
+    if (this._state.bestHeight !== null && height < this._state.bestHeight) {
+      this._logger.warn(`Network bh: ${this._state.bestHeight}, tried to store bh ${height}`)
+      return
+    }
     this._state.bestHeight = height
   }
 
   hasQuorum () {
-    return this._state.discoveredPeers >= this._state.quorum &&
-      this._state.satoshiPeers >= this._state.quorum
+    return this.discoveredPeers >= this._state.quorum &&
+      this.satoshiPeers >= this._state.quorum
   }
 
   addPeer (peer: Peer) {
+    // TODO update all peers height after adding peer - or else in peerready callback
+    // wrong bestHeight is assumed because all peers here except of the newly added one have
+    // the bestHeigh from time they were added
     const { peers } = this._state
     peers[peer.host] = {
       bestHeight: peer.bestHeight,
@@ -103,11 +94,7 @@ export default class Network {
   }
 
   removePeer (peer: Peer) {
-    const { peers, peerData } = this._state
-
-    if (peerData[peer.host] !== undefined) {
-      delete peerData[peer.host]
-    }
+    const { peers } = this._state
 
     if (peers[peer.host] === undefined) {
       return
@@ -116,7 +103,10 @@ export default class Network {
     delete peers[peer.host]
   }
 
-  setState () {
+  /**
+   * Called after establishing quorum to get the best known height of all connected peers
+   */
+  updateBestHeight () {
     const newPeers = Object.keys(this._state.peers).reduce((all, host) => {
       const address = this._state.peers[host]
       if (address !== undefined) {

@@ -7,7 +7,7 @@
  * @disable-flow
  */
 const { pathOr } = require('ramda')
-const { Messages } = require('bitcore-p2p')
+const { Messages, Peer } = require('bitcore-p2p')
 const { Transaction } = require('btc-transaction')
 const LRUCache = require('lru-cache')
 const convBin = require('binstring')
@@ -17,7 +17,7 @@ const logging = require('../../logger')
 const { errToString } = require('../../helper/error')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
-const Network = require('./network').default
+const { Network, isSatoshiPeer } = require('./network')
 const { swapOrder } = require('../../utils/strings')
 const { createUnifiedBlock } = require('../helper')
 
@@ -36,12 +36,10 @@ function _createUnifiedBlock (block: Object): Block { // TODO specify block type
   return msg
 }
 
-const isSatoshiPeer = (peer: { subversion: string }) => (peer.subversion && peer.subversion.indexOf('/Satoshi:0.1') > -1)
-
 export default class Controller {
   constructor () {
     this._dpt = false
-    this._interfaces = []
+    this._network = undefined
     this._logger = logging.getLogger(__filename)
     this._blockCache = new LRUCache({ max: 110 })
     this._blocksNumberCache = new LRUCache({ max: 110 })
@@ -53,15 +51,29 @@ export default class Controller {
     return this._dpt
   }
 
-  get interfaces () {
-    return this._interfaces
+  get network () {
+    return this._network
+  }
+
+  _tryDisconnectPeer (peer: Peer) {
+    try {
+      peer.disconnect()
+    } catch (err) {
+      this._logger.error(`Could not disconnect from peer, err: ${errToString(err)}`)
+    }
+
+    try {
+      this.network.removePeer(peer)
+    } catch (e) {
+      this._logger.warn(`Error while removing peer ${peer.host} from network, err: ${errToString(e)}`)
+    }
   }
 
   init (config) {
     const network = new Network(config)
-    this._interfaces.push(network)
+    this._network = network
 
-    const pool = network.pool
+    const pool = this.network.pool
 
     process.on('disconnect', () => {
       this._logger.info('Parent exited')
@@ -80,16 +92,13 @@ export default class Controller {
 
       if (network.hasQuorum()) {
         try {
-          network.lastBlock = network.setState()
-          network.discoveredPeers++
+          network.updateBestHeight()
           network.addPeer(peer)
         } catch (err) {
           this._logger.error('Error in peerready cb', err)
         }
       } else if (!network.hasQuorum() && isSatoshiPeer(peer)) {
         try {
-          network.discoveredPeers++
-          network.satoshiPeers++
           network.addPeer(peer)
         } catch (err) {
           if (peer !== undefined && peer.status !== undefined) {
@@ -97,31 +106,18 @@ export default class Controller {
           }
         }
       } else {
-        try {
-          if (peer !== undefined && peer.status !== undefined) {
-            peer.disconnect()
-          }
-        } catch (err) {
-          this._logger.error('Could not disconnect from peer', err)
-        }
+        this._tryDisconnectPeer(peer)
       }
     })
 
     pool.on('peerdisconnect', (peer, addr) => {
       this._logger.debug(`Removing peer ${pathOr('', ['ip', 'v4'], addr)}:${addr.port}`)
-      network.discoveredPeers--
-      if (isSatoshiPeer(peer)) {
-        network.satoshiPeers--
-      }
-      try {
-        network.removePeer(peer)
-      } catch (e) {
-        this._logger.warn(`Error while disconnecting peer ${peer.host}, ${addr}, ${e.message}`)
-      }
+      network.removePeer(peer)
     })
 
     pool.on('peererror', (peer, err) => {
       this._logger.debug(`Peer Error, err: ${errToString(err)}`)
+      this._tryDisconnectPeer(peer)
     })
     pool.on('seederror', (err) => {
       this._logger.error(`Seed Error, err: ${errToString(err)}`)
@@ -133,24 +129,20 @@ export default class Controller {
       this._logger.debug(`Timeout, err ${errToString(err)}`)
     })
     pool.on('error', (err) => {
-      this._logger.error(`Generic error, err ${errToString(err)}`)
+      this._logger.error(`Generic pool error, err ${errToString(err)}`)
     })
 
     // attach peer events
     pool.on('peerinv', (peer, message) => {
       try {
         this._logger.debug(`Peer INV: ${peer.version}, ${peer.subversion}, ${peer.bestHeight}, ${peer.host}`)
-        if (peer.subversion !== undefined && peer.subversion.indexOf('/Satoshi:') > -1) {
+        if (peer.subversion !== undefined && isSatoshiPeer(peer)) {
           try {
             var peerMessage = new Messages().GetData(message.inventory)
             peer.sendMessage(peerMessage)
           } catch (err) {
             this._logger.error('Error sending message', err)
-            try {
-              pool._removePeer(peer)
-            } catch (err) {
-              this._logger.error('Error removing peer', err)
-            }
+            this._tryDisconnectPeer(peer)
           }
         }
       } catch (err) {
@@ -163,7 +155,7 @@ export default class Controller {
 
       this._logger.debug('PeerBlock: ' + peer.version, peer.subversion, peer.bestHeight, peer.host)
       this._logger.debug('Peer best height submitting block: ' + peer.bestHeight)
-      this._logger.debug('Last block' + network.bestHeight)
+      this._logger.debug('Last block ' + network.bestHeight)
 
       if (!network.hasQuorum()) {
         this._logger.debug(`Got new block but we don't have quorum yet, peer count: ${network.discoveredPeers}`)
@@ -171,25 +163,21 @@ export default class Controller {
       }
 
       if (network.bestHeight !== undefined && block.header.version === BLOCK_VERSION) {
-        block.lastBlock = network.bestHeight
-        if (block.lastBlock !== undefined && block.lastBlock !== false) {
-          const [isNew, _block] = this._onNewBlock(peer, block)
-
-          if (isNew) {
-            const unifiedBlock = createUnifiedBlock(block, _createUnifiedBlock)
-            network.bestHeight = _block.blockNumber
-            this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
-              if (err) {
-                this._logger.warn('RpcClient could not collect block')
-              } else {
-                this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
-              }
-            })
-          }
+        const [isNew, _block] = this._onNewBlock(block)
+        if (isNew) {
+          const unifiedBlock = createUnifiedBlock(block, _createUnifiedBlock)
+          network.bestHeight = _block.blockNumber
+          this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
+            if (err) {
+              this._logger.warn('RpcClient could not collect block')
+            } else {
+              this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
+            }
+          })
         }
       } else {
         try {
-          pool._removePeer(peer)
+          pool._removeConnectedPeer(peer)
         } catch (err) {
           this._logger.error('Error removing peer', err)
         }
@@ -204,11 +192,11 @@ export default class Controller {
     network.connect()
 
     setInterval(() => {
-      this._logger.info(`Peer count ${pool.numberConnected()}`)
-    }, 10 * 1000)
+      this._logger.info(`Peer count pool: ${pool.numberConnected()} dp: ${network.discoveredPeers}, sp: ${network.satoshiPeers}, q: ${network.hasQuorum()}, bh: ${network.bestHeight}`)
+    }, 3 * 1000)
   }
 
-  _onNewBlock (height, block): [boolean, Object] {
+  _onNewBlock (block): [boolean, Object] {
     const { hash } = block.header
 
     if (this._blockCache.has(hash)) {
@@ -222,6 +210,12 @@ export default class Controller {
     const buffer = convBin(coinbaseTx.toString('hex'), { in: 'hex', out: 'buffer' })
     const deserializedCoinbaseTx = Transaction.deserialize(buffer)
     const blockNumber = deserializedCoinbaseTx.ins[0].script.getBlockHeight()
+
+    // check if blockNumber >= last seen block
+    if (blockNumber < this.network.bestHeight) {
+      this._logger.info(`Block ${blockNumber} received but < best height: ${this.network.bestHeight}`)
+      return [false, block]
+    }
 
     if (this._blocksNumberCache.has(blockNumber) === true) {
       this._logger.warn('possible orphan conflict:  ' + blockNumber + ' ' + hash)
@@ -283,6 +277,6 @@ export default class Controller {
   // }
 
   close () {
-    this.interfaces.map((network) => network.close())
+    this.network.close()
   }
 }
