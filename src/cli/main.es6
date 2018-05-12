@@ -16,7 +16,9 @@ const fs = require('fs')
 const path = require('path')
 const process = require('process')
 const program = require('commander')
+const Raven = require('raven')
 
+const config = require('../../config/config')
 const logging = require('../logger')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
@@ -31,6 +33,8 @@ const LOG_DIR = path.resolve(__dirname, '..', '..', '_logs')
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 export const main = async (args: string[] = process.argv) => {
+  process.title = 'bcnode'
+
   const version = getVersion()
 
   program
@@ -113,6 +117,10 @@ const initDirs = () => {
 }
 
 const initErrorHandlers = (logger: Logger) => {
+  if (config.sentry.enabled) {
+    Raven.config(config.sentry.url).install()
+  }
+
   // setup logging of unhandled rejections
   process.on('unhandledRejection', (err) => {
     // $FlowFixMe
@@ -121,6 +129,11 @@ const initErrorHandlers = (logger: Logger) => {
 
   process.on('uncaughtException', (err) => {
     console.log('UNCAUGHT EXCEPTION', err)
+
+    if (config.sentry.enabled) {
+      console.log('Forwarding exception to sentry')
+      Raven.captureException(err)
+    }
   })
 }
 

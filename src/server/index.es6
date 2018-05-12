@@ -28,6 +28,7 @@ const { dispatcher: socketDispatcher } = require('./socket')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'public')
 const docsDir = path.resolve(__dirname, '..', '..', 'docs')
+const logsDir = path.resolve(__dirname, '..', '..', '_logs')
 
 const PORT = (process.env.BC_UI_PORT && parseInt(process.env.BC_UI_PORT, 10)) || config.server.port
 
@@ -62,6 +63,10 @@ export default class Server {
 
   get app (): express$Application { // eslint-disable-line
     return this._app
+  }
+
+  get engine (): Engine {
+    return this._engine
   }
 
   get opts (): Opts {
@@ -193,6 +198,13 @@ export default class Server {
 
   initUi () {
     this.app.use('/doc', express.static(docsDir))
+    this.app.use('/logs',
+      express.static(logsDir),
+      serveIndex(logsDir, {
+        icons: true,
+        view: 'details'
+      })
+    )
 
     // Serve static content
     this.app.use(
@@ -201,6 +213,11 @@ export default class Server {
         icons: true
       })
     )
+
+    // Subscribe for events
+    this.engine.pubsub.subscribe('block.mined', '<server>', (block: Object) => {
+     this._wsBroadcast(block)
+    })
   }
 
   _transformBlockToWire (block: Block) {

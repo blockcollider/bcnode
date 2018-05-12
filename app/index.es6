@@ -7,8 +7,11 @@
  * @flow
  */
 
+/* global SENTRY_DSN: true, SENTRY_ENABLED: true */
+
 import { render } from './components/Root'
 import { createHistory, createStore } from './store'
+import Raven from 'raven-js'
 
 import { init as initAppReducer } from './reducers/app/reducer'
 import { init as initSocketReducer } from './reducers/socket/reducer'
@@ -25,5 +28,14 @@ initAppReducer(store.dispatch)
 // Initialize socket
 initSocketReducer(store.dispatch)
 
-// Render topmost component
-render('app', history, store)
+// Initialize raven/sentry
+if (SENTRY_ENABLED) {
+  Raven.config(SENTRY_DSN).install()
+  Raven.context(() => {
+    // Render topmost component
+    render('app', history, store)
+  })
+} else {
+  // Render topmost component
+  render('app', history, store)
+}

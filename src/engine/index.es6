@@ -20,6 +20,7 @@ const RoverManager = require('../rover/manager').default
 const rovers = require('../rover/manager').rovers
 const Server = require('../server/index').default
 const PersistenceRocksDb = require('../persistence').RocksDb
+const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
@@ -37,6 +38,7 @@ export default class Engine {
   _monitor: Monitor; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
+  _pubsub: PubSub; //  eslint-disable-line no-undef
   _rovers: RoverManager; // eslint-disable-line no-undef
   _rpc: RpcServer; // eslint-disable-line no-undef
   _server: Server; // eslint-disable-line no-undef
@@ -48,6 +50,7 @@ export default class Engine {
   _mining: bool;
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
+  _subscribers: Object
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -56,11 +59,13 @@ export default class Engine {
     this._monitor = new Monitor(this, {})
     this._node = new Node(this)
     this._persistence = new PersistenceRocksDb(DATA_DIR)
+    this._pubsub = new PubSub()
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
     this._rpc = new RpcServer(this)
     this._server = new Server(this, this._rpc)
     this._collectedBlocks = {}
+    this._subscribers = {}
     for (let roverName of this._knownRovers) {
       this._collectedBlocks[roverName] = 0
     }
@@ -68,6 +73,10 @@ export default class Engine {
     this._mining = false
     // Start NTP sync
     ts.start()
+  }
+
+  get pubsub (): PubSub {
+    return this._pubsub
   }
 
   /**
@@ -394,7 +403,7 @@ export default class Engine {
         timeDiff: solution.timeDiff
       }
 
-      this._server._wsBroadcast({ type: 'block.mined', data: newBlockObj })
+      this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
     } catch (e) {
       console.log('ERROR BROADCASTING', e)
     }

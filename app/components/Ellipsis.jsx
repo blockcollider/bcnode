@@ -90,7 +90,7 @@ export class Ellipsis extends Component<*> {
 
   render () {
     return (
-      <span style={STYLE}>
+      <span style={STYLE} data-toggle='tooltip' data-placement='top' title={this.props.text} >
         {ellipsisMiddle(this.props.text, this.props.length, this.props.ellipsis)}
       </span>
     )
