@@ -216,7 +216,7 @@ export default class Server {
 
     // Subscribe for events
     this.engine.pubsub.subscribe('block.mined', '<server>', (block: Object) => {
-     this._wsBroadcast(block)
+      this._wsBroadcast(block)
     })
   }
 
