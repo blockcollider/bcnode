@@ -7,14 +7,15 @@
  * @flow
  */
 
-/* global SENTRY_DSN: true, SENTRY_ENABLED: true */
-
 import { render } from './components/Root'
 import { createHistory, createStore } from './store'
 import Raven from 'raven-js'
 
 import { init as initAppReducer } from './reducers/app/reducer'
 import { init as initSocketReducer } from './reducers/socket/reducer'
+
+declare var SENTRY_DSN: string
+declare var SENTRY_ENABLED: boolean
 
 // Create history
 const history = createHistory()
