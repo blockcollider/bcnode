@@ -91,10 +91,9 @@ export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: n
  * @param previousDifficulty
  * @param minimalDiffulty
  * @param newBlockCount
- * @param handicap
  * @returns
  */
-export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, newBlockCount: number, handicap: number = 0): BN {
+export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, newBlockCount: number): BN {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 
   let bigMinimalDifficulty = new BN(minimalDiffulty, 16)
@@ -105,6 +104,7 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   const bigMinus99 = new BN(-99, 16)
   const big1 = new BN(1, 16)
   const big0 = new BN(0, 16)
+  const bigTargetTimeDiff = new BN(6, 16)
   let elapsedTime = bigCurentBlockTime.sub(bigPreviousBlockTime)
 
   // elapsedTime + ((elapsedTime - 4) * newBlocks)
@@ -114,14 +114,8 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
     elapsedTime = elapsedTimeBonus
   }
 
-  let x
-  // TODO unclear if correct - handicap is almost always 0 (because there was a change in timestamp of at least one child chain last block)
-  if (handicap === 0) {
-    x = big1.sub(elapsedTime)
-  } else {
-    // x = 1 - floor(x / handicap)
-    x = big1.sub(elapsedTime.div(new BN(handicap))) // div floors by default
-  }
+  // x = 1 - floor(x / handicap)
+  let x = big1.sub(elapsedTime.div(bigTargetTimeDiff)) // div floors by default
   let y
 
   // x < -99 ? -99 : x
@@ -370,15 +364,12 @@ export function getNewPreExpDifficulty (
   childrenCurrentBlocks: ChildBlockHeader[],
   newBlockCount: number
 ) {
-  let handicap = calculateHandicap(childrenPreviousBlocks, childrenCurrentBlocks)
-
   const preExpDiff = getDiff(
     currentTimestamp,
     lastPreviousBlock.getTimestamp(),
     lastPreviousBlock.getDifficulty(),
     MINIMUM_DIFFICULTY,
-    newBlockCount,
-    handicap
+    newBlockCount
   ) // Calculate the final pre-singularity difficulty adjustment
 
   return preExpDiff
