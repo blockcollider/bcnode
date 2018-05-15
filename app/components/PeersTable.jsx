@@ -38,19 +38,29 @@ const UNITS = [
   'TB'
 ]
 
-const formatBytes = (bytes: number) => {
+const UNITS_PS = [
+  'Bps',
+  'kBps',
+  'MBps',
+  'GBps',
+  'TBps'
+]
+
+const formatBytes = (bytes: number, units: string[] = UNITS) => {
   let i
   let res = bytes
-  for (i = 0; i < (UNITS.length - 1) && res >= 1024; i++) {
+  for (i = 0; i < (units.length - 1) && res >= 1024; i++) {
     res /= 1024
   }
 
-  return `${round(res, 2)}${UNITS[i]}`
+  return `${round(res, 0)}${units[i]}`
 }
 
 export class PeersTable extends Component<*> {
   render () {
     let id = 0
+
+    const now = Date.now()
     const peers = this.props.peers.map((peer) => {
       const peerId = `${peer.id.substring(0, 6)}...${peer.id.substr(peer.id.length - 6)}`
 
@@ -104,7 +114,16 @@ export class PeersTable extends Component<*> {
           return 'N/A'
         }
 
-        return `${formatBytes(snapshot.dataReceived)}/${formatBytes(snapshot.dataSent)}`
+        const timeDiff = (now - peer.meta.ts.connectedAt) * 0.001
+        const total = `${formatBytes(snapshot.dataReceived)}/${formatBytes(snapshot.dataSent)}`
+        const speed = `${formatBytes(snapshot.dataReceived / timeDiff, UNITS_PS)}/${formatBytes(snapshot.dataSent / timeDiff, UNITS_PS)}`
+
+        return (
+          <div>
+            <div key={`${peer.id}.stats.total`}>{total}</div>
+            <div key={`${peer.id}.stats.speed`}>{speed}</div>
+          </div>
+        )
       }
 
       return (
@@ -132,7 +151,7 @@ export class PeersTable extends Component<*> {
               <th scope='col'>Address</th>
               <th scope='col'>Protocol Version</th>
               <th scope='col'>Version</th>
-              <th scope='col'>Rx/Tx</th>
+              <th scope='col'>RX/TX</th>
               <th scope='col'>Timestamp</th>
             </tr>
           </thead>
