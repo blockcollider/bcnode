@@ -13,7 +13,7 @@ const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 
 const config = require('../../config/config')
-const { debugSaveObject } = require('../debug')
+const { debugSaveObject, isDebugEnabled } = require('../debug')
 const logging = require('../logger')
 const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')
@@ -25,7 +25,7 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
-const { BcBlock } = require('../protos/core_pb')
+const { Block, BcBlock } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
 const ts = require('../utils/time').default // ES6 default export
@@ -33,6 +33,14 @@ const ts = require('../utils/time').default // ES6 default export
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 const MONITOR_ENABLED = process.env.BC_MONITOR === 'true'
 const MINER_WORKER_PATH = resolve(__filename, '..', '..', 'bc', 'miner_worker.js')
+
+type UnfinishedBlockData = {
+  lastPreviousBlock: ?BcBlock,
+  block: ?Block,
+  currentBlocks: ?{ [blokchain: string]: Block },
+  iterations: ?number,
+  timeDiff: ?number
+}
 
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
@@ -51,7 +59,7 @@ export default class Engine {
   _mining: bool;
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
-  _unfinishedBlockData: ?Object
+  _unfinishedBlockData: ?UnfinishedBlockData
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -71,6 +79,7 @@ export default class Engine {
     }
     this._canMine = false
     this._mining = false
+    this._unfinishedBlockData = { block: undefined, lastPreviousBlock: undefined, currentBlocks: {}, timeDiff: undefined, iterations: undefined }
     // Start NTP sync
     ts.start()
   }
@@ -270,7 +279,13 @@ export default class Engine {
       )
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
-      this._unfinishedBlockData = { lastPreviousBlock, currentBlocks: fromPairs(newBlock.getChildBlockHeadersList().map(b => [b.getBlockchain(), b])), block }
+      this._unfinishedBlockData = {
+        lastPreviousBlock,
+        currentBlocks: fromPairs(newBlock.getChildBlockHeadersList().map(b => [b.getBlockchain(), b])),
+        block,
+        iterations: undefined,
+        timeDiff: undefined
+      }
 
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
       const proc: ChildProcess = fork(MINER_WORKER_PATH)
@@ -313,7 +328,7 @@ export default class Engine {
     }
   }
 
-  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number }) {
+  _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
       throw new Error(`There is not unfininshed block to use solution for`)
     }
@@ -324,8 +339,10 @@ export default class Engine {
     this._unfinishedBlock.setTimestamp(solution.timestamp)
     // $FlowFixMe
     this._unfinishedBlock.setDifficulty(solution.difficulty)
-    this._unfinishedBlockData.iterations = solution.iterations
-    this._unfinishedBlockData.timeDiff = solution.timeDiff
+    if (this._unfinishedBlockData) {
+      this._unfinishedBlockData.iterations = solution.iterations
+      this._unfinishedBlockData.timeDiff = solution.timeDiff
+    }
 
     this._processMinedBlock(this._unfinishedBlock, solution)
   }
@@ -366,20 +383,29 @@ export default class Engine {
     return this._rovers.killRovers()
   }
 
+  _writeMiningData (newBlock: BcBlock, solution: { iterations: number, timeDiff: number }) {
+    // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
+    const row = [
+      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
+    ];
+
+    ['btc', 'eth', 'lsk', 'neo', 'wav'].forEach(roverName => {
+      if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks && this._unfinishedBlockData.currentBlocks[roverName]) {
+        const block = this._unfinishedBlockData.currentBlocks[roverName]
+        row.push(block.getChildBlockConfirmationsInParentCount())
+        row.push(block.getTimestamp() / 1000 << 0)
+      }
+    })
+    writeFileSync(resolve(__dirname, '..', '..', 'mining-data.csv'), `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
+  }
+
   _broadcastMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     this._logger.info('Broadcasting mined block')
 
     this.node.broadcastNewBlock(newBlock)
-    // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
-    const row = [
-      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
-    ]
-
-    const roverNames = ['btc', 'eth', 'lsk', 'neo', 'wav'].forEach(roverName => {
-      row.push(this._unfinishedBlockData.currentBlocks[roverName].getChildBlockConfirmationsInParentCount())
-      row.push(this._unfinishedBlockData.currentBlocks[roverName].getTimestamp() / 1000 << 0)
-    })
-    writeFileSync(resolve(__dirname, '..', '..', 'mining-data.csv'), `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
+    if (isDebugEnabled()) {
+      this._writeMiningData(newBlock, solution)
+    }
     this._unfinishedBlock = undefined
     this._unfinishedBlockData = undefined
     this._mining = false
