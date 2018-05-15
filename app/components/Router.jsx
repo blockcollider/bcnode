@@ -16,6 +16,7 @@ import { App } from './App'
 import {
   Block,
   Blocks,
+  Doc,
   Logs,
   Miner,
   Peer,
@@ -43,6 +44,7 @@ export class Router extends Component<*> {
               <Route path='/profile' component={Profile} />
             </div>
           </div>
+          <Route path='/doc/' component={Doc} />
           <Route path='/logs/' component={Logs} />
         </App>
       </ConnectedRouter>
