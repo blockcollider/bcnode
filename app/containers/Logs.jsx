@@ -17,7 +17,7 @@ export class LogsContainer extends Component<*> {
     //   backgroundColor: 'white'
     // }
     return (
-      <div>
+      <div className='bg-white'>
         <Helmet>
           <title>Logs</title>
         </Helmet>
