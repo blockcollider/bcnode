@@ -38,13 +38,17 @@ export class PeersTable extends Component<*> {
       const meta = peer.meta || {}
       const metaVersion = meta.version || {}
 
-      const address = (peer.addrs || [])
-        .map((addr) => {
-          const key = `${peer.id}.${addr}`
-          return (
-            <div key={key}>{addr.substring(0, 34)}</div>
-          )
-        })
+      // const address = (peer.addrs || [])
+      //   .map((addr) => {
+      //     const key = `${peer.id}.${addr}`
+      //     return (
+      //       <div key={key}>{addr.substring(0, 34)}</div>
+      //     )
+      //   })
+
+      const address = (
+        <div>{peer.addr.substring(0, 34)}</div>
+      )
 
       const protocolVersion = (
         metaVersion.protocol
