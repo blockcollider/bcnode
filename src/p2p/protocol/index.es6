@@ -7,13 +7,16 @@
  * @flow
  */
 
+import type { Bundle } from '../bundle'
+import type { PeerManager } from '../manager/manager'
+
 const { register: registerNewBlock } = require('./newBlock')
 const { register: registerStatus } = require('./status')
 
-export const register = () => {
+export const registerProtocols = (manager: PeerManager, bundle: Bundle) => {
   console.log('Registering protocols')
 
-  registerNewBlock()
+  registerNewBlock(manager, bundle)
 
-  registerStatus()
+  registerStatus(manager, bundle)
 }
