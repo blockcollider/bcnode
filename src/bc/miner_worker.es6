@@ -50,8 +50,6 @@ const main = () => {
         const preExpDiff = getNewPreExpDifficulty(
           timestamp,
           lastPreviousBlockProto,
-          lastPreviousBlockProto.getChildBlockHeadersList(),
-          newBlockHeadersProto,
           newBlockCount
         )
         return getExpFactorDiff(preExpDiff, lastPreviousBlockProto.getHeight()).toNumber()

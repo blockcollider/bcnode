@@ -23,7 +23,6 @@
 const similarity = require('compute-cosine-similarity')
 const BN = require('bn.js')
 const {
-  all,
   call,
   compose,
   flip,
@@ -37,7 +36,6 @@ const {
   repeat,
   reverse,
   splitEvery,
-  transpose,
   zip,
   zipWith,
   sum
@@ -104,7 +102,7 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   const bigMinus99 = new BN(-99, 16)
   const big1 = new BN(1, 16)
   const big0 = new BN(0, 16)
-  const bigTargetTimeDiff = new BN(6, 16)
+  const bigTargetTimeWindow = new BN(6, 16)
   let elapsedTime = bigCurentBlockTime.sub(bigPreviousBlockTime)
 
   // elapsedTime + ((elapsedTime - 4) * newBlocks)
@@ -115,7 +113,7 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   }
 
   // x = 1 - floor(x / handicap)
-  let x = big1.sub(elapsedTime.div(bigTargetTimeDiff)) // div floors by default
+  let x = big1.sub(elapsedTime.div(bigTargetTimeWindow)) // div floors by default
   let y
 
   // x < -99 ? -99 : x
@@ -298,7 +296,6 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
  */
 const toHexBuffer: ((string) => Buffer) = partialRight(invoker(2, 'from'), ['hex', Buffer])
 const hash: ((ChildBlockHeader|Block) => string) = invoker(0, 'getHash')
-const timestamp: ((ChildBlockHeader|Block) => number) = invoker(0, 'getTimestamp')
 const merkleRoot: ((ChildBlockHeader|Block) => string) = invoker(0, 'getMerkleRoot')
 
 /**
@@ -328,40 +325,10 @@ export function getMinimumDifficulty (childChainCount: number): BN {
   return MINIMUM_DIFFICULTY.div(new BN(childChainCount, 16))
 }
 
-/**
- * Calculate handicap between headers of previous and latest BC block
- * If none of the chains have increased in height 4, else 1
- *
- * @param {ChildBlockHeader[]} childrenPreviousBlocks array of rovered block headers used in last-1 BC block
- * @param {ChildBlockHeader[]} childrenCurrentBlocks array of rovered block headers used in last known BC block
- * @return {number} handicap
- */
-export function calculateHandicap (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]) {
-  if (allChildBlocksHaveSameTimestamp(childrenPreviousBlocks, childrenCurrentBlocks)) {
-    return childrenCurrentBlocks.length - 1
-  }
-
-  return 0
-}
-
-/**
- * Compares two arrays' of `ChildBlockHeader` timestamps and returns if some of the timestamps did change or all are the same
- *
- * @param {ChildBlockHeader[]} childrenPreviousBlocks array of rovered block headers used in last-1 BC block
- * @param {ChildBlockHeader[]} childrenCurrentBlocks array of rovered block headers used in last known BC block
- * @return {bool} `false` some of the timestamps did change or `true` all are the same
- */
-function allChildBlocksHaveSameTimestamp (childrenPreviousBlocks: ChildBlockHeader[], childrenCurrentBlocks: ChildBlockHeader[]): bool {
-  const tsPairs = [map(timestamp, childrenPreviousBlocks), map(timestamp, childrenCurrentBlocks)]
-  return all(r => r, transpose(tsPairs).map(([previousTs, currentTs]) => previousTs === currentTs))
-}
-
 // TODO rename arguments to better describe data
 export function getNewPreExpDifficulty (
   currentTimestamp: number,
   lastPreviousBlock: BcBlock,
-  childrenPreviousBlocks: ChildBlockHeader[],
-  childrenCurrentBlocks: ChildBlockHeader[],
   newBlockCount: number
 ) {
   const preExpDiff = getDiff(
@@ -472,8 +439,6 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
       const preExpDiff = getNewPreExpDifficulty(
         finalTimestamp,
         lastPreviousBlock,
-        lastPreviousBlock.getChildBlockHeadersList(),
-        childBlockHeadersList,
         newBlockCount
       )
       finalDifficulty = getExpFactorDiff(preExpDiff, lastPreviousBlock.getHeight()).toNumber()
