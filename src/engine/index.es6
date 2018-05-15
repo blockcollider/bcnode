@@ -7,7 +7,7 @@
  * @flow
  */
 const { EventEmitter } = require('events')
-const { equals, all, values } = require('ramda')
+const { equals, all, values, fromPairs } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
