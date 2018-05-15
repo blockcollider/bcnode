@@ -20,16 +20,23 @@ const logging = require('../../logger')
 
 const { PROTOCOL_PREFIX } = require('../protocol/version')
 
+const BC_P2P_PASSIVE = !!process.env.BC_P2P_PASSIVE
+
 export class PeerManager {
   _logger: Object // eslint-disable-line no-undef
   _peerBook: ManagedPeerBook // eslint-disable-line no-undef
+  _peerBookConnected: ManagedPeerBook // eslint-disable-line no-undef
+  _peerBookDiscovered: ManagedPeerBook // eslint-disable-line no-undef
   _peerNode: PeerNode // eslint-disable-line no-undef
 
   constructor (node: PeerNode) {
     debug('constructor()')
     this._logger = logging.getLogger(__filename)
     this._peerNode = node
+
     this._peerBook = new ManagedPeerBook(this, 'main')
+    this._peerBookConnected = new ManagedPeerBook(this, 'connected')
+    this._peerBookDiscovered = new ManagedPeerBook(this, 'discovered')
   }
 
   get bundle (): Bundle {
@@ -44,6 +51,14 @@ export class PeerManager {
     return this._peerBook
   }
 
+  get peerBookConnected (): ManagedPeerBook {
+    return this._peerBookConnected
+  }
+
+  get peerBookDiscovered (): ManagedPeerBook {
+    return this._peerBookDiscovered
+  }
+
   get peerNode (): PeerNode {
     return this._peerNode
   }
@@ -52,44 +67,56 @@ export class PeerManager {
     const peerId = peer.id.toB58String()
     debug('Event - peer:discovery', peerId)
 
-    if (this.peerBook.has(peer) && this.peerBook.get(peer).meta) {
-      debug(`Discovered peer ${peerId} already in PeerBook`)
-      // console.log(this.peerBook.get(peer))
+    if (!this.peerBookDiscovered.has(peer)) {
+      // TODO: Meta info ???
+      this.peerBookDiscovered.put(peer)
+      debug(`Adding newly discovered peer '${peerId}' to discoveredPeerBook, count: ${this.peerBookDiscovered.getPeersCount()}`)
+    } else {
+      debug(`Discovered peer ${peerId} already in discoveredPeerBook`)
       return
     }
 
-    return this.bundle.dial(peer, (err) => {
-      if (err) {
-        debug(`Error while dialing discovered peer ${peerId}`, err)
-        this._logger.warn(`Error while dialing discovered peer ${peerId}`, err)
-        return err
-      }
+    if (!BC_P2P_PASSIVE && !this.peerBookConnected.has(peer)) {
+      debug(`Dialing newly discovered peer ${peerId}`)
+      return this.bundle.dial(peer, (err) => {
+        if (err) {
+          debug(`Error while dialing discovered peer ${peerId}`, err)
+          this._logger.warn(`Error while dialing discovered peer ${peerId}`,
+            err)
+          return err
+        }
 
-      this._logger.info(`Discovered peer successfully dialed ${peerId}`)
-      this._checkPeerStatus(peer)
-    })
+        this._logger.info(`Discovered peer successfully dialed ${peerId}`)
+      })
+    }
   }
 
   onPeerConnect (peer: PeerInfo) {
     const peerId = peer.id.toB58String()
     debug('Event - peer:connect', peerId)
 
-    // FIXME: This should be done as part of discovery, not after ANOTHER CLIENT CONNECTED TO US
-    // this.checkPeerStatus(peer)
+    if (!this.peerBookConnected.has(peer)) {
+      this.peerBookConnected.put(peer)
+      debug(`Connected new peer '${peerId}', adding to connectedPeerBook, count: ${this.peerBookConnected.getPeersCount()}`)
+    } else {
+      debug(`Peer '${peerId}', already in connectedPeerBook`)
+      return
+    }
+
+    this._checkPeerStatus(peer)
   }
 
   onPeerDisconnect (peer: PeerInfo) {
     const peerId = peer.id.toB58String()
     debug('Event - peer:disconnect', peerId)
-    // wait for 1s for both libp2p-switch/dial and libp2p-switch/connection muxedConn `close` handlers
-    // to finish
-    setTimeout(() => {
-      if (this.peerBook.has(peer)) {
-        this._logger.info('Peer disconnected', peerId)
-        this.peerBook.remove(peer)
-      }
+
+    if (this.peerBookConnected.has(peer)) {
+      this.peerBookConnected.remove(peer)
       this.engine._emitter.emit('peerDisconnected', { peer })
-    }, 1000)
+      debug(`Peer disconnected '${peerId}', removing from connectedPeerBook, count: ${this.peerBookConnected.getPeersCount()}`)
+    } else {
+      debug(`Peer '${peerId}', already removed from connectedPeerBook`)
+    }
   }
 
   _checkPeerStatus (peer: PeerInfo) {
@@ -128,11 +155,15 @@ export class PeerManager {
               throw err
             }
 
-            debug('Updating peer with meta/status', peerId)
+            if (this.peerBookConnected.has(peer)) {
+              debug('Updating peer with meta/status', peerId)
+              const existingPeer = this.peerBookConnected.get(peer)
 
-            const status = JSON.parse(wireData[0])
-            peerInfo.meta = mergeDeepRight(meta, status)
-            // this.peerBook.put(peerInfo)
+              const status = JSON.parse(wireData[0])
+              existingPeer.meta = mergeDeepRight(meta, status)
+            } else {
+              debug('Unable to update peer meta/status, not in peerBookConnected', peerId)
+            }
 
             this.engine._emitter.emit('peerConnected', { peer })
           })
