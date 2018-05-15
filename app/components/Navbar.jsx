@@ -14,11 +14,17 @@ import Brand from './Brand'
 import ConnectionState from './ConnectionState'
 
 const STYLE = {
-//  color: 'black'
+ color: 'black'
 }
 
-export class Navbar extends Component<*> {
-  constructor(props: any) {
+type State = {
+  dropdownOpen: bool
+}
+
+export class Navbar extends Component<*, State> {
+  state: Object // eslint-disable-line no-undef
+
+  constructor (props: any) {
     super(props)
 
     this.state = {
@@ -28,7 +34,7 @@ export class Navbar extends Component<*> {
 
   render () {
     return (
-      <Nav pills className='navbar navbar-expand-sm navbar-light bg-light' style={{borderLeft: 0, borderRight: 0}}>
+      <Nav className='navbar navbar-expand-sm navbar-light bg-light' style={{borderLeft: 0, borderRight: 0}}>
         <Brand>
           <ConnectionState style={{marginLeft: '10px'}} connected={this.props.connected} type='dot' />
         </Brand>
@@ -56,7 +62,7 @@ export class Navbar extends Component<*> {
             })
           }
         } >
-          <DropdownToggle nav caret>
+          <DropdownToggle nav caret style={STYLE}>
             Dev
           </DropdownToggle>
           <DropdownMenu>
