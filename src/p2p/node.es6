@@ -23,12 +23,9 @@ const { ManagedPeerBook } = require('./book')
 const Bundle = require('./bundle').default
 const Engine = require('../engine').default
 const Signaling = require('./signaling').websocket
-const PeerManager = require('./manager/manager').PeerManager
+const { PeerManager, DATETIME_STARTED_AT } = require('./manager/manager')
 
-const { PROTOCOL_PREFIX } = require('./protocol/version')
-const NETWORK_ID = 1
-
-const DATETIME_NOW = Date.now()
+const { PROTOCOL_PREFIX, NETWORK_ID } = require('./protocol/version')
 
 export class PeerNode {
   _logger: Object // eslint-disable-line no-undef
@@ -45,7 +42,7 @@ export class PeerNode {
 
     if (config.p2p.stats.enabled) {
       this._interval = setInterval(() => {
-        this._logger.info(`Peers count ${this.peerBook.getPeersCount()}`)
+        this._logger.info(`Peers count ${this.manager.peerBookConnected.getPeersCount()}`)
       }, config.p2p.stats.interval * 1000)
     }
   }
@@ -89,8 +86,8 @@ export class PeerNode {
             networkId: NETWORK_ID
           },
           ts: {
-            connectedAt: DATETIME_NOW,
-            startedAt: DATETIME_NOW
+            connectedAt: DATETIME_STARTED_AT,
+            startedAt: DATETIME_STARTED_AT
           },
           version: {
             protocol: PROTOCOL_PREFIX,
@@ -145,45 +142,7 @@ export class PeerNode {
       // Register protocols
       (cb: Function) => {
         this._logger.info('Registering protocols')
-
-        this.bundle.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
-          const status = {
-            p2p: {
-              networkId: NETWORK_ID
-            },
-            ts: {
-              startedAt: DATETIME_NOW
-            },
-            version: {
-              protocol: PROTOCOL_PREFIX,
-              ...getVersion()
-            }
-          }
-
-          pull(pull.values([JSON.stringify(status)]), conn)
-        })
-
-        //   this.bundle.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
-        //     pull(
-        //       conn,
-        //       pull.collect((err, wireData) => {
-        //         if (err) {
-        //           console.log('ERROR _handleMessageNewBlock()', err, wireData)
-        //           return
-        //         }
-        //
-        //         try {
-        //           const bytes = wireData[0]
-        //           const raw = new Uint8Array(bytes)
-        //           const block = BcBlock.deserializeBinary(raw)
-        //           this._engine.blockFromPeer(block)
-        //         } catch (e) {
-        //           this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
-        //         }
-        //       })
-        //     )
-        //   })
-
+        this.manager.registerProtocols(this.bundle)
         cb(null)
       }
     ]

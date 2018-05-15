@@ -15,12 +15,15 @@ const PeerInfo = require('peer-info')
 const pull = require('pull-stream')
 
 const { ManagedPeerBook } = require('../book/book')
+const { getVersion } = require('../../helper/version')
 const { PeerNode } = require('../node')
 const logging = require('../../logger')
 
-const { PROTOCOL_PREFIX } = require('../protocol/version')
+const { PROTOCOL_PREFIX, NETWORK_ID } = require('../protocol/version')
 
 const BC_P2P_PASSIVE = !!process.env.BC_P2P_PASSIVE
+
+export const DATETIME_STARTED_AT = Date.now()
 
 export class PeerManager {
   _logger: Object // eslint-disable-line no-undef
@@ -117,6 +120,46 @@ export class PeerManager {
     } else {
       debug(`Peer '${peerId}', already removed from connectedPeerBook`)
     }
+  }
+
+  registerProtocols (bundle: Bundle) {
+    bundle.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
+      const status = {
+        p2p: {
+          networkId: NETWORK_ID
+        },
+        ts: {
+          startedAt: DATETIME_STARTED_AT
+        },
+        version: {
+          protocol: PROTOCOL_PREFIX,
+          ...getVersion()
+        }
+      }
+
+      pull(pull.values([JSON.stringify(status)]), conn)
+    })
+
+    //   this.bundle.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
+    //     pull(
+    //       conn,
+    //       pull.collect((err, wireData) => {
+    //         if (err) {
+    //           console.log('ERROR _handleMessageNewBlock()', err, wireData)
+    //           return
+    //         }
+    //
+    //         try {
+    //           const bytes = wireData[0]
+    //           const raw = new Uint8Array(bytes)
+    //           const block = BcBlock.deserializeBinary(raw)
+    //           this._engine.blockFromPeer(block)
+    //         } catch (e) {
+    //           this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
+    //         }
+    //       })
+    //     )
+    //   })
   }
 
   _checkPeerStatus (peer: PeerInfo) {

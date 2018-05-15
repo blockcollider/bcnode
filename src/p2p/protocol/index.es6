@@ -7,6 +7,13 @@
  * @flow
  */
 
+const { register: registerNewBlock } = require('./newBlock')
+const { register: registerStatus } = require('./status')
+
 export const register = () => {
-  console.log('Registering /status protocol')
+  console.log('Registering protocols')
+
+  registerNewBlock()
+
+  registerStatus()
 }

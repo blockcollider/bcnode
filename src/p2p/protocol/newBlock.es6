@@ -6,3 +6,7 @@
  *
  * @flow
  */
+
+export const register = () => {
+  console.log('Registering /newBlock protocol')
+}

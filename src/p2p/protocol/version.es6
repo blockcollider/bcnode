@@ -9,3 +9,4 @@
 
 export const PROTOCOL_VERSION = '0.0.1'
 export const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
+export const NETWORK_ID = 1
