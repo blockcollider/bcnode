@@ -114,6 +114,15 @@ export class PeerNode {
         cb(null, this._bundle)
       },
 
+      // Start node
+      (bundle: Object, cb: Function) => {
+        this._logger.info('Starting P2P node')
+
+        bundle.start((err) => {
+          cb(err, bundle)
+        })
+      },
+
       // Register event handlers
       (bundle: Object, cb: Function) => {
         this._logger.info('Registering event handlers')
@@ -154,35 +163,28 @@ export class PeerNode {
           pull(pull.values([JSON.stringify(status)]), conn)
         })
 
-        this.bundle.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
-          pull(
-            conn,
-            pull.collect((err, wireData) => {
-              if (err) {
-                console.log('ERROR _handleMessageNewBlock()', err, wireData)
-                return
-              }
-
-              try {
-                const bytes = wireData[0]
-                const raw = new Uint8Array(bytes)
-                const block = BcBlock.deserializeBinary(raw)
-                this._engine.blockFromPeer(block)
-              } catch (e) {
-                this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
-              }
-            })
-          )
-        })
+        //   this.bundle.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
+        //     pull(
+        //       conn,
+        //       pull.collect((err, wireData) => {
+        //         if (err) {
+        //           console.log('ERROR _handleMessageNewBlock()', err, wireData)
+        //           return
+        //         }
+        //
+        //         try {
+        //           const bytes = wireData[0]
+        //           const raw = new Uint8Array(bytes)
+        //           const block = BcBlock.deserializeBinary(raw)
+        //           this._engine.blockFromPeer(block)
+        //         } catch (e) {
+        //           this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
+        //         }
+        //       })
+        //     )
+        //   })
 
         cb(null)
-      },
-
-      // Start node
-      (cb: Function) => {
-        this._logger.info('Starting P2P node')
-
-        this.bundle.start((err) => { cb(err, this.bundle) })
       }
     ]
   }

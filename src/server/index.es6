@@ -216,7 +216,7 @@ export default class Server {
 
     // Subscribe for events
     this.engine.pubsub.subscribe('block.mined', '<server>', (block: Object) => {
-     this._wsBroadcast(block)
+      this._wsBroadcast(block)
     })
   }
 
@@ -233,8 +233,8 @@ export default class Server {
     return {
       id: peer.id.toB58String(),
       meta: peer.meta,
-      // addr: peer.multiaddrs._connectedMultiaddr.toString(),
-      addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString())
+      addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString()),
+      addr: peer._connectedMultiaddr && peer._connectedMultiaddr.toString()
     }
   }
 
@@ -271,7 +271,7 @@ export default class Server {
     let peers = []
 
     const node = this._engine._node
-    const peerBook = node && node.peerBook
+    const peerBook = node && node.manager.peerBookConnected
     if (peerBook) {
       peers = peerBook.getAllArray().map((peer) => {
         return this._transformPeerToWire(peer)
