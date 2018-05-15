@@ -13,7 +13,7 @@ const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 
 const config = require('../../config/config')
-const { debugSaveObject, isDebugEnabled } = require('../debug')
+const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
 const logging = require('../logger')
 const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')
@@ -387,16 +387,17 @@ export default class Engine {
     // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
     const row = [
       newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
-    ];
+    ]
 
-    ['btc', 'eth', 'lsk', 'neo', 'wav'].forEach(roverName => {
+    this._knownRovers.forEach(roverName => {
       if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks && this._unfinishedBlockData.currentBlocks[roverName]) {
         const block = this._unfinishedBlockData.currentBlocks[roverName]
         row.push(block.getChildBlockConfirmationsInParentCount())
         row.push(block.getTimestamp() / 1000 << 0)
       }
     })
-    writeFileSync(resolve(__dirname, '..', '..', 'mining-data.csv'), `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
+    const dataPath = ensureDebugPath(`bc/mining-data.csv`)
+    writeFileSync(dataPath, `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
   }
 
   _broadcastMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
