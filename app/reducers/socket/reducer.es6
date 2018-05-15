@@ -26,6 +26,7 @@ const DISPATCH_TABLE = {
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
   'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
   'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS,
+  'peer.stats': PEER_ACTIONS.PEERS_STATS,
   'profile.set': PROFILE_ACTIONS.PROFILE_SET
 }
 

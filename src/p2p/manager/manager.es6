@@ -27,6 +27,7 @@ export const DATETIME_STARTED_AT = Date.now()
 
 export class PeerManager {
   _logger: Object // eslint-disable-line no-undef
+  _statsInterval: IntervalID // eslint-disable-line no-undef
   _peerBook: ManagedPeerBook // eslint-disable-line no-undef
   _peerBookConnected: ManagedPeerBook // eslint-disable-line no-undef
   _peerBookDiscovered: ManagedPeerBook // eslint-disable-line no-undef
@@ -40,6 +41,31 @@ export class PeerManager {
     this._peerBook = new ManagedPeerBook(this, 'main')
     this._peerBookConnected = new ManagedPeerBook(this, 'connected')
     this._peerBookDiscovered = new ManagedPeerBook(this, 'discovered')
+
+    this._statsInterval = setInterval(() => {
+      const stats = this.peerNode.bundle && this.peerNode.bundle.stats
+      const peers = (stats && stats.peers()) || []
+      const data = peers.reduce((acc, el) => {
+        const peerStats = stats.forPeer(el)
+        if (peerStats) {
+          acc[el] = {
+            snapshot: {
+              dataReceived: parseInt(peerStats.snapshot.dataReceived, 10),
+              dataSent: parseInt(peerStats.snapshot.dataSent, 10)
+            },
+            avg: peerStats.movingAverages
+          }
+        }
+        return acc
+      }, {})
+
+      if (this.engine.server) {
+        this.engine.server._wsBroadcast({
+          type: 'peer.stats',
+          data
+        })
+      }
+    }, 10 * 1000)
   }
 
   get bundle (): Bundle {

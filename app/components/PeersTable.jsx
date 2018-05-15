@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react'
+import { round } from 'mathjs'
 import moment from 'moment'
 
 import { VersionLink } from './VersionLink'
@@ -27,6 +28,24 @@ const PeerLink = (props: Object) => {
   return (
     <a {...linkProps}>{props.children}</a>
   )
+}
+
+const UNITS = [
+  'B',
+  'kB',
+  'MB',
+  'GB',
+  'TB'
+]
+
+const formatBytes = (bytes: number) => {
+  let i
+  let res = bytes
+  for (i = 0; i < (UNITS.length - 1) && res >= 1024; i++) {
+    res /= 1024
+  }
+
+  return `${round(res, 2)}${UNITS[i]}`
 }
 
 export class PeersTable extends Component<*> {
@@ -79,6 +98,15 @@ export class PeersTable extends Component<*> {
         )
       }
 
+      const stats = () => {
+        const snapshot = peer.stats && peer.stats.snapshot
+        if (!snapshot) {
+          return 'N/A'
+        }
+
+        return `${formatBytes(snapshot.dataReceived)}/${formatBytes(snapshot.dataSent)}`
+      }
+
       return (
         <tr key={peer.id}>
           <th scope='row'>{id++}</th>
@@ -88,6 +116,7 @@ export class PeersTable extends Component<*> {
           <td>{address}</td>
           <td>{protocolVersion}</td>
           <td><VersionLink version={metaVersion} /></td>
+          <td>{stats()}</td>
           <td>{timestamp()}</td>
         </tr>
       )
@@ -103,6 +132,7 @@ export class PeersTable extends Component<*> {
               <th scope='col'>Address</th>
               <th scope='col'>Protocol Version</th>
               <th scope='col'>Version</th>
+              <th scope='col'>Rx/Tx</th>
               <th scope='col'>Timestamp</th>
             </tr>
           </thead>

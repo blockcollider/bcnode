@@ -40,6 +40,18 @@ export const reducer = (state: Object = initialState, action: Object) => {
 
     case ACTIONS.PEERS_SET_PEERS:
       return { ...state, peers: action.payload.map(transformFromWire) }
+
+    case ACTIONS.PEERS_STATS:
+      const stats = action.payload
+      const peers = state.peers.map((peer) => {
+        const peerStats = stats[peer.id]
+        if (peerStats) {
+          peer.stats = peerStats
+        }
+        return peer
+      })
+
+      return { ...state, peers }
   }
 
   return state
