@@ -120,7 +120,7 @@ export default class Controller {
       this._tryDisconnectPeer(peer)
     })
     pool.on('seederror', (err) => {
-      this._logger.error(`Seed Error, err: ${errToString(err)}`)
+      this._logger.debug(`Seed Error, err: ${errToString(err)}`)
     })
     pool.on('peertimeout', (err) => {
       this._logger.debug(`Peer timeout, err ${errToString(err)}`)
@@ -129,7 +129,7 @@ export default class Controller {
       this._logger.debug(`Timeout, err ${errToString(err)}`)
     })
     pool.on('error', (err) => {
-      this._logger.error(`Generic pool error, err ${errToString(err)}`)
+      this._logger.debug(`Generic pool error, err ${errToString(err)}`)
     })
 
     // attach peer events
