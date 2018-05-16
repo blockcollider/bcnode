@@ -38,6 +38,18 @@ export function isDebugEnabled () {
 }
 
 /**
+ * Ensures that debug full dir path exists
+ */
+export function ensureDebugPath (relativePath: string) {
+  const fullPath = path.resolve(DEBUG_DIR, relativePath)
+  const fullDir = path.dirname(fullPath)
+  if (!fs.existsSync(fullDir)) {
+    mkdirp.sync(fullDir)
+  }
+  return fullPath
+}
+
+/**
  * Saves object in JSON format into DEBUG_DIR
  * @param relativePath path relative to DEBUG_DIR
  * @param obj Object to be saved
@@ -47,21 +59,12 @@ export function debugSaveObject (relativePath: string, obj: Object) {
     return
   }
 
-  const fullPath = path.resolve(DEBUG_DIR, relativePath)
+  const fullPath = ensureDebugPath(relativePath)
 
   const writeObj = () => {
     const json = JSON.stringify(obj, null, 2)
     fs.writeFile(fullPath, json, () => {})
   }
 
-  const fullDir = path.dirname(fullPath)
-  if (!fs.existsSync(fullDir)) {
-    mkdirp(fullDir, (err) => {
-      if (!err) {
-        writeObj()
-      }
-    })
-  } else {
-    writeObj()
-  }
+  writeObj()
 }

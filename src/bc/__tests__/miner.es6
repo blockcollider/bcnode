@@ -2,10 +2,11 @@ const BN = require('bn.js')
 const { Block } = require('../../protos/core_pb')
 
 const {
-  calculateHandicap,
   prepareNewBlock,
   prepareWork,
-  mine
+  mine,
+  getNewPreExpDifficulty,
+  getNewBlockCount
 } = require('../miner')
 
 const { getGenesisBlock, GENESIS_MINER_KEY } = require('../genesis')
@@ -18,23 +19,6 @@ const TEST_MINER_KEY = GENESIS_MINER_KEY // crypto.randomBytes(32)
 const TEST_DATA = require('../data').BLOCKS_MAP
 
 describe('Miner', () => {
-  test('calculateHandicap() return 0 if any timestamp differs', () => {
-    const headers1 = getGenesisBlock().getChildBlockHeadersList()
-    const headers2 = getGenesisBlock().getChildBlockHeadersList()
-
-    headers2[0].setTimestamp((Date.now() / 1000) << 0)
-    const handicap = calculateHandicap(headers1, headers2)
-    expect(handicap).toEqual(0)
-  })
-
-  test('calculateHandicap() return 4 if all timestamps are same', () => {
-    const genesisBlock = getGenesisBlock()
-    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
-
-    const handicap = calculateHandicap(genesisHeaders, genesisHeaders)
-    expect(handicap).toEqual(4)
-  })
-
   test('mine()', () => {
     const genesisBlock = getGenesisBlock()
     const genesisHeaders = genesisBlock.getChildBlockHeadersList()
@@ -81,7 +65,6 @@ describe('Miner', () => {
     const [newBlock, _] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       genesisBlock,
-      { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[1],
       [], // transactions
@@ -117,7 +100,7 @@ describe('Miner', () => {
       hash: '39bc7bbd2b182eddac2d18d5c998808f64423176975fb5a715d57f8599a4104f',
       height: 2,
       merkleRoot: '53c85bcd43ade65bba9d2e2d2b5944116526b7c05ba7b7d6425699128548f5ae',
-      difficulty: 11801972029398,
+      difficulty: 141129464479256,
       chainRoot: 'daf4c73925e7eb4e67a86cabfb7cc1e257a7af63f6a3f0b3f5991839891fc796',
       distance: 186475791516929,
       nonce: '0.12137218313968567',
@@ -207,7 +190,6 @@ describe('Miner', () => {
     let [newBlock, _] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       genesisBlock,
-      { 'btc': genesisBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[0],
       [], // transactions
@@ -241,7 +223,6 @@ describe('Miner', () => {
     let [newBlock2, _2] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       newBlock,
-      { 'btc': newBlock, 'eth': genesisBlock, 'lsk': genesisBlock, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[0],
       [], // transactions
@@ -275,7 +256,6 @@ describe('Miner', () => {
     let [newBlock3, _3] = prepareNewBlock( // eslint-disable-line
       mockedTimestamp,
       newBlock2,
-      { 'btc': newBlock, 'eth': genesisBlock, 'lsk': newBlock2, 'neo': genesisBlock, 'wav': genesisBlock },
       headers,
       headers[2],
       [], // transactions
@@ -286,5 +266,84 @@ describe('Miner', () => {
     expect(newBlock3.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(1)
     expect(newBlock3.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(4)
     expect(newBlock3.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(4)
+  })
+
+  test('getNewPreExpDifficulty()', () => {
+    const genesisBlock = getGenesisBlock()
+    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+
+    // Convert genesis headers back to raw Block which is returned by miner
+    const headers = genesisHeaders
+      .map((oldHeader) => {
+        return new Block([
+          oldHeader.getBlockchain(),
+          oldHeader.getHash(),
+          oldHeader.getPreviousHash(),
+          oldHeader.getTimestamp(),
+          oldHeader.getHeight(),
+          oldHeader.getMerkleRoot()
+        ])
+      })
+
+    const oldHeader = headers[1]
+
+    // Change hash, previousHash, timestamp and height
+    const newHeader = new Block([
+      'eth',
+      '0x5ea3859a785636dc4894a03e02633f33160269d2fb50366c997e0f3e1e3d0010', // <-------  the new block would update his previous block
+      oldHeader.getHash(), // the previous hash from above
+      oldHeader.getTimestamp() + 2 * 1000, // <-- new ETH block came 2s after previous one
+      oldHeader.getHeight() + 1,
+      '0xb1f411fc1bf9a951b33c9c730ff44310782f587828dd89f2d56e40565cdcd488'
+    ])
+
+    // Update changed header in header list
+    headers[1] = newHeader
+
+    // Mock timestamp - 5 seconds after genesis block
+    let mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 2015)) / 1000 << 0 // <-- now is 15 ms after the ETH block came in
+
+    // Create (not yet existing) block
+    let [newBlock, _] = prepareNewBlock( // eslint-disable-line
+      mockedTimestamp,
+      genesisBlock,
+      headers,
+      headers[1],
+      [], // transactions
+      TEST_MINER_KEY
+    )
+
+    const newBlockCount = getNewBlockCount(genesisBlock.getChildBlockHeadersList(), newBlock.getChildBlockHeadersList())
+
+    expect(newBlockCount).toBe(1)
+
+    const preExpDiff1 = getNewPreExpDifficulty(
+      mockedTimestamp,
+      genesisBlock,
+      genesisBlock.getChildBlockHeadersList(),
+      newBlock.getChildBlockHeadersList(),
+      newBlockCount
+    )
+
+    expect(preExpDiff1.toNumber()).toBe(142083041941953)
+
+    const preExpDiff2 = getNewPreExpDifficulty(
+      mockedTimestamp + 1000,
+      genesisBlock,
+      genesisBlock.getChildBlockHeadersList(),
+      newBlock.getChildBlockHeadersList(),
+      newBlockCount
+    )
+    expect(preExpDiff2.toNumber()).toBe(46725295672253) // <-- stales on this difficulty
+
+    const preExpDiff3 = getNewPreExpDifficulty(
+      mockedTimestamp + 2000,
+      genesisBlock,
+      genesisBlock.getChildBlockHeadersList(),
+      newBlock.getChildBlockHeadersList(),
+      newBlockCount + 1
+    )
+    // TODO probably not correct - should be even lower (1s after previous one and +1 block changed)
+    expect(preExpDiff3.toNumber()).toBe(46725295672253)
   })
 })

@@ -20,7 +20,7 @@ describe('time', () => {
     expect(ts.offset).toBe(0)
   })
 
-  describe('sync', () => {
+  describe('running', () => {
     beforeEach(() => {
       mockNow(new Date(MOCK_DATE_UNIX))
       Sntp.offset = jest.fn((callback) => { callback(null, 1142) })
@@ -32,11 +32,22 @@ describe('time', () => {
       Date.now.mockRestore()
     })
 
-    it('returns dates with shift', () => {
-      expect(ts.offset).toBe(1142)
-      expect(ts.now()).toBe(1523000001142)
-      expect(ts.iso()).toBe('2018-04-06T07:33:21Z')
-      expect(ts.getDate()).toEqual(new Date('2018-04-06T07:33:21.142Z'))
+    describe('sync', () => {
+      it('returns dates with shift', () => {
+        expect(ts.offset).toBe(1142)
+        expect(ts.now()).toBe(1523000001142)
+        expect(ts.iso()).toBe('2018-04-06T07:33:21Z')
+        expect(ts.getDate()).toEqual(new Date('2018-04-06T07:33:21.142Z'))
+      })
+    })
+
+    describe('offsetOverride', () => {
+      it('allows to override offset', () => {
+        ts.offsetOverride(1142)
+        expect(ts.now()).toBe(1523000001142)
+        expect(ts.iso()).toBe('2018-04-06T07:33:21Z')
+        expect(ts.getDate()).toEqual(new Date('2018-04-06T07:33:21.142Z'))
+      })
     })
   })
 })

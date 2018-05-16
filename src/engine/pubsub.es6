@@ -6,7 +6,6 @@
  *
  * @flow
  */
-
 const { RxPubSub } = require('rx-pubsub')
 const debug = require('debug')('bcnode:engine:pubsub')
 
@@ -18,17 +17,14 @@ export class PubSub {
   }
   subscribe (topic: string, context:string, listener: Function) {
     if (!topic) {
-      console.trace()
       throw new Error('No topic to subscribe specified')
     }
 
     if (!context) {
-      console.trace()
       throw new Error('No subscribe context specified')
     }
 
     if (!listener) {
-      console.trace()
       throw new Error('No pubsub listener specified')
     }
 

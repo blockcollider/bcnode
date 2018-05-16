@@ -9,8 +9,7 @@
  */
 import type { Logger } from 'winston'
 const process = require('process')
-const { fromPairs } = require('ramda')
-const { getExpFactorDiff, getNewPreExpDifficulty, getMinimumDifficulty, mine } = require('./miner')
+const { getExpFactorDiff, getNewPreExpDifficulty, getNewBlockCount, mine } = require('./miner')
 const { ChildBlockHeader, BcBlock } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
 
@@ -29,9 +28,9 @@ process.on('unhandledRejection', (err) => {
 const main = () => {
   process.title = 'bc-miner-worker'
   globalLog.debug('Starting miner worker')
-  ts.start()
 
-  process.on('message', ({currentTimestamp, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
+  process.on('message', ({currentTimestamp, offset, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
+    ts.offsetOverride(offset)
     // Deserialize buffers from parent process, buffer will be serialized as object of this shape { <idx>: byte } - so use Object.values on it
     const deserialize = (buffer: { [string]: number }, clazz: BcBlock|ChildBlockHeader) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
 
@@ -40,21 +39,18 @@ const main = () => {
     // each 1s tick with new timestamp
     const difficultyCalculator = function () {
       // Proto buffers are serialized - let's deserialize them
-      const { lastPreviousBlock, previousBcBlocks, currentBlocks, newBlockHeaders } = difficultyData
+      const { lastPreviousBlock, newBlockHeaders } = difficultyData
       const lastPreviousBlockProto = deserialize(lastPreviousBlock, BcBlock)
-      const previousBcBlocksProto = fromPairs(previousBcBlocks.map(([chain, blockBuffer]) => ([chain, deserialize(blockBuffer, BcBlock)])))
       const newBlockHeadersProto = newBlockHeaders.map(header => deserialize(header, ChildBlockHeader))
 
       // return function with scope closing all deserialized difficulty data
       return function (timestamp: number) {
-        const minimumDiffShare = getMinimumDifficulty(currentBlocks.length)
+        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getChildBlockHeadersList(), newBlockHeadersProto)
+
         const preExpDiff = getNewPreExpDifficulty(
           timestamp,
           lastPreviousBlockProto,
-          previousBcBlocksProto,
-          minimumDiffShare,
-          lastPreviousBlockProto.getChildBlockHeadersList(),
-          newBlockHeadersProto
+          newBlockCount
         )
         return getExpFactorDiff(preExpDiff, lastPreviousBlockProto.getHeight()).toNumber()
       }
@@ -73,11 +69,9 @@ const main = () => {
       // send solution and exit
       globalLog.info(`Solution found: ${JSON.stringify(solution, null, 2)}`)
       process.send(solution)
-      ts.stop()
       process.exit(0)
     } catch (e) {
       globalLog.warn(`Mining failed with reason: ${e.message}, stack ${e.stack}`)
-      ts.stop()
       process.exit(1)
     }
   })
