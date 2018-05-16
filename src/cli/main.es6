@@ -22,6 +22,7 @@ const config = require('../../config/config')
 const logging = require('../logger')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
+const { getOsInfo } = require('../helper/os')
 const { cmd: cmdConfig } = require('./cmd/config')
 const { cmd: cmdInfo } = require('./cmd/info')
 const { cmd: cmdStart } = require('./cmd/start')
@@ -100,8 +101,63 @@ export const main = async (args: string[] = process.argv) => {
   // Initialize Rust logger
   native.initLogger()
 
+  // ---------------------------
+  // CORE ERROR HANDLER SECTION
+  // ---------------------------
+
+  // Map of error handlers
+  const errorHandlers = {
+    // Uncaught exception
+    uncaughtException: [],
+
+    // Unhadled execption
+    unhandledRejection: []
+  }
+
+  // Generic console handler
+  const consoleErrorHandler = {
+    handle: (type, err) => {
+      console.log('consoleErrorHandler', type, err)
+    }
+  }
+
+  errorHandlers.uncaughtException.push(consoleErrorHandler)
+  errorHandlers.unhandledRejection.push(consoleErrorHandler)
+
+  // If sentry.io is enabled add to list of additionalErrorHandlers
+  if (config.sentry.enabled) {
+    const osInfo = getOsInfo()
+    // Create additional error handler object
+    const sentryErrorHandler = {
+      // Initialization - used for startup, one-time, handler init
+      init: () => {
+        Raven.config(config.sentry.url, {
+          release: version.git.long,
+          tags: {
+            'package.version': version.npm,
+            'os.arch': osInfo.arch,
+            'os.cpu': osInfo.cpus[0].model,
+            'os.hostname': osInfo.hostname,
+            'os.mem': osInfo.mem,
+            'os.platform': osInfo.platform,
+            'os.release': osInfo.release,
+            'os.type': osInfo.type
+          }
+        }).install()
+      },
+      // Handle error
+      handle: (type, err) => {
+        Raven.captureException(err)
+      }
+    }
+
+    // Add sentry to list of error handlers
+    errorHandlers.uncaughtException.push(sentryErrorHandler)
+    errorHandlers.unhandledRejection.push(sentryErrorHandler)
+  }
+
   // Initialize error handlers
-  initErrorHandlers(logger, versionString)
+  initErrorHandlers(logger, errorHandlers)
 
   // Parse command line
   return program.parse(args)
@@ -117,25 +173,23 @@ const initDirs = () => {
   }
 }
 
-const initErrorHandlers = (logger: Logger, versionString: string) => {
-  if (config.sentry.enabled) {
-    Raven.config(config.sentry.url, {
-      release: versionString
-    }).install()
-  }
+const initErrorHandlers = (logger: Logger, errorHandlers: Object = {}) => {
+  // Get all error handler names - uncaughtException, unhandledRejection ...
+  const errorNames = Object.keys(errorHandlers)
 
-  // setup logging of unhandled rejections
-  process.on('unhandledRejection', (err) => {
-    // $FlowFixMe
-    logger.error(`Rejected promise, trace:\n${err.stack}`)
-  })
+  // Iterate ...
+  errorNames.forEach((errorName) => {
+    logger.info(`Initializing ${errorName} handlers`)
+    const handlers = errorHandlers[errorName].map((handler) => {
+      // Initialize handler if init() func is specified
+      handler.init && handler.init()
 
-  process.on('uncaughtException', (uncaughtError) => {
-    console.log('UNCAUGHT EXCEPTION, saving in exception.log', uncaughtError)
+      return handler.handle
+    })
 
-    if (config.sentry.enabled) {
-      Raven.captureException(uncaughtError)
-    }
+    process.on(errorName, (err) => {
+      handlers.forEach((handler) => handler(errorName, err))
+    })
   })
 }
 
