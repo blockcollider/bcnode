@@ -57,7 +57,9 @@ export default class Controller {
 
   _tryDisconnectPeer (peer: Peer) {
     try {
-      peer.disconnect()
+      if (peer && peer.status) {
+        peer.disconnect()
+      }
     } catch (err) {
       this._logger.error(`Could not disconnect from peer, err: ${errToString(err)}`)
     }
