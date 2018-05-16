@@ -463,7 +463,7 @@ export default class Network extends EventEmitter {
   }
 
   onError (msg: string, err: Error) {
-    this._logger.error(`Error: ${msg} ${err.toString()}`)
+    this._logger.debug(`Error: ${msg} ${err.toString()}`)
   }
 
   // TODO port is never used
