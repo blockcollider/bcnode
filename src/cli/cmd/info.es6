@@ -8,7 +8,7 @@
  */
 
 const { Command } = require('commander')
-const os = require('os')
+const { getOsInfo } = require('../../helper/os')
 
 export const cmd = (program: typeof Command) => {
   // return program.help()
@@ -20,18 +20,5 @@ export const cmd = (program: typeof Command) => {
 
   if (program.opts().all || program.opts().machine) {
     console.log(JSON.stringify(getOsInfo(), null, 2))
-  }
-}
-
-function getOsInfo () {
-  return {
-    arch: os.arch(),
-    cpus: os.cpus(),
-    hostname: os.hostname(),
-    platform: os.platform(),
-    release: os.release(),
-    mem: os.totalmem(),
-    network: os.networkInterfaces(),
-    type: os.type()
   }
 }
