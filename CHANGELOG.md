@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [Sentry] - Log more details
 - [Sentry] - Log version as sentry 'release'
 - [CLI] - Name the process - bcnode
 - [Global] - Added benchmark module
