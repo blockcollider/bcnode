@@ -7,7 +7,7 @@
  * @flow
  */
 const { EventEmitter } = require('events')
-const { equals, all, values, fromPairs } = require('ramda')
+const { equals, all, values } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
@@ -25,7 +25,7 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
-const { Block, BcBlock } = require('../protos/core_pb')
+const { Block, BcBlock, ChildChain } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
 const ts = require('../utils/time').default // ES6 default export
@@ -56,7 +56,6 @@ export default class Engine {
   _minerKey: string; // eslint-disable-line no-undef
   _collectedBlocks: Object; // eslint-disable-line no-undef
   _canMine: bool; // eslint-disable-line no-undef
-  _mining: bool;
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
   _unfinishedBlockData: ?UnfinishedBlockData
@@ -78,7 +77,6 @@ export default class Engine {
       this._collectedBlocks[roverName] = 0
     }
     this._canMine = false
-    this._mining = false
     this._unfinishedBlockData = { block: undefined, lastPreviousBlock: undefined, currentBlocks: {}, timeDiff: undefined, iterations: undefined }
     // Start NTP sync
     ts.start()
@@ -220,7 +218,6 @@ export default class Engine {
           }
         }).catch(err => {
           this._logger.error(`Could not send to mining worker, reason: ${errToString(err)}`)
-          this._mining = false
           this._unfinishedBlock = undefined
           this._unfinishedBlockData = undefined
         })
@@ -236,8 +233,7 @@ export default class Engine {
     }
 
     // start mining only if all known chains are being rovered
-    if (this._canMine && !this._mining && equals(new Set(this._knownRovers), new Set(rovers))) {
-      this._mining = true
+    if (this._canMine && equals(new Set(this._knownRovers), new Set(rovers))) {
       let currentBlocks
       let lastPreviousBlock
 
@@ -265,7 +261,7 @@ export default class Engine {
         throw err
       }
 
-      this._logger.debug(`Preparing new block `)
+      this._logger.debug(`Preparing new block`)
 
       const currentTimestamp = ts.nowSeconds()
       const work = prepareWork(lastPreviousBlock, currentBlocks)
@@ -275,13 +271,14 @@ export default class Engine {
         currentBlocks,
         block,
         [], // TODO add transactions
-        this._minerKey
+        this._minerKey,
+        this._unfinishedBlock
       )
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
       this._unfinishedBlockData = {
         lastPreviousBlock,
-        currentBlocks: fromPairs(newBlock.getChildBlockHeadersList().map(b => [b.getBlockchain(), b])),
+        currentBlocks: newBlock.getChildBlockHeadersMap(),
         block,
         iterations: undefined,
         timeDiff: undefined
@@ -308,7 +305,8 @@ export default class Engine {
           difficultyData: {
             currentTimestamp,
             lastPreviousBlock: lastPreviousBlock.serializeBinary(),
-            newBlockHeaders: newBlock.getChildBlockHeadersList().map(header => header.serializeBinary())
+            // $FlowFixMe
+            newBlockHeaders: Object.entries(newBlock.getChildBlockHeadersMap()).map(([chain, headerList]) => [chain, headerList.map(header => header.serializeBinary())])
           }})
         // $FlowFixMe - Flow can't properly find worker pid
         return Promise.resolve(this._workerProcess.pid)
@@ -317,10 +315,6 @@ export default class Engine {
     } else {
       if (!this._canMine) {
         this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
-        return Promise.resolve(false)
-      }
-      if (this._mining) {
-        this._logger.info('Not starting mining new block while already mining one')
         return Promise.resolve(false)
       }
       this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
@@ -351,7 +345,6 @@ export default class Engine {
     this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
     this._unfinishedBlock = undefined
     this._unfinishedBlockData = undefined
-    this._mining = false
     // $FlowFixMe - Flow can't properly find worker pid
     this._workerProcess.kill('SIGKILL')
     this._workerProcess = undefined
@@ -362,7 +355,6 @@ export default class Engine {
       this._logger.warn(`Mining worker process exited with code ${code}, signal ${signal}`)
       this._unfinishedBlock = undefined
       this._unfinishedBlockData = undefined
-      this._mining = false
     } else {
       this._logger.debug(`Mining worker fininshed its work (code: ${code})`)
     }
@@ -389,11 +381,11 @@ export default class Engine {
       newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
     ]
 
-    this._knownRovers.forEach(roverName => {
+    Object.keys(ChildChain).forEach(roverName => {
       if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks && this._unfinishedBlockData.currentBlocks[roverName]) {
-        const block = this._unfinishedBlockData.currentBlocks[roverName]
-        row.push(block.getChildBlockConfirmationsInParentCount())
-        row.push(block.getTimestamp() / 1000 << 0)
+        const blocks = this._unfinishedBlockData.currentBlocks[roverName]
+        row.push(blocks.getValuesList().map(block => block.getChildBlockConfirmationsInParentCount()).join(','))
+        row.push(blocks.getValuesList().map(block => block.getTimestamp() / 1000 << 0).join(','))
       }
     })
     const dataPath = ensureDebugPath(`bc/mining-data.csv`)
@@ -409,7 +401,6 @@ export default class Engine {
     }
     this._unfinishedBlock = undefined
     this._unfinishedBlockData = undefined
-    this._mining = false
 
     try {
       const newBlockObj = {
