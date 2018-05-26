@@ -559,6 +559,417 @@ impl ::protobuf::reflect::ProtobufValue for Block {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct ChildBlockHeaders {
+    // message fields
+    pub btc: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub eth: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub lsk: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub neo: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub wav: ::protobuf::RepeatedField<ChildBlockHeader>,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+// see codegen.rs for the explanation why impl Sync explicitly
+unsafe impl ::std::marker::Sync for ChildBlockHeaders {}
+
+impl ChildBlockHeaders {
+    pub fn new() -> ChildBlockHeaders {
+        ::std::default::Default::default()
+    }
+
+    pub fn default_instance() -> &'static ChildBlockHeaders {
+        static mut instance: ::protobuf::lazy::Lazy<ChildBlockHeaders> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ChildBlockHeaders,
+        };
+        unsafe {
+            instance.get(ChildBlockHeaders::new)
+        }
+    }
+
+    // repeated .bc.ChildBlockHeader btc = 1;
+
+    pub fn clear_btc(&mut self) {
+        self.btc.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_btc(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.btc = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_btc(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.btc
+    }
+
+    // Take field
+    pub fn take_btc(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.btc, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_btc(&self) -> &[ChildBlockHeader] {
+        &self.btc
+    }
+
+    fn get_btc_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.btc
+    }
+
+    fn mut_btc_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.btc
+    }
+
+    // repeated .bc.ChildBlockHeader eth = 2;
+
+    pub fn clear_eth(&mut self) {
+        self.eth.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_eth(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.eth = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_eth(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.eth
+    }
+
+    // Take field
+    pub fn take_eth(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.eth, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_eth(&self) -> &[ChildBlockHeader] {
+        &self.eth
+    }
+
+    fn get_eth_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.eth
+    }
+
+    fn mut_eth_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.eth
+    }
+
+    // repeated .bc.ChildBlockHeader lsk = 3;
+
+    pub fn clear_lsk(&mut self) {
+        self.lsk.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_lsk(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.lsk = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_lsk(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.lsk
+    }
+
+    // Take field
+    pub fn take_lsk(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.lsk, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_lsk(&self) -> &[ChildBlockHeader] {
+        &self.lsk
+    }
+
+    fn get_lsk_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.lsk
+    }
+
+    fn mut_lsk_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.lsk
+    }
+
+    // repeated .bc.ChildBlockHeader neo = 4;
+
+    pub fn clear_neo(&mut self) {
+        self.neo.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_neo(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.neo = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_neo(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.neo
+    }
+
+    // Take field
+    pub fn take_neo(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.neo, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_neo(&self) -> &[ChildBlockHeader] {
+        &self.neo
+    }
+
+    fn get_neo_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.neo
+    }
+
+    fn mut_neo_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.neo
+    }
+
+    // repeated .bc.ChildBlockHeader wav = 5;
+
+    pub fn clear_wav(&mut self) {
+        self.wav.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_wav(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+        self.wav = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_wav(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.wav
+    }
+
+    // Take field
+    pub fn take_wav(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+        ::std::mem::replace(&mut self.wav, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_wav(&self) -> &[ChildBlockHeader] {
+        &self.wav
+    }
+
+    fn get_wav_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+        &self.wav
+    }
+
+    fn mut_wav_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+        &mut self.wav
+    }
+}
+
+impl ::protobuf::Message for ChildBlockHeaders {
+    fn is_initialized(&self) -> bool {
+        for v in &self.btc {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.eth {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.lsk {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.neo {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.wav {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.btc)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.eth)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.lsk)?;
+                },
+                4 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.neo)?;
+                },
+                5 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.wav)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        for value in &self.btc {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        for value in &self.eth {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        for value in &self.lsk {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        for value in &self.neo {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        for value in &self.wav {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        for v in &self.btc {
+            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        for v in &self.eth {
+            os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        for v in &self.lsk {
+            os.write_tag(3, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        for v in &self.neo {
+            os.write_tag(4, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        for v in &self.wav {
+            os.write_tag(5, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        ::protobuf::MessageStatic::descriptor_static(None::<Self>)
+    }
+}
+
+impl ::protobuf::MessageStatic for ChildBlockHeaders {
+    fn new() -> ChildBlockHeaders {
+        ChildBlockHeaders::new()
+    }
+
+    fn descriptor_static(_: ::std::option::Option<ChildBlockHeaders>) -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "btc",
+                    ChildBlockHeaders::get_btc_for_reflect,
+                    ChildBlockHeaders::mut_btc_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "eth",
+                    ChildBlockHeaders::get_eth_for_reflect,
+                    ChildBlockHeaders::mut_eth_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "lsk",
+                    ChildBlockHeaders::get_lsk_for_reflect,
+                    ChildBlockHeaders::mut_lsk_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "neo",
+                    ChildBlockHeaders::get_neo_for_reflect,
+                    ChildBlockHeaders::mut_neo_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                    "wav",
+                    ChildBlockHeaders::get_wav_for_reflect,
+                    ChildBlockHeaders::mut_wav_for_reflect,
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<ChildBlockHeaders>(
+                    "ChildBlockHeaders",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+}
+
+impl ::protobuf::Clear for ChildBlockHeaders {
+    fn clear(&mut self) {
+        self.clear_btc();
+        self.clear_eth();
+        self.clear_lsk();
+        self.clear_neo();
+        self.clear_wav();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for ChildBlockHeaders {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for ChildBlockHeaders {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct BcBlock {
     // message fields
     pub hash: ::std::string::String,
@@ -573,7 +984,7 @@ pub struct BcBlock {
     pub tx_count: u64,
     pub transactions: ::protobuf::RepeatedField<BcTransaction>,
     pub child_blockchain_count: u64,
-    pub child_block_headers: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub child_block_headers: ::protobuf::SingularPtrField<ChildBlockHeaders>,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -938,36 +1349,44 @@ impl BcBlock {
         &mut self.child_blockchain_count
     }
 
-    // repeated .bc.ChildBlockHeader child_block_headers = 13;
+    // .bc.ChildBlockHeaders child_block_headers = 13;
 
     pub fn clear_child_block_headers(&mut self) {
         self.child_block_headers.clear();
     }
 
+    pub fn has_child_block_headers(&self) -> bool {
+        self.child_block_headers.is_some()
+    }
+
     // Param is passed by value, moved
-    pub fn set_child_block_headers(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
-        self.child_block_headers = v;
+    pub fn set_child_block_headers(&mut self, v: ChildBlockHeaders) {
+        self.child_block_headers = ::protobuf::SingularPtrField::some(v);
     }
 
     // Mutable pointer to the field.
-    pub fn mut_child_block_headers(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
-        &mut self.child_block_headers
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_child_block_headers(&mut self) -> &mut ChildBlockHeaders {
+        if self.child_block_headers.is_none() {
+            self.child_block_headers.set_default();
+        }
+        self.child_block_headers.as_mut().unwrap()
     }
 
     // Take field
-    pub fn take_child_block_headers(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
-        ::std::mem::replace(&mut self.child_block_headers, ::protobuf::RepeatedField::new())
+    pub fn take_child_block_headers(&mut self) -> ChildBlockHeaders {
+        self.child_block_headers.take().unwrap_or_else(|| ChildBlockHeaders::new())
     }
 
-    pub fn get_child_block_headers(&self) -> &[ChildBlockHeader] {
+    pub fn get_child_block_headers(&self) -> &ChildBlockHeaders {
+        self.child_block_headers.as_ref().unwrap_or_else(|| ChildBlockHeaders::default_instance())
+    }
+
+    fn get_child_block_headers_for_reflect(&self) -> &::protobuf::SingularPtrField<ChildBlockHeaders> {
         &self.child_block_headers
     }
 
-    fn get_child_block_headers_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
-        &self.child_block_headers
-    }
-
-    fn mut_child_block_headers_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    fn mut_child_block_headers_for_reflect(&mut self) -> &mut ::protobuf::SingularPtrField<ChildBlockHeaders> {
         &mut self.child_block_headers
     }
 }
@@ -1052,7 +1471,7 @@ impl ::protobuf::Message for BcBlock {
                     self.child_blockchain_count = tmp;
                 },
                 13 => {
-                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.child_block_headers)?;
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.child_block_headers)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1103,10 +1522,10 @@ impl ::protobuf::Message for BcBlock {
         if self.child_blockchain_count != 0 {
             my_size += ::protobuf::rt::value_size(12, self.child_blockchain_count, ::protobuf::wire_format::WireTypeVarint);
         }
-        for value in &self.child_block_headers {
-            let len = value.compute_size();
+        if let Some(ref v) = self.child_block_headers.as_ref() {
+            let len = v.compute_size();
             my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
-        };
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -1151,11 +1570,11 @@ impl ::protobuf::Message for BcBlock {
         if self.child_blockchain_count != 0 {
             os.write_uint64(12, self.child_blockchain_count)?;
         }
-        for v in &self.child_block_headers {
+        if let Some(ref v) = self.child_block_headers.as_ref() {
             os.write_tag(13, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
-        };
+        }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -1260,7 +1679,7 @@ impl ::protobuf::MessageStatic for BcBlock {
                     BcBlock::get_child_blockchain_count_for_reflect,
                     BcBlock::mut_child_blockchain_count_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeaders>>(
                     "child_block_headers",
                     BcBlock::get_child_block_headers_for_reflect,
                     BcBlock::mut_child_block_headers_for_reflect,
@@ -1943,26 +2362,31 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cprevio\
     usHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestamp\x12\x16\n\
     \x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0bmerkle_root\x18\
-    \x06\x20\x01(\tR\nmerkleRoot\"\xc9\x03\n\x07BcBlock\x12\x12\n\x04hash\
-    \x18\x01\x20\x01(\tR\x04hash\x12\x16\n\x06height\x18\x02\x20\x01(\x04R\
-    \x06height\x12\x14\n\x05miner\x18\x03\x20\x01(\tR\x05miner\x12\x1e\n\ndi\
-    fficulty\x18\x04\x20\x01(\x02R\ndifficulty\x12\x1c\n\ttimestamp\x18\x05\
-    \x20\x01(\x04R\ttimestamp\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\n\
-    merkleRoot\x12\x1d\n\nchain_root\x18\x07\x20\x01(\tR\tchainRoot\x12\x1a\
-    \n\x08distance\x18\x08\x20\x01(\x04R\x08distance\x12\x14\n\x05nonce\x18\
-    \t\x20\x01(\tR\x05nonce\x12\x19\n\x08tx_count\x18\n\x20\x01(\x04R\x07txC\
-    ount\x125\n\x0ctransactions\x18\x0b\x20\x03(\x0b2\x11.bc.BcTransactionR\
-    \x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\x20\x01(\x04R\
-    \x14childBlockchainCount\x12D\n\x13child_block_headers\x18\r\x20\x03(\
-    \x0b2\x14.bc.ChildBlockHeaderR\x11childBlockHeaders\"#\n\rBcTransaction\
-    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9b\x02\n\x10ChildBlock\
-    Header\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\
-    \x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\
-    \x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttim\
-    estamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0b\
-    merkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12W\n)child_block_confirmat\
-    ions_in_parent_count\x18\x07\x20\x01(\x04R$childBlockConfirmationsInPare\
-    ntCountb\x06proto3\
+    \x06\x20\x01(\tR\nmerkleRoot\"\xdb\x01\n\x11ChildBlockHeaders\x12&\n\x03\
+    btc\x18\x01\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03btc\x12&\n\x03eth\
+    \x18\x02\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03eth\x12&\n\x03lsk\x18\
+    \x03\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03lsk\x12&\n\x03neo\x18\x04\
+    \x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03neo\x12&\n\x03wav\x18\x05\x20\
+    \x03(\x0b2\x14.bc.ChildBlockHeaderR\x03wav\"\xca\x03\n\x07BcBlock\x12\
+    \x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12\x16\n\x06height\x18\x02\
+    \x20\x01(\x04R\x06height\x12\x14\n\x05miner\x18\x03\x20\x01(\tR\x05miner\
+    \x12\x1e\n\ndifficulty\x18\x04\x20\x01(\x02R\ndifficulty\x12\x1c\n\ttime\
+    stamp\x18\x05\x20\x01(\x04R\ttimestamp\x12\x1f\n\x0bmerkle_root\x18\x06\
+    \x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain_root\x18\x07\x20\x01(\tR\tchai\
+    nRoot\x12\x1a\n\x08distance\x18\x08\x20\x01(\x04R\x08distance\x12\x14\n\
+    \x05nonce\x18\t\x20\x01(\tR\x05nonce\x12\x19\n\x08tx_count\x18\n\x20\x01\
+    (\x04R\x07txCount\x125\n\x0ctransactions\x18\x0b\x20\x03(\x0b2\x11.bc.Bc\
+    TransactionR\x0ctransactions\x124\n\x16child_blockchain_count\x18\x0c\
+    \x20\x01(\x04R\x14childBlockchainCount\x12E\n\x13child_block_headers\x18\
+    \r\x20\x01(\x0b2\x15.bc.ChildBlockHeadersR\x11childBlockHeaders\"#\n\rBc\
+    Transaction\x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9b\x02\n\
+    \x10ChildBlockHeader\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockcha\
+    in\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\
+    \x18\x03\x20\x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\
+    \x01(\x04R\ttimestamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06heigh\
+    t\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12W\n)child_\
+    block_confirmations_in_parent_count\x18\x07\x20\x01(\x04R$childBlockConf\
+    irmationsInParentCountb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

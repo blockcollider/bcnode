@@ -6,41 +6,28 @@
  *
  * @flow
  */
-
-const { BcBlock } = require('../protos/core_pb')
+const { BcBlock, ChildBlockHeader, ChildBlockHeaders } = require('../protos/core_pb')
 
 export const GENESIS_MINER_KEY = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
 
 export function getGenesisBlock () {
-  // const genesisBlock = GENESIS_BLOCK
-  // const oldBestBlockchainHeaderHashes = getChildrenBlocksHashes(headers)
-  // const oldChainRoot = blake2bl(getChildrenRootHash(oldBestBlockchainHeaderHashes).toString())
-  // const genesisTimestamp = ((Date.now() / 1000) << 0) - 70
-  // genesisBlock.setMiner(minerPublicAddress)
-  // genesisBlock.setMerkleRoot(
-  //   createMerkleRoot(
-  //     oldBestBlockchainHeaderHashes.concat(
-  //       oldTransactions.concat([minerPublicAddress, '1'])
-  //     )
-  //   )
-  // )
-  // genesisBlock.setChainRoot(oldChainRoot)
-  // genesisBlock.setChildBlockHeadersList(oldBestBlockchainsBlockHeaders)
-  // return genesisBlock
-
   const GENESIS_DATA = require('./genesis.raw')
-
-  const GENESIS_BLOCK_HEADERS = GENESIS_DATA.childBlockHeadersList
-    .map((header) => {
-      return [
-        header.blockchain,
-        header.hash,
-        header.previousHash,
-        header.timestamp,
-        header.height,
-        header.merkleRoot,
-        header.childBlockConfirmationsInParentCount
-      ]
+  const GENESIS_BLOCK_HEADERS_MAP = new ChildBlockHeaders()
+  Object.entries(GENESIS_DATA.childBlockHeadersMap)
+    .forEach(([chain, headerList]) => {
+      const methodName = `set${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. setBtcList
+      // $FlowFixMe flow typing of Object.entries is not generic
+      GENESIS_BLOCK_HEADERS_MAP[methodName](headerList.map(header => {
+        return new ChildBlockHeader([
+          header.blockchain,
+          header.hash,
+          header.previousHash,
+          header.timestamp,
+          header.height,
+          header.merkleRoot,
+          header.childBlockConfirmationsInParentCount
+        ])
+      }))
     })
 
   const GENESIS_BLOCK = new BcBlock([
@@ -55,9 +42,9 @@ export function getGenesisBlock () {
     GENESIS_DATA.nonce,
     GENESIS_DATA.txCount,
     GENESIS_DATA.transactionsList,
-    GENESIS_BLOCK_HEADERS.length,
-    GENESIS_BLOCK_HEADERS
+    Object.keys(GENESIS_BLOCK_HEADERS_MAP.toObject()).length
   ])
+  GENESIS_BLOCK.setChildBlockHeaders(GENESIS_BLOCK_HEADERS_MAP)
 
   return GENESIS_BLOCK
 }

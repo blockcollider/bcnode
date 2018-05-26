@@ -41,11 +41,11 @@ const main = () => {
       // Proto buffers are serialized - let's deserialize them
       const { lastPreviousBlock, newBlockHeaders } = difficultyData
       const lastPreviousBlockProto = deserialize(lastPreviousBlock, BcBlock)
-      const newBlockHeadersProto = newBlockHeaders.map(header => deserialize(header, ChildBlockHeader))
+      const newBlockHeadersProto = newBlockHeaders.map(header => deserialize(header, ChildBlockHeader)) // simple map here won't work
 
       // return function with scope closing all deserialized difficulty data
       return function (timestamp: number) {
-        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getChildBlockHeadersList(), newBlockHeadersProto)
+        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getChildBlockHeadersMap(), newBlockHeadersProto)
 
         const preExpDiff = getNewPreExpDifficulty(
           timestamp,
