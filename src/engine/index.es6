@@ -278,10 +278,16 @@ export default class Engine {
       this._unfinishedBlock = newBlock
       this._unfinishedBlockData = {
         lastPreviousBlock,
-        currentBlocks: newBlock.getChildBlockHeadersMap(),
+        currentBlocks: newBlock.getChildBlockHeaders(),
         block,
         iterations: undefined,
         timeDiff: undefined
+      }
+
+      if (this._workerProcess) { // TODO restart conditionaly - define conditions
+        this._logger.debug(`Restarting mining with a new rovered block`)
+        // $FlowFixMe
+        this._workerProcess.kill('SIGKILL')
       }
 
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
@@ -306,7 +312,7 @@ export default class Engine {
             currentTimestamp,
             lastPreviousBlock: lastPreviousBlock.serializeBinary(),
             // $FlowFixMe
-            newBlockHeaders: Object.entries(newBlock.getChildBlockHeadersMap()).map(([chain, headerList]) => [chain, headerList.map(header => header.serializeBinary())])
+            newBlockHeaders: newBlock.getChildBlockHeaders().serializeBinary()
           }})
         // $FlowFixMe - Flow can't properly find worker pid
         return Promise.resolve(this._workerProcess.pid)
@@ -383,9 +389,11 @@ export default class Engine {
 
     Object.keys(ChildChain).forEach(roverName => {
       if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks && this._unfinishedBlockData.currentBlocks[roverName]) {
-        const blocks = this._unfinishedBlockData.currentBlocks[roverName]
-        row.push(blocks.getValuesList().map(block => block.getChildBlockConfirmationsInParentCount()).join(','))
-        row.push(blocks.getValuesList().map(block => block.getTimestamp() / 1000 << 0).join(','))
+        const methodNameGet = `get${roverName[0].toUpperCase() + roverName.slice(1)}List` // e.g. getBtcList
+        // $FlowFixMe - flow does not now about methods of protobuf message instances
+        const blocks = this._unfinishedBlockData.currentBlocks[methodNameGet]()
+        row.push(blocks.map(block => block.getChildBlockConfirmationsInParentCount()).join(','))
+        row.push(blocks.map(block => block.getTimestamp() / 1000 << 0).join(','))
       }
     })
     const dataPath = ensureDebugPath(`bc/mining-data.csv`)
@@ -431,10 +439,10 @@ export default class Engine {
       .then(() => {
         this._logger.debug('New BC block stored in DB')
 
-        // TODO broadcast BC block here
         return this._broadcastMinedBlock(newBlock, solution)
       })
       .catch((err) => {
+        this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
         this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
       })
   }

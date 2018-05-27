@@ -21,18 +21,18 @@ const TEST_DATA = require('../data').BLOCKS_MAP
 describe('Miner', () => {
   test('mine()', () => {
     const genesisBlock = getGenesisBlock()
-    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+    const genesisHeaders = genesisBlock.getChildBlockHeaders()
 
     // Convert genesis headers back to raw Block which is returned by miner
-    const headers = genesisHeaders
+    const headers = Object.values(genesisHeaders.toObject()).reduce((acc, curr) => acc.concat(curr), [])
       .map((oldHeader) => {
         return new Block([
-          oldHeader.getBlockchain(),
-          oldHeader.getHash(),
-          oldHeader.getPreviousHash(),
-          oldHeader.getTimestamp(),
-          oldHeader.getHeight(),
-          oldHeader.getMerkleRoot()
+          oldHeader.blockchain,
+          oldHeader.hash,
+          oldHeader.previousHash,
+          oldHeader.timestamp,
+          oldHeader.height,
+          oldHeader.merkleRoot
         ])
       })
 
@@ -109,60 +109,60 @@ describe('Miner', () => {
       timestamp: newBlockTimestamp,
       transactionsList: [],
       childBlockchainCount: 5,
-      childBlockHeadersList: [
-        { blockchain: 'btc',
-          childBlockConfirmationsInParentCount: genesisHeaders[0].getChildBlockConfirmationsInParentCount() + 1,
-          hash: genesisHeaders[0].getHash(),
-          previousHash: genesisHeaders[0].getPreviousHash(),
-          merkleRoot: genesisHeaders[0].getMerkleRoot(),
-          height: genesisHeaders[0].getHeight(),
-          timestamp: genesisHeaders[0].getTimestamp() },
-        { blockchain: 'eth',
+      childBlockHeaders: {
+        btcList: [{ blockchain: 'btc',
+          childBlockConfirmationsInParentCount: genesisHeaders.getBtcList()[0].getChildBlockConfirmationsInParentCount() + 1,
+          hash: genesisHeaders.getBtcList()[0].getHash(),
+          previousHash: genesisHeaders.getBtcList()[0].getPreviousHash(),
+          merkleRoot: genesisHeaders.getBtcList()[0].getMerkleRoot(),
+          height: genesisHeaders.getBtcList()[0].getHeight(),
+          timestamp: genesisHeaders.getBtcList()[0].getTimestamp() } ],
+        ethList: [{ blockchain: 'eth',
           childBlockConfirmationsInParentCount: 1,
           hash: testEthBlock.hash,
           previousHash: testEthBlock.previousHash,
           merkleRoot: testEthBlock.merkleRoot,
           height: testEthBlock.height,
-          timestamp: (testEthBlock.timestamp / 1000) },
-        { blockchain: 'lsk',
-          childBlockConfirmationsInParentCount: genesisHeaders[2].getChildBlockConfirmationsInParentCount() + 1,
-          hash: genesisHeaders[2].getHash(),
-          previousHash: genesisHeaders[2].getPreviousHash(),
-          merkleRoot: genesisHeaders[2].getMerkleRoot(),
-          height: genesisHeaders[2].getHeight(),
-          timestamp: genesisHeaders[2].getTimestamp() },
-        { blockchain: 'neo',
-          childBlockConfirmationsInParentCount: genesisHeaders[3].getChildBlockConfirmationsInParentCount() + 1,
-          hash: genesisHeaders[3].getHash(),
-          previousHash: genesisHeaders[3].getPreviousHash(),
-          merkleRoot: genesisHeaders[3].getMerkleRoot(),
-          height: genesisHeaders[3].getHeight(),
-          timestamp: genesisHeaders[3].getTimestamp() },
-        { blockchain: 'wav',
-          childBlockConfirmationsInParentCount: genesisHeaders[4].getChildBlockConfirmationsInParentCount() + 1,
-          hash: genesisHeaders[4].getHash(),
-          previousHash: genesisHeaders[4].getPreviousHash(),
-          merkleRoot: genesisHeaders[4].getMerkleRoot(),
-          height: genesisHeaders[4].getHeight(),
-          timestamp: genesisHeaders[4].getTimestamp() }
-      ]
+          timestamp: (testEthBlock.timestamp / 1000) } ],
+        lskList: [{ blockchain: 'lsk',
+          childBlockConfirmationsInParentCount: genesisHeaders.getLskList()[0].getChildBlockConfirmationsInParentCount() + 1,
+          hash: genesisHeaders.getLskList()[0].getHash(),
+          previousHash: genesisHeaders.getLskList()[0].getPreviousHash(),
+          merkleRoot: genesisHeaders.getLskList()[0].getMerkleRoot(),
+          height: genesisHeaders.getLskList()[0].getHeight(),
+          timestamp: genesisHeaders.getLskList()[0].getTimestamp() } ],
+        neoList: [{ blockchain: 'neo',
+          childBlockConfirmationsInParentCount: genesisHeaders.getNeoList()[0].getChildBlockConfirmationsInParentCount() + 1,
+          hash: genesisHeaders.getNeoList()[0].getHash(),
+          previousHash: genesisHeaders.getNeoList()[0].getPreviousHash(),
+          merkleRoot: genesisHeaders.getNeoList()[0].getMerkleRoot(),
+          height: genesisHeaders.getNeoList()[0].getHeight(),
+          timestamp: genesisHeaders.getNeoList()[0].getTimestamp() } ],
+        wavList: [{ blockchain: 'wav',
+          childBlockConfirmationsInParentCount: genesisHeaders.getWavList()[0].getChildBlockConfirmationsInParentCount() + 1,
+          hash: genesisHeaders.getWavList()[0].getHash(),
+          previousHash: genesisHeaders.getWavList()[0].getPreviousHash(),
+          merkleRoot: genesisHeaders.getWavList()[0].getMerkleRoot(),
+          height: genesisHeaders.getWavList()[0].getHeight(),
+          timestamp: genesisHeaders.getWavList()[0].getTimestamp() } ]
+      }
     })
   })
 
   test('prepareNewBlock()', () => {
     const genesisBlock = getGenesisBlock()
-    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+    const genesisHeaders = genesisBlock.getChildBlockHeaders()
 
     // Convert genesis headers back to raw Block which is returned by miner
-    const headers = genesisHeaders
+    const headers = Object.values(genesisHeaders.toObject()).reduce((acc, curr) => acc.concat(curr), [])
       .map((oldHeader) => {
         return new Block([
-          oldHeader.getBlockchain(),
-          oldHeader.getHash(),
-          oldHeader.getPreviousHash(),
-          oldHeader.getTimestamp(),
-          oldHeader.getHeight(),
-          oldHeader.getMerkleRoot()
+          oldHeader.blockchain,
+          oldHeader.hash,
+          oldHeader.previousHash,
+          oldHeader.timestamp,
+          oldHeader.height,
+          oldHeader.merkleRoot
         ])
       })
 
@@ -195,11 +195,11 @@ describe('Miner', () => {
       [], // transactions
       TEST_MINER_KEY
     )
-    expect(newBlock.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
-    expect(newBlock.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(2)
-    expect(newBlock.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(2)
-    expect(newBlock.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(2)
-    expect(newBlock.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeaders().getBtcList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock.getChildBlockHeaders().getEthList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeaders().getLskList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeaders().getNeoList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock.getChildBlockHeaders().getWavList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
 
     testBtcHeader = TEST_DATA.btc[1]
     // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
@@ -228,11 +228,11 @@ describe('Miner', () => {
       [], // transactions
       TEST_MINER_KEY
     )
-    expect(newBlock2.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
-    expect(newBlock2.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(3)
-    expect(newBlock2.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(3)
-    expect(newBlock2.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(3)
-    expect(newBlock2.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeaders().getBtcList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock2.getChildBlockHeaders().getEthList()[0].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeaders().getLskList()[0].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeaders().getNeoList()[0].getChildBlockConfirmationsInParentCount()).toBe(3)
+    expect(newBlock2.getChildBlockHeaders().getWavList()[0].getChildBlockConfirmationsInParentCount()).toBe(3)
 
     let testLskHeader = TEST_DATA.lsk[0]
     // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
@@ -261,27 +261,27 @@ describe('Miner', () => {
       [], // transactions
       TEST_MINER_KEY
     )
-    expect(newBlock3.getChildBlockHeadersList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
-    expect(newBlock3.getChildBlockHeadersList()[1].getChildBlockConfirmationsInParentCount()).toBe(4)
-    expect(newBlock3.getChildBlockHeadersList()[2].getChildBlockConfirmationsInParentCount()).toBe(1)
-    expect(newBlock3.getChildBlockHeadersList()[3].getChildBlockConfirmationsInParentCount()).toBe(4)
-    expect(newBlock3.getChildBlockHeadersList()[4].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock3.getChildBlockHeaders().getBtcList()[0].getChildBlockConfirmationsInParentCount()).toBe(2)
+    expect(newBlock3.getChildBlockHeaders().getEthList()[0].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock3.getChildBlockHeaders().getLskList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
+    expect(newBlock3.getChildBlockHeaders().getNeoList()[0].getChildBlockConfirmationsInParentCount()).toBe(4)
+    expect(newBlock3.getChildBlockHeaders().getWavList()[0].getChildBlockConfirmationsInParentCount()).toBe(4)
   })
 
   test('getNewPreExpDifficulty()', () => {
     const genesisBlock = getGenesisBlock()
-    const genesisHeaders = genesisBlock.getChildBlockHeadersList()
+    const genesisHeaders = genesisBlock.getChildBlockHeaders()
 
     // Convert genesis headers back to raw Block which is returned by miner
-    const headers = genesisHeaders
+    const headers = Object.values(genesisHeaders.toObject()).reduce((acc, curr) => acc.concat(curr), [])
       .map((oldHeader) => {
         return new Block([
-          oldHeader.getBlockchain(),
-          oldHeader.getHash(),
-          oldHeader.getPreviousHash(),
-          oldHeader.getTimestamp(),
-          oldHeader.getHeight(),
-          oldHeader.getMerkleRoot()
+          oldHeader.blockchain,
+          oldHeader.hash,
+          oldHeader.previousHash,
+          oldHeader.timestamp,
+          oldHeader.height,
+          oldHeader.merkleRoot
         ])
       })
 
@@ -313,15 +313,13 @@ describe('Miner', () => {
       TEST_MINER_KEY
     )
 
-    const newBlockCount = getNewBlockCount(genesisBlock.getChildBlockHeadersList(), newBlock.getChildBlockHeadersList())
+    const newBlockCount = getNewBlockCount(genesisBlock.getChildBlockHeaders(), newBlock.getChildBlockHeaders())
 
     expect(newBlockCount).toBe(1)
 
     const preExpDiff1 = getNewPreExpDifficulty(
       mockedTimestamp,
       genesisBlock,
-      genesisBlock.getChildBlockHeadersList(),
-      newBlock.getChildBlockHeadersList(),
       newBlockCount
     )
 
@@ -330,8 +328,6 @@ describe('Miner', () => {
     const preExpDiff2 = getNewPreExpDifficulty(
       mockedTimestamp + 1000,
       genesisBlock,
-      genesisBlock.getChildBlockHeadersList(),
-      newBlock.getChildBlockHeadersList(),
       newBlockCount
     )
     expect(preExpDiff2.toNumber()).toBe(46725295672253) // <-- stales on this difficulty
@@ -339,8 +335,6 @@ describe('Miner', () => {
     const preExpDiff3 = getNewPreExpDifficulty(
       mockedTimestamp + 2000,
       genesisBlock,
-      genesisBlock.getChildBlockHeadersList(),
-      newBlock.getChildBlockHeadersList(),
       newBlockCount + 1
     )
     // TODO probably not correct - should be even lower (1s after previous one and +1 block changed)

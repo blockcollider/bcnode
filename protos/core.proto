@@ -4,16 +4,8 @@ package bc;
 
 message Null {}
 
-enum ChildChain {
-    BTC = 0;
-    ETH = 1;
-    LSK = 2;
-    NEO = 3;
-    WAV = 4;
-}
-
 message Block {
-    ChildChain blockchain = 1;
+    string blockchain = 1;
     string hash = 2;
     string previous_hash = 3;
     uint64 timestamp = 4;
@@ -21,8 +13,12 @@ message Block {
     string merkle_root = 6;
 }
 
-message ChildBlockHeadersList {
-    repeated ChildBlockHeader value = 1;
+message ChildBlockHeaders {
+    repeated ChildBlockHeader btc = 1;
+    repeated ChildBlockHeader eth = 2;
+    repeated ChildBlockHeader lsk = 3;
+    repeated ChildBlockHeader neo = 4;
+    repeated ChildBlockHeader wav = 5;
 }
 
 message BcBlock {
@@ -38,7 +34,7 @@ message BcBlock {
     uint64 tx_count = 10;
     repeated BcTransaction transactions = 11;
     uint64 child_blockchain_count = 12;
-    map<uint32, ChildBlockHeadersList> child_block_headers = 13;
+    ChildBlockHeaders child_block_headers = 13;
 }
 
 message BcTransaction {
@@ -46,7 +42,7 @@ message BcTransaction {
 }
 
 message ChildBlockHeader {
-    ChildChain blockchain = 1;
+    string blockchain = 1;
     string hash = 2;
     string previous_hash = 3;
     uint64 timestamp = 4;

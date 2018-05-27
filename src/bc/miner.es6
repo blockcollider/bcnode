@@ -25,8 +25,9 @@ const BN = require('bn.js')
 const {
   call,
   compose,
+  difference,
+  flatten,
   flip,
-  fromPairs,
   invoker,
   join,
   map,
@@ -37,20 +38,14 @@ const {
   reverse,
   splitEvery,
   zip,
-  zipWith,
-  sum
+  zipWith
 } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
-const { Block, BcBlock, BcTransaction, ChildBlockHeader } = require('../protos/core_pb')
+const { Block, BcBlock, BcTransaction, ChildBlockHeader, ChildBlockHeaders } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
-
-
-type ChildBlockHeadersMap = {
-  [chain_uint64: number]: ChildBlockHeader[]
-}
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -380,7 +375,7 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
  * @param {bool} shouldAppend flags if the newChildBlock should be appended to a child block sublist or replace
  * @return {ChildBlockHeader[]} Headers of rovered chains with confirmations count calculated
  */
-function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): ChildBlockHeadersMap {
+function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): ChildBlockHeaders {
   const copyHeader = (block: ChildBlockHeader|Block, confirmations: number): ChildBlockHeader => {
     const header = new ChildBlockHeader()
     header.setBlockchain(block.getBlockchain())
@@ -394,38 +389,44 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
   }
 
   const chainWhichTriggeredMining = newChildBlock.getBlockchain()
-  const newMap = {}
-  Object.entries(previousBlock.getChildBlockHeadersMap())
-    .forEach(([chain, headersList]) => {
-      const updatedHeaders = headersList.getValuesList()
+  const newMap = new ChildBlockHeaders()
+  Object.keys(previousBlock.getChildBlockHeaders().toObject())
+    .forEach((chainKeyName) => {
+      const chain = chainKeyName.replace(/List$/, '')
+      const methodNameGet = `get${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. getBtcList
+      const methodNameSet = `set${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. setBtcList
+
+      const updatedHeaders = previousBlock.getChildBlockHeaders()[methodNameGet]()
         .map(header => {
-          if (chainWhichTriggeredMining === chain) { // TODO convert uint32 to string
-            return copyHeader(header, 1)
+          if (chainWhichTriggeredMining === chain) {
+            // add original header with confirmation count 1
+            const changedChainHeaders = [copyHeader(header, 1)]
+            // if mining was already in process add another header to the currently mined block
+            if (shouldAppend) {
+              changedChainHeaders.push(copyHeader(newChildBlock, 1))
+            }
+            return changedChainHeaders
           }
 
           return copyHeader(header, header.getChildBlockConfirmationsInParentCount() + 1)
         })
 
-      if (shouldAppend) {
-        updatedHeaders.push(copyHeader(newChildBlock, 1))
-      }
-
-      newMap[chain] = headersList.setValuesList(updatedHeaders)
+      newMap[methodNameSet](flatten(updatedHeaders)) // need to flatten because in case of append map returns [] and not a single header
     })
+
   return newMap
 }
 
 /**
- * Returns sum off differences of heights between child block headers is last valid BC block and currently mined BC block
+ * How many new child blocks are between previousBlockHeaders and currentBlockHeaders
  */
-export function getNewBlockCount (previousBlockHeaders: ChildBlockHeadersMap, currentBlockHeaders: ChildBlockHeadersMap) {
-  if (Object.keys(previousBlockHeaders).length !== Object.keys(currentBlockHeaders).length) {
-    throw new Error(`Previous and current headers have to have the same length, got prev: ${Object.keys(previousBlockHeaders).length}, current: ${Object.keys(currentBlockHeaders).length}`)
-  }
-  const previousBlocksMap = fromPairs(previousBlockHeaders.map(header => [header.getBlockchain(), header]))
-  return sum(currentBlockHeaders.map(current => {
-    return current.getHeight() - previousBlocksMap[current.getBlockchain()].getHeight()
-  }))
+export function getNewBlockCount (previousBlockHeaders: ChildBlockHeaders, currentBlockHeaders: ChildBlockHeaders) {
+  // $FlowFixMe - protbuf toObject is not typed
+  const headersToHashes = (headers: ChildBlockHeaders) => Object.values(headers.toObject()).reduce((acc, curr) => acc.concat(curr), []).map(headerObj => headerObj.hash)
+  const previousHashes = headersToHashes(previousBlockHeaders)
+  const currentHashes = headersToHashes(currentBlockHeaders)
+
+  return difference(currentHashes, previousHashes).length
 }
 
 /**
@@ -442,6 +443,7 @@ export function getNewBlockCount (previousBlockHeaders: ChildBlockHeadersMap, cu
  * @param {Block} blockWhichTriggeredMining The last rovered block - this one triggered the mining
  * @param {BcTransaction[]} newTransactions Transactions which will be added to newly mined block
  * @param {string} minerAddress Public addres to which NRG award for mining the block and transactions will be credited to
+ * @param {BcBlock} unfinishedBlock If miner was running this is the block currently mined
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
 export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string, unfinishedBlock: ?BcBlock): [BcBlock, number] {
@@ -449,13 +451,14 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   const newChainRoot = getChildrenRootHash(blockHashes)
 
   const shouldAppend = !!unfinishedBlock
-  const childBlockHeadersMap = prepareChildBlockHeadersMap(
+  console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
+  const childBlockHeaders = prepareChildBlockHeadersMap(
     unfinishedBlock || lastPreviousBlock,
     blockWhichTriggeredMining,
     shouldAppend
   )
 
-  const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeadersList(), childBlockHeadersMap)
+  const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeaders(), childBlockHeaders)
 
   let finalDifficulty
   let finalTimestamp = currentTimestamp
@@ -493,7 +496,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   newBlock.setTxCount(0)
   newBlock.setTransactionsList(newTransactions)
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
-  newBlock.setChildBlockHeadersMap(childBlockHeadersMap)
+  newBlock.setChildBlockHeaders(childBlockHeaders)
 
   return [newBlock, finalTimestamp]
 }

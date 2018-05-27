@@ -14,8 +14,8 @@ module.exports = {
   "txCount": 0,
   "transactionsList": [],
   "childBlockchainCount": 5,
-  "childBlockHeadersList": [
-    {
+  "childBlockHeadersMap": {
+    "btc": [{
       "blockchain": "btc",
       "hash": "0000000000000000003a77d5927982946004cb0ffdabc356ebf3c1de8cfa82c3",
       "previousHash": "00000000000000000029fa0e75be83699a632ed531a882f7f04e26392c372bf5",
@@ -23,8 +23,8 @@ module.exports = {
       "height": 518390 ,
       "merkleRoot": "ea5f5cd60d98846778d39d02a7a49844a93c2bb1608e602eaf6a93675effa5d5",
       "childBlockConfirmationsInParentCount": 1
-    },
-    {
+    }],
+    "eth": [{
       "blockchain": "eth",
       "hash": "0xa0c8290fbbefa0410ea7e727ce1f2a7ee7c6db1495a92e0f8778201c13dcef2b",
       "previousHash": "0x5cee422a929fb1263d96954f935b794c29a9e8f904bb47de2e167aaa37d391ff",
@@ -32,8 +32,8 @@ module.exports = {
       "height": 5451804,
       "merkleRoot": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
       "childBlockConfirmationsInParentCount": 1
-    },
-    {
+    }],
+    "lsk": [{
       "blockchain": "lsk",
       "hash": "2875516409288438346",
       "previousHash": "6899263519938768036",
@@ -41,8 +41,8 @@ module.exports = {
       "height": 5743193,
       "merkleRoot": "2875516409288438346",
       "childBlockConfirmationsInParentCount": 1
-    },
-    {
+    }],
+    "neo": [{
       "blockchain": "neo",
       "hash": "3a7faa52678c965680c65222149e077e9fed1316aa11c05e5f61c9efd9874224",
       "previousHash": "c734ed02a391207ad22a732d5318b8625bc6ec0a4d7772fcdda2191adb8e4f4f",
@@ -50,8 +50,8 @@ module.exports = {
       "height": 2141254,
       "merkleRoot": "205231ee785064e0407a77553120ca044c5c643f52aa23731a99e008ac719a16",
       "childBlockConfirmationsInParentCount": 1
-    },
-    {
+    }],
+    "wav": [{
       "blockchain": "wav",
       "hash": "2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU",
       "previousHash": "57DGUE3gEjKo5WEYLKkHn2dnLiCoZKiEqGvEGZCbiANFYov4qRk3hgh8CruLZ5gYzjYNsFnWuoNmwjzK7GJ9iPmh",
@@ -59,6 +59,6 @@ module.exports = {
       "height": 962470,
       "merkleRoot": "2zBdKozsif6AQMfnfRsCiiiviBQsSaX2p5mmobwDoCUJ6veuSWGZrf9CuNzjhUw4cjpAmiZxvYzgjdVQHvxjMzhU",
       "childBlockConfirmationsInParentCount": 1
-    }
-  ]
+    }]
+  }
 }

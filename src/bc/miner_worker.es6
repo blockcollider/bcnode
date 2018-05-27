@@ -10,7 +10,7 @@
 import type { Logger } from 'winston'
 const process = require('process')
 const { getExpFactorDiff, getNewPreExpDifficulty, getNewBlockCount, mine } = require('./miner')
-const { ChildBlockHeader, BcBlock } = require('../protos/core_pb')
+const { ChildBlockHeaders, ChildBlockHeader, BcBlock } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
 
 const logging = require('../logger')
@@ -32,7 +32,7 @@ const main = () => {
   process.on('message', ({currentTimestamp, offset, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
     ts.offsetOverride(offset)
     // Deserialize buffers from parent process, buffer will be serialized as object of this shape { <idx>: byte } - so use Object.values on it
-    const deserialize = (buffer: { [string]: number }, clazz: BcBlock|ChildBlockHeader) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
+    const deserialize = (buffer: { [string]: number }, clazz: BcBlock|ChildBlockHeader|ChildBlockHeaders) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
 
     // function with all difficultyData closed in scope and
     // send it to mine with all arguments except of timestamp and use it
@@ -41,11 +41,11 @@ const main = () => {
       // Proto buffers are serialized - let's deserialize them
       const { lastPreviousBlock, newBlockHeaders } = difficultyData
       const lastPreviousBlockProto = deserialize(lastPreviousBlock, BcBlock)
-      const newBlockHeadersProto = newBlockHeaders.map(header => deserialize(header, ChildBlockHeader)) // simple map here won't work
+      const newBlockHeadersProto = deserialize(newBlockHeaders, ChildBlockHeaders)
 
       // return function with scope closing all deserialized difficulty data
       return function (timestamp: number) {
-        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getChildBlockHeadersMap(), newBlockHeadersProto)
+        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getChildBlockHeaders(), newBlockHeadersProto)
 
         const preExpDiff = getNewPreExpDifficulty(
           timestamp,

@@ -15,8 +15,7 @@ goog.exportSymbol('proto.bc.BcBlock', null, global);
 goog.exportSymbol('proto.bc.BcTransaction', null, global);
 goog.exportSymbol('proto.bc.Block', null, global);
 goog.exportSymbol('proto.bc.ChildBlockHeader', null, global);
-goog.exportSymbol('proto.bc.ChildBlockHeadersList', null, global);
-goog.exportSymbol('proto.bc.ChildChain', null, global);
+goog.exportSymbol('proto.bc.ChildBlockHeaders', null, global);
 goog.exportSymbol('proto.bc.Null', null, global);
 
 /**
@@ -181,7 +180,7 @@ proto.bc.Block.prototype.toObject = function(opt_includeInstance) {
  */
 proto.bc.Block.toObject = function(includeInstance, msg) {
   var f, obj = {
-    blockchain: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    blockchain: jspb.Message.getFieldWithDefault(msg, 1, ""),
     hash: jspb.Message.getFieldWithDefault(msg, 2, ""),
     previousHash: jspb.Message.getFieldWithDefault(msg, 3, ""),
     timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
@@ -224,7 +223,7 @@ proto.bc.Block.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.bc.ChildChain} */ (reader.readEnum());
+      var value = /** @type {string} */ (reader.readString());
       msg.setBlockchain(value);
       break;
     case 2:
@@ -277,8 +276,8 @@ proto.bc.Block.prototype.serializeBinary = function() {
 proto.bc.Block.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getBlockchain();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  if (f.length > 0) {
+    writer.writeString(
       1,
       f
     );
@@ -322,15 +321,15 @@ proto.bc.Block.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional ChildChain blockchain = 1;
- * @return {!proto.bc.ChildChain}
+ * optional string blockchain = 1;
+ * @return {string}
  */
 proto.bc.Block.prototype.getBlockchain = function() {
-  return /** @type {!proto.bc.ChildChain} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
-/** @param {!proto.bc.ChildChain} value */
+/** @param {string} value */
 proto.bc.Block.prototype.setBlockchain = function(value) {
   jspb.Message.setField(this, 1, value);
 };
@@ -422,19 +421,19 @@ proto.bc.Block.prototype.setMerkleRoot = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.bc.ChildBlockHeadersList = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.bc.ChildBlockHeadersList.repeatedFields_, null);
+proto.bc.ChildBlockHeaders = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.bc.ChildBlockHeaders.repeatedFields_, null);
 };
-goog.inherits(proto.bc.ChildBlockHeadersList, jspb.Message);
+goog.inherits(proto.bc.ChildBlockHeaders, jspb.Message);
 if (true || goog.DEBUG && !COMPILED) {
-  proto.bc.ChildBlockHeadersList.displayName = 'proto.bc.ChildBlockHeadersList';
+  proto.bc.ChildBlockHeaders.displayName = 'proto.bc.ChildBlockHeaders';
 }
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.bc.ChildBlockHeadersList.repeatedFields_ = [1];
+proto.bc.ChildBlockHeaders.repeatedFields_ = [1,2,3,4,5];
 
 
 
@@ -449,8 +448,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.bc.ChildBlockHeadersList.prototype.toObject = function(opt_includeInstance) {
-  return proto.bc.ChildBlockHeadersList.toObject(opt_includeInstance, this);
+proto.bc.ChildBlockHeaders.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.ChildBlockHeaders.toObject(opt_includeInstance, this);
 };
 
 
@@ -459,13 +458,21 @@ proto.bc.ChildBlockHeadersList.prototype.toObject = function(opt_includeInstance
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.bc.ChildBlockHeadersList} msg The msg instance to transform.
+ * @param {!proto.bc.ChildBlockHeaders} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.bc.ChildBlockHeadersList.toObject = function(includeInstance, msg) {
+proto.bc.ChildBlockHeaders.toObject = function(includeInstance, msg) {
   var f, obj = {
-    valueList: jspb.Message.toObjectList(msg.getValueList(),
+    btcList: jspb.Message.toObjectList(msg.getBtcList(),
+    proto.bc.ChildBlockHeader.toObject, includeInstance),
+    ethList: jspb.Message.toObjectList(msg.getEthList(),
+    proto.bc.ChildBlockHeader.toObject, includeInstance),
+    lskList: jspb.Message.toObjectList(msg.getLskList(),
+    proto.bc.ChildBlockHeader.toObject, includeInstance),
+    neoList: jspb.Message.toObjectList(msg.getNeoList(),
+    proto.bc.ChildBlockHeader.toObject, includeInstance),
+    wavList: jspb.Message.toObjectList(msg.getWavList(),
     proto.bc.ChildBlockHeader.toObject, includeInstance)
   };
 
@@ -480,23 +487,23 @@ proto.bc.ChildBlockHeadersList.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.bc.ChildBlockHeadersList}
+ * @return {!proto.bc.ChildBlockHeaders}
  */
-proto.bc.ChildBlockHeadersList.deserializeBinary = function(bytes) {
+proto.bc.ChildBlockHeaders.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.bc.ChildBlockHeadersList;
-  return proto.bc.ChildBlockHeadersList.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.bc.ChildBlockHeaders;
+  return proto.bc.ChildBlockHeaders.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.bc.ChildBlockHeadersList} msg The message object to deserialize into.
+ * @param {!proto.bc.ChildBlockHeaders} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.bc.ChildBlockHeadersList}
+ * @return {!proto.bc.ChildBlockHeaders}
  */
-proto.bc.ChildBlockHeadersList.deserializeBinaryFromReader = function(msg, reader) {
+proto.bc.ChildBlockHeaders.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -506,7 +513,27 @@ proto.bc.ChildBlockHeadersList.deserializeBinaryFromReader = function(msg, reade
     case 1:
       var value = new proto.bc.ChildBlockHeader;
       reader.readMessage(value,proto.bc.ChildBlockHeader.deserializeBinaryFromReader);
-      msg.addValue(value);
+      msg.addBtc(value);
+      break;
+    case 2:
+      var value = new proto.bc.ChildBlockHeader;
+      reader.readMessage(value,proto.bc.ChildBlockHeader.deserializeBinaryFromReader);
+      msg.addEth(value);
+      break;
+    case 3:
+      var value = new proto.bc.ChildBlockHeader;
+      reader.readMessage(value,proto.bc.ChildBlockHeader.deserializeBinaryFromReader);
+      msg.addLsk(value);
+      break;
+    case 4:
+      var value = new proto.bc.ChildBlockHeader;
+      reader.readMessage(value,proto.bc.ChildBlockHeader.deserializeBinaryFromReader);
+      msg.addNeo(value);
+      break;
+    case 5:
+      var value = new proto.bc.ChildBlockHeader;
+      reader.readMessage(value,proto.bc.ChildBlockHeader.deserializeBinaryFromReader);
+      msg.addWav(value);
       break;
     default:
       reader.skipField();
@@ -521,9 +548,9 @@ proto.bc.ChildBlockHeadersList.deserializeBinaryFromReader = function(msg, reade
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.bc.ChildBlockHeadersList.prototype.serializeBinary = function() {
+proto.bc.ChildBlockHeaders.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.bc.ChildBlockHeadersList.serializeBinaryToWriter(this, writer);
+  proto.bc.ChildBlockHeaders.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -531,16 +558,48 @@ proto.bc.ChildBlockHeadersList.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.bc.ChildBlockHeadersList} message
+ * @param {!proto.bc.ChildBlockHeaders} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.bc.ChildBlockHeadersList.serializeBinaryToWriter = function(message, writer) {
+proto.bc.ChildBlockHeaders.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getValueList();
+  f = message.getBtcList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
       1,
+      f,
+      proto.bc.ChildBlockHeader.serializeBinaryToWriter
+    );
+  }
+  f = message.getEthList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      2,
+      f,
+      proto.bc.ChildBlockHeader.serializeBinaryToWriter
+    );
+  }
+  f = message.getLskList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      3,
+      f,
+      proto.bc.ChildBlockHeader.serializeBinaryToWriter
+    );
+  }
+  f = message.getNeoList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      4,
+      f,
+      proto.bc.ChildBlockHeader.serializeBinaryToWriter
+    );
+  }
+  f = message.getWavList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      5,
       f,
       proto.bc.ChildBlockHeader.serializeBinaryToWriter
     );
@@ -549,17 +608,17 @@ proto.bc.ChildBlockHeadersList.serializeBinaryToWriter = function(message, write
 
 
 /**
- * repeated ChildBlockHeader value = 1;
+ * repeated ChildBlockHeader btc = 1;
  * @return {!Array.<!proto.bc.ChildBlockHeader>}
  */
-proto.bc.ChildBlockHeadersList.prototype.getValueList = function() {
+proto.bc.ChildBlockHeaders.prototype.getBtcList = function() {
   return /** @type{!Array.<!proto.bc.ChildBlockHeader>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.ChildBlockHeader, 1));
 };
 
 
 /** @param {!Array.<!proto.bc.ChildBlockHeader>} value */
-proto.bc.ChildBlockHeadersList.prototype.setValueList = function(value) {
+proto.bc.ChildBlockHeaders.prototype.setBtcList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
 
@@ -569,13 +628,137 @@ proto.bc.ChildBlockHeadersList.prototype.setValueList = function(value) {
  * @param {number=} opt_index
  * @return {!proto.bc.ChildBlockHeader}
  */
-proto.bc.ChildBlockHeadersList.prototype.addValue = function(opt_value, opt_index) {
+proto.bc.ChildBlockHeaders.prototype.addBtc = function(opt_value, opt_index) {
   return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.bc.ChildBlockHeader, opt_index);
 };
 
 
-proto.bc.ChildBlockHeadersList.prototype.clearValueList = function() {
-  this.setValueList([]);
+proto.bc.ChildBlockHeaders.prototype.clearBtcList = function() {
+  this.setBtcList([]);
+};
+
+
+/**
+ * repeated ChildBlockHeader eth = 2;
+ * @return {!Array.<!proto.bc.ChildBlockHeader>}
+ */
+proto.bc.ChildBlockHeaders.prototype.getEthList = function() {
+  return /** @type{!Array.<!proto.bc.ChildBlockHeader>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.ChildBlockHeader, 2));
+};
+
+
+/** @param {!Array.<!proto.bc.ChildBlockHeader>} value */
+proto.bc.ChildBlockHeaders.prototype.setEthList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 2, value);
+};
+
+
+/**
+ * @param {!proto.bc.ChildBlockHeader=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.bc.ChildBlockHeader}
+ */
+proto.bc.ChildBlockHeaders.prototype.addEth = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 2, opt_value, proto.bc.ChildBlockHeader, opt_index);
+};
+
+
+proto.bc.ChildBlockHeaders.prototype.clearEthList = function() {
+  this.setEthList([]);
+};
+
+
+/**
+ * repeated ChildBlockHeader lsk = 3;
+ * @return {!Array.<!proto.bc.ChildBlockHeader>}
+ */
+proto.bc.ChildBlockHeaders.prototype.getLskList = function() {
+  return /** @type{!Array.<!proto.bc.ChildBlockHeader>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.ChildBlockHeader, 3));
+};
+
+
+/** @param {!Array.<!proto.bc.ChildBlockHeader>} value */
+proto.bc.ChildBlockHeaders.prototype.setLskList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 3, value);
+};
+
+
+/**
+ * @param {!proto.bc.ChildBlockHeader=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.bc.ChildBlockHeader}
+ */
+proto.bc.ChildBlockHeaders.prototype.addLsk = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.bc.ChildBlockHeader, opt_index);
+};
+
+
+proto.bc.ChildBlockHeaders.prototype.clearLskList = function() {
+  this.setLskList([]);
+};
+
+
+/**
+ * repeated ChildBlockHeader neo = 4;
+ * @return {!Array.<!proto.bc.ChildBlockHeader>}
+ */
+proto.bc.ChildBlockHeaders.prototype.getNeoList = function() {
+  return /** @type{!Array.<!proto.bc.ChildBlockHeader>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.ChildBlockHeader, 4));
+};
+
+
+/** @param {!Array.<!proto.bc.ChildBlockHeader>} value */
+proto.bc.ChildBlockHeaders.prototype.setNeoList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 4, value);
+};
+
+
+/**
+ * @param {!proto.bc.ChildBlockHeader=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.bc.ChildBlockHeader}
+ */
+proto.bc.ChildBlockHeaders.prototype.addNeo = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.bc.ChildBlockHeader, opt_index);
+};
+
+
+proto.bc.ChildBlockHeaders.prototype.clearNeoList = function() {
+  this.setNeoList([]);
+};
+
+
+/**
+ * repeated ChildBlockHeader wav = 5;
+ * @return {!Array.<!proto.bc.ChildBlockHeader>}
+ */
+proto.bc.ChildBlockHeaders.prototype.getWavList = function() {
+  return /** @type{!Array.<!proto.bc.ChildBlockHeader>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.ChildBlockHeader, 5));
+};
+
+
+/** @param {!Array.<!proto.bc.ChildBlockHeader>} value */
+proto.bc.ChildBlockHeaders.prototype.setWavList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 5, value);
+};
+
+
+/**
+ * @param {!proto.bc.ChildBlockHeader=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.bc.ChildBlockHeader}
+ */
+proto.bc.ChildBlockHeaders.prototype.addWav = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 5, opt_value, proto.bc.ChildBlockHeader, opt_index);
+};
+
+
+proto.bc.ChildBlockHeaders.prototype.clearWavList = function() {
+  this.setWavList([]);
 };
 
 
@@ -646,7 +829,7 @@ proto.bc.BcBlock.toObject = function(includeInstance, msg) {
     transactionsList: jspb.Message.toObjectList(msg.getTransactionsList(),
     proto.bc.BcTransaction.toObject, includeInstance),
     childBlockchainCount: jspb.Message.getFieldWithDefault(msg, 12, 0),
-    childBlockHeadersMap: (f = msg.getChildBlockHeadersMap()) ? f.toObject(includeInstance, proto.bc.ChildBlockHeadersList.toObject) : []
+    childBlockHeaders: (f = msg.getChildBlockHeaders()) && proto.bc.ChildBlockHeaders.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -733,10 +916,9 @@ proto.bc.BcBlock.deserializeBinaryFromReader = function(msg, reader) {
       msg.setChildBlockchainCount(value);
       break;
     case 13:
-      var value = msg.getChildBlockHeadersMap();
-      reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readUint32, jspb.BinaryReader.prototype.readMessage, proto.bc.ChildBlockHeadersList.deserializeBinaryFromReader);
-         });
+      var value = new proto.bc.ChildBlockHeaders;
+      reader.readMessage(value,proto.bc.ChildBlockHeaders.deserializeBinaryFromReader);
+      msg.setChildBlockHeaders(value);
       break;
     default:
       reader.skipField();
@@ -852,9 +1034,13 @@ proto.bc.BcBlock.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getChildBlockHeadersMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(13, writer, jspb.BinaryWriter.prototype.writeUint32, jspb.BinaryWriter.prototype.writeMessage, proto.bc.ChildBlockHeadersList.serializeBinaryToWriter);
+  f = message.getChildBlockHeaders();
+  if (f != null) {
+    writer.writeMessage(
+      13,
+      f,
+      proto.bc.ChildBlockHeaders.serializeBinaryToWriter
+    );
   }
 };
 
@@ -1056,20 +1242,32 @@ proto.bc.BcBlock.prototype.setChildBlockchainCount = function(value) {
 
 
 /**
- * map<uint32, ChildBlockHeadersList> child_block_headers = 13;
- * @param {boolean=} opt_noLazyCreate Do not create the map if
- * empty, instead returning `undefined`
- * @return {!jspb.Map<number,!proto.bc.ChildBlockHeadersList>}
+ * optional ChildBlockHeaders child_block_headers = 13;
+ * @return {?proto.bc.ChildBlockHeaders}
  */
-proto.bc.BcBlock.prototype.getChildBlockHeadersMap = function(opt_noLazyCreate) {
-  return /** @type {!jspb.Map<number,!proto.bc.ChildBlockHeadersList>} */ (
-      jspb.Message.getMapField(this, 13, opt_noLazyCreate,
-      proto.bc.ChildBlockHeadersList));
+proto.bc.BcBlock.prototype.getChildBlockHeaders = function() {
+  return /** @type{?proto.bc.ChildBlockHeaders} */ (
+    jspb.Message.getWrapperField(this, proto.bc.ChildBlockHeaders, 13));
 };
 
 
-proto.bc.BcBlock.prototype.clearChildBlockHeadersMap = function() {
-  this.getChildBlockHeadersMap().clear();
+/** @param {?proto.bc.ChildBlockHeaders|undefined} value */
+proto.bc.BcBlock.prototype.setChildBlockHeaders = function(value) {
+  jspb.Message.setWrapperField(this, 13, value);
+};
+
+
+proto.bc.BcBlock.prototype.clearChildBlockHeaders = function() {
+  this.setChildBlockHeaders(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.bc.BcBlock.prototype.hasChildBlockHeaders = function() {
+  return jspb.Message.getField(this, 13) != null;
 };
 
 
@@ -1262,7 +1460,7 @@ proto.bc.ChildBlockHeader.prototype.toObject = function(opt_includeInstance) {
  */
 proto.bc.ChildBlockHeader.toObject = function(includeInstance, msg) {
   var f, obj = {
-    blockchain: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    blockchain: jspb.Message.getFieldWithDefault(msg, 1, ""),
     hash: jspb.Message.getFieldWithDefault(msg, 2, ""),
     previousHash: jspb.Message.getFieldWithDefault(msg, 3, ""),
     timestamp: jspb.Message.getFieldWithDefault(msg, 4, 0),
@@ -1306,7 +1504,7 @@ proto.bc.ChildBlockHeader.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.bc.ChildChain} */ (reader.readEnum());
+      var value = /** @type {string} */ (reader.readString());
       msg.setBlockchain(value);
       break;
     case 2:
@@ -1363,8 +1561,8 @@ proto.bc.ChildBlockHeader.prototype.serializeBinary = function() {
 proto.bc.ChildBlockHeader.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getBlockchain();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  if (f.length > 0) {
+    writer.writeString(
       1,
       f
     );
@@ -1415,15 +1613,15 @@ proto.bc.ChildBlockHeader.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional ChildChain blockchain = 1;
- * @return {!proto.bc.ChildChain}
+ * optional string blockchain = 1;
+ * @return {string}
  */
 proto.bc.ChildBlockHeader.prototype.getBlockchain = function() {
-  return /** @type {!proto.bc.ChildChain} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
-/** @param {!proto.bc.ChildChain} value */
+/** @param {string} value */
 proto.bc.ChildBlockHeader.prototype.setBlockchain = function(value) {
   jspb.Message.setField(this, 1, value);
 };
@@ -1518,16 +1716,5 @@ proto.bc.ChildBlockHeader.prototype.setChildBlockConfirmationsInParentCount = fu
   jspb.Message.setField(this, 7, value);
 };
 
-
-/**
- * @enum {number}
- */
-proto.bc.ChildChain = {
-  BTC: 0,
-  ETH: 1,
-  LSK: 2,
-  NEO: 3,
-  WAV: 4
-};
 
 goog.object.extend(exports, proto.bc);
