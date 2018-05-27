@@ -25,7 +25,7 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
-const { Block, BcBlock, ChildChain } = require('../protos/core_pb')
+const { Block, BcBlock } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
 const ts = require('../utils/time').default // ES6 default export
@@ -287,12 +287,18 @@ export default class Engine {
       if (this._workerProcess) { // TODO restart conditionaly - define conditions
         this._logger.debug(`Restarting mining with a new rovered block`)
         // $FlowFixMe
-        this._workerProcess.kill('SIGKILL')
+        this._workerProcess.kill()
+        // $FlowFixMe
+        this._workerProcess.disconnect()
       }
 
+      // if (!this._workerProcess) {
       this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
       const proc: ChildProcess = fork(MINER_WORKER_PATH)
       this._workerProcess = proc
+      // } else {
+      //   this._logger.debug(`Sending work to existing miner process (pid: ${this._workerProcess.pid}), work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+      // }
       if (this._workerProcess !== null) {
         // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
         this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
@@ -330,7 +336,7 @@ export default class Engine {
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
-      throw new Error(`There is not unfininshed block to use solution for`)
+      throw new Error(`There is not unfinished block to use solution for`)
     }
     this._unfinishedBlock.setNonce(solution.nonce)
     // $FlowFixMe
@@ -357,12 +363,12 @@ export default class Engine {
   }
 
   _handleWorkerExit (code: number, signal: string) {
-    if (code !== 0) {
+    if (code === 0 || code === null) { // 0 means worker exited on it's own correctly, null that is was terminated from engine
+      this._logger.debug(`Mining worker finished its work (code: ${code})`)
+    } else {
       this._logger.warn(`Mining worker process exited with code ${code}, signal ${signal}`)
       this._unfinishedBlock = undefined
       this._unfinishedBlockData = undefined
-    } else {
-      this._logger.debug(`Mining worker fininshed its work (code: ${code})`)
     }
     this._workerProcess = undefined
   }
@@ -387,15 +393,18 @@ export default class Engine {
       newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
     ]
 
-    Object.keys(ChildChain).forEach(roverName => {
-      if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks && this._unfinishedBlockData.currentBlocks[roverName]) {
+    let childBlockCount = 0
+    this._knownRovers.forEach(roverName => {
+      if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks) {
         const methodNameGet = `get${roverName[0].toUpperCase() + roverName.slice(1)}List` // e.g. getBtcList
         // $FlowFixMe - flow does not now about methods of protobuf message instances
         const blocks = this._unfinishedBlockData.currentBlocks[methodNameGet]()
-        row.push(blocks.map(block => block.getChildBlockConfirmationsInParentCount()).join(','))
-        row.push(blocks.map(block => block.getTimestamp() / 1000 << 0).join(','))
+        row.push(blocks.map(block => block.getChildBlockConfirmationsInParentCount()).join('|'))
+        row.push(blocks.map(block => block.getTimestamp() / 1000 << 0).join('|'))
+        childBlockCount += blocks.length
       }
     })
+    row.push(childBlockCount)
     const dataPath = ensureDebugPath(`bc/mining-data.csv`)
     writeFileSync(dataPath, `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
   }
@@ -442,7 +451,7 @@ export default class Engine {
         return this._broadcastMinedBlock(newBlock, solution)
       })
       .catch((err) => {
-        this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
+        // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
         this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
       })
   }

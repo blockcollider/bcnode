@@ -397,24 +397,24 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
       const methodNameSet = `set${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. setBtcList
       let updatedHeaders
       if (chainWhichTriggeredMining === chain) {
-        console.log(`${chain} trigger mining`)
+        // console.log(`${chain} trigger mining`)
         updatedHeaders = [copyHeader(newChildBlock, 1)]
         if (shouldAppend) {
-          console.log(`unshifting`)
+          // console.log(`unshifting`)
           updatedHeaders.unshift(previousBlock.getChildBlockHeaders()[methodNameGet]().map(header => {
             return copyHeader(header, 1)
           }))
         }
       } else {
         updatedHeaders = previousBlock.getChildBlockHeaders()[methodNameGet]().map(header => {
-          console.log(`${chain} did not trigger mining, just copying with count+1`)
+          // console.log(`${chain} did not trigger mining, just copying with count+1`)
           return copyHeader(header, header.getChildBlockConfirmationsInParentCount() + 1)
         })
       }
 
       newMap[methodNameSet](flatten(updatedHeaders)) // need to flatten because in case of append map returns [] and not a single header
     })
-  console.log(newMap.toObject())
+  // console.log(newMap.toObject())
   return newMap
 }
 
@@ -452,7 +452,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   const newChainRoot = getChildrenRootHash(blockHashes)
 
   const shouldAppend = !!unfinishedBlock
-  console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
+  // console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
   const childBlockHeaders = prepareChildBlockHeadersMap(
     unfinishedBlock || lastPreviousBlock,
     blockWhichTriggeredMining,
