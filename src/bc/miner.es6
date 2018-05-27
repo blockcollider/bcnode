@@ -26,6 +26,7 @@ const {
   call,
   compose,
   difference,
+  flatten,
   flip,
   invoker,
   join,
@@ -387,8 +388,6 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
     return header
   }
 
-  if (newChildBlock.toObject().hash === '0xb9835f19d0abbc7142850df04d4e878f49c556bbcbc92eab9f07d8fb448b3f68') {
-  }
   const chainWhichTriggeredMining = newChildBlock.getBlockchain()
   const newMap = new ChildBlockHeaders()
   Object.keys(previousBlock.getChildBlockHeaders().toObject())
@@ -400,17 +399,19 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
       const updatedHeaders = previousBlock.getChildBlockHeaders()[methodNameGet]()
         .map(header => {
           if (chainWhichTriggeredMining === chain) {
-            return copyHeader(newChildBlock, 1)
+            // add original header with confirmation count 1
+            const changedChainHeaders = [copyHeader(header, 1)]
+            // if mining was already in process add another header to the currently mined block
+            if (shouldAppend) {
+              changedChainHeaders.push(copyHeader(newChildBlock, 1))
+            }
+            return changedChainHeaders
           }
 
           return copyHeader(header, header.getChildBlockConfirmationsInParentCount() + 1)
         })
 
-      if (shouldAppend) {
-        updatedHeaders.push(copyHeader(newChildBlock, 1))
-      }
-
-      newMap[methodNameSet](updatedHeaders)
+      newMap[methodNameSet](flatten(updatedHeaders)) // need to flatten because in case of append map returns [] and not a single header
     })
 
   return newMap
@@ -450,6 +451,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   const newChainRoot = getChildrenRootHash(blockHashes)
 
   const shouldAppend = !!unfinishedBlock
+  console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
   const childBlockHeaders = prepareChildBlockHeadersMap(
     unfinishedBlock || lastPreviousBlock,
     blockWhichTriggeredMining,
