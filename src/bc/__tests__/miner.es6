@@ -266,6 +266,38 @@ describe('Miner', () => {
     expect(newBlock3.getChildBlockHeaders().getLskList()[0].getChildBlockConfirmationsInParentCount()).toBe(1)
     expect(newBlock3.getChildBlockHeaders().getNeoList()[0].getChildBlockConfirmationsInParentCount()).toBe(4)
     expect(newBlock3.getChildBlockHeaders().getWavList()[0].getChildBlockConfirmationsInParentCount()).toBe(4)
+
+    // test adding block to an unfinished block
+    let testLskHeader2 = TEST_DATA.lsk[1]
+    // expect(testBtcHeader.previousHash).toEqual(oldHeader.getHash())
+    // Change hash, previousHash, timestamp and height
+    newHeader = new Block([
+      testLskHeader2.blockchain,
+      testLskHeader2.hash, // <-------  the new block would update his previous block
+      testLskHeader2.previousHash, // the previous hash from above
+      testLskHeader2.timestamp / 1000,
+      testLskHeader2.height,
+      testLskHeader2.merkleRoot
+    ])
+
+    // Update changed header in header list
+    headers[2] = newHeader
+
+    // Mock timestamp - 3600 seconds (1 hour) after genesis block
+    mockedTimestamp = mockNow(new Date((genesisBlock.getTimestamp() * 1000) + 3600 * 1000))
+
+    // Create (not yet existing) block
+    let [newBlock4, _4] = prepareNewBlock( // eslint-disable-line
+      mockedTimestamp,
+      newBlock2,
+      headers,
+      headers[2],
+      [], // transactions
+      TEST_MINER_KEY,
+      newBlock3
+    )
+
+    expect(newBlock4.getChildBlockHeaders().getLskList()).toHaveLength(2)
   })
 
   test('getNewPreExpDifficulty()', () => {

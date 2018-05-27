@@ -395,25 +395,26 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
       const chain = chainKeyName.replace(/List$/, '')
       const methodNameGet = `get${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. getBtcList
       const methodNameSet = `set${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. setBtcList
-
-      const updatedHeaders = previousBlock.getChildBlockHeaders()[methodNameGet]()
-        .map(header => {
-          if (chainWhichTriggeredMining === chain) {
-            // add original header with confirmation count 1
-            const changedChainHeaders = [copyHeader(header, 1)]
-            // if mining was already in process add another header to the currently mined block
-            if (shouldAppend) {
-              changedChainHeaders.push(copyHeader(newChildBlock, 1))
-            }
-            return changedChainHeaders
-          }
-
+      let updatedHeaders
+      if (chainWhichTriggeredMining === chain) {
+        console.log(`${chain} trigger mining`)
+        updatedHeaders = [copyHeader(newChildBlock, 1)]
+        if (shouldAppend) {
+          console.log(`unshifting`)
+          updatedHeaders.unshift(previousBlock.getChildBlockHeaders()[methodNameGet]().map(header => {
+            return copyHeader(header, 1)
+          }))
+        }
+      } else {
+        updatedHeaders = previousBlock.getChildBlockHeaders()[methodNameGet]().map(header => {
+          console.log(`${chain} did not trigger mining, just copying with count+1`)
           return copyHeader(header, header.getChildBlockConfirmationsInParentCount() + 1)
         })
+      }
 
       newMap[methodNameSet](flatten(updatedHeaders)) // need to flatten because in case of append map returns [] and not a single header
     })
-
+  console.log(newMap.toObject())
   return newMap
 }
 
