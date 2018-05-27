@@ -6,10 +6,11 @@
  *
  * @flow
  */
-
+import type Logger from 'winston'
 const RocksDb = require('rocksdb')
 
 const { serialize, deserialize } = require('./codec')
+const { getLogger } = require('../logger')
 
 /**
  * Unified persistence interface
@@ -17,10 +18,12 @@ const { serialize, deserialize } = require('./codec')
 export default class PersistenceRocksDb {
   _db: RocksDb; // eslint-disable-line no-undef
   _isOpen: boolean; // eslint-disable-line no-undef
+  _logger: Logger
 
   constructor (location: string = '_data') {
     this._db = new RocksDb(location)
     this._isOpen = false
+    this._logger = getLogger(__dirname)
   }
 
   get db (): RocksDb {
@@ -71,7 +74,13 @@ export default class PersistenceRocksDb {
    * @param opts
    */
   put (key: string, value: any, opts: Object = {}): Promise<*> {
-    const serialized = serialize(value)
+    let serialized
+    try {
+      serialized = serialize(value)
+    } catch (e) {
+      this._logger.warn(`Could not serialize key: ${key}, value: ${value.toObject()}`)
+      throw e
+    }
     return new Promise((resolve, reject) => {
       this.db.put(key, serialized, opts, (err) => {
         if (err) {
