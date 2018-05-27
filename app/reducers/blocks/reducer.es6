@@ -12,8 +12,41 @@ import { initialState } from './state'
 
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
-    case ACTIONS.BLOCKS_SET:
-      return {...state, id: action.payload[0].height, blocks: action.payload}
+    case ACTIONS.BLOCKS_ANNOUNCED_ADD:
+      let announcedBlocks = state.announced.blocks
+      action.payload.timestamp = new Date(action.payload.timestamp)
+      announcedBlocks.enq(action.payload)
+      return {
+        ...state,
+        announced: {
+          ...state.announced,
+          count: state.announced.count + 1,
+          blocks: announcedBlocks
+        }
+      }
+
+    case ACTIONS.BLOCKS_MINED_ADD:
+      let minedBlocks = state.mined.blocks
+      action.payload.timestamp = new Date(action.payload.timestamp)
+      minedBlocks.enq(action.payload)
+      return {
+        ...state,
+        mined: {
+          ...state.mined,
+          count: state.mined.count + 1,
+          blocks: minedBlocks
+        }
+      }
+
+    case ACTIONS.BLOCKS_STORED_SET:
+      return {
+        ...state,
+        stored: {
+          ...state.stored,
+          id: action.payload[0].height,
+          blocks: action.payload
+        }
+      }
   }
 
   return state

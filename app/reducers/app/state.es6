@@ -10,5 +10,20 @@
 export const initialState = {
   config: {
     debug: false
+  },
+
+  render: {
+    animFrameHandle: null
+  },
+
+  ts: {
+    startedAt: Date.now()
+  },
+
+  window: {
+    size: {
+      width: 0,
+      height: 0
+    }
   }
 }

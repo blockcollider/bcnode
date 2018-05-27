@@ -1,10 +1,11 @@
 const path = require('path')
-// const webpack = require('webpack')
+const webpack = require('webpack')
 
 // const fs = require('fs')
 // const GIT_DIR = path.resolve(__dirname, '../.git')
 // const { genarateVersion } = require('../lib/helper/version')
 
+const config = require('../config/config')
 const APP_DIR = path.resolve(__dirname, '../app')
 
 module.exports = {
@@ -68,6 +69,10 @@ module.exports = {
     //     genarateVersion()
     //   }
     // }
+    new webpack.DefinePlugin({
+      SENTRY_ENABLED: JSON.stringify(config.sentry.enabled),
+      SENTRY_DSN: JSON.stringify(config.sentry.url)
+    })
   ]
 
   // module: {

@@ -33,7 +33,14 @@ class BlocksTable extends Component<*> {
   render () {
     let i = 0
     const blocks = this.props.blocks.map((block) => {
-      const extraFields = (this.props.extraCols || []).map((colName, idx) => (<td key={idx}>{block[colName[1]]}</td>))
+      const extraFields = (this.props.extraCols || []).map(
+        (colName, idx) => {
+          const val = typeof colName[1] === 'function' ? colName[1](block) : block[colName[1]]
+          return (
+            <td key={idx}>{val}</td>
+          )
+        }
+      )
 
       const fixedStyle = {
         fontFamily: 'monospace'

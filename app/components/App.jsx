@@ -27,11 +27,7 @@ export class App extends Component<*> {
         </Helmet>
 
         <Navbar />
-        <div className='container-fluid'>
-          <div className='container'>
-            {elements}
-          </div>
-        </div>
+        {elements}
       </div>
     )
   }

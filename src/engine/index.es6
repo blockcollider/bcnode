@@ -47,7 +47,7 @@ export default class Engine {
   _monitor: Monitor; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
-  _pubsub: PubSub // eslint-disable-line no-undef
+  _pubsub: PubSub; //  eslint-disable-line no-undef
   _rovers: RoverManager; // eslint-disable-line no-undef
   _rpc: RpcServer; // eslint-disable-line no-undef
   _server: Server; // eslint-disable-line no-undef
@@ -58,6 +58,7 @@ export default class Engine {
   _canMine: bool; // eslint-disable-line no-undef
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
+  _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
@@ -73,6 +74,7 @@ export default class Engine {
     this._rpc = new RpcServer(this)
     this._server = new Server(this, this._rpc)
     this._collectedBlocks = {}
+    this._subscribers = {}
     for (let roverName of this._knownRovers) {
       this._collectedBlocks[roverName] = 0
     }
@@ -326,6 +328,14 @@ export default class Engine {
       this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
       return Promise.resolve(false)
     }
+  }
+
+  blockFromPeer (block: Object) {
+    const blockObj = block.toObject()
+    this._logger.info('Received new block from peer', blockObj.height, blockObj.miner, blockObj)
+    // TODO: Validate new block mined by peer
+
+    this._server._wsBroadcast({ type: 'block.announced', data: blockObj })
   }
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {

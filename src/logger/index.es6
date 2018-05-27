@@ -47,7 +47,8 @@ const logger = new winston.Logger({
       datePattern: '-yyyyMMddHH.log',
       json: false,
       formatter: format,
-      level: LOG_LEVEL
+      level: LOG_LEVEL,
+      maxFiles: 10
     })
 
     // // File error

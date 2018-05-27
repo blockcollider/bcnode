@@ -11,6 +11,7 @@ import App from './App'
 import BlocksTable from './BlocksTable'
 import Brand from './Brand'
 import ConnectionState from './ConnectionState'
+import Dot from './Dot'
 import Ellipsis from './Ellipsis'
 import Navbar from './Navbar'
 import PeersTable from './PeersTable'
@@ -23,6 +24,7 @@ export {
   BlocksTable,
   Brand,
   ConnectionState,
+  Dot,
   Ellipsis,
   Navbar,
   PeersTable,

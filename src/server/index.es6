@@ -28,6 +28,7 @@ const { dispatcher: socketDispatcher } = require('./socket')
 
 const assetsDir = path.resolve(__dirname, '..', '..', 'public')
 const docsDir = path.resolve(__dirname, '..', '..', 'docs')
+const logsDir = path.resolve(__dirname, '..', '..', '_logs')
 
 const PORT = (process.env.BC_UI_PORT && parseInt(process.env.BC_UI_PORT, 10)) || config.server.port
 
@@ -197,6 +198,13 @@ export default class Server {
 
   initUi () {
     this.app.use('/doc', express.static(docsDir))
+    this.app.use('/logs',
+      express.static(logsDir),
+      serveIndex(logsDir, {
+        icons: true,
+        view: 'details'
+      })
+    )
 
     // Serve static content
     this.app.use(
@@ -206,7 +214,10 @@ export default class Server {
       })
     )
 
-    this.engine.pubsub.subscribe('block.mined', 'server', (block: Object) => this._wsBroadcast(block))
+    // Subscribe for events
+    this.engine.pubsub.subscribe('block.mined', '<server>', (block: Object) => {
+      this._wsBroadcast(block)
+    })
   }
 
   _transformBlockToWire (block: Block) {
@@ -222,8 +233,8 @@ export default class Server {
     return {
       id: peer.id.toB58String(),
       meta: peer.meta,
-      // addr: peer.multiaddrs._connectedMultiaddr.toString(),
-      addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString())
+      addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString()),
+      addr: peer._connectedMultiaddr && peer._connectedMultiaddr.toString()
     }
   }
 
@@ -260,7 +271,7 @@ export default class Server {
     let peers = []
 
     const node = this._engine._node
-    const peerBook = node && node.peerBook
+    const peerBook = node && node.manager.peerBookConnected
     if (peerBook) {
       peers = peerBook.getAllArray().map((peer) => {
         return this._transformPeerToWire(peer)

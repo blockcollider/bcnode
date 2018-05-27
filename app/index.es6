@@ -9,9 +9,13 @@
 
 import { render } from './components/Root'
 import { createHistory, createStore } from './store'
+import Raven from 'raven-js'
 
 import { init as initAppReducer } from './reducers/app/reducer'
 import { init as initSocketReducer } from './reducers/socket/reducer'
+
+declare var SENTRY_DSN: string
+declare var SENTRY_ENABLED: boolean
 
 // Create history
 const history = createHistory()
@@ -25,5 +29,14 @@ initAppReducer(store.dispatch)
 // Initialize socket
 initSocketReducer(store.dispatch)
 
-// Render topmost component
-render('app', history, store)
+// Initialize raven/sentry
+if (SENTRY_ENABLED) {
+  Raven.config(SENTRY_DSN).install()
+  Raven.context(() => {
+    // Render topmost component
+    render('app', history, store)
+  })
+} else {
+  // Render topmost component
+  render('app', history, store)
+}

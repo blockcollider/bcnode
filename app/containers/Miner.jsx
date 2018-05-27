@@ -32,9 +32,9 @@ export class MinerContainer extends Component<*> {
         </Helmet>
 
         <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
-          Mined blocks (last 20)
+          Mined blocks (last {this.props.blocks.capacity()} of {this.props.blocksCount})
         </h2>
-        <BlocksTable blocks={this.props.blocks} extraCols={extraCols} onClick={this.props.actions.showBlock} />
+        <BlocksTable blocks={this.props.blocks.toarray()} extraCols={extraCols} onClick={this.props.actions.showBlock} />
       </div>
     )
   }
@@ -47,7 +47,8 @@ function mapDispatchToProps (dispatch) {
 export const Miner = connect(
   state => ({
     config: state.app.config,
-    blocks: state.miner.blocks.toarray()
+    blocks: state.blocks.mined.blocks,
+    blocksCount: state.blocks.mined.count
   }),
   mapDispatchToProps
 )(MinerContainer)

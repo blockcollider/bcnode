@@ -16,12 +16,26 @@ export const init = (dispatch : (msg : Object) => void) => {
     console.log('d is pressed', e)
     dispatch({type: ACTIONS.APP_DEBUG_TOGGLE})
   })
+
+  window.onresize = () => {
+    const payload = {
+      height: window.innerHeight,
+      width: window.innerWidth
+    }
+
+    dispatch({type: ACTIONS.APP_WINDOWS_SIZE_SET, payload})
+  }
+
+  window.onresize()
 }
 
 export const reducer = (state: Object = initialState, action: Object) => {
   switch (action.type) {
     case ACTIONS.APP_DEBUG_TOGGLE:
       return { ...state, config: { debug: !state.config.debug } }
+
+    case ACTIONS.APP_WINDOWS_SIZE_SET:
+      return { ...state, window: { size: action.payload } }
   }
 
   return state
