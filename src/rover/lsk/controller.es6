@@ -13,8 +13,10 @@ const lisk = require('lisk-js')
 
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
+const { errToString } = require('../../helper/error')
 const { RpcClient } = require('../../rpc')
-const string = require('../../utils/strings.js')
+const { blake2b } = require('../../utils/crypto')
+const { createUnifiedBlock } = require('../helper')
 
 type LiskBlock = { // eslint-disable-line no-undef
   id: string,
@@ -29,11 +31,20 @@ type LiskBlock = { // eslint-disable-line no-undef
   blockSignature: string,
   confirmations: number,
   totalForged: number,
-  timestamp: string,
+  timestamp: number,
   version: string,
 }
 
-const getMerkleRoot = (txs) => txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
+const LSK_GENESIS_DATE = new Date('2016-05-24T17:00:00.000Z')
+
+const getMerkleRoot = (block) => {
+  if (!block.transactions || (block.transactions.length === 0)) {
+    return blake2b(block.blockSignature)
+  }
+
+  const txs = block.transactions.map((tx) => tx.id)
+  return txs.reduce((acc, el) => blake2b(acc + el), '')
+}
 
 const getLastHeight = (api: Object): Promise<number> => {
   const response = api.sendRequest('blocks/getHeight')
@@ -48,41 +59,47 @@ const getTransactionsForBlock = (api: Object, blockId: string): Promise<Object[]
   return api.sendRequest('transactions', { blockId }).then(response => response.transactions)
 }
 
-const _createUnifiedBlock = (block): Block => {
-  // TODO return Block as message
-  const obj = {}
+const getAbsoluteTimestamp = (blockTs: number) => {
+  return ((LSK_GENESIS_DATE.getTime() / 1000 << 0) + blockTs) * 1000
+}
 
-  obj.blockNumber = block.height
-  obj.prevHash = block.previousBlock
-  obj.blockHash = block.id
-  obj.root = getMerkleRoot(block.transactions)
-  obj.fee = block.totalFee
-  obj.size = block.payloadLength
-  obj.payloadHash = block.payloadHash
-  obj.generator = block.generatorId
-  obj.generatorPublicKey = block.generatorPublicKey
-  obj.blockSignature = block.blockSignature
-  obj.confirmations = block.confirmations
-  obj.totalForged = block.totalForged
-  obj.timestamp = block.timestamp
-  obj.version = block.version
-  obj.transactions = block.transactions.reduce(function (all, t) {
-    const tx = {
-      txHash: t.id,
-      // inputs: t.inputs,
-      // outputs: t.outputs,
-      marked: false
-    }
-    all.push(tx)
-    return all
-  }, [])
-
-  // return obj
+function _createUnifiedBlock (block: Object): Block {
+  const obj = {
+    blockNumber: block.height,
+    prevHash: block.previousBlock,
+    blockHash: block.id,
+    root: getMerkleRoot(block),
+    fee: block.totalFee,
+    size: block.payloadLength,
+    payloadHash: block.payloadHash,
+    generator: block.generatorId,
+    generatorPublicKey: block.generatorPublicKey,
+    blockSignature: block.blockSignature,
+    confirmations: block.confirmations,
+    totalForged: block.totalForged,
+    timestamp: getAbsoluteTimestamp(parseInt(block.timestamp, 10)),
+    version: block.version,
+    transactions: block.transactions.reduce(
+      function (all, t) {
+        all.push({
+          txHash: t.id,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        })
+        return all
+      },
+      []
+    )
+  }
 
   const msg = new Block()
   msg.setBlockchain('lsk')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
@@ -117,23 +134,23 @@ export default class Controller {
     this._logger.debug('initialized')
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
 
     const cycle = () => {
-      this._logger.info('trying to get new block')
+      this._logger.debug('trying to get new block')
 
       return getLastHeight(this._liskApi).then(lastHeight => {
-        this._logger.debug(`got lastHeight: "${lastHeight}"`)
+        this._logger.debug(`Got lastHeight: "${lastHeight}"`)
 
         getBlock(this._liskApi, lastHeight).then(lastBlock => {
-          this._logger.debug(`collected new block with id: ${inspect(lastBlock.id)}`)
+          this._logger.debug(`Collected new block with id: ${inspect(lastBlock.id)}`)
 
           if (!this._blockCache.has(lastBlock.id)) {
             this._blockCache.set(lastBlock.id, true)
@@ -144,9 +161,9 @@ export default class Controller {
               lastBlock.transactions = transactions
               this._logger.debug(`successfuly got ${transactions.length} transactions for block ${inspect(lastBlock.id)}`)
 
-              const unifiedBlock = _createUnifiedBlock(lastBlock)
-              this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+              const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
+              this._logger.debug('LSK Going to call this._rpc.rover.collectBlock()')
               this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
                 if (err) {
                   this._logger.error(`Error while collecting block ${inspect(err)}`)
@@ -158,7 +175,7 @@ export default class Controller {
           }
         })
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`Error while getting new block, err: ${e.message}`)
       })
     }
 
@@ -193,8 +210,8 @@ export default class Controller {
     //        return 0
     //      })
 
-    //      log.info('peer sample: ' + response.peers.length)
-    //      log.info('probable lsk block heigh ' + tp[0])
+    //      log.debug('peer sample: ' + response.peers.length)
+    //      log.debug('probable lsk block heigh ' + tp[0])
     //    }
     //  })
     // }, 60000)

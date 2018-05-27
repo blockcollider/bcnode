@@ -8,4 +8,45 @@ message Block {
     string blockchain = 1;
     string hash = 2;
     string previous_hash = 3;
+    uint64 timestamp = 4;
+    uint64 height = 5;
+    string merkle_root = 6;
+}
+
+message ChildBlockHeaders {
+    repeated ChildBlockHeader btc = 1;
+    repeated ChildBlockHeader eth = 2;
+    repeated ChildBlockHeader lsk = 3;
+    repeated ChildBlockHeader neo = 4;
+    repeated ChildBlockHeader wav = 5;
+}
+
+message BcBlock {
+    string hash = 1;
+    uint64 height = 2;
+    string miner = 3;
+    float difficulty = 4;
+    uint64 timestamp = 5;
+    string merkle_root = 6;
+    string chain_root = 7;
+    uint64 distance = 8;
+    string nonce = 9;
+    uint64 tx_count = 10;
+    repeated BcTransaction transactions = 11;
+    uint64 child_blockchain_count = 12;
+    ChildBlockHeaders child_block_headers = 13;
+}
+
+message BcTransaction {
+  string hash = 1;
+}
+
+message ChildBlockHeader {
+    string blockchain = 1;
+    string hash = 2;
+    string previous_hash = 3;
+    uint64 timestamp = 4;
+    uint64 height = 5;
+    string merkle_root = 6;
+    uint64 child_block_confirmations_in_parent_count = 7;
 }

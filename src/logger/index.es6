@@ -12,11 +12,11 @@ const winston = require('winston')
 const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
-const logDir = resolve(__dirname, '..', '..', 'logs')
-
-const logPath = `${logDir}/bcnode`
-
+const LOG_DIR = resolve(__dirname, '..', '..', '_logs')
+const logPath = `${LOG_DIR}/bcnode`
 const tsFormat = () => new Date().toISOString()
+
+const LOG_LEVEL = process.env.BC_LOG || 'info'
 
 const format = options => {
   const ts = options.timestamp()
@@ -37,7 +37,7 @@ const logger = new winston.Logger({
       colorize: true,
       timestamp: tsFormat,
       formatter: format,
-      level: (process.stdout.isTTY || 'DEBUG' in process.env) ? 'debug' : 'info'
+      level: LOG_LEVEL
     }),
 
     // File
@@ -46,9 +46,35 @@ const logger = new winston.Logger({
       timestamp: tsFormat,
       datePattern: '-yyyyMMddHH.log',
       json: false,
-      formatter: format
+      formatter: format,
+      level: LOG_LEVEL
     })
-  ]
+
+    // // File error
+    // new winston.transports.DailyRotateFile({
+    //   filename: `${logPath}`,
+    //   timestamp: tsFormat,
+    //   datePattern: '-yyyyMMddHH.log',
+    //   json: false,
+    //   formatter: format,
+    //   level: LOG_LEVEL
+    // })
+  ],
+  exceptionHandlers: [
+    new winston.transports.File({
+      filename: `${logPath}-exceptions.log`,
+      json: false,
+      formatter: (options) => {
+        const msg = {
+          msg: options.message,
+          date: options.meta.date,
+          stack: options.meta.stack
+        }
+        return JSON.stringify(msg, null, 2)
+      }
+    })
+  ],
+  exitOnError: false
 })
 
 const pathToLogPrefix = (path, topLevelDir = 'lib') => {
@@ -109,6 +135,6 @@ class LoggingContext {
   }
 }
 
-export const getLogger = (path: string, meta: ?Object) => {
+export const getLogger = (path: string, meta: ?Object): Logger => {
   return new LoggingContext(logger, pathToLogPrefix(path), meta)
 }

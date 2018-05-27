@@ -7,147 +7,280 @@
  * @flow
  */
 
-const PeerId = require('peer-id')
+const { inspect } = require('util')
+
+const { mergeDeepRight } = require('ramda')
 const PeerInfo = require('peer-info')
-const PeerBook = require('peer-book')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
 
-const logging = require('../logger')
+const debug = require('debug')('bcnode:p2p:node')
 const config = require('../../config/config')
+const { getVersion } = require('../helper/version')
+const logging = require('../logger')
+
+const { BcBlock } = require('../protos/core_pb')
+const { PeerBook } = require('./book')
 const Bundle = require('./bundle').default
+const Engine = require('../engine').default
+const Signaling = require('./signaling').websocket
+const PeerManager = require('./manager').PeerManager
 
 const PROTOCOL_VERSION = '0.0.1'
 const PROTOCOL_PREFIX = `/bc/${PROTOCOL_VERSION}`
 const NETWORK_ID = 1
 
-type StatusMsg = {
-  networkId: number,
-  peerId: ?string,
-}
+const DATETIME_NOW = Date.now()
 
-export default class Node {
+// const debug = require('debug')('p2p')('node')
+
+// type StatusMsg = {
+//   networkId: number,
+//   peerId: ?string,
+// }
+
+export class PeerNode {
   _logger: Object // eslint-disable-line no-undef
-  _engine: Object // eslint-disable-line no-undef
-  _statusMsg: StatusMsg // eslint-disable-line no-undef
-  _peers: PeerBook // eslint-disable-line no-undef
+  _engine: Engine // eslint-disable-line no-undef
+  _interval: IntervalID // eslint-disable-line no-undef
+  _bundle: Bundle // eslint-disable-line no-undef
+  _manager: PeerManager // eslint-disable-line no-undef
+  _peer: PeerInfo // eslint-disable-line no-undef
 
-  constructor (engine: Object) {
+  constructor (engine: Engine) {
     this._engine = engine
     this._logger = logging.getLogger(__filename)
-    this._statusMsg = {
-      networkId: NETWORK_ID,
-      peerId: null
+    this._manager = new PeerManager(this)
+
+    if (config.p2p.stats.enabled) {
+      this._interval = setInterval(() => {
+        this._logger.info(`Peers count ${this.peerBook.getPeersCount()}`)
+      }, config.p2p.stats.interval * 1000)
     }
-    this._peers = new PeerBook()
+  }
+
+  get bundle (): Bundle {
+    return this._bundle
+  }
+
+  get manager (): PeerManager {
+    return this._manager
+  }
+
+  get peer (): PeerInfo {
+    return this._peer
+  }
+
+  get peerBook (): PeerBook {
+    return this.manager.peerBook
+  }
+
+  _pipelineStartNode () {
+    return [
+      // Create PeerInfo for local node
+      (cb: Function) => {
+        this._logger.info('Generating peer info')
+        PeerInfo.create(cb)
+      },
+
+      // Join p2p network
+      (peerInfo: PeerInfo, cb: Function) => {
+        const peerId = peerInfo.id.toB58String()
+        this._logger.info(`Registering addresses for ${peerId}`)
+
+        peerInfo.multiaddrs.add(Signaling.getAddress(peerInfo))
+        peerInfo.multiaddrs.add(`/ip4/0.0.0.0/tcp/0/ipfs/${peerId}`)
+
+        peerInfo.meta = {
+          p2p: {
+            networkId: NETWORK_ID
+          },
+          ts: {
+            connectedAt: DATETIME_NOW,
+            startedAt: DATETIME_NOW
+          },
+          version: {
+            protocol: PROTOCOL_PREFIX,
+            ...getVersion()
+          }
+        }
+        this._peer = peerInfo
+
+        cb(null, peerInfo)
+      },
+
+      // Create node
+      (peerInfo: PeerInfo, cb: Function) => {
+        this._logger.info('Creating P2P node')
+        const opts = {
+          signaling: Signaling.initialize(peerInfo),
+          relay: false
+        }
+        this._bundle = new Bundle(peerInfo, this.peerBook, opts)
+
+        cb(null, this._bundle)
+      },
+
+      // Register event handlers
+      (bundle: Object, cb: Function) => {
+        this._logger.info('Registering event handlers')
+
+        this.bundle.on('peer:discovery', (peer) => {
+          const peerId = peer.id.toB58String()
+          debug('Event - peer:discovery', peerId)
+
+          if (this.peerBook.has(peer)) {
+            debug(`Discovered peer ${peerId} already in PeerBook`)
+            // console.log(this.peerBook.get(peer))
+            return
+          }
+
+          this.bundle.dial(peer, (err) => {
+            if (err) {
+              this._logger.warn(`Error while dialing discovered peer ${peerId}`)
+              return err
+            }
+
+            this._logger.info(`Discovered peer successfully dialed ${peerId}`)
+          })
+        })
+
+        this.bundle.on('peer:connect', (peer) => {
+          const peerId = peer.id.toB58String()
+          debug('Event - peer:connect', peerId)
+
+          const meta = {
+            ts: {
+              connectedAt: Date.now()
+            }
+          }
+
+          // this.peerBook.put(peer)
+
+          // FIXME: This should be done as part of discovery, not after ANOTHER CLIENT CONNECTED TO US
+          this.bundle.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
+            if (err) {
+              this._logger.error('Error dialing /status protocol', peerId)
+              throw err
+            }
+
+            pull(
+              conn,
+              pull.collect((err, wireData) => {
+                if (err) {
+                  throw err
+                }
+
+                const status = JSON.parse(wireData[0])
+                peer.meta = mergeDeepRight(meta, status)
+
+                this._engine._emitter.emit('peerConnected', { peer })
+              })
+            )
+          })
+        })
+
+        this.bundle.on('peer:disconnect', (peer) => {
+          const peerId = peer.id.toB58String()
+          debug('Event - peer:disconnect', peerId)
+          // wait for 1s for both libp2p-switch/dial and libp2p-switch/connection muxedConn `close` handlers
+          // to finish
+          setTimeout(() => {
+            if (this.peerBook.has(peer)) {
+              this._logger.info('Peer disconnected', peerId)
+              this.peerBook.remove(peer)
+            }
+            this._engine._emitter.emit('peerDisconnected', { peer })
+          }, 1000)
+        })
+
+        cb(null)
+      },
+
+      // Register protocols
+      (cb: Function) => {
+        this._logger.info('Registering protocols')
+
+        this.bundle.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => {
+          const status = {
+            p2p: {
+              networkId: NETWORK_ID
+            },
+            ts: {
+              startedAt: DATETIME_NOW
+            },
+            version: {
+              protocol: PROTOCOL_PREFIX,
+              ...getVersion()
+            }
+          }
+
+          pull(pull.values([JSON.stringify(status)]), conn)
+        })
+
+        this.bundle.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => {
+          pull(
+            conn,
+            pull.collect((err, wireData) => {
+              if (err) {
+                console.log('ERROR _handleMessageNewBlock()', err, wireData)
+                return
+              }
+
+              try {
+                const bytes = wireData[0]
+                const raw = new Uint8Array(bytes)
+                const block = BcBlock.deserializeBinary(raw)
+                this._logger.info('Received new block from peer', block.toObject())
+                // TODO: Validate new block mined by peer
+              } catch (e) {
+                this._logger.error(`Error decoding block from peer, reason: ${e.message}`)
+              }
+            })
+          )
+        })
+
+        cb(null)
+      },
+
+      // Start node
+      (cb: Function) => {
+        this._logger.info('Starting P2P node')
+
+        this.bundle.start((err) => { cb(err, this.bundle) })
+      }
+    ]
   }
 
   start () {
-    let node: Bundle
-
-    const pipeline = [
-      (cb) => PeerInfo.create(cb),
-      (peerInfo, cb) => {
-        peerInfo.multiaddrs.add(config.p2p.rendezvous)
-
-        node = new Bundle(peerInfo)
-        this._logger.debug(`Staring p2p node (self) with ${peerInfo.id.toB58String()}`)
-        node.start(cb)
-
-        this._registerMessageHandlers(node)
-      }
-    ]
-
-    waterfall(pipeline, (err) => {
+    waterfall(this._pipelineStartNode(), (err) => {
       if (err) {
         this._logger.error(err)
         throw err
       }
 
-      this._registerEventHandlers(node)
+      this._logger.info('P2P node started')
     })
 
     return true
   }
 
-  _handleEventPeerConnect (node: Object, peer: Object) {
-    this._logger.info('Connection established:', peer.id.toB58String())
-    node.dialProtocol(peer, `${PROTOCOL_PREFIX}/status`, (err, conn) => {
-      if (err) {
-        node.hangUp(peer, () => {
-          this._logger.error(`${peer.id.toB58String()} disconnected, reason: ${err.message}`)
-        })
-      }
-      const msg = this._statusMsg
-      msg.peerId = peer.id.toB58String()
-      pull(pull.values([JSON.stringify(msg)]), conn)
-    })
-  }
+  broadcastNewBlock (block: BcBlock) {
+    this._logger.debug(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
 
-  _handleEventPeerDisconnect (peer: Object) {
-    this._peers.remove(peer)
-    this._logger.info(`Peer ${peer.id.toB58String()} disconnected, removed from book`)
-  }
-
-  _handleEventPeerDiscovery (node: Object, peer: Object) {
-    this._logger.info(`Discovered: ${peer.id.toB58String()}`)
-    node.dial(peer, (err) => {
-      if (err) {
-        this._logger.warn(`Error while dialing discovered peer ${peer.id.toB58String()}`)
-      }
-    })
-  }
-
-  _handleMessageNewBlock (protocol: Object, conn: Object) {
-    pull(
-      conn,
-      pull.map((v) => v.toString()),
-      pull.log() // TODO store to persistence
-    )
-  }
-
-  _handleMessageStatus (node: Object, protocol: Object, conn: Object) {
-    pull(
-      conn,
-      pull.collect((err, wireData) => {
+    const url = `${PROTOCOL_PREFIX}/newblock`
+    this.peerBook.getAllArray().map(peer => {
+      this._logger.debug(`Sending to peer ${peer}`)
+      this.bundle.dialProtocol(peer, url, (err, conn) => {
         if (err) {
-          this._logger.warn('Error while processing status')
-          return
+          this._logger.error('Error sending message to peer', peer.id.toB58String(), err)
+          return err
         }
-        try {
-          const data = JSON.parse(wireData.toString())
-          const { networkId, peerId } = data
-          if (networkId !== NETWORK_ID) {
-            this._logger.warn(`Disconnecting peer ${peerId} - network id mismatch ${networkId} / ${NETWORK_ID}`)
-            node.hangUp(new PeerId(peerId), () => {
-              this._logger.info(`${peerId} disconnected`)
-            })
-            return
-          }
-        } catch (e) {
-          this._logger.error('Error while parsing data')
-          return
-        }
-        conn.getPeerInfo((err, peer) => {
-          if (err) {
-            this._logger.error(`Cannot get peer info ${err}`)
-            return
-          }
-          this._peers.put(peer)
-          this._logger.info(`Status handled successfuly, added peer ${peer.id.toB58String()}`)
-        })
+
+        pull(pull.values([block.serializeBinary()]), conn)
       })
-    )
-  }
-
-  _registerEventHandlers (node: Object) {
-    node.on('peer:discovery', (peer) => this._handleEventPeerDiscovery(node, peer))
-    node.on('peer:connect', (peer) => this._handleEventPeerConnect(node, peer))
-    node.on('peer:disconnect', (peer) => this._handleEventPeerDisconnect(peer))
-  }
-
-  _registerMessageHandlers (node: Object) {
-    node.handle(`${PROTOCOL_PREFIX}/newblock`, (protocol, conn) => this._handleMessageNewBlock(protocol, conn))
-    node.handle(`${PROTOCOL_PREFIX}/status`, (protocol, conn) => this._handleMessageStatus(node, protocol, conn))
+    })
   }
 }
+
+export default PeerNode

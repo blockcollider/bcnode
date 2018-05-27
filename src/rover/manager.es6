@@ -7,9 +7,11 @@
  * @flow
  */
 
-const logging = require('../logger')
 const { fork } = require('child_process')
 const path = require('path')
+
+const logging = require('../logger')
+const { errToString } = require('../helper/error')
 
 const ROVER_RESTART_TIMEOUT = 5000
 
@@ -40,6 +42,10 @@ export default class RoverManager {
     this._rovers = {}
   }
 
+  get rovers (): Object {
+    return this._rovers
+  }
+
   /**
    * Start rover
    * @param roverName Name of rover to start
@@ -54,26 +60,52 @@ export default class RoverManager {
     }
 
     this._logger.info(`Starting rover '${roverName}'`)
-
     const rover = fork(
       roverPath,
       [],
       {
-        execArgv: process.env.DEBUGGER ? ['--inspect-brk'] : []
+        execArgv: []
       }
     )
-
     this._rovers[roverName] = rover
 
     rover.on('exit', (code, signal) => {
       this._logger.warn(`Rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting in ${ROVER_RESTART_TIMEOUT / 1000}s`)
+      delete this._rovers[roverName]
       // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
       setTimeout(() => {
-        delete this._rovers[roverName]
         this.startRover(roverName)
       }, ROVER_RESTART_TIMEOUT)
     })
 
     return true
+  }
+
+  /**
+   * Kill all rovers managed by this manager
+   * @return {*} Promise
+   */
+  killRovers (): Promise<bool> {
+    const roverNames = Object.keys(this._rovers)
+    roverNames.map((roverName) => {
+      this._killRover(roverName)
+    })
+
+    return Promise.resolve(true)
+  }
+
+  /**
+   * Kill rover managed by this manager by its name
+   * @param roverName
+   * @private
+   */
+  _killRover (roverName: string) {
+    const { pid } = this._rovers[roverName]
+    this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
+    try {
+      process.kill(pid, 'SIGHUP')
+    } catch (err) {
+      this._logger.warn(`Error while killing rover '${roverName}', PID: ${pid}, error: ${errToString(err)}`)
+    }
   }
 }

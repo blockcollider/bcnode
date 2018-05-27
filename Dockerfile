@@ -29,20 +29,49 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly \
 ENV PATH "/root/.cargo/bin:$PATH"
 
 # Install neon-bindings
-RUN npm install -g neon-cli
+RUN npm install -g neon-cli forever
 
 # Create /src folder and switch to it
 RUN mkdir /src
 WORKDIR /src
 
+# Support for mounted volumes
+VOLUME /src/_data
+VOLUME /src/_debug
+VOLUME /src/_logs
+VOLUME /src/config
+
+# Get JS deps
+COPY ["package.json", "yarn.lock", "./"]
+RUN yarn
+
+# Add and build native (rust) stuff
+ADD native native
+ADD rust rust
+
+ADD protos protos
+ADD src/protos src/protos
+
+RUN neon build
+
+# Git -> .version.json
 COPY . .
 
-# And build everything
+# Install packages
+RUN yarn
+
+# Initial transpile
+RUN yarn transpile
+
+# Build all
 RUN yarn run dist
+
+RUN  rm -rf native/target/
+RUN  rm -rf target/
 
 RUN mkdir -p /src/logs
 
 EXPOSE 3000 9090
 
-ENTRYPOINT [ "node", "./bin/cli" ]
+ENTRYPOINT [ "./bin/cli" ]
 

@@ -6,12 +6,12 @@
  *
  * @flow-disable
  */
+const { resolve } = require('path')
+const rimraf = require('rimraf')
 
 const { RocksDb } = require('../')
 
-const rimraf = require('rimraf')
-
-const dataDir = '_data_test'
+const TEST_DATA_DIR = resolve(__filename, '..', '..', '..', '_data_test')
 
 describe('RocksDb', () => {
   it('can instantiate self', () => {
@@ -19,7 +19,7 @@ describe('RocksDb', () => {
   })
 
   test('put', done => {
-    const db = new RocksDb(dataDir)
+    const db = new RocksDb(TEST_DATA_DIR)
 
     const key = 'msg'
     const value = 'hello'
@@ -44,7 +44,7 @@ describe('RocksDb', () => {
   })
 
   afterAll(done => {
-    rimraf(dataDir, () => {
+    rimraf(TEST_DATA_DIR, () => {
       done()
     })
   })

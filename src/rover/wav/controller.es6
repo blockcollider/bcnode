@@ -6,6 +6,7 @@
  *
  * @flow
  */
+
 import type { Logger } from 'winston'
 const { inspect } = require('util')
 const WavesApi = require('waves-api')
@@ -13,8 +14,11 @@ const LRUCache = require('lru-cache')
 
 const { Block } = require('../../protos/core_pb')
 const { getLogger } = require('../../logger')
-const string = require('../../utils/strings.js')
+const { errToString } = require('../../helper/error')
+const { blake2b } = require('../../utils/crypto')
 const { RpcClient } = require('../../rpc')
+
+const { createUnifiedBlock } = require('../helper')
 
 type WavesTransaction = {
   type: number,
@@ -48,11 +52,13 @@ type WavesBlock = {
   height: number
 }
 
-const getMerkleRoot = (txs: WavesTransaction[]) => {
-  if (txs !== undefined && txs.length > 0) {
-    return txs.reduce((all, tx) => string.blake2b(all + tx.id), '')
+const getMerkleRoot = (block) => {
+  if (!block.transactions || (block.transactions.length === 0)) {
+    return blake2b(block.signature)
   }
-  return false
+
+  const txs = block.transactions.map((tx) => tx.id)
+  return txs.reduce((acc, el) => blake2b(acc + el), '')
 }
 
 const getLastHeight = (api: Object): Promise<number> => {
@@ -64,37 +70,40 @@ const getBlock = (api: Object, height: number): Promise<WavesBlock> => {
   return api.API.Node.v1.blocks.at(height).then(b => b)
 }
 
-const _createUnifiedBlock = (block): Block => {
-  const obj = {}
-
-  obj.blockNumber = block.height
-  obj.prevHash = block.reference
-  obj.blockHash = block.signature
-  obj.root = getMerkleRoot(block.transactions)
-  obj.fee = block.fee
-  obj.size = block.blocksize
-  obj.generator = block.generator
-  obj.genSignature = block['nxt-consensus']['generation-signature']
-  obj.baseTarget = block['nxt-consensus']['base-target']
-  obj.timestamp = block.timestamp
-  obj.version = block.version
-  obj.generator = block.generator
-  obj.transactions = block.transactions.reduce(function (all, t) {
-    var tx = {
-      txHash: t.id,
-      // inputs: t.inputs,
-      // outputs: t.outputs,
-      marked: false
-    }
-
-    all.push(tx)
-    return all
-  }, [])
+function _createUnifiedBlock (block): Block {
+  const obj = {
+    blockNumber: block.height,
+    prevHash: block.reference,
+    blockHash: block.signature,
+    root: getMerkleRoot(block),
+    fee: block.fee,
+    size: block.blocksize,
+    generator: block.generator,
+    genSignature: block['nxt-consensus']['generation-signature'],
+    baseTarget: block['nxt-consensus']['base-target'],
+    timestamp: parseInt(block.timestamp, 10),
+    version: block.version,
+    transactions: block.transactions.reduce(
+      function (all, t) {
+        all.push({
+          txHash: t.id,
+          // inputs: t.inputs,
+          // outputs: t.outputs,
+          marked: false
+        })
+        return all
+      },
+      []
+    )
+  }
 
   const msg = new Block()
   msg.setBlockchain('wav')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
@@ -120,15 +129,15 @@ export default class Controller {
   }
 
   init () {
-    this._logger.info('initialized')
+    this._logger.debug('Initialized')
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
 
@@ -138,11 +147,10 @@ export default class Controller {
         this._logger.debug(`Got last height '${height}'`)
         getBlock(this._wavesApi, height - 1).then(lastBlock => {
           if (!this._blockCache.has(lastBlock.reference)) {
-            this._logger.info(`Unseen new block '${lastBlock.reference}', height: ${height}`)
+            this._logger.debug(`Unseen new block '${lastBlock.reference}', height: ${height}`)
             this._blockCache.set(lastBlock.reference)
 
-            const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+            const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {

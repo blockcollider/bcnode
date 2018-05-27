@@ -133,7 +133,7 @@ export default class Network extends EventEmitter {
       const port = peer.endpoint.tcpPort
       const target = `${protocol}://${host}:${port}`
 
-      this._logger.info('new peer: ' + target)
+      this._logger.debug('New peer: ' + target)
       this.peers.push(target)
     }
   }
@@ -144,7 +144,7 @@ export default class Network extends EventEmitter {
         this.run(port)
       })
       .catch(() => {
-        this._logger.error('unable to find local network interface to listen on')
+        this._logger.error('Unable to find local network interface to listen on')
         process.exit(3)
       })
   }
@@ -247,7 +247,7 @@ export default class Network extends EventEmitter {
         if (isValid) {
           this.onNewBlock(block, peer)
         } else {
-          this._logger.info(`disconnecting ${getPeerAddr(peer)} for invalid block body`)
+          this._logger.info(`Disconnecting ${getPeerAddr(peer)} for invalid block body`)
           peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
         }
       })
@@ -299,7 +299,7 @@ export default class Network extends EventEmitter {
       }
 
       if (!isValidPayload) {
-        this._logger.warn(`${getPeerAddr(peer)} received wrong block header ${header.hash().toString('hex')}`)
+        this._logger.debug(`${getPeerAddr(peer)} received wrong block header ${header.hash().toString('hex')}`)
       }
     }
   }
@@ -391,7 +391,7 @@ export default class Network extends EventEmitter {
 
     const clientId = peer.getHelloMessage().clientId
 
-    this._logger.info(`Add peer: (${addr}, ${clientId}), eth${eth.getVersion()}, total: ${rlpx.getPeers().length}`)
+    this._logger.debug(`Add peer: (${addr}, ${clientId}), eth${eth.getVersion()}, total: ${rlpx.getPeers().length}`)
 
     eth.sendStatus({
       networkId: 1, // reference: https://ethereum.stackexchange.com/a/17101
@@ -448,22 +448,22 @@ export default class Network extends EventEmitter {
         dpt.banPeer(peerId, 300000 /* 5 minutes */)
       }
 
-      this._logger.error(`Peer error (${getPeerAddr(peer)}): ${err.message}`)
+      this._logger.debug(`Peer error (${getPeerAddr(peer)}): ${err.message}`)
       return
     }
 
-    this._logger.error(`Peer error (${getPeerAddr(peer)}): ${err.stack || err.toString()}`)
+    this._logger.debug(`Peer error (${getPeerAddr(peer)}): ${err.stack || err.toString()}`)
   }
 
   handlePeerRemoved (rlpx: Object, peer: Object, reason: Object, disconnectWe: boolean) {
     const who = disconnectWe ? 'we disconnect' : 'peer disconnect'
     const total = rlpx.getPeers().length
     const reasonCode = DISCONNECT_REASONS[parseInt(String(reason), 10)]
-    this._logger.warn(`Remove peer (${getPeerAddr(peer)}): ${who}, reason code: ${reasonCode}, total: ${total}`)
+    this._logger.debug(`Remove peer (${getPeerAddr(peer)}): ${who}, reason code: ${reasonCode}, total: ${total}`)
   }
 
   onError (msg: string, err: Error) {
-    this._logger.error(`${msg} ${err.toString()}`)
+    this._logger.debug(`Error: ${msg} ${err.toString()}`)
   }
 
   // TODO port is never used
@@ -499,7 +499,7 @@ export default class Network extends EventEmitter {
     for (let node of BOOTNODES) {
       // $FlowFixMe
       this._dpt.bootstrap(node).catch(err => {
-        this._logger.error(`DPT bootstrap error: ${err.stack || err.toString()}`)
+        this._logger.debug(`DPT bootstrap error: ${err.stack || err.toString()}`)
       })
     }
 
@@ -509,7 +509,7 @@ export default class Network extends EventEmitter {
       const openSlots = this.rlpx._getOpenSlots()
       const queueLength = this.rlpx._peersQueue.length
       const queueLength2 = this.rlpx._peersQueue.filter(o => o.ts <= Date.now()).length
-      this._logger.info(`rover peers ${peersCount}, open slots: ${openSlots}, queue: ${queueLength} / ${queueLength2}`)
+      this._logger.debug(`Rover peers ${peersCount}, open slots: ${openSlots}, queue: ${queueLength} / ${queueLength2}`)
     }, 30000 /* 30 sec */)
   }
 }

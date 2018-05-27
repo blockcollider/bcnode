@@ -15,7 +15,9 @@ const LRUCache = require('lru-cache')
 
 const { Block } = require('../../protos/core_pb')
 const logging = require('../../logger')
+const { errToString } = require('../../helper/error')
 const { RpcClient } = require('../../rpc')
+const { createUnifiedBlock } = require('../helper')
 
 type NeoBlock = { // eslint-disable-line no-undef
   hash: string,
@@ -48,7 +50,7 @@ type NeoBlock = { // eslint-disable-line no-undef
   nextblockhash: string
 }
 
-const _createUnifiedBlock = (block: NeoBlock): Block => {
+function _createUnifiedBlock (block: NeoBlock): Block {
   const obj = {}
 
   obj.blockNumber = block.index
@@ -58,7 +60,7 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   obj.size = block.size
   obj.nonce = block.nonce
   obj.nextConsensus = block.nextconsensus
-  obj.timestamp = block.time
+  obj.timestamp = block.time * 1000
   obj.version = block.version
   obj.transactions = block.tx.reduce(function (all, t) {
     const tx = {
@@ -75,6 +77,9 @@ const _createUnifiedBlock = (block: NeoBlock): Block => {
   msg.setBlockchain('neo')
   msg.setHash(obj.blockHash)
   msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
 
   return msg
 }
@@ -90,6 +95,7 @@ export default class Controller {
   _config: Object;
   _neoMesh: Object;
   _intervalDescriptor: IntervalID;
+  _networkRefreshIntervalDescriptor: IntervalID;
   /* eslint-enable */
 
   constructor (config: Object) {
@@ -116,27 +122,27 @@ export default class Controller {
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
 
     const cycle = () => {
-      this._logger.info('trying to get new block')
-      const node = this._neoMesh.getRandomNode()
+      this._logger.debug('trying to get new block')
+      const node = this._neoMesh.getHighestNode()
 
       return node.rpc.getBestBlockHash().then(bestBlockHash => {
-        this._logger.debug(`got best block: "${bestBlockHash}"`)
+        this._logger.debug(`Got best block: "${bestBlockHash}"`)
         if (!this._blockCache.has(bestBlockHash)) {
           this._blockCache.set(bestBlockHash, true)
-          this._logger.debug(`unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
+          this._logger.debug(`Unseen block with id: ${inspect(bestBlockHash)} => using for BC chain`)
 
-          node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
-            this._logger.debug(`collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
+          return node.rpc.getBlockByHash(bestBlockHash).then(lastBlock => {
+            this._logger.debug(`Collected new block with id: ${inspect(lastBlock.hash)}, with "${lastBlock.tx.length}" transactions`)
 
-            const unifiedBlock = _createUnifiedBlock(lastBlock)
-            this._logger.debug(`created unified block: ${JSON.stringify(unifiedBlock.toObject(), null, 4)}`)
+            const unifiedBlock = createUnifiedBlock(lastBlock, _createUnifiedBlock)
 
+            this._logger.debug('NEO Going to call this._rpc.rover.collectBlock()')
             this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
               if (err) {
                 this._logger.error(`Error while collecting block ${inspect(err)}`)
@@ -147,9 +153,43 @@ export default class Controller {
           })
         }
       }).catch(e => {
-        this._logger.error(`error while getting new block, err: ${inspect(e)}`)
+        this._logger.error(`Error while getting new block, err: ${e.message}`)
       })
     }
+
+    const pingNode = (node: NeoNode) => {
+      this._logger.debug('pingNode triggered.', `node: [${node.domain}:${node.port}]`)
+      const t0 = Date.now()
+      node.pendingRequests += 1
+      node.rpc.getBlockCount()
+        .then((res) => {
+          this._logger.debug('getBlockCount success:', res)
+          const blockCount = res
+          node.blockHeight = blockCount
+          node.index = blockCount - 1
+          node.active = true
+          node.age = Date.now()
+          node.latency = node.age - t0
+          node.pendingRequests -= 1
+          this._logger.debug('node.latency:', node.latency)
+        })
+        .catch((err) => {
+          this._logger.debug(`getBlockCount failed, ${err.reason}`)
+          node.active = false
+          node.age = Date.now()
+          node.pendingRequests -= 1
+        })
+    }
+    // Ping all nodes in order to setup their height and latency
+    this._neoMesh.nodes.forEach((node) => {
+      pingNode(node)
+    })
+
+    // Ping a random node periodically
+    // TODO: apply some sort of priority to ping inactive node less frequent
+    this._networkRefreshIntervalDescriptor = setInterval(() => {
+      pingNode(this._neoMesh.getRandomNode())
+    }, 4000)
 
     this._logger.debug('tick')
     this._intervalDescriptor = setInterval(() => {
@@ -161,5 +201,6 @@ export default class Controller {
 
   close () {
     this._intervalDescriptor && clearInterval(this._intervalDescriptor)
+    this._networkRefreshIntervalDescriptor && clearInterval(this._networkRefreshIntervalDescriptor)
   }
 }

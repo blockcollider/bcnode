@@ -1,6 +1,8 @@
 {
   "plugins": [
-    "transform-flow-strip-types"
+    "transform-class-properties",
+    "transform-flow-strip-types",
+    "transform-object-rest-spread"
   ],
   "presets": [
     ["env", {
@@ -13,5 +15,6 @@
         "transform-async-to-generator"
       ]
     }]
-  ]
+  ],
+  "sourceMaps": true
 }

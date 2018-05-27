@@ -6,36 +6,41 @@
  *
  * @flow
  */
+import { PeerBook } from './book'
 
-const wrtc = require('wrtc')
 const libp2p = require('libp2p')
+const KadDHT = require('libp2p-kad-dht')
 const Mplex = require('libp2p-mplex')
+const MDNS = require('libp2p-mdns')
 const SECIO = require('libp2p-secio')
-const WStar = require('libp2p-webrtc-star')
+const PeerInfo = require('peer-info')
+const TCP = require('libp2p-tcp')
 
 export default class Bundle extends libp2p {
-  constructor (peerInfo: Object) {
-    const ws = new WStar({
-      wrtc: wrtc
-    })
+  peerInfo: PeerBook
+  peerBook: ?PeerBook
+  options: Object
 
+  constructor (peerInfo: PeerInfo, peerBook: PeerBook, opts: Object) {
+    const signaling = opts.signaling
     const modules = {
       transport: [
-        ws
+        new TCP(),
+        signaling
       ],
       connection: {
         muxer: [
           Mplex
         ],
-        crypto: [
-          SECIO
-        ]
+        crypto: [ SECIO ]
       },
       discovery: [
-        ws.discovery
-      ]
+        new MDNS(peerInfo, { interval: 3000, broadcast: true }),
+        signaling.discovery
+      ],
+      DHT: KadDHT
     }
 
-    super(modules, peerInfo)
+    super(modules, peerInfo, peerBook, opts)
   }
 }

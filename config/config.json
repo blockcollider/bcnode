@@ -9,7 +9,18 @@
   },
 
   "p2p": {
-    "rendezvous": "/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star/"
+    "blacklist": {
+      "defaultTtl": 6000,
+      "purgeInterval": 6000
+    },
+    "rendezvous": {
+      "webrtc": "/dns4/rendezvous.blockcollider.org/tcp/9090/ws/p2p-webrtc-star",
+      "websocket": "/dns4/rendezvous.blockcollider.org/tcp/9092/ws/p2p-websocket-star"
+    },
+    "stats": {
+      "enabled": true,
+      "interval": 10
+    }
   },
 
   "rovers": {
@@ -31,7 +42,13 @@
     }
   },
 
+  "sentry": {
+    "enabled": true,
+    "url": "https://8f889605ace248d88784796a32903c9e@sentry.io/1202649"
+  },
+
   "server": {
-    "port": 3000
+    "port": 3000,
+    "logCalls": false
   }
 }

@@ -6,6 +6,7 @@
  *
  * @flow
  */
+
 import type { Logger } from 'winston'
 const { inspect } = require('util')
 const EthereumBlock = require('ethereumjs-block')
@@ -13,9 +14,42 @@ const EthereumTx = require('ethereumjs-tx')
 var ethUtils = require('ethereumjs-util')
 
 const logging = require('../../logger')
+const { errToString } = require('../../helper/error')
 const { Block } = require('../../protos/core_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
+const { createUnifiedBlock } = require('../helper')
+
+function _createUnifiedBlock (block: EthereumBlock): Block {
+  const d = block.toJSON({ labeled: true })
+  const obj = {
+    blockNumber: parseInt(d.header.number, 16),
+    prevHash: d.header.parentHash,
+    blockHash: '0x' + block.hash().toString('hex'),
+    root: d.header.stateRoot,
+    nonce: parseInt(d.header.nonce, 16),
+    timestamp: parseInt(d.header.timestamp, 16) * 1000,
+    difficulty: parseInt(d.header.difficulty, 16),
+    coinbase: d.header.coinbase,
+    marked: false,
+    transactions: d.transactions.map(function (t) {
+      const tx = new EthereumTx(t)
+      t.txHash = ethUtils.bufferToHex(tx.hash(true))
+
+      return t
+    })
+  }
+
+  const msg = new Block()
+  msg.setBlockchain('eth')
+  msg.setHash(obj.blockHash)
+  msg.setPreviousHash(obj.prevHash)
+  msg.setTimestamp(obj.timestamp)
+  msg.setHeight(obj.blockNumber)
+  msg.setMerkleRoot(obj.root)
+
+  return msg
+}
 
 /**
  * ETH Controller
@@ -37,42 +71,9 @@ export default class Controller {
     return this._interfaces
   }
 
-  _createUnifiedBlock (block: EthereumBlock) {
-    const d = block.toJSON({ labeled: true })
-    const obj = {}
-
-    obj.blockNumber = parseInt(d.header.number, 16)
-    obj.prevHash = d.header.parentHash
-    obj.blockHash = '0x' + block.hash().toString('hex')
-    obj.root = d.header.stateRoot
-    obj.nonce = parseInt(d.header.nonce, 16)
-    obj.timestamp = parseInt(d.header.timestamp, 16)
-    obj.difficulty = parseInt(d.header.difficulty, 16)
-    obj.coinbase = d.header.coinbase
-    obj.marked = false
-    obj.transactions = d.transactions.map(function (t) {
-      var tx = new EthereumTx(t)
-      // var v = ethUtils.bufferToInt(t.v)
-      // var e = ethUtils.ecrecover(tx.hash(true), v, t.r, t.s).toString("hex");
-
-      t.txHash = ethUtils.bufferToHex(tx.hash(true))
-
-      return t
-    })
-
-    return obj
-  }
-
   transmitNewBlock (block: EthereumBlock) {
-    const unifiedBlockData = this._createUnifiedBlock(block)
-
-    const msg = new Block()
-    msg.setBlockchain('eth')
-    msg.setHash(unifiedBlockData.blockHash)
-    msg.setPreviousHash(unifiedBlockData.prevHash)
-
-    this._logger.debug(`Created unified block from eth block ${unifiedBlockData.blockNumber} (${unifiedBlockData.blockHash})`)
-    this._rpc.rover.collectBlock(msg, (err, response) => {
+    const unifiedBlock = createUnifiedBlock(block, _createUnifiedBlock)
+    this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
       if (err) {
         this._logger.error(`Error while collecting block ${inspect(err)}`)
         return
@@ -94,12 +95,12 @@ export default class Controller {
     this.start()
 
     process.on('disconnect', () => {
-      this._logger.info('parent exited')
+      this._logger.info('Parent exited')
       process.exit()
     })
 
-    process.on('uncaughtError', (e) => {
-      this._logger.error('Uncaught error', e)
+    process.on('uncaughtException', (e) => {
+      this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
   }

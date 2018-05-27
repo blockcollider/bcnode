@@ -9,7 +9,7 @@
 
 const { HelpResponse } = require('../../../protos/bc_pb')
 
-export default function help(context: Object, call: Object, callback: Function) {
+export default function help (context: Object, call: Object, callback: Function) {
   const reply = new HelpResponse(['Hi there!'])
   callback(null, reply)
 }

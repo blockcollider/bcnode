@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @disable-flow
+ */
+
 const { jsonRpcMiddleware } = require('../index')
 
 describe('jsonRpcMiddleware', () => {
@@ -7,7 +16,7 @@ describe('jsonRpcMiddleware', () => {
 
   let middleware = null
 
-  beforeEach(() =>  {
+  beforeEach(() => {
     middleware = jsonRpcMiddleware(mapping)
   })
 
@@ -43,7 +52,7 @@ describe('jsonRpcMiddleware', () => {
     }
     // This function sets req.rpcBody
     const mockRes = {
-      json: jest.fn(),
+      json: jest.fn()
     }
     middleware(req, mockRes, jest.fn())
 
