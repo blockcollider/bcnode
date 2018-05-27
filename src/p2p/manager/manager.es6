@@ -15,6 +15,7 @@ const PeerInfo = require('peer-info')
 const pull = require('pull-stream')
 
 const { ManagedPeerBook } = require('../book/book')
+const { Peer } = require('../peer')
 const { PeerNode } = require('../node')
 const { registerProtocols } = require('../protocol')
 const logging = require('../../logger')
@@ -92,6 +93,10 @@ export class PeerManager {
     return this._peerNode
   }
 
+  createPeer (peerId: PeerInfo): Peer {
+    return new Peer(this.bundle, peerId)
+  }
+
   onPeerDiscovery (peer: PeerInfo) {
     const peerId = peer.id.toB58String()
     debug('Event - peer:discovery', peerId)
@@ -131,6 +136,12 @@ export class PeerManager {
       debug(`Peer '${peerId}', already in connectedPeerBook`)
       return
     }
+
+    this.createPeer(peer)
+      .getLatestHeader()
+      .then((header) => {
+        debug('Peer latest header', peer.id.toB58String(), header)
+      })
 
     this._checkPeerStatus(peer)
   }

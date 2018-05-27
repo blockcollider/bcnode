@@ -451,7 +451,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   const newChainRoot = getChildrenRootHash(blockHashes)
 
   const shouldAppend = !!unfinishedBlock
-  console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
+  // console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
   const childBlockHeaders = prepareChildBlockHeadersMap(
     unfinishedBlock || lastPreviousBlock,
     blockWhichTriggeredMining,

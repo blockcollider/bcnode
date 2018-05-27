@@ -6,3 +6,6 @@
  *
  * @flow
  */
+
+export { createPeerMeta } from './meta'
+export { Peer } from './peer'
