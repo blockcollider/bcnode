@@ -23,18 +23,35 @@ message ChildBlockHeaders {
 
 message BcBlock {
     string hash = 1;
-    uint64 height = 2;
-    string miner = 3;
-    float difficulty = 4;
-    uint64 timestamp = 5;
-    string merkle_root = 6;
-    string chain_root = 7;
-    uint64 distance = 8;
-    string nonce = 9;
-    uint64 tx_count = 10;
-    repeated BcTransaction transactions = 11;
-    uint64 child_blockchain_count = 12;
-    ChildBlockHeaders child_block_headers = 13;
+    string previous_hash = 2;
+    uint64 version = 3; // new
+    uint64 schema_version = 4; // new
+    uint64 height = 5;
+    string miner = 6;
+    float difficulty = 7;
+    uint64 timestamp = 8;
+    string merkle_root = 9;
+    string chain_root = 10;
+    uint64 distance = 11;
+    string nonce = 12;
+    uint64 nrg_grant = 13; // new
+    string target_hash = 14; // new
+    uint64 target_height = 15; // new
+    string target_miner = 16; // new
+    string target_signature = 17; // new
+    uint64 twn = 18; // new
+    repeated string tws = 19; // new
+    uint64 emblem_weight = 20; // new
+    string emblem_chain_block_hash = 21; // new
+    string emblem_chain_fingerprint_root = 22; // new
+    string emblem_chain_address = 23; // new
+    uint64 tx_count = 24;
+    repeated BcTransaction txs = 25;
+    uint64 tx_fee_base = 26; // new
+    uint64 tx_distance_sum_limit = 27; // new
+    uint64 child_blockchain_count = 28;
+    ChildBlockHeaders child_block_headers = 29;
+    string blockchain_fingerprints_root = 30; // new
 }
 
 message BcTransaction {

@@ -488,15 +488,37 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
 
   const newBlock = new BcBlock()
   newBlock.setHash(blake2bl(lastPreviousBlock.getHash() + newMerkleRoot))
+  newBlock.setPreviousHash(lastPreviousBlock.getHash())
+  newBlock.setVersion(1)
+  newBlock.setSchemaVersion(1)
   newBlock.setHeight(lastPreviousBlock.getHeight() + 1)
   newBlock.setMiner(minerAddress)
   newBlock.setDifficulty(finalDifficulty)
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
   newBlock.setDistance(0)
+  ////
+  newBlock.setNrgGrant()
+  newBlock.setTargetHash()
+  newBlock.setTargetHash()
+  newBlock.setTargetHeight()
+  newBlock.setTargetMiner()
+  newBlock.setTargetSignature()
+  newBlock.setTwn()
+  newBlock.setTwsList()
+  newBlock.setEmblemHeight()
+  newBlock.setEmblemChainBlockHash()
+  newBlock.setEmblemChainFingerprintRoot()
+  newBlock.setEmblemChainAddress()
+  //// end
   newBlock.setTxCount(0)
   newBlock.setTransactionsList(newTransactions)
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
+  ////
+  newBlock.setBlockchainFingerprintsRoot()
+  newBlock.setTxFeeBase()
+  newBlock.setTxDistanceSumLimit()
+  //// end
   newBlock.setChildBlockHeaders(childBlockHeaders)
 
   return [newBlock, finalTimestamp]

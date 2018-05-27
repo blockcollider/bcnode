@@ -785,7 +785,7 @@ if (true || goog.DEBUG && !COMPILED) {
  * @private {!Array<number>}
  * @const
  */
-proto.bc.BcBlock.repeatedFields_ = [11];
+proto.bc.BcBlock.repeatedFields_ = [19,25];
 
 
 
@@ -817,19 +817,36 @@ proto.bc.BcBlock.prototype.toObject = function(opt_includeInstance) {
 proto.bc.BcBlock.toObject = function(includeInstance, msg) {
   var f, obj = {
     hash: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    height: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    miner: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    difficulty: +jspb.Message.getFieldWithDefault(msg, 4, 0.0),
-    timestamp: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    merkleRoot: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    chainRoot: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    distance: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    nonce: jspb.Message.getFieldWithDefault(msg, 9, ""),
-    txCount: jspb.Message.getFieldWithDefault(msg, 10, 0),
-    transactionsList: jspb.Message.toObjectList(msg.getTransactionsList(),
+    previousHash: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    version: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    schemaVersion: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    height: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    miner: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    difficulty: +jspb.Message.getFieldWithDefault(msg, 7, 0.0),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    merkleRoot: jspb.Message.getFieldWithDefault(msg, 9, ""),
+    chainRoot: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    distance: jspb.Message.getFieldWithDefault(msg, 11, 0),
+    nonce: jspb.Message.getFieldWithDefault(msg, 12, ""),
+    nrgGrant: jspb.Message.getFieldWithDefault(msg, 13, 0),
+    targetHash: jspb.Message.getFieldWithDefault(msg, 14, ""),
+    targetHeight: jspb.Message.getFieldWithDefault(msg, 15, 0),
+    targetMiner: jspb.Message.getFieldWithDefault(msg, 16, ""),
+    targetSignature: jspb.Message.getFieldWithDefault(msg, 17, ""),
+    twn: jspb.Message.getFieldWithDefault(msg, 18, 0),
+    twsList: jspb.Message.getRepeatedField(msg, 19),
+    emblemWeight: jspb.Message.getFieldWithDefault(msg, 20, 0),
+    emblemChainBlockHash: jspb.Message.getFieldWithDefault(msg, 21, ""),
+    emblemChainFingerprintRoot: jspb.Message.getFieldWithDefault(msg, 22, ""),
+    emblemChainAddress: jspb.Message.getFieldWithDefault(msg, 23, ""),
+    txCount: jspb.Message.getFieldWithDefault(msg, 24, 0),
+    txsList: jspb.Message.toObjectList(msg.getTxsList(),
     proto.bc.BcTransaction.toObject, includeInstance),
-    childBlockchainCount: jspb.Message.getFieldWithDefault(msg, 12, 0),
-    childBlockHeaders: (f = msg.getChildBlockHeaders()) && proto.bc.ChildBlockHeaders.toObject(includeInstance, f)
+    txFeeBase: jspb.Message.getFieldWithDefault(msg, 26, 0),
+    txDistanceSumLimit: jspb.Message.getFieldWithDefault(msg, 27, 0),
+    childBlockchainCount: jspb.Message.getFieldWithDefault(msg, 28, 0),
+    childBlockHeaders: (f = msg.getChildBlockHeaders()) && proto.bc.ChildBlockHeaders.toObject(includeInstance, f),
+    blockchainFingerprintsRoot: jspb.Message.getFieldWithDefault(msg, 30, "")
   };
 
   if (includeInstance) {
@@ -871,54 +888,122 @@ proto.bc.BcBlock.deserializeBinaryFromReader = function(msg, reader) {
       msg.setHash(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
-      msg.setHeight(value);
+      var value = /** @type {string} */ (reader.readString());
+      msg.setPreviousHash(value);
       break;
     case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setMiner(value);
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setVersion(value);
       break;
     case 4:
-      var value = /** @type {number} */ (reader.readFloat());
-      msg.setDifficulty(value);
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setSchemaVersion(value);
       break;
     case 5:
       var value = /** @type {number} */ (reader.readUint64());
-      msg.setTimestamp(value);
+      msg.setHeight(value);
       break;
     case 6:
       var value = /** @type {string} */ (reader.readString());
-      msg.setMerkleRoot(value);
+      msg.setMiner(value);
       break;
     case 7:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setChainRoot(value);
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setDifficulty(value);
       break;
     case 8:
       var value = /** @type {number} */ (reader.readUint64());
-      msg.setDistance(value);
+      msg.setTimestamp(value);
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
-      msg.setNonce(value);
+      msg.setMerkleRoot(value);
       break;
     case 10:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setChainRoot(value);
+      break;
+    case 11:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setDistance(value);
+      break;
+    case 12:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setNonce(value);
+      break;
+    case 13:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setNrgGrant(value);
+      break;
+    case 14:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTargetHash(value);
+      break;
+    case 15:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setTargetHeight(value);
+      break;
+    case 16:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTargetMiner(value);
+      break;
+    case 17:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTargetSignature(value);
+      break;
+    case 18:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setTwn(value);
+      break;
+    case 19:
+      var value = /** @type {string} */ (reader.readString());
+      msg.addTws(value);
+      break;
+    case 20:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setEmblemWeight(value);
+      break;
+    case 21:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setEmblemChainBlockHash(value);
+      break;
+    case 22:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setEmblemChainFingerprintRoot(value);
+      break;
+    case 23:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setEmblemChainAddress(value);
+      break;
+    case 24:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setTxCount(value);
       break;
-    case 11:
+    case 25:
       var value = new proto.bc.BcTransaction;
       reader.readMessage(value,proto.bc.BcTransaction.deserializeBinaryFromReader);
-      msg.addTransactions(value);
+      msg.addTxs(value);
       break;
-    case 12:
+    case 26:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setTxFeeBase(value);
+      break;
+    case 27:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setTxDistanceSumLimit(value);
+      break;
+    case 28:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setChildBlockchainCount(value);
       break;
-    case 13:
+    case 29:
       var value = new proto.bc.ChildBlockHeaders;
       reader.readMessage(value,proto.bc.ChildBlockHeaders.deserializeBinaryFromReader);
       msg.setChildBlockHeaders(value);
+      break;
+    case 30:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setBlockchainFingerprintsRoot(value);
       break;
     default:
       reader.skipField();
@@ -956,90 +1041,209 @@ proto.bc.BcBlock.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getHeight();
-  if (f !== 0) {
-    writer.writeUint64(
+  f = message.getPreviousHash();
+  if (f.length > 0) {
+    writer.writeString(
       2,
       f
     );
   }
-  f = message.getMiner();
-  if (f.length > 0) {
-    writer.writeString(
+  f = message.getVersion();
+  if (f !== 0) {
+    writer.writeUint64(
       3,
       f
     );
   }
-  f = message.getDifficulty();
-  if (f !== 0.0) {
-    writer.writeFloat(
+  f = message.getSchemaVersion();
+  if (f !== 0) {
+    writer.writeUint64(
       4,
       f
     );
   }
-  f = message.getTimestamp();
+  f = message.getHeight();
   if (f !== 0) {
     writer.writeUint64(
       5,
       f
     );
   }
-  f = message.getMerkleRoot();
+  f = message.getMiner();
   if (f.length > 0) {
     writer.writeString(
       6,
       f
     );
   }
-  f = message.getChainRoot();
-  if (f.length > 0) {
-    writer.writeString(
+  f = message.getDifficulty();
+  if (f !== 0.0) {
+    writer.writeFloat(
       7,
       f
     );
   }
-  f = message.getDistance();
+  f = message.getTimestamp();
   if (f !== 0) {
     writer.writeUint64(
       8,
       f
     );
   }
-  f = message.getNonce();
+  f = message.getMerkleRoot();
   if (f.length > 0) {
     writer.writeString(
       9,
       f
     );
   }
-  f = message.getTxCount();
-  if (f !== 0) {
-    writer.writeUint64(
+  f = message.getChainRoot();
+  if (f.length > 0) {
+    writer.writeString(
       10,
       f
     );
   }
-  f = message.getTransactionsList();
+  f = message.getDistance();
+  if (f !== 0) {
+    writer.writeUint64(
+      11,
+      f
+    );
+  }
+  f = message.getNonce();
+  if (f.length > 0) {
+    writer.writeString(
+      12,
+      f
+    );
+  }
+  f = message.getNrgGrant();
+  if (f !== 0) {
+    writer.writeUint64(
+      13,
+      f
+    );
+  }
+  f = message.getTargetHash();
+  if (f.length > 0) {
+    writer.writeString(
+      14,
+      f
+    );
+  }
+  f = message.getTargetHeight();
+  if (f !== 0) {
+    writer.writeUint64(
+      15,
+      f
+    );
+  }
+  f = message.getTargetMiner();
+  if (f.length > 0) {
+    writer.writeString(
+      16,
+      f
+    );
+  }
+  f = message.getTargetSignature();
+  if (f.length > 0) {
+    writer.writeString(
+      17,
+      f
+    );
+  }
+  f = message.getTwn();
+  if (f !== 0) {
+    writer.writeUint64(
+      18,
+      f
+    );
+  }
+  f = message.getTwsList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      19,
+      f
+    );
+  }
+  f = message.getEmblemWeight();
+  if (f !== 0) {
+    writer.writeUint64(
+      20,
+      f
+    );
+  }
+  f = message.getEmblemChainBlockHash();
+  if (f.length > 0) {
+    writer.writeString(
+      21,
+      f
+    );
+  }
+  f = message.getEmblemChainFingerprintRoot();
+  if (f.length > 0) {
+    writer.writeString(
+      22,
+      f
+    );
+  }
+  f = message.getEmblemChainAddress();
+  if (f.length > 0) {
+    writer.writeString(
+      23,
+      f
+    );
+  }
+  f = message.getTxCount();
+  if (f !== 0) {
+    writer.writeUint64(
+      24,
+      f
+    );
+  }
+  f = message.getTxsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      11,
+      25,
       f,
       proto.bc.BcTransaction.serializeBinaryToWriter
+    );
+  }
+  f = message.getTxFeeBase();
+  if (f !== 0) {
+    writer.writeUint64(
+      26,
+      f
+    );
+  }
+  f = message.getTxDistanceSumLimit();
+  if (f !== 0) {
+    writer.writeUint64(
+      27,
+      f
     );
   }
   f = message.getChildBlockchainCount();
   if (f !== 0) {
     writer.writeUint64(
-      12,
+      28,
       f
     );
   }
   f = message.getChildBlockHeaders();
   if (f != null) {
     writer.writeMessage(
-      13,
+      29,
       f,
       proto.bc.ChildBlockHeaders.serializeBinaryToWriter
+    );
+  }
+  f = message.getBlockchainFingerprintsRoot();
+  if (f.length > 0) {
+    writer.writeString(
+      30,
+      f
     );
   }
 };
@@ -1061,153 +1265,377 @@ proto.bc.BcBlock.prototype.setHash = function(value) {
 
 
 /**
- * optional uint64 height = 2;
- * @return {number}
+ * optional string previous_hash = 2;
+ * @return {string}
  */
-proto.bc.BcBlock.prototype.getHeight = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+proto.bc.BcBlock.prototype.getPreviousHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
-/** @param {number} value */
-proto.bc.BcBlock.prototype.setHeight = function(value) {
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setPreviousHash = function(value) {
   jspb.Message.setField(this, 2, value);
 };
 
 
 /**
- * optional string miner = 3;
- * @return {string}
+ * optional uint64 version = 3;
+ * @return {number}
  */
-proto.bc.BcBlock.prototype.getMiner = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+proto.bc.BcBlock.prototype.getVersion = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
-/** @param {string} value */
-proto.bc.BcBlock.prototype.setMiner = function(value) {
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setVersion = function(value) {
   jspb.Message.setField(this, 3, value);
 };
 
 
 /**
- * optional float difficulty = 4;
+ * optional uint64 schema_version = 4;
  * @return {number}
  */
-proto.bc.BcBlock.prototype.getDifficulty = function() {
-  return /** @type {number} */ (+jspb.Message.getFieldWithDefault(this, 4, 0.0));
+proto.bc.BcBlock.prototype.getSchemaVersion = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /** @param {number} value */
-proto.bc.BcBlock.prototype.setDifficulty = function(value) {
+proto.bc.BcBlock.prototype.setSchemaVersion = function(value) {
   jspb.Message.setField(this, 4, value);
 };
 
 
 /**
- * optional uint64 timestamp = 5;
+ * optional uint64 height = 5;
  * @return {number}
  */
-proto.bc.BcBlock.prototype.getTimestamp = function() {
+proto.bc.BcBlock.prototype.getHeight = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
 
 /** @param {number} value */
-proto.bc.BcBlock.prototype.setTimestamp = function(value) {
+proto.bc.BcBlock.prototype.setHeight = function(value) {
   jspb.Message.setField(this, 5, value);
 };
 
 
 /**
- * optional string merkle_root = 6;
+ * optional string miner = 6;
  * @return {string}
  */
-proto.bc.BcBlock.prototype.getMerkleRoot = function() {
+proto.bc.BcBlock.prototype.getMiner = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
 /** @param {string} value */
-proto.bc.BcBlock.prototype.setMerkleRoot = function(value) {
+proto.bc.BcBlock.prototype.setMiner = function(value) {
   jspb.Message.setField(this, 6, value);
 };
 
 
 /**
- * optional string chain_root = 7;
- * @return {string}
+ * optional float difficulty = 7;
+ * @return {number}
  */
-proto.bc.BcBlock.prototype.getChainRoot = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+proto.bc.BcBlock.prototype.getDifficulty = function() {
+  return /** @type {number} */ (+jspb.Message.getFieldWithDefault(this, 7, 0.0));
 };
 
 
-/** @param {string} value */
-proto.bc.BcBlock.prototype.setChainRoot = function(value) {
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setDifficulty = function(value) {
   jspb.Message.setField(this, 7, value);
 };
 
 
 /**
- * optional uint64 distance = 8;
+ * optional uint64 timestamp = 8;
  * @return {number}
  */
-proto.bc.BcBlock.prototype.getDistance = function() {
+proto.bc.BcBlock.prototype.getTimestamp = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.bc.BcBlock.prototype.setDistance = function(value) {
+proto.bc.BcBlock.prototype.setTimestamp = function(value) {
   jspb.Message.setField(this, 8, value);
 };
 
 
 /**
- * optional string nonce = 9;
+ * optional string merkle_root = 9;
  * @return {string}
  */
-proto.bc.BcBlock.prototype.getNonce = function() {
+proto.bc.BcBlock.prototype.getMerkleRoot = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
 
 /** @param {string} value */
-proto.bc.BcBlock.prototype.setNonce = function(value) {
+proto.bc.BcBlock.prototype.setMerkleRoot = function(value) {
   jspb.Message.setField(this, 9, value);
 };
 
 
 /**
- * optional uint64 tx_count = 10;
- * @return {number}
+ * optional string chain_root = 10;
+ * @return {string}
  */
-proto.bc.BcBlock.prototype.getTxCount = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+proto.bc.BcBlock.prototype.getChainRoot = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
 };
 
 
-/** @param {number} value */
-proto.bc.BcBlock.prototype.setTxCount = function(value) {
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setChainRoot = function(value) {
   jspb.Message.setField(this, 10, value);
 };
 
 
 /**
- * repeated BcTransaction transactions = 11;
+ * optional uint64 distance = 11;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getDistance = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 11, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setDistance = function(value) {
+  jspb.Message.setField(this, 11, value);
+};
+
+
+/**
+ * optional string nonce = 12;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getNonce = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setNonce = function(value) {
+  jspb.Message.setField(this, 12, value);
+};
+
+
+/**
+ * optional uint64 nrg_grant = 13;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getNrgGrant = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 13, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setNrgGrant = function(value) {
+  jspb.Message.setField(this, 13, value);
+};
+
+
+/**
+ * optional string target_hash = 14;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getTargetHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setTargetHash = function(value) {
+  jspb.Message.setField(this, 14, value);
+};
+
+
+/**
+ * optional uint64 target_height = 15;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getTargetHeight = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 15, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTargetHeight = function(value) {
+  jspb.Message.setField(this, 15, value);
+};
+
+
+/**
+ * optional string target_miner = 16;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getTargetMiner = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 16, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setTargetMiner = function(value) {
+  jspb.Message.setField(this, 16, value);
+};
+
+
+/**
+ * optional string target_signature = 17;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getTargetSignature = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 17, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setTargetSignature = function(value) {
+  jspb.Message.setField(this, 17, value);
+};
+
+
+/**
+ * optional uint64 twn = 18;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getTwn = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 18, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTwn = function(value) {
+  jspb.Message.setField(this, 18, value);
+};
+
+
+/**
+ * repeated string tws = 19;
+ * @return {!Array.<string>}
+ */
+proto.bc.BcBlock.prototype.getTwsList = function() {
+  return /** @type {!Array.<string>} */ (jspb.Message.getRepeatedField(this, 19));
+};
+
+
+/** @param {!Array.<string>} value */
+proto.bc.BcBlock.prototype.setTwsList = function(value) {
+  jspb.Message.setField(this, 19, value || []);
+};
+
+
+/**
+ * @param {!string} value
+ * @param {number=} opt_index
+ */
+proto.bc.BcBlock.prototype.addTws = function(value, opt_index) {
+  jspb.Message.addToRepeatedField(this, 19, value, opt_index);
+};
+
+
+proto.bc.BcBlock.prototype.clearTwsList = function() {
+  this.setTwsList([]);
+};
+
+
+/**
+ * optional uint64 emblem_weight = 20;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getEmblemWeight = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 20, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setEmblemWeight = function(value) {
+  jspb.Message.setField(this, 20, value);
+};
+
+
+/**
+ * optional string emblem_chain_block_hash = 21;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getEmblemChainBlockHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 21, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setEmblemChainBlockHash = function(value) {
+  jspb.Message.setField(this, 21, value);
+};
+
+
+/**
+ * optional string emblem_chain_fingerprint_root = 22;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getEmblemChainFingerprintRoot = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 22, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setEmblemChainFingerprintRoot = function(value) {
+  jspb.Message.setField(this, 22, value);
+};
+
+
+/**
+ * optional string emblem_chain_address = 23;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getEmblemChainAddress = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 23, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setEmblemChainAddress = function(value) {
+  jspb.Message.setField(this, 23, value);
+};
+
+
+/**
+ * optional uint64 tx_count = 24;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getTxCount = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 24, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTxCount = function(value) {
+  jspb.Message.setField(this, 24, value);
+};
+
+
+/**
+ * repeated BcTransaction txs = 25;
  * @return {!Array.<!proto.bc.BcTransaction>}
  */
-proto.bc.BcBlock.prototype.getTransactionsList = function() {
+proto.bc.BcBlock.prototype.getTxsList = function() {
   return /** @type{!Array.<!proto.bc.BcTransaction>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.bc.BcTransaction, 11));
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.BcTransaction, 25));
 };
 
 
 /** @param {!Array.<!proto.bc.BcTransaction>} value */
-proto.bc.BcBlock.prototype.setTransactionsList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 11, value);
+proto.bc.BcBlock.prototype.setTxsList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 25, value);
 };
 
 
@@ -1216,44 +1644,74 @@ proto.bc.BcBlock.prototype.setTransactionsList = function(value) {
  * @param {number=} opt_index
  * @return {!proto.bc.BcTransaction}
  */
-proto.bc.BcBlock.prototype.addTransactions = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 11, opt_value, proto.bc.BcTransaction, opt_index);
+proto.bc.BcBlock.prototype.addTxs = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 25, opt_value, proto.bc.BcTransaction, opt_index);
 };
 
 
-proto.bc.BcBlock.prototype.clearTransactionsList = function() {
-  this.setTransactionsList([]);
+proto.bc.BcBlock.prototype.clearTxsList = function() {
+  this.setTxsList([]);
 };
 
 
 /**
- * optional uint64 child_blockchain_count = 12;
+ * optional uint64 tx_fee_base = 26;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getTxFeeBase = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 26, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTxFeeBase = function(value) {
+  jspb.Message.setField(this, 26, value);
+};
+
+
+/**
+ * optional uint64 tx_distance_sum_limit = 27;
+ * @return {number}
+ */
+proto.bc.BcBlock.prototype.getTxDistanceSumLimit = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 27, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.BcBlock.prototype.setTxDistanceSumLimit = function(value) {
+  jspb.Message.setField(this, 27, value);
+};
+
+
+/**
+ * optional uint64 child_blockchain_count = 28;
  * @return {number}
  */
 proto.bc.BcBlock.prototype.getChildBlockchainCount = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 12, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 28, 0));
 };
 
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setChildBlockchainCount = function(value) {
-  jspb.Message.setField(this, 12, value);
+  jspb.Message.setField(this, 28, value);
 };
 
 
 /**
- * optional ChildBlockHeaders child_block_headers = 13;
+ * optional ChildBlockHeaders child_block_headers = 29;
  * @return {?proto.bc.ChildBlockHeaders}
  */
 proto.bc.BcBlock.prototype.getChildBlockHeaders = function() {
   return /** @type{?proto.bc.ChildBlockHeaders} */ (
-    jspb.Message.getWrapperField(this, proto.bc.ChildBlockHeaders, 13));
+    jspb.Message.getWrapperField(this, proto.bc.ChildBlockHeaders, 29));
 };
 
 
 /** @param {?proto.bc.ChildBlockHeaders|undefined} value */
 proto.bc.BcBlock.prototype.setChildBlockHeaders = function(value) {
-  jspb.Message.setWrapperField(this, 13, value);
+  jspb.Message.setWrapperField(this, 29, value);
 };
 
 
@@ -1267,7 +1725,22 @@ proto.bc.BcBlock.prototype.clearChildBlockHeaders = function() {
  * @return {!boolean}
  */
 proto.bc.BcBlock.prototype.hasChildBlockHeaders = function() {
-  return jspb.Message.getField(this, 13) != null;
+  return jspb.Message.getField(this, 29) != null;
+};
+
+
+/**
+ * optional string blockchain_fingerprints_root = 30;
+ * @return {string}
+ */
+proto.bc.BcBlock.prototype.getBlockchainFingerprintsRoot = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 30, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.BcBlock.prototype.setBlockchainFingerprintsRoot = function(value) {
+  jspb.Message.setField(this, 30, value);
 };
 
 
