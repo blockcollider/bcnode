@@ -370,6 +370,7 @@ export default class Engine {
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
       this._logger.warn('There is not unfinished block to use solution for')
+      return
     }
     // $FlowFixMe
     this._unfinishedBlock.setNonce(solution.nonce)
