@@ -274,7 +274,6 @@ export default class Engine {
       this._logger.debug(`Preparing new block`)
 
       const currentTimestamp = ts.nowSeconds()
-      const work = prepareWork(lastPreviousBlock, currentBlocks)
       const [newBlock, finalTimestamp] = prepareNewBlock(
         currentTimestamp,
         lastPreviousBlock,
@@ -284,6 +283,7 @@ export default class Engine {
         this._minerKey,
         this._unfinishedBlock
       )
+      const work = prepareWork(lastPreviousBlock, newBlock.getBlockchainHeaders())
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
       this._unfinishedBlockData = {

@@ -7,6 +7,7 @@
  * @flow
  */
 const { BcBlock } = require('../protos/core_pb')
+const { getChildrenRootHash } = require('./miner')
 
 export default function isValidBlock (newBlock: BcBlock): bool {
   return theBlockChainFingerPrintMatchGenesisBlock(newBlock) &&
@@ -30,6 +31,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock) {
 }
 
 function isChainRootCorrectlyCalculated (newBlock: BcBlock) {
+  const newBlock.getChainRoot()
   return true
 }
 

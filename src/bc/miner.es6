@@ -452,18 +452,15 @@ export function getNewBlockCount (previousBlockHeaders: BlockchainHeaders, curre
  * @return {BcBlock} Prepared structure of the new BC block, does not contain `nonce` and `distance` which will be filled after successful mining of the block
  */
 export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string, unfinishedBlock: ?BcBlock): [BcBlock, number] {
-  const blockHashes = getChildrenBlocksHashes(childrenCurrentBlocks)
-  const newChainRoot = getChildrenRootHash(blockHashes)
-
   const shouldAppend = !!unfinishedBlock
-  // console.log(`====================== ${shouldAppend} ==== ${unfinishedBlock} ===============`)
   const childBlockHeaders = prepareChildBlockHeadersMap(
     unfinishedBlock || lastPreviousBlock,
     blockWhichTriggeredMining,
     shouldAppend
   )
-
-  const newBlockCount = getNewBlockCount(lastPreviousBlock.getBlockchainHeaders(), childBlockHeaders)
+  const blockHashes = getChildrenBlocksHashes(childBlockHeaders)
+  const newChainRoot = getChildrenRootHash(blockHashes)
+  const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeaders(), childBlockHeaders)
 
   let finalDifficulty
   let finalTimestamp = currentTimestamp
