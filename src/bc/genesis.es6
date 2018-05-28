@@ -6,26 +6,24 @@
  *
  * @flow
  */
-const { BcBlock, ChildBlockHeader, ChildBlockHeaders } = require('../protos/core_pb')
-
-export const GENESIS_MINER_KEY = '0x93490z9j390fdih2390kfcjsd90j3uifhs909ih3'
+const { BcBlock, BlockchainHeader, BlockchainHeaders } = require('../protos/core_pb')
 
 export function getGenesisBlock () {
   const GENESIS_DATA = require('./genesis.raw')
-  const GENESIS_BLOCK_HEADERS_MAP = new ChildBlockHeaders()
-  Object.entries(GENESIS_DATA.childBlockHeadersMap)
+  const GENESIS_BLOCK_HEADERS_MAP = new BlockchainHeaders()
+  Object.entries(GENESIS_DATA.blockchainHeadersMap)
     .forEach(([chain, headerList]) => {
       const methodName = `set${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. setBtcList
       // $FlowFixMe flow typing of Object.entries is not generic
       GENESIS_BLOCK_HEADERS_MAP[methodName](headerList.map(header => {
-        return new ChildBlockHeader([
+        return new BlockchainHeader([
           header.blockchain,
           header.hash,
           header.previousHash,
           header.timestamp,
           header.height,
           header.merkleRoot,
-          header.childBlockConfirmationsInParentCount
+          header.blockchainConfirmationsInParentCount
         ])
       }))
     })
@@ -62,7 +60,7 @@ export function getGenesisBlock () {
     GENESIS_BLOCK_HEADERS_MAP,
     GENESIS_DATA.blockchainFingerprintsRoot
   ])
-  GENESIS_BLOCK.setChildBlockHeaders(GENESIS_BLOCK_HEADERS_MAP)
+  GENESIS_BLOCK.setBlockchainHeaders(GENESIS_BLOCK_HEADERS_MAP)
 
   return GENESIS_BLOCK
 }

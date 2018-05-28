@@ -34,8 +34,8 @@ module.exports = {
   "txFeeBase": 0,
   "txDistanceSumLimit": 0,
 
-  "childBlockchainCount": 5,
-  "childBlockHeadersMap": {},
+  "childBlockchainCount": 5, // not used in genesis module now
+  "blockchainHeadersMap": {},
 
   "blockchainFingerprintsRoot": "86120e6b6c3bcc31204ebb7f7fdacf62cbcc1408191092ee2f8f5b3cc5082db1"
 }

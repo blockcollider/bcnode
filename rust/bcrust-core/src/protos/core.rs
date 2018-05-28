@@ -559,203 +559,203 @@ impl ::protobuf::reflect::ProtobufValue for Block {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct ChildBlockHeaders {
+pub struct BlockchainHeaders {
     // message fields
-    pub btc: ::protobuf::RepeatedField<ChildBlockHeader>,
-    pub eth: ::protobuf::RepeatedField<ChildBlockHeader>,
-    pub lsk: ::protobuf::RepeatedField<ChildBlockHeader>,
-    pub neo: ::protobuf::RepeatedField<ChildBlockHeader>,
-    pub wav: ::protobuf::RepeatedField<ChildBlockHeader>,
+    pub btc: ::protobuf::RepeatedField<BlockchainHeader>,
+    pub eth: ::protobuf::RepeatedField<BlockchainHeader>,
+    pub lsk: ::protobuf::RepeatedField<BlockchainHeader>,
+    pub neo: ::protobuf::RepeatedField<BlockchainHeader>,
+    pub wav: ::protobuf::RepeatedField<BlockchainHeader>,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
 }
 
 // see codegen.rs for the explanation why impl Sync explicitly
-unsafe impl ::std::marker::Sync for ChildBlockHeaders {}
+unsafe impl ::std::marker::Sync for BlockchainHeaders {}
 
-impl ChildBlockHeaders {
-    pub fn new() -> ChildBlockHeaders {
+impl BlockchainHeaders {
+    pub fn new() -> BlockchainHeaders {
         ::std::default::Default::default()
     }
 
-    pub fn default_instance() -> &'static ChildBlockHeaders {
-        static mut instance: ::protobuf::lazy::Lazy<ChildBlockHeaders> = ::protobuf::lazy::Lazy {
+    pub fn default_instance() -> &'static BlockchainHeaders {
+        static mut instance: ::protobuf::lazy::Lazy<BlockchainHeaders> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ChildBlockHeaders,
+            ptr: 0 as *const BlockchainHeaders,
         };
         unsafe {
-            instance.get(ChildBlockHeaders::new)
+            instance.get(BlockchainHeaders::new)
         }
     }
 
-    // repeated .bc.ChildBlockHeader btc = 1;
+    // repeated .bc.BlockchainHeader btc = 1;
 
     pub fn clear_btc(&mut self) {
         self.btc.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_btc(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+    pub fn set_btc(&mut self, v: ::protobuf::RepeatedField<BlockchainHeader>) {
         self.btc = v;
     }
 
     // Mutable pointer to the field.
-    pub fn mut_btc(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn mut_btc(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.btc
     }
 
     // Take field
-    pub fn take_btc(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn take_btc(&mut self) -> ::protobuf::RepeatedField<BlockchainHeader> {
         ::std::mem::replace(&mut self.btc, ::protobuf::RepeatedField::new())
     }
 
-    pub fn get_btc(&self) -> &[ChildBlockHeader] {
+    pub fn get_btc(&self) -> &[BlockchainHeader] {
         &self.btc
     }
 
-    fn get_btc_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+    fn get_btc_for_reflect(&self) -> &::protobuf::RepeatedField<BlockchainHeader> {
         &self.btc
     }
 
-    fn mut_btc_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    fn mut_btc_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.btc
     }
 
-    // repeated .bc.ChildBlockHeader eth = 2;
+    // repeated .bc.BlockchainHeader eth = 2;
 
     pub fn clear_eth(&mut self) {
         self.eth.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_eth(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+    pub fn set_eth(&mut self, v: ::protobuf::RepeatedField<BlockchainHeader>) {
         self.eth = v;
     }
 
     // Mutable pointer to the field.
-    pub fn mut_eth(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn mut_eth(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.eth
     }
 
     // Take field
-    pub fn take_eth(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn take_eth(&mut self) -> ::protobuf::RepeatedField<BlockchainHeader> {
         ::std::mem::replace(&mut self.eth, ::protobuf::RepeatedField::new())
     }
 
-    pub fn get_eth(&self) -> &[ChildBlockHeader] {
+    pub fn get_eth(&self) -> &[BlockchainHeader] {
         &self.eth
     }
 
-    fn get_eth_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+    fn get_eth_for_reflect(&self) -> &::protobuf::RepeatedField<BlockchainHeader> {
         &self.eth
     }
 
-    fn mut_eth_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    fn mut_eth_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.eth
     }
 
-    // repeated .bc.ChildBlockHeader lsk = 3;
+    // repeated .bc.BlockchainHeader lsk = 3;
 
     pub fn clear_lsk(&mut self) {
         self.lsk.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_lsk(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+    pub fn set_lsk(&mut self, v: ::protobuf::RepeatedField<BlockchainHeader>) {
         self.lsk = v;
     }
 
     // Mutable pointer to the field.
-    pub fn mut_lsk(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn mut_lsk(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.lsk
     }
 
     // Take field
-    pub fn take_lsk(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn take_lsk(&mut self) -> ::protobuf::RepeatedField<BlockchainHeader> {
         ::std::mem::replace(&mut self.lsk, ::protobuf::RepeatedField::new())
     }
 
-    pub fn get_lsk(&self) -> &[ChildBlockHeader] {
+    pub fn get_lsk(&self) -> &[BlockchainHeader] {
         &self.lsk
     }
 
-    fn get_lsk_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+    fn get_lsk_for_reflect(&self) -> &::protobuf::RepeatedField<BlockchainHeader> {
         &self.lsk
     }
 
-    fn mut_lsk_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    fn mut_lsk_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.lsk
     }
 
-    // repeated .bc.ChildBlockHeader neo = 4;
+    // repeated .bc.BlockchainHeader neo = 4;
 
     pub fn clear_neo(&mut self) {
         self.neo.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_neo(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+    pub fn set_neo(&mut self, v: ::protobuf::RepeatedField<BlockchainHeader>) {
         self.neo = v;
     }
 
     // Mutable pointer to the field.
-    pub fn mut_neo(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn mut_neo(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.neo
     }
 
     // Take field
-    pub fn take_neo(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn take_neo(&mut self) -> ::protobuf::RepeatedField<BlockchainHeader> {
         ::std::mem::replace(&mut self.neo, ::protobuf::RepeatedField::new())
     }
 
-    pub fn get_neo(&self) -> &[ChildBlockHeader] {
+    pub fn get_neo(&self) -> &[BlockchainHeader] {
         &self.neo
     }
 
-    fn get_neo_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+    fn get_neo_for_reflect(&self) -> &::protobuf::RepeatedField<BlockchainHeader> {
         &self.neo
     }
 
-    fn mut_neo_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    fn mut_neo_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.neo
     }
 
-    // repeated .bc.ChildBlockHeader wav = 5;
+    // repeated .bc.BlockchainHeader wav = 5;
 
     pub fn clear_wav(&mut self) {
         self.wav.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_wav(&mut self, v: ::protobuf::RepeatedField<ChildBlockHeader>) {
+    pub fn set_wav(&mut self, v: ::protobuf::RepeatedField<BlockchainHeader>) {
         self.wav = v;
     }
 
     // Mutable pointer to the field.
-    pub fn mut_wav(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn mut_wav(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.wav
     }
 
     // Take field
-    pub fn take_wav(&mut self) -> ::protobuf::RepeatedField<ChildBlockHeader> {
+    pub fn take_wav(&mut self) -> ::protobuf::RepeatedField<BlockchainHeader> {
         ::std::mem::replace(&mut self.wav, ::protobuf::RepeatedField::new())
     }
 
-    pub fn get_wav(&self) -> &[ChildBlockHeader] {
+    pub fn get_wav(&self) -> &[BlockchainHeader] {
         &self.wav
     }
 
-    fn get_wav_for_reflect(&self) -> &::protobuf::RepeatedField<ChildBlockHeader> {
+    fn get_wav_for_reflect(&self) -> &::protobuf::RepeatedField<BlockchainHeader> {
         &self.wav
     }
 
-    fn mut_wav_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<ChildBlockHeader> {
+    fn mut_wav_for_reflect(&mut self) -> &mut ::protobuf::RepeatedField<BlockchainHeader> {
         &mut self.wav
     }
 }
 
-impl ::protobuf::Message for ChildBlockHeaders {
+impl ::protobuf::Message for BlockchainHeaders {
     fn is_initialized(&self) -> bool {
         for v in &self.btc {
             if !v.is_initialized() {
@@ -898,12 +898,12 @@ impl ::protobuf::Message for ChildBlockHeaders {
     }
 }
 
-impl ::protobuf::MessageStatic for ChildBlockHeaders {
-    fn new() -> ChildBlockHeaders {
-        ChildBlockHeaders::new()
+impl ::protobuf::MessageStatic for BlockchainHeaders {
+    fn new() -> BlockchainHeaders {
+        BlockchainHeaders::new()
     }
 
-    fn descriptor_static(_: ::std::option::Option<ChildBlockHeaders>) -> &'static ::protobuf::reflect::MessageDescriptor {
+    fn descriptor_static(_: ::std::option::Option<BlockchainHeaders>) -> &'static ::protobuf::reflect::MessageDescriptor {
         static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
             ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
@@ -911,33 +911,33 @@ impl ::protobuf::MessageStatic for ChildBlockHeaders {
         unsafe {
             descriptor.get(|| {
                 let mut fields = ::std::vec::Vec::new();
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHeader>>(
                     "btc",
-                    ChildBlockHeaders::get_btc_for_reflect,
-                    ChildBlockHeaders::mut_btc_for_reflect,
+                    BlockchainHeaders::get_btc_for_reflect,
+                    BlockchainHeaders::mut_btc_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHeader>>(
                     "eth",
-                    ChildBlockHeaders::get_eth_for_reflect,
-                    ChildBlockHeaders::mut_eth_for_reflect,
+                    BlockchainHeaders::get_eth_for_reflect,
+                    BlockchainHeaders::mut_eth_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHeader>>(
                     "lsk",
-                    ChildBlockHeaders::get_lsk_for_reflect,
-                    ChildBlockHeaders::mut_lsk_for_reflect,
+                    BlockchainHeaders::get_lsk_for_reflect,
+                    BlockchainHeaders::mut_lsk_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHeader>>(
                     "neo",
-                    ChildBlockHeaders::get_neo_for_reflect,
-                    ChildBlockHeaders::mut_neo_for_reflect,
+                    BlockchainHeaders::get_neo_for_reflect,
+                    BlockchainHeaders::mut_neo_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeader>>(
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHeader>>(
                     "wav",
-                    ChildBlockHeaders::get_wav_for_reflect,
-                    ChildBlockHeaders::mut_wav_for_reflect,
+                    BlockchainHeaders::get_wav_for_reflect,
+                    BlockchainHeaders::mut_wav_for_reflect,
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<ChildBlockHeaders>(
-                    "ChildBlockHeaders",
+                ::protobuf::reflect::MessageDescriptor::new::<BlockchainHeaders>(
+                    "BlockchainHeaders",
                     fields,
                     file_descriptor_proto()
                 )
@@ -946,7 +946,7 @@ impl ::protobuf::MessageStatic for ChildBlockHeaders {
     }
 }
 
-impl ::protobuf::Clear for ChildBlockHeaders {
+impl ::protobuf::Clear for BlockchainHeaders {
     fn clear(&mut self) {
         self.clear_btc();
         self.clear_eth();
@@ -957,13 +957,13 @@ impl ::protobuf::Clear for ChildBlockHeaders {
     }
 }
 
-impl ::std::fmt::Debug for ChildBlockHeaders {
+impl ::std::fmt::Debug for BlockchainHeaders {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for ChildBlockHeaders {
+impl ::protobuf::reflect::ProtobufValue for BlockchainHeaders {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -999,8 +999,8 @@ pub struct BcBlock {
     pub txs: ::protobuf::RepeatedField<BcTransaction>,
     pub tx_fee_base: u64,
     pub tx_distance_sum_limit: u64,
-    pub child_blockchain_count: u64,
-    pub child_block_headers: ::protobuf::SingularPtrField<ChildBlockHeaders>,
+    pub blockchain_headers_count: u64,
+    pub blockchain_headers: ::protobuf::SingularPtrField<BlockchainHeaders>,
     pub blockchain_fingerprints_root: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
@@ -1798,68 +1798,68 @@ impl BcBlock {
         &mut self.tx_distance_sum_limit
     }
 
-    // uint64 child_blockchain_count = 28;
+    // uint64 blockchain_headers_count = 28;
 
-    pub fn clear_child_blockchain_count(&mut self) {
-        self.child_blockchain_count = 0;
+    pub fn clear_blockchain_headers_count(&mut self) {
+        self.blockchain_headers_count = 0;
     }
 
     // Param is passed by value, moved
-    pub fn set_child_blockchain_count(&mut self, v: u64) {
-        self.child_blockchain_count = v;
+    pub fn set_blockchain_headers_count(&mut self, v: u64) {
+        self.blockchain_headers_count = v;
     }
 
-    pub fn get_child_blockchain_count(&self) -> u64 {
-        self.child_blockchain_count
+    pub fn get_blockchain_headers_count(&self) -> u64 {
+        self.blockchain_headers_count
     }
 
-    fn get_child_blockchain_count_for_reflect(&self) -> &u64 {
-        &self.child_blockchain_count
+    fn get_blockchain_headers_count_for_reflect(&self) -> &u64 {
+        &self.blockchain_headers_count
     }
 
-    fn mut_child_blockchain_count_for_reflect(&mut self) -> &mut u64 {
-        &mut self.child_blockchain_count
+    fn mut_blockchain_headers_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.blockchain_headers_count
     }
 
-    // .bc.ChildBlockHeaders child_block_headers = 29;
+    // .bc.BlockchainHeaders blockchain_headers = 29;
 
-    pub fn clear_child_block_headers(&mut self) {
-        self.child_block_headers.clear();
+    pub fn clear_blockchain_headers(&mut self) {
+        self.blockchain_headers.clear();
     }
 
-    pub fn has_child_block_headers(&self) -> bool {
-        self.child_block_headers.is_some()
+    pub fn has_blockchain_headers(&self) -> bool {
+        self.blockchain_headers.is_some()
     }
 
     // Param is passed by value, moved
-    pub fn set_child_block_headers(&mut self, v: ChildBlockHeaders) {
-        self.child_block_headers = ::protobuf::SingularPtrField::some(v);
+    pub fn set_blockchain_headers(&mut self, v: BlockchainHeaders) {
+        self.blockchain_headers = ::protobuf::SingularPtrField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_child_block_headers(&mut self) -> &mut ChildBlockHeaders {
-        if self.child_block_headers.is_none() {
-            self.child_block_headers.set_default();
+    pub fn mut_blockchain_headers(&mut self) -> &mut BlockchainHeaders {
+        if self.blockchain_headers.is_none() {
+            self.blockchain_headers.set_default();
         }
-        self.child_block_headers.as_mut().unwrap()
+        self.blockchain_headers.as_mut().unwrap()
     }
 
     // Take field
-    pub fn take_child_block_headers(&mut self) -> ChildBlockHeaders {
-        self.child_block_headers.take().unwrap_or_else(|| ChildBlockHeaders::new())
+    pub fn take_blockchain_headers(&mut self) -> BlockchainHeaders {
+        self.blockchain_headers.take().unwrap_or_else(|| BlockchainHeaders::new())
     }
 
-    pub fn get_child_block_headers(&self) -> &ChildBlockHeaders {
-        self.child_block_headers.as_ref().unwrap_or_else(|| ChildBlockHeaders::default_instance())
+    pub fn get_blockchain_headers(&self) -> &BlockchainHeaders {
+        self.blockchain_headers.as_ref().unwrap_or_else(|| BlockchainHeaders::default_instance())
     }
 
-    fn get_child_block_headers_for_reflect(&self) -> &::protobuf::SingularPtrField<ChildBlockHeaders> {
-        &self.child_block_headers
+    fn get_blockchain_headers_for_reflect(&self) -> &::protobuf::SingularPtrField<BlockchainHeaders> {
+        &self.blockchain_headers
     }
 
-    fn mut_child_block_headers_for_reflect(&mut self) -> &mut ::protobuf::SingularPtrField<ChildBlockHeaders> {
-        &mut self.child_block_headers
+    fn mut_blockchain_headers_for_reflect(&mut self) -> &mut ::protobuf::SingularPtrField<BlockchainHeaders> {
+        &mut self.blockchain_headers
     }
 
     // string blockchain_fingerprints_root = 30;
@@ -1904,7 +1904,7 @@ impl ::protobuf::Message for BcBlock {
                 return false;
             }
         };
-        for v in &self.child_block_headers {
+        for v in &self.blockchain_headers {
             if !v.is_initialized() {
                 return false;
             }
@@ -2054,10 +2054,10 @@ impl ::protobuf::Message for BcBlock {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.child_blockchain_count = tmp;
+                    self.blockchain_headers_count = tmp;
                 },
                 29 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.child_block_headers)?;
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.blockchain_headers)?;
                 },
                 30 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.blockchain_fingerprints_root)?;
@@ -2156,10 +2156,10 @@ impl ::protobuf::Message for BcBlock {
         if self.tx_distance_sum_limit != 0 {
             my_size += ::protobuf::rt::value_size(27, self.tx_distance_sum_limit, ::protobuf::wire_format::WireTypeVarint);
         }
-        if self.child_blockchain_count != 0 {
-            my_size += ::protobuf::rt::value_size(28, self.child_blockchain_count, ::protobuf::wire_format::WireTypeVarint);
+        if self.blockchain_headers_count != 0 {
+            my_size += ::protobuf::rt::value_size(28, self.blockchain_headers_count, ::protobuf::wire_format::WireTypeVarint);
         }
-        if let Some(ref v) = self.child_block_headers.as_ref() {
+        if let Some(ref v) = self.blockchain_headers.as_ref() {
             let len = v.compute_size();
             my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         }
@@ -2255,10 +2255,10 @@ impl ::protobuf::Message for BcBlock {
         if self.tx_distance_sum_limit != 0 {
             os.write_uint64(27, self.tx_distance_sum_limit)?;
         }
-        if self.child_blockchain_count != 0 {
-            os.write_uint64(28, self.child_blockchain_count)?;
+        if self.blockchain_headers_count != 0 {
+            os.write_uint64(28, self.blockchain_headers_count)?;
         }
-        if let Some(ref v) = self.child_block_headers.as_ref() {
+        if let Some(ref v) = self.blockchain_headers.as_ref() {
             os.write_tag(29, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
@@ -2446,14 +2446,14 @@ impl ::protobuf::MessageStatic for BcBlock {
                     BcBlock::mut_tx_distance_sum_limit_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
-                    "child_blockchain_count",
-                    BcBlock::get_child_blockchain_count_for_reflect,
-                    BcBlock::mut_child_blockchain_count_for_reflect,
+                    "blockchain_headers_count",
+                    BcBlock::get_blockchain_headers_count_for_reflect,
+                    BcBlock::mut_blockchain_headers_count_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<ChildBlockHeaders>>(
-                    "child_block_headers",
-                    BcBlock::get_child_block_headers_for_reflect,
-                    BcBlock::mut_child_block_headers_for_reflect,
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<BlockchainHeaders>>(
+                    "blockchain_headers",
+                    BcBlock::get_blockchain_headers_for_reflect,
+                    BcBlock::mut_blockchain_headers_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "blockchain_fingerprints_root",
@@ -2499,8 +2499,8 @@ impl ::protobuf::Clear for BcBlock {
         self.clear_txs();
         self.clear_tx_fee_base();
         self.clear_tx_distance_sum_limit();
-        self.clear_child_blockchain_count();
-        self.clear_child_block_headers();
+        self.clear_blockchain_headers_count();
+        self.clear_blockchain_headers();
         self.clear_blockchain_fingerprints_root();
         self.unknown_fields.clear();
     }
@@ -2695,7 +2695,7 @@ impl ::protobuf::reflect::ProtobufValue for BcTransaction {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct ChildBlockHeader {
+pub struct BlockchainHeader {
     // message fields
     pub blockchain: ::std::string::String,
     pub hash: ::std::string::String,
@@ -2703,27 +2703,27 @@ pub struct ChildBlockHeader {
     pub timestamp: u64,
     pub height: u64,
     pub merkle_root: ::std::string::String,
-    pub child_block_confirmations_in_parent_count: u64,
+    pub blockchain_confirmations_in_parent_count: u64,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
 }
 
 // see codegen.rs for the explanation why impl Sync explicitly
-unsafe impl ::std::marker::Sync for ChildBlockHeader {}
+unsafe impl ::std::marker::Sync for BlockchainHeader {}
 
-impl ChildBlockHeader {
-    pub fn new() -> ChildBlockHeader {
+impl BlockchainHeader {
+    pub fn new() -> BlockchainHeader {
         ::std::default::Default::default()
     }
 
-    pub fn default_instance() -> &'static ChildBlockHeader {
-        static mut instance: ::protobuf::lazy::Lazy<ChildBlockHeader> = ::protobuf::lazy::Lazy {
+    pub fn default_instance() -> &'static BlockchainHeader {
+        static mut instance: ::protobuf::lazy::Lazy<BlockchainHeader> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ChildBlockHeader,
+            ptr: 0 as *const BlockchainHeader,
         };
         unsafe {
-            instance.get(ChildBlockHeader::new)
+            instance.get(BlockchainHeader::new)
         }
     }
 
@@ -2909,31 +2909,31 @@ impl ChildBlockHeader {
         &mut self.merkle_root
     }
 
-    // uint64 child_block_confirmations_in_parent_count = 7;
+    // uint64 blockchain_confirmations_in_parent_count = 7;
 
-    pub fn clear_child_block_confirmations_in_parent_count(&mut self) {
-        self.child_block_confirmations_in_parent_count = 0;
+    pub fn clear_blockchain_confirmations_in_parent_count(&mut self) {
+        self.blockchain_confirmations_in_parent_count = 0;
     }
 
     // Param is passed by value, moved
-    pub fn set_child_block_confirmations_in_parent_count(&mut self, v: u64) {
-        self.child_block_confirmations_in_parent_count = v;
+    pub fn set_blockchain_confirmations_in_parent_count(&mut self, v: u64) {
+        self.blockchain_confirmations_in_parent_count = v;
     }
 
-    pub fn get_child_block_confirmations_in_parent_count(&self) -> u64 {
-        self.child_block_confirmations_in_parent_count
+    pub fn get_blockchain_confirmations_in_parent_count(&self) -> u64 {
+        self.blockchain_confirmations_in_parent_count
     }
 
-    fn get_child_block_confirmations_in_parent_count_for_reflect(&self) -> &u64 {
-        &self.child_block_confirmations_in_parent_count
+    fn get_blockchain_confirmations_in_parent_count_for_reflect(&self) -> &u64 {
+        &self.blockchain_confirmations_in_parent_count
     }
 
-    fn mut_child_block_confirmations_in_parent_count_for_reflect(&mut self) -> &mut u64 {
-        &mut self.child_block_confirmations_in_parent_count
+    fn mut_blockchain_confirmations_in_parent_count_for_reflect(&mut self) -> &mut u64 {
+        &mut self.blockchain_confirmations_in_parent_count
     }
 }
 
-impl ::protobuf::Message for ChildBlockHeader {
+impl ::protobuf::Message for BlockchainHeader {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -2973,7 +2973,7 @@ impl ::protobuf::Message for ChildBlockHeader {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.child_block_confirmations_in_parent_count = tmp;
+                    self.blockchain_confirmations_in_parent_count = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -3005,8 +3005,8 @@ impl ::protobuf::Message for ChildBlockHeader {
         if !self.merkle_root.is_empty() {
             my_size += ::protobuf::rt::string_size(6, &self.merkle_root);
         }
-        if self.child_block_confirmations_in_parent_count != 0 {
-            my_size += ::protobuf::rt::value_size(7, self.child_block_confirmations_in_parent_count, ::protobuf::wire_format::WireTypeVarint);
+        if self.blockchain_confirmations_in_parent_count != 0 {
+            my_size += ::protobuf::rt::value_size(7, self.blockchain_confirmations_in_parent_count, ::protobuf::wire_format::WireTypeVarint);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -3032,8 +3032,8 @@ impl ::protobuf::Message for ChildBlockHeader {
         if !self.merkle_root.is_empty() {
             os.write_string(6, &self.merkle_root)?;
         }
-        if self.child_block_confirmations_in_parent_count != 0 {
-            os.write_uint64(7, self.child_block_confirmations_in_parent_count)?;
+        if self.blockchain_confirmations_in_parent_count != 0 {
+            os.write_uint64(7, self.blockchain_confirmations_in_parent_count)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -3066,12 +3066,12 @@ impl ::protobuf::Message for ChildBlockHeader {
     }
 }
 
-impl ::protobuf::MessageStatic for ChildBlockHeader {
-    fn new() -> ChildBlockHeader {
-        ChildBlockHeader::new()
+impl ::protobuf::MessageStatic for BlockchainHeader {
+    fn new() -> BlockchainHeader {
+        BlockchainHeader::new()
     }
 
-    fn descriptor_static(_: ::std::option::Option<ChildBlockHeader>) -> &'static ::protobuf::reflect::MessageDescriptor {
+    fn descriptor_static(_: ::std::option::Option<BlockchainHeader>) -> &'static ::protobuf::reflect::MessageDescriptor {
         static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
             ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
@@ -3081,41 +3081,41 @@ impl ::protobuf::MessageStatic for ChildBlockHeader {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "blockchain",
-                    ChildBlockHeader::get_blockchain_for_reflect,
-                    ChildBlockHeader::mut_blockchain_for_reflect,
+                    BlockchainHeader::get_blockchain_for_reflect,
+                    BlockchainHeader::mut_blockchain_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "hash",
-                    ChildBlockHeader::get_hash_for_reflect,
-                    ChildBlockHeader::mut_hash_for_reflect,
+                    BlockchainHeader::get_hash_for_reflect,
+                    BlockchainHeader::mut_hash_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "previous_hash",
-                    ChildBlockHeader::get_previous_hash_for_reflect,
-                    ChildBlockHeader::mut_previous_hash_for_reflect,
+                    BlockchainHeader::get_previous_hash_for_reflect,
+                    BlockchainHeader::mut_previous_hash_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
                     "timestamp",
-                    ChildBlockHeader::get_timestamp_for_reflect,
-                    ChildBlockHeader::mut_timestamp_for_reflect,
+                    BlockchainHeader::get_timestamp_for_reflect,
+                    BlockchainHeader::mut_timestamp_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
                     "height",
-                    ChildBlockHeader::get_height_for_reflect,
-                    ChildBlockHeader::mut_height_for_reflect,
+                    BlockchainHeader::get_height_for_reflect,
+                    BlockchainHeader::mut_height_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "merkle_root",
-                    ChildBlockHeader::get_merkle_root_for_reflect,
-                    ChildBlockHeader::mut_merkle_root_for_reflect,
+                    BlockchainHeader::get_merkle_root_for_reflect,
+                    BlockchainHeader::mut_merkle_root_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
-                    "child_block_confirmations_in_parent_count",
-                    ChildBlockHeader::get_child_block_confirmations_in_parent_count_for_reflect,
-                    ChildBlockHeader::mut_child_block_confirmations_in_parent_count_for_reflect,
+                    "blockchain_confirmations_in_parent_count",
+                    BlockchainHeader::get_blockchain_confirmations_in_parent_count_for_reflect,
+                    BlockchainHeader::mut_blockchain_confirmations_in_parent_count_for_reflect,
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<ChildBlockHeader>(
-                    "ChildBlockHeader",
+                ::protobuf::reflect::MessageDescriptor::new::<BlockchainHeader>(
+                    "BlockchainHeader",
                     fields,
                     file_descriptor_proto()
                 )
@@ -3124,7 +3124,7 @@ impl ::protobuf::MessageStatic for ChildBlockHeader {
     }
 }
 
-impl ::protobuf::Clear for ChildBlockHeader {
+impl ::protobuf::Clear for BlockchainHeader {
     fn clear(&mut self) {
         self.clear_blockchain();
         self.clear_hash();
@@ -3132,18 +3132,18 @@ impl ::protobuf::Clear for ChildBlockHeader {
         self.clear_timestamp();
         self.clear_height();
         self.clear_merkle_root();
-        self.clear_child_block_confirmations_in_parent_count();
+        self.clear_blockchain_confirmations_in_parent_count();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for ChildBlockHeader {
+impl ::std::fmt::Debug for BlockchainHeader {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for ChildBlockHeader {
+impl ::protobuf::reflect::ProtobufValue for BlockchainHeader {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -3155,12 +3155,12 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cprevio\
     usHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestamp\x12\x16\n\
     \x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0bmerkle_root\x18\
-    \x06\x20\x01(\tR\nmerkleRoot\"\xdb\x01\n\x11ChildBlockHeaders\x12&\n\x03\
-    btc\x18\x01\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03btc\x12&\n\x03eth\
-    \x18\x02\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03eth\x12&\n\x03lsk\x18\
-    \x03\x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03lsk\x12&\n\x03neo\x18\x04\
-    \x20\x03(\x0b2\x14.bc.ChildBlockHeaderR\x03neo\x12&\n\x03wav\x18\x05\x20\
-    \x03(\x0b2\x14.bc.ChildBlockHeaderR\x03wav\"\xd9\x08\n\x07BcBlock\x12\
+    \x06\x20\x01(\tR\nmerkleRoot\"\xdb\x01\n\x11BlockchainHeaders\x12&\n\x03\
+    btc\x18\x01\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03btc\x12&\n\x03eth\
+    \x18\x02\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03eth\x12&\n\x03lsk\x18\
+    \x03\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03lsk\x12&\n\x03neo\x18\x04\
+    \x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03neo\x12&\n\x03wav\x18\x05\x20\
+    \x03(\x0b2\x14.bc.BlockchainHeaderR\x03wav\"\xdc\x08\n\x07BcBlock\x12\
     \x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x02\
     \x20\x01(\tR\x0cpreviousHash\x12\x18\n\x07version\x18\x03\x20\x01(\x04R\
     \x07version\x12%\n\x0eschema_version\x18\x04\x20\x01(\x04R\rschemaVersio\
@@ -3183,18 +3183,18 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\x04R\x07txCount\x12#\n\x03txs\x18\x19\x20\x03(\x0b2\x11.bc.BcT\
     ransactionR\x03txs\x12\x1e\n\x0btx_fee_base\x18\x1a\x20\x01(\x04R\ttxFee\
     Base\x121\n\x15tx_distance_sum_limit\x18\x1b\x20\x01(\x04R\x12txDistance\
-    SumLimit\x124\n\x16child_blockchain_count\x18\x1c\x20\x01(\x04R\x14child\
-    BlockchainCount\x12E\n\x13child_block_headers\x18\x1d\x20\x01(\x0b2\x15.\
-    bc.ChildBlockHeadersR\x11childBlockHeaders\x12@\n\x1cblockchain_fingerpr\
-    ints_root\x18\x1e\x20\x01(\tR\x1ablockchainFingerprintsRoot\"#\n\rBcTran\
-    saction\x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9b\x02\n\x10Chi\
-    ldBlockHeader\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\
-    \x12\n\x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\
-    \x20\x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\
-    \ttimestamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\
-    \n\x0bmerkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12W\n)child_block_con\
-    firmations_in_parent_count\x18\x07\x20\x01(\x04R$childBlockConfirmations\
-    InParentCountb\x06proto3\
+    SumLimit\x128\n\x18blockchain_headers_count\x18\x1c\x20\x01(\x04R\x16blo\
+    ckchainHeadersCount\x12D\n\x12blockchain_headers\x18\x1d\x20\x01(\x0b2\
+    \x15.bc.BlockchainHeadersR\x11blockchainHeaders\x12@\n\x1cblockchain_fin\
+    gerprints_root\x18\x1e\x20\x01(\tR\x1ablockchainFingerprintsRoot\"#\n\rB\
+    cTransaction\x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9a\x02\n\
+    \x10BlockchainHeader\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockcha\
+    in\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\
+    \x18\x03\x20\x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\
+    \x01(\x04R\ttimestamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06heigh\
+    t\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12V\n(blockc\
+    hain_confirmations_in_parent_count\x18\x07\x20\x01(\x04R$blockchainConfi\
+    rmationsInParentCountb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
