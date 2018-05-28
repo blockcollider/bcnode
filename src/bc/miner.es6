@@ -25,7 +25,6 @@ const BN = require('bn.js')
 const {
   call,
   compose,
-  concat,
   difference,
   flatten,
   flip,
@@ -43,13 +42,12 @@ const {
 } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
+const { concatAll } = require('../utils/ramda')
 const { Block, BcBlock, BcTransaction, BlockchainHeader, BlockchainHeaders } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
 const GENESIS_DATA = require('./genesis.raw')
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
-
-const concatAll = reduce(concat, [])
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
