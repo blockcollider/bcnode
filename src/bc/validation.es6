@@ -7,11 +7,13 @@
  * @flow
  */
 const { blake2bl } = require('../utils/crypto')
+const { concatAll } = require('../utils/ramda')
 const { BcBlock } = require('../protos/core_pb')
 const {
   getChildrenBlocksHashes,
   getChildrenRootHash,
-  blockchainMapToList
+  blockchainMapToList,
+  createMerkleRoot
 } = require('./miner')
 
 export default function isValidBlock (newBlock: BcBlock): bool {
@@ -19,7 +21,7 @@ export default function isValidBlock (newBlock: BcBlock): bool {
     numberOfBlockchainsNeededMatchesChildBlock(newBlock) && // TODO
     ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) && // TODO
     isChainRootCorrectlyCalculated(newBlock) &&
-    isMerkleRootCorrectlyCalculated(newBlock) && // TODO
+    isMerkleRootCorrectlyCalculated(newBlock) &&
     isDistanceCorrectlyCalculated(newBlock) // TODO
 }
 
@@ -37,13 +39,23 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock) {
 
 function isChainRootCorrectlyCalculated (newBlock: BcBlock) {
   const receivedChainRoot = newBlock.getChainRoot()
+
   const expectedBlockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
   const expectedChainRoot = blake2bl(getChildrenRootHash(expectedBlockHashes).toString())
   return receivedChainRoot === expectedChainRoot
 }
 
 function isMerkleRootCorrectlyCalculated (newBlock: BcBlock) {
-  return true
+  const receivedMerkleRoot = newBlock.getMerkleRoot()
+
+  const blockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
+  const expectedMerkleRoot = createMerkleRoot(concatAll([
+    blockHashes,
+    newBlock.getTxsList(),
+    [newBlock.getMiner(), newBlock.getHeight(), newBlock.getVersion(), newBlock.getSchemaVersion(), newBlock.getNrgGrant()]
+  ]))
+
+  return receivedMerkleRoot === expectedMerkleRoot
 }
 
 function isDistanceCorrectlyCalculated (newBlock: BcBlock) {
