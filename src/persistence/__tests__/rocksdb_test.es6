@@ -18,6 +18,27 @@ describe('RocksDb', () => {
     expect(new RocksDb()).toBeInstanceOf(RocksDb)
   })
 
+  test('get (batch)', done => {
+    const db = new RocksDb(TEST_DATA_DIR)
+
+    const nums = [...Array(100)].map((v, i) => i)
+    db.open()
+      .then(() => {
+        const promises = nums.map((num) => db.put(num, num))
+        return Promise.all(promises)
+      })
+      .then(() => {
+        const promises = nums.map((num) => db.get(num))
+        return Promise.all(promises)
+      })
+      .then((res) => {
+        nums.forEach((val, index) => {
+          expect(val).toEqual(res[index])
+        })
+        done()
+      })
+  })
+
   test('put', done => {
     const db = new RocksDb(TEST_DATA_DIR)
 

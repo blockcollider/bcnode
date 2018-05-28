@@ -8,26 +8,76 @@
  */
 
 import React, { Component } from 'react'
+import { round } from 'mathjs'
 import moment from 'moment'
 
 import { VersionLink } from './VersionLink'
 
+const PeerLink = (props: Object) => {
+  const peer = props.peer
+  const linkProps = {
+    href: `/#/peer/${peer.id}`,
+    onClick: (e) => {
+      e.preventDefault()
+      props.onClick(peer)
+    },
+    style: {
+      color: 'black'
+    }
+  }
+  return (
+    <a {...linkProps}>{props.children}</a>
+  )
+}
+
+const UNITS = [
+  'B',
+  'kB',
+  'MB',
+  'GB',
+  'TB'
+]
+
+const UNITS_PS = [
+  'Bps',
+  'kBps',
+  'MBps',
+  'GBps',
+  'TBps'
+]
+
+const formatBytes = (bytes: number, units: string[] = UNITS) => {
+  let i
+  let res = bytes
+  for (i = 0; i < (units.length - 1) && res >= 1024; i++) {
+    res /= 1024
+  }
+
+  return `${round(res, 0)}${units[i]}`
+}
+
 export class PeersTable extends Component<*> {
   render () {
     let id = 0
+
+    const now = Date.now()
     const peers = this.props.peers.map((peer) => {
       const peerId = `${peer.id.substring(0, 6)}...${peer.id.substr(peer.id.length - 6)}`
 
       const meta = peer.meta || {}
       const metaVersion = meta.version || {}
 
-      const address = (peer.addrs || [])
-        .map((addr) => {
-          const key = `${peer.id}.${addr}`
-          return (
-            <div key={key}>{addr.substring(0, 34)}</div>
-          )
-        })
+      // const address = (peer.addrs || [])
+      //   .map((addr) => {
+      //     const key = `${peer.id}.${addr}`
+      //     return (
+      //       <div key={key}>{addr.substring(0, 34)}</div>
+      //     )
+      //   })
+
+      const address = (
+        <div>{peer.addr.substring(0, 34)}</div>
+      )
 
       const protocolVersion = (
         metaVersion.protocol
@@ -58,13 +108,34 @@ export class PeersTable extends Component<*> {
         )
       }
 
+      const stats = () => {
+        const snapshot = peer.stats && peer.stats.snapshot
+        if (!snapshot) {
+          return 'N/A'
+        }
+
+        const timeDiff = (now - peer.meta.ts.connectedAt) * 0.001
+        const total = `${formatBytes(snapshot.dataReceived)}/${formatBytes(snapshot.dataSent)}`
+        const speed = `${formatBytes(snapshot.dataReceived / timeDiff, UNITS_PS)}/${formatBytes(snapshot.dataSent / timeDiff, UNITS_PS)}`
+
+        return (
+          <div>
+            <div key={`${peer.id}.stats.total`}>{total}</div>
+            <div key={`${peer.id}.stats.speed`}>{speed}</div>
+          </div>
+        )
+      }
+
       return (
         <tr key={peer.id}>
           <th scope='row'>{id++}</th>
-          <td>{peerId}</td>
+          <td>
+            <PeerLink peer={peer} onClick={this.props.onClick}>{peerId}</PeerLink>
+          </td>
           <td>{address}</td>
           <td>{protocolVersion}</td>
           <td><VersionLink version={metaVersion} /></td>
+          <td>{stats()}</td>
           <td>{timestamp()}</td>
         </tr>
       )
@@ -80,6 +151,7 @@ export class PeersTable extends Component<*> {
               <th scope='col'>Address</th>
               <th scope='col'>Protocol Version</th>
               <th scope='col'>Version</th>
+              <th scope='col'>RX/TX</th>
               <th scope='col'>Timestamp</th>
             </tr>
           </thead>

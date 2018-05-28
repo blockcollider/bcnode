@@ -8,6 +8,5 @@
  */
 
 export const initialState = {
-  peer: null,
   peers: []
 }

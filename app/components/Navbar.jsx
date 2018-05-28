@@ -8,31 +8,69 @@
  */
 
 import React, { Component } from 'react'
+import { Nav, NavItem, Dropdown, DropdownItem, DropdownToggle, DropdownMenu, NavLink } from 'reactstrap'
 
 import Brand from './Brand'
 import ConnectionState from './ConnectionState'
 
 const STYLE = {
-  color: 'black'
+ color: 'black'
 }
 
-export class Navbar extends Component<*> {
+type State = {
+  dropdownOpen: bool
+}
+
+export class Navbar extends Component<*, State> {
+  state: Object // eslint-disable-line no-undef
+
+  constructor (props: any) {
+    super(props)
+
+    this.state = {
+      dropdownOpen: false
+    }
+  }
+
   render () {
     return (
-      <nav className='navbar navbar-expand-sm navbar-light bg-light'>
-        <Brand />
-        <div className='collapse navbar-collapse' id='navbarText'>
-          { false && <a className='nav-link' href='/#/miner' style={STYLE}>
-            <i className='fas fa-user' /> Profile
-          </a> }
+      <Nav className='navbar navbar-expand-sm navbar-light bg-light' style={{borderLeft: 0, borderRight: 0}}>
+        <Brand>
+          <ConnectionState style={{marginLeft: '10px'}} connected={this.props.connected} type='dot' />
+        </Brand>
 
-          <a className='nav-link' href='/#/blocks/latest' style={STYLE}>BC Chain</a>
-          <a className='nav-link' href='/#/miner' style={STYLE}>Miner</a>
-          <a className='nav-link' href='/#/rover' style={STYLE}>Rover</a>
-          <a className='nav-link' href='/#/peers' style={STYLE}>Peers</a>
-        </div>
-        <ConnectionState connected={this.props.connected} />
-      </nav>
+        <NavItem className='navbar-light bg-light'>
+          <NavLink href='/#/blocks/latest' style={STYLE} className='navbar-light bg-light'>BC Chain</NavLink>
+        </NavItem>
+
+        <NavItem>
+          <NavLink href='/#/miner' style={STYLE}>Miner</NavLink>
+        </NavItem>
+
+        <NavItem>
+          <NavLink href='/#/rover' style={STYLE}>Rover</NavLink>
+        </NavItem>
+
+        <NavItem>
+          <NavLink href='/#/peers' style={STYLE}>Peers</NavLink>
+        </NavItem>
+
+        <Dropdown nav isOpen={this.state.dropdownOpen} toggle={
+          () => {
+            this.setState({
+              dropdownOpen: !this.state.dropdownOpen
+            })
+          }
+        } >
+          <DropdownToggle nav caret style={STYLE}>
+            Dev
+          </DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem href='/#/doc'>Doc</DropdownItem>
+            <DropdownItem href='/#/logs'>Logs</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </Nav>
     )
   }
 }

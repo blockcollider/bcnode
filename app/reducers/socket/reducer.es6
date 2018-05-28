@@ -10,7 +10,6 @@
 import { ACTIONS as PROFILE_ACTIONS } from '../profile/actions'
 import { ACTIONS as BLOCK_ACTIONS } from '../block/actions'
 import { ACTIONS as BLOCKS_ACTIONS } from '../blocks/actions'
-import { ACTIONS as MINER_ACTIONS } from '../miner/actions'
 import { ACTIONS as PEER_ACTIONS } from '../peers/actions'
 import { ACTIONS as ROVER_ACTIONS } from '../rover/actions'
 
@@ -18,14 +17,16 @@ import { ACTIONS } from './actions'
 import { initialState } from './state'
 
 const DISPATCH_TABLE = {
-  'block.mined': MINER_ACTIONS.MINER_ADD_BLOCK,
+  'block.announced': BLOCKS_ACTIONS.BLOCKS_ANNOUNCED_ADD,
+  'block.mined': BLOCKS_ACTIONS.BLOCKS_MINED_ADD,
   'block.latest': ROVER_ACTIONS.ROVER_ADD_BLOCK,
   'block.set': BLOCK_ACTIONS.BLOCK_SET,
   'block.snapshot': ROVER_ACTIONS.ROVER_SET_BLOCKS,
-  'blocks.set': BLOCKS_ACTIONS.BLOCKS_SET,
+  'blocks.set': BLOCKS_ACTIONS.BLOCKS_STORED_SET,
   'peer.connected': PEER_ACTIONS.PEERS_ADD_PEER,
   'peer.disconnected': PEER_ACTIONS.PEERS_REMOVE_PEER,
   'peer.snapshot': PEER_ACTIONS.PEERS_SET_PEERS,
+  'peer.stats': PEER_ACTIONS.PEERS_STATS,
   'profile.set': PROFILE_ACTIONS.PROFILE_SET
 }
 

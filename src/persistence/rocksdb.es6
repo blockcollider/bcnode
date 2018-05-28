@@ -98,6 +98,14 @@ export default class PersistenceRocksDb {
    * @param opts
    */
   get (key: string, opts: Object = { asBuffer: true }): Promise<Object> {
+    if (Array.isArray(key)) {
+      const promises = key.map((k) => {
+        return this.get(k)
+      })
+
+      return Promise.all(promises)
+    }
+
     return new Promise((resolve, reject) => {
       this.db.get(key, opts, (err, value) => {
         if (err) {

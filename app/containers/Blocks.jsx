@@ -53,11 +53,11 @@ export class BlocksContainer extends Component<*> {
           <ul className='pagination justify-content-end'>
             <li className='page-item'>
               <a className='page-link'
-                href={'/#' + getLink(this.props.blocks[0].height + this.props.count)}>Newer</a>
+                href={'/#' + getLink(this.props.blocks[0].height + this.props.perPage)}>Newer</a>
             </li>
             <li className='page-item'>
               <a className='page-link'
-                href={'/#' + getLink(this.props.blocks[0].height - this.props.count)}>Older</a>
+                href={'/#' + getLink(this.props.blocks[0].height - this.props.perPage)}>Older</a>
             </li>
           </ul>
         </nav>}
@@ -67,17 +67,19 @@ export class BlocksContainer extends Component<*> {
 }
 
 function mapDispatchToProps (dispatch, ownProps) {
-  const res = { actions: bindActionCreators(actions(dispatch), dispatch) }
-  return res
+  return {
+    actions: bindActionCreators(actions(dispatch), dispatch)
+  }
 }
+
 const Blocks = connect(
   (state, ownProps) => {
     const id = ownProps.match.params.id || 'latest'
-    let blocks = state.blocks.blocks
-    let count = state.blocks.count
+    let blocks = state.blocks.stored.blocks
+    let perPage = state.blocks.stored.perPage
     return {
       id,
-      count,
+      perPage,
       blocks
     }
   },

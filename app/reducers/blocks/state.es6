@@ -7,8 +7,22 @@
  * @flow
  */
 
+import CircularBuffer from 'circular-buffer'
+
 export const initialState = {
-  id: null,
-  blocks: [],
-  count: 20
+  stored: {
+    id: null,
+    blocks: [],
+    perPage: 20
+  },
+
+  announced: {
+    count: 0,
+    blocks: new CircularBuffer(20)
+  },
+
+  mined: {
+    count: 0,
+    blocks: new CircularBuffer(20)
+  }
 }

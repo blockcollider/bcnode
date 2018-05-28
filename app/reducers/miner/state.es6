@@ -7,8 +7,4 @@
  * @flow
  */
 
-import CircularBuffer from 'circular-buffer'
-
-export const initialState = {
-  blocks: new CircularBuffer(20)
-}
+export const initialState = {}

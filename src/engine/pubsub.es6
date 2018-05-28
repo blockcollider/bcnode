@@ -6,6 +6,9 @@
  *
  * @flow
  */
+
+const { inspect } = require('util')
+
 const { RxPubSub } = require('rx-pubsub')
 const debug = require('debug')('bcnode:engine:pubsub')
 
@@ -45,7 +48,7 @@ export class PubSub {
   }
 
   publish (topic: string, data: any) {
-    debug('Publishing new message', topic, data)
+    debug('Publishing new message', inspect(topic), data)
     RxPubSub.publish(topic, data)
   }
 }

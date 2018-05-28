@@ -15,12 +15,14 @@ import { ACTIONS as SOCKET_ACTIONS } from '../socket/actions'
 import { initialState } from './state'
 
 export const ACTIONS = {
-  BLOCKS_SET: 'BLOCKS_SET'
+  BLOCKS_ANNOUNCED_ADD: 'BLOCKS_ANNOUNCED_ADD',
+  BLOCKS_MINED_ADD: 'BLOCKS_MINED_ADD',
+  BLOCKS_STORED_SET: 'BLOCKS_STORED_SET'
 }
 
 export const actions = (dispatch: Function) => {
   return {
-    getBlocks: (id: Object, count: number = initialState.count) => {
+    getBlocks: (id: Object, count: number = initialState.stored.perPage) => {
       return {
         type: SOCKET_ACTIONS.SOCKET_SEND,
         payload: {
