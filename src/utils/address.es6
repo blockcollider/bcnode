@@ -7,18 +7,15 @@
  * @flow
  */
 class Address {
-  constructor () {
-    this.types = ["keccak40", "ethereum", "eth"] 
-  }
-  assert (type, addr) {
-    if (addr === undefined || type === undefined || this.types.indexOf(type) < 0) {
-      return false 
+  assert (t: string, addr: string) {
+    if (addr === undefined || t === undefined) {
+      return false
     }
-    if (addr.slice(0,2) !== "0x") {
-      addr = "0x" + addr 
+    if (addr.slice(0, 2) !== '0x') {
+      addr = '0x' + addr
     }
-    if(type === "keccak40" || type === "ethereum" || type == "eth") {
-      return (/^(0x){1}[0-9a-fA-F]{40}$/i.test(addr));
+    if (t === 'keccak40' || t === 'ethereum' || t === 'eth') {
+      return (/^(0x){1}[0-9a-fA-F]{40}$/i.test(addr))
     }
     return false
   }
