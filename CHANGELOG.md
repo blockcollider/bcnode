@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [CI] - Automatically build docker images
 - [Docker] - Mountable volumes - _data, config, logs
 - [Docker] - Use foreverjs
+- [CLI] - --miner-key option validates formatted address 
 
 ### Changed
 
