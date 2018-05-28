@@ -30,7 +30,7 @@ describe('RocksDb', () => {
       .then(() => db.put("bc.block.1", rawGenesisBlock))
       .then(() => db.getBtAddressBalance(goodAddress))
       .then((res) => {
-        expect(res).toEqual(0)
+        expect(res).toEqual({ unconfirmed: 0, confirmed: 0 })
         return db.close()
       })
       .then(() => {

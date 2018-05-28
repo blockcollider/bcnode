@@ -142,17 +142,19 @@ export default class PersistenceRocksDb {
       confirmed: 0,
       unconfirmed: 0
     }
-    for (let i = (startBlock - 1); i < endBlock; i++) {
+    for (let i = startBlock; i < endBlock; i++) {
       try {
         const block = await self.get('bc.block.' + i)
-        if (block.nrgGrant !== 1600000000) block.nrgGrant = 1600000000 // Force BT Reward
-        if (endBlock - i > 99 && block.nrgGrant !== undefined) {
-          accountBalances.confirmed += block.nrgGrant
-        } else if (endBlock - i < 99 && block.nrgGrant !== undefined) {
-          accountBalances.unconfirmed += block.nrgGrant
+        if (block !== undefined && block.miner === address) {
+          if (block.nrgGrant !== 1600000000) block.nrgGrant = 1600000000 // Force BT Reward
+          if (endBlock - i > 99 && block.nrgGrant !== undefined) {
+            accountBalances.confirmed += block.nrgGrant
+          } else if (endBlock - i < 99 && block.nrgGrant !== undefined) {
+            accountBalances.unconfirmed += block.nrgGrant
+          }
         }
       } catch (err) {
-        return new Error('block scan error')
+        return err
       }
     }
     return accountBalances
@@ -180,7 +182,7 @@ export default class PersistenceRocksDb {
           const latestBlock = deserialize(value)
           if (latestBlock !== undefined && latestBlock.height !== undefined) {
             const endBlock = latestBlock.height
-            return await self.scanBlockGrants(address, 1, Number(endBlock))
+            return resolve(self.scanBlockGrants(address, 1, Number(endBlock)))
           } else {
             return reject(new Error(`No blocks stored on disk`))
           }
