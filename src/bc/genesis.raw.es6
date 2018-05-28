@@ -32,7 +32,7 @@ module.exports = {
   "txCount": 0,
   "txsList": [],
   "txFeeBase": 0,
-  "txDistanceLimit": 0,
+  "txDistanceSumLimit": 0,
 
   "childBlockchainCount": 5,
   "childBlockHeadersMap": {},

@@ -32,6 +32,9 @@ export function getGenesisBlock () {
 
   const GENESIS_BLOCK = new BcBlock([
     GENESIS_DATA.hash,
+    GENESIS_DATA.previousHash,
+    GENESIS_DATA.version,
+    GENESIS_DATA.schemaVersion,
     GENESIS_DATA.height,
     GENESIS_DATA.miner,
     GENESIS_DATA.difficulty,
@@ -40,9 +43,24 @@ export function getGenesisBlock () {
     GENESIS_DATA.chainRoot,
     GENESIS_DATA.distance,
     GENESIS_DATA.nonce,
+    GENESIS_DATA.nrgGrant,
+    GENESIS_DATA.targetHash,
+    GENESIS_DATA.targetHeight,
+    GENESIS_DATA.targetMiner,
+    GENESIS_DATA.targetSignature,
+    GENESIS_DATA.twn,
+    GENESIS_DATA.tws,
+    GENESIS_DATA.emblemWeight,
+    GENESIS_DATA.emblemChainBlockHash,
+    GENESIS_DATA.emblemChainFingerprintRoot,
+    GENESIS_DATA.emblemChainAddress,
     GENESIS_DATA.txCount,
-    GENESIS_DATA.transactionsList,
-    Object.keys(GENESIS_BLOCK_HEADERS_MAP.toObject()).length
+    GENESIS_DATA.txsList,
+    GENESIS_DATA.txFeeBase,
+    GENESIS_DATA.txDistanceSumLimit,
+    5, // blockchain_fingerprints_count,
+    GENESIS_BLOCK_HEADERS_MAP,
+    GENESIS_DATA.blockchainFingerprintsRoot
   ])
   GENESIS_BLOCK.setChildBlockHeaders(GENESIS_BLOCK_HEADERS_MAP)
 

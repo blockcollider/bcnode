@@ -481,7 +481,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
     }
   }
 
-  const oldTransactions = lastPreviousBlock.getTransactionsList()
+  const oldTransactions = lastPreviousBlock.getTxsList()
   const newMerkleRoot = createMerkleRoot(
     blockHashes.concat(oldTransactions.concat([minerAddress, 1]))
   ) // blockchains, transactions, miner address, height
@@ -506,13 +506,13 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   newBlock.setTargetSignature()
   newBlock.setTwn()
   newBlock.setTwsList()
-  newBlock.setEmblemHeight()
+  newBlock.setEmblemWeight()
   newBlock.setEmblemChainBlockHash()
   newBlock.setEmblemChainFingerprintRoot()
   newBlock.setEmblemChainAddress()
   //// end
   newBlock.setTxCount(0)
-  newBlock.setTransactionsList(newTransactions)
+  newBlock.setTxsList(newTransactions)
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
   ////
   newBlock.setBlockchainFingerprintsRoot()
