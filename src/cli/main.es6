@@ -86,7 +86,7 @@ export const main = async (args: string[] = process.argv) => {
     .command('start')
     .description('Start Block Collider')
     .usage('[opts]')
-    .option('--miner-key [key]', 'Miner key', /^(0x){1}[0-9a-fA-F]{40}$/i)
+    .option('--miner-key [key]', 'Miner key', /^(0x){1}[0-9a-fA-F]{40}$/i, new Error("malformed address used for miner key"))
     .option('-n, --node', 'Start P2P node')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')
