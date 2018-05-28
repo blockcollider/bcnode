@@ -110,3 +110,7 @@ dist/
 
 # Local snippets
 /snippets/
+
+# Temporary stuff
+tmp/
+
