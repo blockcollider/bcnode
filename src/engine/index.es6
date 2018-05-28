@@ -11,6 +11,8 @@ const { equals, all, values } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
+const LRUCache = require('lru-cache')
+const debug = require('debug')('bcnode:engine')
 
 const config = require('../../config/config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -45,6 +47,7 @@ type UnfinishedBlockData = {
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _monitor: Monitor; // eslint-disable-line no-undef
+  _knownBlocksCache: Object // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _pubsub: PubSub; //  eslint-disable-line no-undef
@@ -80,6 +83,11 @@ export default class Engine {
     }
     this._canMine = false
     this._unfinishedBlockData = { block: undefined, lastPreviousBlock: undefined, currentBlocks: {}, timeDiff: undefined, iterations: undefined }
+
+    this._knownBlocksCache = LRUCache({
+      max: 1024
+    })
+
     // Start NTP sync
     ts.start()
   }
@@ -339,9 +347,24 @@ export default class Engine {
   blockFromPeer (block: Object) {
     const blockObj = block.toObject()
     this._logger.info('Received new block from peer', blockObj.height, blockObj.miner, blockObj)
-    // TODO: Validate new block mined by peer
 
-    this._server._wsBroadcast({ type: 'block.announced', data: blockObj })
+    // TODO: Validate new block mined by peer
+    if (!this._knownBlocksCache.get(blockObj.hash)) {
+      debug(`Adding received block into cache of known blocks - ${blockObj.hash}`)
+
+      // Add to cache
+      this._knownBlocksCache.set(blockObj.hash, blockObj)
+
+      // TODO: Update metaverse
+
+      // Broadcast to other peers
+      this.node.broadcastNewBlock(block)
+
+      // Update UI
+      this._server._wsBroadcast({ type: 'block.announced', data: blockObj })
+    } else {
+      debug(`Received block is already in cache of known blocks - ${blockObj.hash}`)
+    }
   }
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
@@ -456,6 +479,8 @@ export default class Engine {
       this.persistence.put('bc.block.latest', newBlock),
       this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
     ]
+
+    this._knownBlocksCache.set(newBlockObj.hash, newBlockObj)
 
     return Promise.all(tasks)
       .then(() => {

@@ -46,14 +46,14 @@ const UNITS_PS = [
   'TBps'
 ]
 
-const formatBytes = (bytes: number, units: string[] = UNITS) => {
+const formatBytes = (bytes: number, units: string[] = UNITS, precision: number = 0) => {
   let i
   let res = bytes
   for (i = 0; i < (units.length - 1) && res >= 1024; i++) {
     res /= 1024
   }
 
-  return `${round(res, 0)}${units[i]}`
+  return `${round(res, precision)}${units[i]}`
 }
 
 export class PeersTable extends Component<*> {
@@ -115,8 +115,8 @@ export class PeersTable extends Component<*> {
         }
 
         const timeDiff = (now - peer.meta.ts.connectedAt) * 0.001
-        const total = `${formatBytes(snapshot.dataReceived)}/${formatBytes(snapshot.dataSent)}`
-        const speed = `${formatBytes(snapshot.dataReceived / timeDiff, UNITS_PS)}/${formatBytes(snapshot.dataSent / timeDiff, UNITS_PS)}`
+        const total = `${formatBytes(snapshot.dataReceived, UNITS, 2)}/${formatBytes(snapshot.dataSent, UNITS, 2)}`
+        const speed = `${formatBytes(snapshot.dataReceived / timeDiff, UNITS_PS, 2)}/${formatBytes(snapshot.dataSent / timeDiff, UNITS_PS, 2)}`
 
         return (
           <div>

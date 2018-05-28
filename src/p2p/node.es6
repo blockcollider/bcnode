@@ -42,7 +42,7 @@ export class PeerNode {
 
     if (config.p2p.stats.enabled) {
       this._interval = setInterval(() => {
-        this._logger.info(`Peers count ${this.manager.peerBookConnected.getPeersCount()}`)
+        debug(`Peers count ${this.manager.peerBookConnected.getPeersCount()}`)
       }, config.p2p.stats.interval * 1000)
     }
   }
