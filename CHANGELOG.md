@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [CLI] - Added command "balance <address>" to get NRG balance
 - [CLI] - --miner-key option validates formatted address 
 - [Sentry] - Log more details
 - [Sentry] - Log version as sentry 'release'

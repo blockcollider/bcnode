@@ -176,7 +176,7 @@ export default class PersistenceRocksDb {
       }
       this.db.get('bc.block.latest', opts, (err, value) => {
         if (err) {
-          return reject(new Error(`${err.message} - bc.block.latest`))
+          return reject(new Error(`${err.message} --> local Block Collider ledger not found, sychronize machine with network`))
         }
         try {
           const latestBlock = deserialize(value)

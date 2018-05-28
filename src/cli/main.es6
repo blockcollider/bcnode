@@ -26,6 +26,7 @@ const { getOsInfo } = require('../helper/os')
 const { cmd: cmdConfig } = require('./cmd/config')
 const { cmd: cmdInfo } = require('./cmd/info')
 const { cmd: cmdStart } = require('./cmd/start')
+const { cmd: cmdBalance } = require('./cmd/balance')
 
 // $FlowFixMe
 const native = require('../../native/index.node')
@@ -61,7 +62,7 @@ export const main = async (args: string[] = process.argv) => {
   // COMMAND - info
   program
     .command('info')
-    .description('Various informations')
+    .description('Various metrics')
     .usage('<options>')
     .option('--all', 'Show all', false)
     .option('--dirs', 'Path of directories used', false)
@@ -70,12 +71,21 @@ export const main = async (args: string[] = process.argv) => {
       return cmdInfo(cmd)
     })
 
+  // COMMAND - balance
+  program
+    .command('balance <address>')
+    .description('Confirmed/unconfirmed address NRG balance')
+    .usage('balance <address> <options>')
+    .option('-s, --show', 'Print config to console')
+    .action((address, cmd) => {
+      return cmdBalance(cmd, address)
+    })
+
   // COMMAND - start
   program
     .command('start')
     .description('Start Block Collider')
     .usage('[opts]')
-    // .arguments('')
     .option('--miner-key [key]', 'Miner key', /^(0x){1}[0-9a-fA-F]{40}$/i)
     .option('-n, --node', 'Start P2P node')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
