@@ -177,7 +177,7 @@ export default class Controller {
             }
           })
         }
-      } else {
+      } else if (peer !== undefined && peer.status !== undefined && peer.hash !== undefined && pool._connectedPeers[peer.hash] !== undefined) {
         try {
           pool._removeConnectedPeer(peer)
         } catch (err) {
