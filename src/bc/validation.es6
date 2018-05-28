@@ -6,16 +6,21 @@
  *
  * @flow
  */
+const { blake2bl } = require('../utils/crypto')
 const { BcBlock } = require('../protos/core_pb')
-const { getChildrenRootHash } = require('./miner')
+const {
+  getChildrenBlocksHashes,
+  getChildrenRootHash,
+  blockchainMapToList
+} = require('./miner')
 
 export default function isValidBlock (newBlock: BcBlock): bool {
-  return theBlockChainFingerPrintMatchGenesisBlock(newBlock) &&
-    numberOfBlockchainsNeededMatchesChildBlock(newBlock) &&
-    ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) &&
+  return theBlockChainFingerPrintMatchGenesisBlock(newBlock) && // TODO
+    numberOfBlockchainsNeededMatchesChildBlock(newBlock) && // TODO
+    ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) && // TODO
     isChainRootCorrectlyCalculated(newBlock) &&
-    isMerkleRootCorrectlyCalculated(newBlock) &&
-    isDistanceCorrectlyCalculated(newBlock)
+    isMerkleRootCorrectlyCalculated(newBlock) && // TODO
+    isDistanceCorrectlyCalculated(newBlock) // TODO
 }
 
 function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock) {
@@ -31,8 +36,10 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock) {
 }
 
 function isChainRootCorrectlyCalculated (newBlock: BcBlock) {
-  const newBlock.getChainRoot()
-  return true
+  const receivedChainRoot = newBlock.getChainRoot()
+  const expectedBlockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
+  const expectedChainRoot = blake2bl(getChildrenRootHash(expectedBlockHashes).toString())
+  return receivedChainRoot === expectedChainRoot
 }
 
 function isMerkleRootCorrectlyCalculated (newBlock: BcBlock) {

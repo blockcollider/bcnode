@@ -316,6 +316,16 @@ const blockHash: (BlockchainHeader|Block => string) = compose(
 
 export const getChildrenBlocksHashes: ((BlockchainHeader[]|Block[]) => string[]) = map(blockHash)
 
+// TODO should maintain sort (btc -> eth -> lsk -> neo -> wav)
+export const blockchainMapToList = (headersMap: BlockchainHeaders): BlockchainHeader[] => {
+  return Object.keys(headersMap.toObject()).map(listName => {
+    const getMethodName = `get${listName[0].toUpperCase()}${listName.slice(1)}`
+    return headersMap[getMethodName]()
+  }).reduce((acc, curr) => {
+    return acc.concat(curr)
+  }, [])
+}
+
 export const getChildrenRootHash = reduce((all: BN, blockHash: string) => {
   return all.xor(new BN(toHexBuffer(blockHash)))
 }, new BN(0))
@@ -458,7 +468,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
     blockWhichTriggeredMining,
     shouldAppend
   )
-  const blockHashes = getChildrenBlocksHashes(childBlockHeaders)
+  const blockHashes = getChildrenBlocksHashes(blockchainMapToList(childBlockHeaders))
   const newChainRoot = getChildrenRootHash(blockHashes)
   const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeaders(), childBlockHeaders)
 
