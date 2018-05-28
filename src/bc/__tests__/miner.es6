@@ -18,7 +18,7 @@ const TEST_MINER_KEY = GENESIS_MINER_KEY // crypto.randomBytes(32)
 
 const TEST_DATA = require('../data').BLOCKS_MAP
 
-describe('Miner', () => {
+describe.skip('Miner', () => {
   test('mine()', () => {
     const genesisBlock = getGenesisBlock()
     const genesisHeaders = genesisBlock.getChildBlockHeaders()

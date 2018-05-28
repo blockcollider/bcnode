@@ -25,6 +25,7 @@ const BN = require('bn.js')
 const {
   call,
   compose,
+  concat,
   difference,
   flatten,
   flip,
@@ -44,8 +45,11 @@ const {
 const { blake2bl } = require('../utils/crypto')
 const { Block, BcBlock, BcTransaction, ChildBlockHeader, ChildBlockHeaders } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
+const GENESIS_DATA = require('./genesis.raw')
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
+
+const concatAll = reduce(concat, [])
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -481,44 +485,40 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
     }
   }
 
+  const newHeight = lastPreviousBlock.getHeight() + 1
   const oldTransactions = lastPreviousBlock.getTxsList()
-  const newMerkleRoot = createMerkleRoot(
-    blockHashes.concat(oldTransactions.concat([minerAddress, 1]))
-  ) // blockchains, transactions, miner address, height
+  // blockchains, transactions, miner address, height
+  const newMerkleRoot = createMerkleRoot(concatAll([blockHashes, oldTransactions, [minerAddress, newHeight, GENESIS_DATA.version, GENESIS_DATA.nrgGrant]]))
 
+  // nonce, distance, timestamp and difficulty are set to proper values after successful mining of this block
   const newBlock = new BcBlock()
   newBlock.setHash(blake2bl(lastPreviousBlock.getHash() + newMerkleRoot))
   newBlock.setPreviousHash(lastPreviousBlock.getHash())
   newBlock.setVersion(1)
   newBlock.setSchemaVersion(1)
-  newBlock.setHeight(lastPreviousBlock.getHeight() + 1)
+  newBlock.setHeight(newHeight)
   newBlock.setMiner(minerAddress)
   newBlock.setDifficulty(finalDifficulty)
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
-  newBlock.setDistance(0)
-  ////
-  newBlock.setNrgGrant()
-  newBlock.setTargetHash()
-  newBlock.setTargetHash()
-  newBlock.setTargetHeight()
-  newBlock.setTargetMiner()
-  newBlock.setTargetSignature()
-  newBlock.setTwn()
-  newBlock.setTwsList()
-  newBlock.setEmblemWeight()
-  newBlock.setEmblemChainBlockHash()
-  newBlock.setEmblemChainFingerprintRoot()
-  newBlock.setEmblemChainAddress()
-  //// end
+  newBlock.setDistance(0) // is set to proper value after successful mining
+  newBlock.setNrgGrant(GENESIS_DATA.nrgGrant)
+  newBlock.setTargetHash(GENESIS_DATA.targetHash)
+  newBlock.setTargetHeight(GENESIS_DATA.targetHeight)
+  newBlock.setTargetMiner(GENESIS_DATA.targetMiner)
+  newBlock.setTargetSignature(GENESIS_DATA.targetSignature)
+  newBlock.setTwn(GENESIS_DATA.twn)
+  newBlock.setTwsList(GENESIS_DATA.twsList)
+  newBlock.setEmblemWeight(GENESIS_DATA.emblemWeight)
+  newBlock.setEmblemChainBlockHash(GENESIS_DATA.emblemChainBlockHash)
+  newBlock.setEmblemChainFingerprintRoot(GENESIS_DATA.emblemChainFingerprintRoot)
+  newBlock.setEmblemChainAddress(GENESIS_DATA.emblemChainAddress)
   newBlock.setTxCount(0)
   newBlock.setTxsList(newTransactions)
   newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
-  ////
-  newBlock.setBlockchainFingerprintsRoot()
-  newBlock.setTxFeeBase()
-  newBlock.setTxDistanceSumLimit()
-  //// end
+  newBlock.setBlockchainFingerprintsRoot(GENESIS_DATA.blockchainFingerprintsRoot)
+  newBlock.setTxFeeBase(GENESIS_DATA.txFeeBase)
+  newBlock.setTxDistanceSumLimit(GENESIS_DATA.txDistanceSumLimit)
   newBlock.setChildBlockHeaders(childBlockHeaders)
 
   return [newBlock, finalTimestamp]
