@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [Rover] - Kill all child rovers at ctrl+c
 - [Global] - Added env variables BC_LOG, BC_DEBUG
 - [CLI] - New option --miner-key
+- [CLI] - --miner-key option validates formatted address 
 - [UI] - Serve documentation - /doc
 - [CI] - Automatically build docker images
 - [Docker] - Mountable volumes - _data, config, logs
