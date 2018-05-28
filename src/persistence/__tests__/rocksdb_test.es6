@@ -18,8 +18,31 @@ describe('RocksDb', () => {
     expect(new RocksDb()).toBeInstanceOf(RocksDb)
   })
 
+  test('get (batch)', done => {
+    const dataDir = `${TEST_DATA_DIR}_get`
+    const db = new RocksDb(dataDir)
+
+    const nums = [...Array(100)].map((v, i) => i)
+    db.open()
+      .then(() => {
+        const promises = nums.map((num) => db.put(num, num))
+        return Promise.all(promises)
+      })
+      .then(() => {
+        const promises = nums.map((num) => db.get(num))
+        return Promise.all(promises)
+      })
+      .then((res) => {
+        nums.forEach((val, index) => {
+          expect(val).toEqual(res[index])
+        })
+        done()
+      })
+  })
+
   test('put', done => {
-    const db = new RocksDb(TEST_DATA_DIR)
+    const dataDir = `${TEST_DATA_DIR}_put`
+    const db = new RocksDb(dataDir)
 
     const key = 'msg'
     const value = 'hello'
@@ -44,7 +67,7 @@ describe('RocksDb', () => {
   })
 
   afterAll(done => {
-    rimraf(TEST_DATA_DIR, () => {
+    rimraf(`${TEST_DATA_DIR}*`, () => {
       done()
     })
   })

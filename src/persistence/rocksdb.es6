@@ -16,8 +16,8 @@ const { getLogger } = require('../logger')
  * Unified persistence interface
  */
 export default class PersistenceRocksDb {
-  _db: RocksDb; // eslint-disable-line no-undef
-  _isOpen: boolean; // eslint-disable-line no-undef
+  _db: RocksDb // eslint-disable-line no-undef
+  _isOpen: boolean // eslint-disable-line no-undef
   _logger: Logger
 
   constructor (location: string = '_data') {
@@ -40,7 +40,7 @@ export default class PersistenceRocksDb {
    */
   open (opts: Object = {}): Promise<*> {
     return new Promise((resolve, reject) => {
-      this.db.open(opts, (err) => {
+      this.db.open(opts, err => {
         if (err) {
           this._isOpen = false
           return reject(err)
@@ -57,7 +57,7 @@ export default class PersistenceRocksDb {
    */
   close (): Promise<*> {
     return new Promise((resolve, reject) => {
-      this.db.close((err) => {
+      this.db.close(err => {
         if (err) {
           return reject(err)
         }
@@ -82,7 +82,7 @@ export default class PersistenceRocksDb {
       throw e
     }
     return new Promise((resolve, reject) => {
-      this.db.put(key, serialized, opts, (err) => {
+      this.db.put(key, serialized, opts, err => {
         if (err) {
           return reject(err)
         }
@@ -120,12 +120,73 @@ export default class PersistenceRocksDb {
    */
   del (key: string, opts: Object = {}): Promise<*> {
     return new Promise((resolve, reject) => {
-      this.db.del(key, opts, (err) => {
+      this.db.del(key, opts, err => {
         if (err) {
           return reject(err)
         }
 
         resolve(true)
+      })
+    })
+  }
+
+  /**
+   * Scan blocks to return balance of miner address
+   * @param address
+   * @param startBlock
+   * @param endBlock
+   */
+  async scanBlockGrants (address: string, startBlock: number, endBlock: number): Object {
+    const self = this
+    const accountBalances = {
+      confirmed: 0,
+      unconfirmed: 0
+    }
+    for (let i = (startBlock - 1); i < endBlock; i++) {
+      try {
+        const block = await self.get('bc.block.' + i)
+        if (block.nrgGrant !== 1600000000) block.nrgGrant = 1600000000 // Force BT Reward
+        if (endBlock - i > 99 && block.nrgGrant !== undefined) {
+          accountBalances.confirmed += block.nrgGrant
+        } else if (endBlock - i < 99 && block.nrgGrant !== undefined) {
+          accountBalances.unconfirmed += block.nrgGrant
+        }
+      } catch (err) {
+        return new Error('block scan error')
+      }
+    }
+    return accountBalances
+  }
+
+  /**
+   * Get Balance of Address (Before Target)
+   * @param address
+   * @param opts
+   */
+  getBtAddressBalance (address: string, opts: Object = { asBuffer: true }): Promise<Object> {
+    const self = this
+    return new Promise((resolve, reject) => {
+      if (address === undefined) {
+        return reject(new Error(`no address provided`))
+      }
+      if (/^(0x){1}[0-9a-fA-F]{40}$/i.test(address) === false) {
+        return reject(new Error(`malformed address`))
+      }
+      this.db.get('bc.block.latest', opts, (err, value) => {
+        if (err) {
+          return reject(new Error(`${err.message} - bc.block.latest`))
+        }
+        try {
+          const latestBlock = deserialize(value)
+          if (latestBlock !== undefined && latestBlock.height !== undefined) {
+            const endBlock = latestBlock.height
+            return await self.scanBlockGrants(address, 1, Number(endBlock))
+          } else {
+            return reject(new Error(`No blocks stored on disk`))
+          }
+        } catch (e) {
+          return reject(new Error(`Could not deserialize value`))
+        }
       })
     })
   }
