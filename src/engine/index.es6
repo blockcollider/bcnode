@@ -346,8 +346,9 @@ export default class Engine {
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
-      throw new Error(`There is not unfinished block to use solution for`)
+      this._logger.warn('There is not unfinished block to use solution for')
     }
+    // $FlowFixMe
     this._unfinishedBlock.setNonce(solution.nonce)
     // $FlowFixMe
     this._unfinishedBlock.setDistance(solution.distance)
@@ -367,8 +368,10 @@ export default class Engine {
     this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
     this._unfinishedBlock = undefined
     this._unfinishedBlockData = undefined
-    // $FlowFixMe - Flow can't properly find worker pid
-    this._workerProcess.kill('SIGKILL')
+    // $FlowFixMe - Flow can't properly type subprocess
+    this._workerProcess.kill()
+    // $FlowFixMe - Flow can't properly type subprocess
+    this._workerProcess.disconnect()
     this._workerProcess = undefined
   }
 
