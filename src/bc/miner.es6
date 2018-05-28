@@ -486,9 +486,8 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   }
 
   const newHeight = lastPreviousBlock.getHeight() + 1
-  const oldTransactions = lastPreviousBlock.getTxsList()
   // blockchains, transactions, miner address, height
-  const newMerkleRoot = createMerkleRoot(concatAll([blockHashes, oldTransactions, [minerAddress, newHeight, GENESIS_DATA.version, GENESIS_DATA.nrgGrant]]))
+  const newMerkleRoot = createMerkleRoot(concatAll([blockHashes, newTransactions, [minerAddress, newHeight, GENESIS_DATA.version, GENESIS_DATA.schemaVersion, GENESIS_DATA.nrgGrant]]))
 
   // nonce, distance, timestamp and difficulty are set to proper values after successful mining of this block
   const newBlock = new BcBlock()
