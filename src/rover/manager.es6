@@ -19,8 +19,6 @@ const ROVER_RESTART_TIMEOUT = 5000
  * Rover lookup table
  *
  * Gets the rover path by name of it
- *
- * @type {{btc: *, eth: *, lsk: *}}
  */
 export const rovers = {
   btc: path.resolve(__dirname, 'btc', 'rover.js'),
