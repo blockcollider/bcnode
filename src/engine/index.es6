@@ -283,7 +283,7 @@ export default class Engine {
         this._minerKey,
         this._unfinishedBlock
       )
-      const work = prepareWork(lastPreviousBlock, newBlock.getBlockchainHeaders())
+      const work = prepareWork(lastPreviousBlock.getHash(), newBlock.getBlockchainHeaders())
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
       this._unfinishedBlockData = {

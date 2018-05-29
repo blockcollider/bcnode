@@ -305,7 +305,7 @@ const merkleRoot: ((BlockchainHeader|Block) => string) = invoker(0, 'getMerkleRo
  * @param {BlockchainHeader|Block} block to hash
  * @return {string} hash of the block
  */
-export const blockHash: (BlockchainHeader|Block => string) = compose(
+const blockHash: (BlockchainHeader|Block => string) = compose(
   blake2bl,
   join(''),
   zipWith(call, [hash, merkleRoot]),
@@ -361,12 +361,12 @@ export function getNewPreExpDifficulty (
  * @param {Block[]} childrenCurrentBlocks Last know rovered blocks from each chain (one of them is the one which triggered mining)
  * @return {string} a hash representing the work
  */
-export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: BlockchainHeaders): string {
+export function prepareWork (previousBlockHash: string, childrenCurrentBlocks: BlockchainHeaders): string {
   const newChainRoot = getChildrenRootHash(getChildrenBlocksHashes(blockchainMapToList(childrenCurrentBlocks)))
   const work = blake2bl(
     newChainRoot.xor(
       new BN(
-        toHexBuffer(blockHash(previousBlock))
+        toHexBuffer(previousBlockHash)
       )
     ).toString()
   )
