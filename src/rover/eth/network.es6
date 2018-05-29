@@ -156,7 +156,7 @@ export default class Network extends EventEmitter {
     }
 
     this._txCache.set(txHashHex, true)
-    this._logger.debug(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
+    // this._logger.debug(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
   }
 
   onNewBlock (block: EthereumBlock, peer: Object) {
@@ -176,7 +176,7 @@ export default class Network extends EventEmitter {
   }
 
   handleMessage (rlpx: Object, code: string, payload: Buffer, peer: Object) {
-    this._logger.debug(`new message, code: ${code}`)
+    // this._logger.debug(`new message, code: ${code}`)
     // console.log('message.payload', payload)
     // console.log(`new message (${addr}) ${code} ${rlp.encode(payload).toString('hex')}`)
 
