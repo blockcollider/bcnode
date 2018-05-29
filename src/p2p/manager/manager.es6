@@ -148,7 +148,6 @@ export class PeerManager {
         this._quorumSyncing = true
         this._lastQuorumSync = new Date()
 
-        // TODO: Notify miner to stop mining
         this.peerNode.triggerBlockSync()
       }
 

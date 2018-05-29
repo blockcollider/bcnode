@@ -35,6 +35,11 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           const raw = new Uint8Array(bytes)
           const block = BcBlock.deserializeBinary(raw)
           manager.engine.blockFromPeer(block)
+          if (manager.isQuorumSynced()) {
+            manager._lastQuorumSync = new Date()
+            manager._quorumSyncing = true
+            manager.peerNode.triggerBlockSync()
+          }
         } catch (e) {
           debug(`Error decoding block from peer, reason: ${e.message}`)
         }

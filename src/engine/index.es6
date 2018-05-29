@@ -64,6 +64,7 @@ export default class Engine {
   _unfinishedBlock: ?BcBlock
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
+  _peerIsSyncing: bool
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -88,6 +89,7 @@ export default class Engine {
     this._knownBlocksCache = LRUCache({
       max: 1024
     })
+    this._peerIsSyncing = false
 
     // Start NTP sync
     ts.start()
@@ -244,7 +246,7 @@ export default class Engine {
     }
 
     // start mining only if all known chains are being rovered
-    if (this._canMine && equals(new Set(this._knownRovers), new Set(rovers))) {
+    if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       let currentBlocks
       let lastPreviousBlock
 
@@ -340,6 +342,10 @@ export default class Engine {
         this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
         return Promise.resolve(false)
       }
+      if (this._peerIsSyncing) {
+        this._logger.info(`Not mining because the peer is syncing}`)
+        return Promise.resolve(false)
+      }
       this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
       return Promise.resolve(false)
     }
@@ -366,6 +372,10 @@ export default class Engine {
     } else {
       debug(`Received block is already in cache of known blocks - ${blockObj.hash}`)
     }
+  }
+
+  receiveSyncPeriod (peerIsSyncing: bool) {
+    this._peerIsSyncing = peerIsSyncing
   }
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
