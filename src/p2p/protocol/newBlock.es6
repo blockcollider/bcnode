@@ -51,8 +51,7 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           if (manager.engine.peerIsSyncing === true) {
             manager._lastQuorumSync = new Date()
             manager._quorumSyncing = true
-            manager.peerNode._blockPool.purge('bc.blockpool.')
-            manager.peerNode._blockPool.purge('bc.block.')
+
             if (manager.peerNode._blockPool._syncEnabled === true) {
               manager.peerNode._blockPool.addBlock(block)
             }
