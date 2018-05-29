@@ -77,9 +77,9 @@ const handlers = {
   },
 
   getMetaverse: (manager: PeerManager) => {
-    // if (false && manager.isQuorumSyncing()) {
-    //   return Promise.resolve([])
-    // }
+    if (false && manager.isQuorumSyncing()) {
+      return Promise.resolve([])
+    }
 
     return manager.engine.persistence.get('bc.block.latest')
       .then((block) => {

@@ -10,7 +10,7 @@
 import type BcBlock from '../protos/core_pb'
 
 const BLOCK_POOL_REFERENCE = 'bc.blockpool.'
-const GENESIS_DATA = require('./genesisBlock.raw')
+const GENESIS_DATA = require('./genesis.raw')
 
 export class BlockPool {
   _persistence: any
@@ -21,8 +21,8 @@ export class BlockPool {
     this._syncEnabled = true
   }
 
-  async getLatest (): BcBlock {
-    const latestHash = await this._persistence.get(BLOCK_POOL_REFERENCE + 'latest')
+  async getLatest (key: string): BcBlock {
+    const latestHash = await this._persistence.get(key + 'latest')
     const latest = await this._persistence.get(latestHash)
     return latest
   }
@@ -52,7 +52,7 @@ export class BlockPool {
         .then((res) => {
           this._persistence.get(res)
             .then((possibleBlock) => {
-              const latest = this.getLatest()
+              const latest = this.getLatest(BLOCK_POOL_REFERENCE)
               if (latest.getHeight() < possibleBlock.getHeight()) {
                 return this.putLatest(block)
               }
@@ -68,7 +68,7 @@ export class BlockPool {
             })
         })
         .catch((_) => {
-          const latest = this.getLatest()
+          const latest = this.getLatest(BLOCK_COOLPREFERENCE)
           const tasks = [
             this._persistence.put(BLOCK_POOL_REFERENCE + height, block),
             this._persistence.put(hash, BLOCK_POOL_REFERENCE + height)
@@ -95,21 +95,14 @@ export class BlockPool {
     }
   }
 
-  purge () {
-    const latest = this.getLatest()
+  purge (ref: string) {
+    const latest = this.getLatest(BLOCK_POOL_REFERENCE)
     this._syncEnabled = true
-    return this.disableSync(latest.getHeight())
+    return Promise.all([
+      this.disableSync(latest.getHeight())
+    ])
   }
 
-  // print () {
-  //   for (let i = 0; i < this.maxDepth; i++) {
-  //     console.log(`DEPTH: ${i}, HEIGHT: ${this.minHeight + i}`)
-  //     const blocks = this.blocks.get(i) || []
-  //     for (let j = 0; j < blocks.length; j++) {
-  //       console.log(j, blocks[j].toObject())
-  //     }
-  //   }
-  // }
 }
 
 export default BlockPool
