@@ -12,7 +12,6 @@ import type { Bundle } from './../bundle'
 
 const debug = require('debug')('bcnode:peer:peer')
 const pull = require('pull-stream')
-const { type } = require('ramda')
 const { BcBlock } = require('../../protos/core_pb')
 
 const { PROTOCOL_PREFIX } = require('../protocol/version')
