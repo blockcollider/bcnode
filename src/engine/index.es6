@@ -388,6 +388,7 @@ export default class Engine {
 
     if (!isValidBlock(this._unfinishedBlock)) {
       this._logger.warn(`The mined block is not valid`)
+      return
     }
 
     this._processMinedBlock(this._unfinishedBlock, solution)
