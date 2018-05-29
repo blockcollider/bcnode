@@ -9,13 +9,18 @@
 
 import type BcBlock from '../protos/core_pb'
 
-const { flatten } = require('ramda')
-
 const BLOCK_POOL_REFERENCE = 'bc.blockpool.'
-const BC_BLOCK_REFERENCE = 'bc.block.'
 
 export class BlockPool {
-  async getLatest () {
+  _persistence: any
+  _syncEnabled: bool
+
+  constructor (persistence: any) {
+    this._persistence = persistence
+    this._syncEnabled = true
+  }
+
+  async getLatest (): BcBlock {
     const latestHash = await this._persistence.get(BLOCK_POOL_REFERENCE + 'latest')
     const latest = await this._persistence.get(latestHash)
     return latest
@@ -25,10 +30,10 @@ export class BlockPool {
     return await this._persistence.put(BLOCK_POOL_REFERENCE + 'latest', data)
   }
 
-  async disableSync (itr) {
+  async disableSync (itr: number) {
     this._syncEnabled = false
     try {
-      await this.del(BLOCK_POOL_REFERENCE + itr)
+      await this._persistence.del(BLOCK_POOL_REFERENCE + itr)
       if (itr > 0) {
         return this.disableSync(itr--)
       }
@@ -52,16 +57,16 @@ export class BlockPool {
               }
               return this._persistence.put('bc.block.' + height, possibleBlock)
             })
-            .catch((err) => {
+            .catch((_) => {
               return Promise.all([
                 this._persistence.del(BLOCK_POOL_REFERENCE + height),
                 this._persistence.del(hash)])
                 .catch((err) => {
-                  return throw Error(err)
+                  throw Error(err)
                 })
             })
         })
-        .catch((err) => {
+        .catch((_) => {
           const latest = this.getLatest()
           const tasks = [
             this._persistence.put(BLOCK_POOL_REFERENCE + height, block),
@@ -70,18 +75,18 @@ export class BlockPool {
           if (latest.getHeight() < block.getHeight()) {
             tasks.push(this.putLatest(block))
           }
-          return Promises.all(tasks)
+          return Promise.all(tasks)
             .then(() => {
               return this._persistence.get('bc.block.' + height)
                 .then((has) => {
                   return has
                 })
                 .catch((err) => {
-                  return new Error(err)
+                  throw new Error(err)
                 })
             })
             .catch((err) => {
-              return throw (err)
+              throw new Error(err)
             })
         })
     } else {
@@ -92,7 +97,7 @@ export class BlockPool {
   purge () {
     const latest = this.getLatest()
     this._syncEnabled = true
-    return this.disableSync(latest.height)
+    return this.disableSync(latest.getHeight())
   }
 
   // print () {
