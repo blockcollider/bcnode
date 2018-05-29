@@ -10,6 +10,7 @@
 import type BcBlock from '../protos/core_pb'
 
 const BLOCK_POOL_REFERENCE = 'bc.blockpool.'
+const GENESIS_DATA = require('./genesisBlock.raw')
 
 export class BlockPool {
   _persistence: any
@@ -34,7 +35,7 @@ export class BlockPool {
     this._syncEnabled = false
     try {
       await this._persistence.del(BLOCK_POOL_REFERENCE + itr)
-      if (itr > 0) {
+      if (itr > GENESIS_DATA.height) {
         return this.disableSync(itr--)
       }
     } catch (err) {
