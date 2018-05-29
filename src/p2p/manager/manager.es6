@@ -38,7 +38,6 @@ export class PeerManager {
     debug('constructor()')
     this._logger = logging.getLogger(__filename)
     this._peerNode = node
-
     this._peerBook = new ManagedPeerBook(this, 'main')
     this._peerBookConnected = new ManagedPeerBook(this, 'connected')
     this._peerBookDiscovered = new ManagedPeerBook(this, 'discovered')
