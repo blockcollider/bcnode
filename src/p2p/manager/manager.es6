@@ -26,6 +26,8 @@ const BC_P2P_PASSIVE = !!process.env.BC_P2P_PASSIVE
 
 export const DATETIME_STARTED_AT = Date.now()
 
+const PEER_QUORUM_SIZE = 1
+
 export class PeerManager {
   _logger: Object // eslint-disable-line no-undef
   _statsInterval: IntervalID // eslint-disable-line no-undef
@@ -33,6 +35,8 @@ export class PeerManager {
   _peerBookConnected: ManagedPeerBook // eslint-disable-line no-undef
   _peerBookDiscovered: ManagedPeerBook // eslint-disable-line no-undef
   _peerNode: PeerNode // eslint-disable-line no-undef
+  _lastQuorumSync: ?Date
+  _quorumSyncing: boolean
 
   constructor (node: PeerNode) {
     debug('constructor()')
@@ -41,6 +45,8 @@ export class PeerManager {
     this._peerBook = new ManagedPeerBook(this, 'main')
     this._peerBookConnected = new ManagedPeerBook(this, 'connected')
     this._peerBookDiscovered = new ManagedPeerBook(this, 'discovered')
+    this._lastQuorumSync = null
+    this._quorumSyncing = false
 
     this._statsInterval = setInterval(() => {
       const stats = this.peerNode.bundle && this.peerNode.bundle.stats
@@ -96,6 +102,14 @@ export class PeerManager {
     return new Peer(this.bundle, peerId)
   }
 
+  isQuorumSynced (): boolean {
+    return this._quorumSyncing === false && this._lastQuorumSync !== null
+  }
+
+  isQuorumSyncing (): boolean {
+    return this._quorumSyncing
+  }
+
   onPeerDiscovery (peer: PeerInfo) {
     const peerId = peer.id.toB58String()
     debug('Event - peer:discovery', peerId)
@@ -131,6 +145,15 @@ export class PeerManager {
     if (!this.peerBookConnected.has(peer)) {
       this.peerBookConnected.put(peer)
       debug(`Connected new peer '${peerId}', adding to connectedPeerBook, count: ${this.peerBookConnected.getPeersCount()}`)
+
+      if (!this._lastQuorumSync && this.peerBookConnected.getPeersCount() >= PEER_QUORUM_SIZE) {
+        this._quorumSyncing = true
+        this._lastQuorumSync = new Date()
+
+        // TODO: Notify miner to stop mining
+        this.peerNode.triggerBlockSync()
+      }
+
     } else {
       debug(`Peer '${peerId}', already in connectedPeerBook`)
       return

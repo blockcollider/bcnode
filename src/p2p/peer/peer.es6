@@ -142,6 +142,43 @@ export class Peer {
       })
     })
   }
+
+  getMetaverse (): Promise<*> {
+    debug(`getMetaverse()`, this.peerId.id.toB58String())
+
+    return new Promise((resolve, reject) => {
+      this.bundle.dialProtocol(this.peerId, `${PROTOCOL_PREFIX}/rpc`, (err, conn) => {
+        if (err) {
+          return reject(err)
+        }
+
+        const msg = {
+          jsonrpc: '2.0',
+          method: 'getMetaverse',
+          params: [],
+          id: 42
+        }
+
+        pull(pull.values([JSON.stringify(msg)]), conn)
+
+        pull(
+          conn,
+          pull.collect((err, wireData) => {
+            if (err) {
+              return reject(err)
+            }
+
+            try {
+              const msg = JSON.parse(wireData)
+              resolve(msg)
+            } catch (e) {
+              return reject(e)
+            }
+          })
+        )
+      })
+    })
+  }
 }
 
 export default Peer

@@ -74,6 +74,29 @@ const handlers = {
         return manager.engine.persistence.get(ids)
           .then((res) => res.map((block) => block.toObject()))
       })
+  },
+
+  getMetaverse: (manager: PeerManager) => {
+    // if (false && manager.isQuorumSyncing()) {
+    //   return Promise.resolve([])
+    // }
+
+    return manager.engine.persistence.get('bc.block.latest')
+      .then((block) => {
+        if (!block) {
+          return Promise.resolve([])
+        }
+
+        const height = block.getHeight()
+        const blocksCount = Math.min(7, height)
+        const ids = []
+        for (let i = 0; i < blocksCount; i++) {
+          ids.push(`bc.block.${height - i}`)
+        }
+
+        return manager.engine.persistence.get(ids)
+          .then((res) => res.map((block) => block.toObject()))
+      })
   }
 }
 

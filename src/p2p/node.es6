@@ -12,6 +12,7 @@ const { inspect } = require('util')
 const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
+const { uniqBy, sum } = require('ramda')
 
 const debug = require('debug')('bcnode:p2p:node')
 const config = require('../../config/config')
@@ -175,6 +176,69 @@ export class PeerNode {
 
         pull(pull.values([block.serializeBinary()]), conn)
       })
+    })
+  }
+
+  triggerBlockSync () {
+    const peerMetaverses = []
+
+    this.peerBook.getAllArray().map(peer => {
+      this.manager.createPeer(peer)
+        .getMetaverse()
+        .then((metaverse) => {
+          debug('Got metaverse from peer', peer.id.toB58String(), metaverse)
+          peerMetaverses.push(metaverse)
+
+          if (peerMetaverses.length >= 12) {
+            const candidates = peerMetaverses.map((peerMetaverse) => {
+              if (true /* hereWillBeAdamsCheck() */ && peerMetaverse.length > 0) {
+                // TODO: Here we also use Tomas' helper +/- 6 seconds
+                return peerMetaverse
+              } else {
+                return null
+              }
+            }).filter((item) => {
+              return item !== null
+            }) || []
+
+            if (candidates.length >= 12) {
+              const uniqueCandidates = uniqBy((candidate) => candidate[0].hash, candidates)
+              if (uniqueCandidates.length === 1) {
+                // TODO: Commit as active metaverse and begin full sync from known peers
+              } else {
+                const peerMetaverseByDifficultySum = uniqueCandidates
+                  // accumulator, element
+                  .reduce((all, peerBlocks) => {
+                    const difficultySum = sum(peerBlocks.map((peerBlock) => peerBlock.difficulty))
+
+                    peerBlocks[0].difficultySum = difficultySum
+                    all.push(peerBlocks[0])
+                    return all
+                  }, [])
+                  .sort((a, b) => {
+                    if (a.difficultySum > b.difficultySum) {
+                      return 1
+                    } else if (a.difficultySum < b.difficultySum) {
+                      return -1
+                    }
+
+                    return 0
+                  })
+
+                const winner = peerMetaverseByDifficultySum[0]
+                const syncCandidates = candidates.filter((candidate) => {
+                  if (winner.hash === candidate[0].hash) {
+                    return true
+                  }
+
+                  return false
+                })
+              }
+            } else {
+              // TODO: Wait for block
+            }
+          }
+        })
     })
   }
 }
