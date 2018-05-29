@@ -9,19 +9,18 @@
 
 import type BcBlock from '../protos/core_pb'
 
-const CircularBuffer = require('circular-buffer')
 const { flatten } = require('ramda')
 
 const COMMIT_METAVERSE_DEPTH = 7
 
 export class Metaverse {
-  _blocks: object
+  _blocks: Object
   _commitDepth: number
-  _writeQueue: array
+  _writeQueue: Array
   _height: number
 
   constructor (commitDepth: number = COMMIT_METAVERSE_DEPTH, persistence: any) {
-    this._blocks = {}  
+    this._blocks = {}
     this._writeQueue = []
     this._persistence = persistence
     this._commitDepth = commitDepth
@@ -29,74 +28,74 @@ export class Metaverse {
     // TODO: I want this to load from current persistence
   }
 
-  get blocks (): object {
+  get blocks (): Object {
     return this._blocks
   }
 
   get blocksCount (): number {
-    const blocks = Object.keys(this._blocks) 
+    const blocks = Object.keys(this._blocks)
     return blocks.length
   }
 
   addBlock (block: BcBlock, force: boolean = false): boolean {
     const height = block.getHeight()
-    const childHeight = height + 1 
-    const parentHeight = height - 1 
+    const childHeight = height + 1
+    const parentHeight = height - 1
     let hasParent = false
     let hasChild = false
     let inMetaverseLayer = false
     let added = false
-    if(height == 1) {
+    if (height === 1) {
       return false
-      // this is the genesis block 
+      // this is the genesis block
     }
-    if(this._blocks[parentHeight] !== undefined) {
-       hasParent = this._blocks[parentHeight].reduce((all, item) => {
-          if (item.getHash() === block.getPreviousHash()) {
-            all = true
-          }
-          return all    
-       }, false)
+    if (this._blocks[parentHeight] !== undefined) {
+      hasParent = this._blocks[parentHeight].reduce((all, item) => {
+        if (item.getHash() === block.getPreviousHash()) {
+          all = true
+        }
+        return all
+      }, false)
     }
-    if(this._blocks[childHeight] !== undefined) {
-       hasChild = this._blocks[parentHeight].reduce((all, item) => {
-          if (item.previousHash() === block.getHash()) {
-            all = true
-          }
-          return all 
-       }, false)
+    if (this._blocks[childHeight] !== undefined) {
+      hasChild = this._blocks[parentHeight].reduce((all, item) => {
+        if (item.previousHash() === block.getHash()) {
+          all = true
+        }
+        return all
+      }, false)
     }
-    if(this._blocks[height] !== undefined) {
-       inMetaverseLayer = this._blocks[parentHeight].reduce((all, item) => {
-          if (item.previousHash() === block.getHash()) {
-            all = true
-          }
-          return all 
-       }, false)
+    if (this._blocks[height] !== undefined) {
+      inMetaverseLayer = this._blocks[parentHeight].reduce((all, item) => {
+        if (item.previousHash() === block.getHash()) {
+          all = true
+        }
+        return all
+      }, false)
     }
-    if (hashParent || hasChild) {
-       if(inMetaverseLayer === false) {
-         if(this._blocks[height] === undefined) {
-           this._blocks[height] = []  
-         }
-         this._blocks[height].push(block)
-         if (this._blocks[height].length > 1) {
-           this._blocks[height] = this._blocks[height].sort((a, b) {
-              if(a.difficulty > b.difficulty) return 1
-              if(a.difficulty < b.difficulty) return -1
-              return 0
-           })
-           added = true
-         }
-         if (this._blocks[height] !== undefined 
-            && this._blocks[height].length > 0 
-            && this._blocks[height][0].getHash() === block.getHash()) {
-            this._writeQueue.push(block) 
-            added = true
-         }
-       }
-    } else if(force === true) {
-       this._writeQueue.push(block) 
+    if (hasParent || hasChild) {
+      if (inMetaverseLayer === false) {
+        if (this._blocks[height] === undefined) {
+          this._blocks[height] = []
+        }
+        this._blocks[height].push(block)
+        if (this._blocks[height].length > 1) {
+          this._blocks[height] = this._blocks[height].sort((a, b) => {
+            if (a.difficulty > b.difficulty) return 1
+            if (a.difficulty < b.difficulty) return -1
+            return 0
+          })
+          added = true
+        }
+        if (this._blocks[height] !== undefined &&
+            this._blocks[height].length > 0 &&
+            this._blocks[height][0].getHash() === block.getHash()) {
+          this._writeQueue.push(block)
+          added = true
+        }
+      }
+    } else if (force === true) {
+      this._writeQueue.push(block)
     }
     return added
   }
@@ -104,22 +103,22 @@ export class Metaverse {
   getHighestBlock (): ?BcBlock {
     const keys = Object.keys(this.block)
     if (keys.length > 0) {
-        const last = keys.pop()
-        const block = this._blocks[last][0] 
-        return block
+      const last = keys.pop()
+      const block = this._blocks[last][0]
+      return block
     } else {
-      return null 
+      return null
     }
   }
 
   getLowestBlock (): ?BcBlock {
     const keys = Object.keys(this.block)
     if (keys.length > 0) {
-        const last = keys.shift()
-        const block = this._blocks[last][0] 
-        return block
+      const last = keys.shift()
+      const block = this._blocks[last][0]
+      return block
     } else {
-      return null 
+      return null
     }
   }
 
@@ -127,25 +126,15 @@ export class Metaverse {
     const highestBlock = this.getHighestBlock()
     if (highestBlock !== null) {
       if (this._addBlock(block, force) === true) {
-          const height = highestBlock.getHeight()
-          if(block.getHeight() >= height) {
-             return true
-          }
+        const height = highestBlock.getHeight()
+        if (block.getHeight() >= height) {
+          return true
+        }
       }
     } else {
       return true
     }
     return false
-  }
-
-  getBlockByHash (hash: string): ?BcBlock {
-    this.((block) => {
-      if (block.hash === hash) {
-        return block
-      }
-    })
-
-    return null
   }
 
   toArray (): Array<Array<BcBlock>> {
@@ -157,15 +146,15 @@ export class Metaverse {
     return flatten(blocks)
   }
 
-  evalMetaverse (): ?<Promise> { 
-     if(this._writeQueue.length > 0){
-        const tasks = []
-        for(let i = 0; i<this._writeQueue.length; i++){
-          tasks.push(this._persistence.set("bc.block." + this._writeQueue[i].getHeight(), this._writeQueue[i]))
-        }
-        this.writeQueue = []
-        return Promise.all(tasks)
-     } 
+  evalMetaverse (): Promise {
+    if (this._writeQueue.length > 0) {
+      const tasks = []
+      for (let i = 0; i < this._writeQueue.length; i++) {
+        tasks.push(this._persistence.set('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
+      }
+      this.writeQueue = []
+      return Promise.all(tasks)
+    }
   }
 
   // print () {

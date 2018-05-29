@@ -236,13 +236,6 @@ export class PeerNode {
                   })
 
                 const winner = peerMetaverseByDifficultySum[0]
-                const syncCandidates = candidates.filter((candidate) => {
-                  if (winner.getHash() === candidate[0].getHash()) {
-                    return true
-                  }
-
-                  return false
-                })
                 // TODO insert into the metaverse
                 // Report not syncing
                 // this.reportSyncPeriod(false)
