@@ -494,14 +494,11 @@ export default class Engine {
     this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
     debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
 
-    const tasks = [
-      this.persistence.put('bc.block.latest', newBlock),
-      this.persistence.put(`bc.block.${newBlock.getHeight()}`, newBlock)
-    ]
-
+    //  add to metaverse and call persist
+    this.node.metaverse.addBlock(newBlock)
     this._knownBlocksCache.set(newBlockObj.hash, newBlockObj)
 
-    return Promise.all(tasks)
+    return this.node.metaverse.persist()
       .then(() => {
         this._logger.debug('New BC block stored in DB')
 

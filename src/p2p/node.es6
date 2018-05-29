@@ -74,6 +74,10 @@ export class PeerNode {
     return this._engine.receiveSyncPeriod
   }
 
+  get metaverse (): Metaverse {
+    return this._metaverse
+  }
+
   _pipelineStartNode () {
     debug('_pipelineStartNode')
 
@@ -246,12 +250,12 @@ export class PeerNode {
                 //   }
                 //   return false
                 // })
-                const lowestBlock = this._metaverse.getLowestBlock()
+                const lowestBlock = this.metaverse.getLowestBlock()
                 if (lowestBlock && lowestBlock.getHash() !== winningMetaverse[0].getHash()) {
-                  this._metaverse.purge()
+                  this.metaverse.purge()
                   // insert into the metaverse
-                  winningMetaverse.map(block => this._metaverse.addBlock(block))
-                  this._metaverse.persist()
+                  winningMetaverse.map(block => this.metaverse.addBlock(block))
+                  this.metaverse.persist()
                   // Report not syncing
                   this.reportSyncPeriod(false)
                 }

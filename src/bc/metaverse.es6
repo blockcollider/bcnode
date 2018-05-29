@@ -152,14 +152,21 @@ export class Metaverse {
     return flatten(blocks)
   }
 
-  persist(): Promise<*> {
+  persist (): Promise<*> {
     if (this._writeQueue.length > 0) {
-      const tasks = []
-      for (let i = 0; i < this._writeQueue.length; i++) {
-        tasks.push(this._persistence.put('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
-      }
-      this._writeQueue = []
-      return Promise.all(tasks)
+      this._persistence.get('bc.block.latest').then(latestStoredBlock => {
+        const tasks = []
+        const highestBlock = this.getHighestBlock()
+        if (highestBlock && highestBlock.getHash() !== latestStoredBlock.getHash()) {
+          tasks.push(this._persistence.put('bc.block.latest', this.getHighestBlock()))
+        }
+
+        for (let i = 0; i < this._writeQueue.length; i++) {
+          tasks.push(this._persistence.put('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
+        }
+        this._writeQueue = []
+        return Promise.all(tasks)
+      })
     }
 
     return Promise.resolve()
