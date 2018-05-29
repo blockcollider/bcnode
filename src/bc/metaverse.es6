@@ -7,6 +7,8 @@
  * @flow
  */
 
+import type BcBlock from '../protos/core_pb'
+
 const CircularBuffer = require('circular-buffer')
 
 const MAX_METAVERSE_DEPTH = 7
@@ -14,10 +16,12 @@ const MAX_METAVERSE_DEPTH = 7
 export class Metaverse {
   _blocks: CircularBuffer
   _maxDepth: number
+  _height: number
 
   constructor (maxDepth: number = MAX_METAVERSE_DEPTH) {
     this._blocks = new CircularBuffer(maxDepth)
     this._maxDepth = maxDepth
+    this._height = 0
   }
 
   get blocks (): CircularBuffer {
@@ -28,7 +32,15 @@ export class Metaverse {
     return this._maxDepth
   }
 
-  getBlockByHash (hash: string): ?Object {
+  get maxHeight (): number {
+    return this._height + this.maxDepth - 1
+  }
+
+  get minHeight (): number {
+    return this._height
+  }
+
+  getBlockByHash (hash: string): ?BcBlock {
     this.toArray().forEach((block) => {
       if (block.hash === hash) {
         return block
@@ -38,7 +50,7 @@ export class Metaverse {
     return null
   }
 
-  toArray (): Array<*> {
+  toArray (): Array<BcBlock> {
     return this._blocks.toarray()
   }
 }
