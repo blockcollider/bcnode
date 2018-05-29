@@ -388,6 +388,8 @@ export default class Engine {
 
     if (!isValidBlock(this._unfinishedBlock)) {
       this._logger.warn(`The mined block is not valid`)
+      this._unfinishedBlock = undefined
+      this._unfinishedBlockData = undefined
       return
     }
 
