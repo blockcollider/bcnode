@@ -9,68 +9,132 @@
 
 import type BcBlock from '../protos/core_pb'
 
-const CircularBuffer = require('circular-buffer')
 const { flatten } = require('ramda')
 
-const MAX_METAVERSE_DEPTH = 7
+const COMMIT_METAVERSE_DEPTH = 7
 
 export class Metaverse {
-  _blocks: CircularBuffer
-  _maxDepth: number
+  _blocks: Object
+  _commitDepth: number
+  _writeQueue: Array
   _height: number
 
-  constructor (maxDepth: number = MAX_METAVERSE_DEPTH) {
-    this._blocks = new CircularBuffer(maxDepth)
-    this._maxDepth = maxDepth
+  constructor (commitDepth: number = COMMIT_METAVERSE_DEPTH, persistence: any) {
+    this._blocks = {}
+    this._writeQueue = []
+    this._persistence = persistence
+    this._commitDepth = commitDepth
     this._height = 0
-
-    for (let i = 0; i < this.maxDepth; i++) {
-      this.blocks.enq([])
-    }
+    // TODO: I want this to load from current persistence
   }
 
-  get blocks (): CircularBuffer {
+  get blocks (): Object {
     return this._blocks
   }
 
   get blocksCount (): number {
-    const blocks = this.toFlatArray()
+    const blocks = Object.keys(this._blocks)
     return blocks.length
   }
 
-  get maxDepth (): number {
-    return this._maxDepth
-  }
-
-  get maxHeight (): number {
-    return this._height + this.maxDepth - 1
-  }
-
-  get minHeight (): number {
-    return this._height
-  }
-
-  addBlock (block: BcBlock): boolean {
+  addBlock (block: BcBlock, force: boolean = false): boolean {
     const height = block.getHeight()
-    const depth = height - this.minHeight
-    if (depth <= this.maxHeight) {
-      const blocks = this.blocks.get(depth) || []
-      blocks.push(block)
-      this.blocks[depth] = blocks
+    const childHeight = height + 1
+    const parentHeight = height - 1
+    let hasParent = false
+    let hasChild = false
+    let inMetaverseLayer = false
+    let added = false
+    if (height === 1) {
+      return false
+      // this is the genesis block
+    }
+    if (this._blocks[parentHeight] !== undefined) {
+      hasParent = this._blocks[parentHeight].reduce((all, item) => {
+        if (item.getHash() === block.getPreviousHash()) {
+          all = true
+        }
+        return all
+      }, false)
+    }
+    if (this._blocks[childHeight] !== undefined) {
+      hasChild = this._blocks[parentHeight].reduce((all, item) => {
+        if (item.previousHash() === block.getHash()) {
+          all = true
+        }
+        return all
+      }, false)
+    }
+    if (this._blocks[height] !== undefined) {
+      inMetaverseLayer = this._blocks[parentHeight].reduce((all, item) => {
+        if (item.previousHash() === block.getHash()) {
+          all = true
+        }
+        return all
+      }, false)
+    }
+    if (hasParent || hasChild) {
+      if (inMetaverseLayer === false) {
+        if (this._blocks[height] === undefined) {
+          this._blocks[height] = []
+        }
+        this._blocks[height].push(block)
+        if (this._blocks[height].length > 1) {
+          this._blocks[height] = this._blocks[height].sort((a, b) => {
+            if (a.difficulty > b.difficulty) return 1
+            if (a.difficulty < b.difficulty) return -1
+            return 0
+          })
+          added = true
+        }
+        if (this._blocks[height] !== undefined &&
+            this._blocks[height].length > 0 &&
+            this._blocks[height][0].getHash() === block.getHash()) {
+          this._writeQueue.push(block)
+          added = true
+        }
+      }
+    } else if (force === true) {
+      this._writeQueue.push(block)
+    }
+    return added
+  }
+
+  getHighestBlock (): ?BcBlock {
+    const keys = Object.keys(this.block)
+    if (keys.length > 0) {
+      const last = keys.pop()
+      const block = this._blocks[last][0]
+      return block
+    } else {
+      return null
+    }
+  }
+
+  getLowestBlock (): ?BcBlock {
+    const keys = Object.keys(this.block)
+    if (keys.length > 0) {
+      const last = keys.shift()
+      const block = this._blocks[last][0]
+      return block
+    } else {
+      return null
+    }
+  }
+
+  shouldBroadcastBlock (block: BcBlock, force: boolean = false): boolean {
+    const highestBlock = this.getHighestBlock()
+    if (highestBlock !== null) {
+      if (this._addBlock(block, force) === true) {
+        const height = highestBlock.getHeight()
+        if (block.getHeight() >= height) {
+          return true
+        }
+      }
+    } else {
       return true
     }
-
     return false
-  }
-
-  getBlockByHash (hash: string): ?BcBlock {
-    this.toFlatArray().forEach((block) => {
-      if (block.hash === hash) {
-        return block
-      }
-    })
-
-    return null
   }
 
   toArray (): Array<Array<BcBlock>> {
@@ -80,6 +144,17 @@ export class Metaverse {
   toFlatArray (): Array<BcBlock> {
     const blocks = this.toArray()
     return flatten(blocks)
+  }
+
+  evalMetaverse (): Promise {
+    if (this._writeQueue.length > 0) {
+      const tasks = []
+      for (let i = 0; i < this._writeQueue.length; i++) {
+        tasks.push(this._persistence.set('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
+      }
+      this.writeQueue = []
+      return Promise.all(tasks)
+    }
   }
 
   // print () {

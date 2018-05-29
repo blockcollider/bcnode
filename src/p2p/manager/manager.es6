@@ -103,11 +103,9 @@ export class PeerManager {
   }
 
   isQuorumSynced (): boolean {
-    return this._quorumSyncing === false && this._lastQuorumSync !== null
-  }
-
-  isQuorumSyncing (): boolean {
-    return this._quorumSyncing
+    // TODO: Fix  
+    //return this._quorumSyncing === false 
+    return false 
   }
 
   onPeerDiscovery (peer: PeerInfo) {
