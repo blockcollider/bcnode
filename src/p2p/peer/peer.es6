@@ -61,7 +61,7 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              const result = msg.map(b => BcBlock.deserializeBinary(b))
+              const result = msg.map(b => BcBlock.deserializeBinary(Buffer.from(b, 'base64')))
               resolve(result)
             } catch (e) {
               return reject(e)
@@ -99,7 +99,7 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              const result = BcBlock.deserializeBinary(msg)
+              const result = BcBlock.deserializeBinary(Buffer.from(msg, 'base64'))
               resolve(result)
             } catch (e) {
               return reject(e)
@@ -137,7 +137,7 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              const result = msg.map(b => BcBlock.deserializeBinary(b))
+              const result = msg.map(b => BcBlock.deserializeBinary(Buffer.from(b, 'base64')))
               resolve(result)
             } catch (e) {
               return reject(e)
@@ -175,7 +175,7 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              const result = msg.map(b => BcBlock.deserializeBinary(b))
+              const result = msg.map(b => BcBlock.deserializeBinary(Buffer.from(b, 'base64')))
               resolve(result)
             } catch (e) {
               return reject(e)
