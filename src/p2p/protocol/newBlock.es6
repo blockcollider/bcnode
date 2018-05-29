@@ -15,6 +15,7 @@ const pull = require('pull-stream')
 
 const { BcBlock } = require('../../protos/core_pb')
 const { shouldBlockBeAddedToMetaverse } = require('../../engine/helper')
+const { isValidBlock } = require('../../bc/validation')
 
 const { PROTOCOL_PREFIX } = require('./version')
 
@@ -35,6 +36,11 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           const bytes = wireData[0]
           const raw = new Uint8Array(bytes)
           const block = BcBlock.deserializeBinary(raw)
+          if (!isValidBlock(block)) {
+            debug('Received block was not valid')
+            // TODO this peer should make to the the blacklist
+            return
+          }
           manager.engine.blockFromPeer(block)
           if (manager.isQuorumSynced()) {
             manager._lastQuorumSync = new Date()
