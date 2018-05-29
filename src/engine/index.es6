@@ -27,6 +27,7 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
+const { isValidBlock } = require('../bc/validation')
 const { Block, BcBlock } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
@@ -274,7 +275,6 @@ export default class Engine {
       this._logger.debug(`Preparing new block`)
 
       const currentTimestamp = ts.nowSeconds()
-      const work = prepareWork(lastPreviousBlock, currentBlocks)
       const [newBlock, finalTimestamp] = prepareNewBlock(
         currentTimestamp,
         lastPreviousBlock,
@@ -284,6 +284,7 @@ export default class Engine {
         this._minerKey,
         this._unfinishedBlock
       )
+      const work = prepareWork(lastPreviousBlock.getHash(), newBlock.getBlockchainHeaders())
       newBlock.setTimestamp(finalTimestamp)
       this._unfinishedBlock = newBlock
       this._unfinishedBlockData = {
@@ -383,6 +384,13 @@ export default class Engine {
     if (this._unfinishedBlockData) {
       this._unfinishedBlockData.iterations = solution.iterations
       this._unfinishedBlockData.timeDiff = solution.timeDiff
+    }
+
+    if (!isValidBlock(this._unfinishedBlock)) {
+      this._logger.warn(`The mined block is not valid`)
+      this._unfinishedBlock = undefined
+      this._unfinishedBlockData = undefined
+      return
     }
 
     this._processMinedBlock(this._unfinishedBlock, solution)
