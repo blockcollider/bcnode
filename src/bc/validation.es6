@@ -10,13 +10,15 @@ const { inspect } = require('util')
 const {
   all,
   aperture,
-  equals
+  equals,
+  flatten,
+  sort
 } = require('ramda')
 
 const { getLogger } = require('../logger')
 const { blake2bl } = require('../utils/crypto')
 const { concatAll } = require('../utils/ramda')
-const { BcBlock } = require('../protos/core_pb')
+const { BcBlock, BlockchainHeader } = require('../protos/core_pb')
 const {
   getChildrenBlocksHashes,
   getChildrenRootHash,
@@ -119,4 +121,64 @@ function isDistanceCorrectlyCalculated (newBlock: BcBlock): bool {
   const expectedWork = prepareWork(newBlock.getPreviousHash(), newBlock.getBlockchainHeaders())
   const expectedDistance = distance(expectedWork, blake2bl(newBlock.getMiner() + newBlock.getMerkleRoot() + blake2bl(newBlock.getNonce()) + newBlock.getTimestamp()))
   return receivedDistance === expectedDistance
+}
+
+function blockainHeadersOrdered (childHeaderList: BlockchainHeader[], parentHeaderList: BlockchainHeader[]) {
+  // check highest block from child list is higher or equally high as highest block from parent list
+  const pickHighestFromList = (list: BlockchainHeader[]) => {
+    if (list.length === 1) {
+      return list[0]
+    } else {
+      return list.reduce((acc, curr) => curr.getHeight() > acc.getHeight() ? curr : acc, list[0])
+    }
+  }
+
+  const highestChildHeader = pickHighestFromList(childHeaderList)
+  const highestParentHeader = pickHighestFromList(parentHeaderList)
+
+  logger.debug(`blockainHeadersOrdered highestChild ${inspect(highestChildHeader.toObject())}, highestParent: ${inspect(highestParentHeader.toObject())}`)
+  return highestChildHeader.getHeight() >= highestParentHeader.getHeight()
+}
+
+export function validateBlockSequence (blocks: BcBlock[]): bool {
+  // BC: 10 > BC: 9 > BC: 8 ...
+  const sortedBlocks = sort((a, b) => b.getHeight() - a.getHeight(), blocks)
+
+  logger.debug(`validateBlockSequence sorted blocks ${sortedBlocks.map(b => b.getHeight())}`)
+  // validate that Bc blocks are all in the same chain
+  const validPairs = aperture(2, sortedBlocks).map(([a, b]) => {
+    return a.getPreviousHash() === b.getHash()
+  })
+
+  logger.debug(`validateBlockSequence sorted blocks ${inspect(aperture(2, sortedBlocks.map(b => b.getHeight())))}`)
+  if (!all(equals(true), validPairs)) {
+    logger.debug(`validateBlockSequence validPairs: ${validPairs}`)
+    return false
+  }
+
+  // validate that highest header from each blockchain list from each block maintains ordering
+  // [[BC10, BC9], [BC9, BC8]]
+  const pairs = aperture(2, sortedBlocks)
+
+  // now create:
+  // [[btcOrdered, ethOrdered, lskOrdered, neoOrdered, wavOrdered], [btcOrderder, ethOrdered, lskOrdered, neoOrdered, wavOrdered]]
+  //                                e.g. BC10, BC9
+  const validPairSubchains = pairs.map(([child, parent]) => {
+    const childBlockchainHeaders = child.getBlockchainHeaders()
+    const parentBlockchainHeaders = parent.getBlockchainHeaders()
+    return [
+      blockainHeadersOrdered(childBlockchainHeaders.getBtcList(), parentBlockchainHeaders.getBtcList()),
+      blockainHeadersOrdered(childBlockchainHeaders.getEthList(), parentBlockchainHeaders.getEthList()),
+      blockainHeadersOrdered(childBlockchainHeaders.getLskList(), parentBlockchainHeaders.getLskList()),
+      blockainHeadersOrdered(childBlockchainHeaders.getNeoList(), parentBlockchainHeaders.getNeoList()),
+      blockainHeadersOrdered(childBlockchainHeaders.getWavList(), parentBlockchainHeaders.getWavList())
+    ]
+  })
+  // flatten => [btc10_9Ordered, eth10_9Ordered, lsk10_9Ordered, neo10_9Ordered, wav10_9Ordered, btc9_8Orderded, eth9_8Ordered, lsk9_8Ordered, neo9_8Ordered, wav9_8Ordered]
+  logger.debug(`validateBlockSequence validPairSubchains ${inspect(validPairSubchains)}`)
+  if (!all(equals(true), flatten(validPairSubchains))) {
+    return false
+  }
+
+  return true
 }
