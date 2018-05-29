@@ -12,6 +12,7 @@ const {
   equals
 } = require('ramda')
 
+const { getLogger } = require('../logger')
 const { blake2bl } = require('../utils/crypto')
 const { concatAll } = require('../utils/ramda')
 const { BcBlock } = require('../protos/core_pb')
@@ -25,7 +26,9 @@ const {
 } = require('./miner')
 const GENESIS_DATA = require('./genesis.raw')
 
-export default function isValidBlock (newBlock: BcBlock): bool {
+const logger = getLogger(__filename)
+
+export function isValidBlock (newBlock: BcBlock): bool {
   return theBlockChainFingerPrintMatchGenesisBlock(newBlock) &&
     numberOfBlockchainsNeededMatchesChildBlock(newBlock) &&
     ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) &&
@@ -35,15 +38,18 @@ export default function isValidBlock (newBlock: BcBlock): bool {
 }
 
 function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
+  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation failed')
   return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
 }
 
 function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock): bool {
+  logger.info('numberOfBlockchainsNeededMatchesChildBlock validation failed')
   // verify that all blockain header lists are non empty and that there is childBlockchainCount of them
   return Object.values(newBlock.getBlockchainHeaders().toObject().filter(headersList => headersList.length > 0)).length === GENESIS_DATA.childBlockchainCount
 }
 
 function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): bool {
+  logger.info('ifMoreThanOneHeaderPerBlockchainAreTheyOrdered validation failed')
   const headersMap = newBlock.getBlockchainHeaders()
 
   // gather true/false for each chain signalling if either there is only one header
@@ -69,6 +75,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
 }
 
 function isChainRootCorrectlyCalculated (newBlock: BcBlock): bool {
+  logger.info('isChainRootCorrectlyCalculated validation failed')
   const receivedChainRoot = newBlock.getChainRoot()
 
   const expectedBlockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
@@ -77,6 +84,7 @@ function isChainRootCorrectlyCalculated (newBlock: BcBlock): bool {
 }
 
 function isMerkleRootCorrectlyCalculated (newBlock: BcBlock): bool {
+  logger.info('isMerkleRootCorrectlyCalculated validation failed')
   const receivedMerkleRoot = newBlock.getMerkleRoot()
 
   const blockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
@@ -90,6 +98,7 @@ function isMerkleRootCorrectlyCalculated (newBlock: BcBlock): bool {
 }
 
 function isDistanceCorrectlyCalculated (newBlock: BcBlock): bool {
+  logger.info('isDistanceCorrectlyCalculated validation failed')
   const receivedDistance = newBlock.getDistance()
 
   const expectedWork = prepareWork(newBlock.getPreviousHash(), newBlock.getBlockchainHeaders())

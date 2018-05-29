@@ -27,6 +27,7 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
+const { isValidBlock } = require('../bc/validation')
 const { Block, BcBlock } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
@@ -383,6 +384,10 @@ export default class Engine {
     if (this._unfinishedBlockData) {
       this._unfinishedBlockData.iterations = solution.iterations
       this._unfinishedBlockData.timeDiff = solution.timeDiff
+    }
+
+    if (!isValidBlock(this._unfinishedBlock)) {
+      this._logger.warn(`The mined block is not valid`)
     }
 
     this._processMinedBlock(this._unfinishedBlock, solution)
