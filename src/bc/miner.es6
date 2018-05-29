@@ -374,6 +374,28 @@ export function prepareWork (previousBlockHash: string, childrenCurrentBlocks: B
   return work
 }
 
+const copyHeader = (block: BlockchainHeader|Block, confirmations: number): BlockchainHeader => {
+  const header = new BlockchainHeader()
+  header.setBlockchain(block.getBlockchain())
+  header.setHash(block.getHash())
+  header.setPreviousHash(block.getPreviousHash())
+  header.setTimestamp(block.getTimestamp())
+  header.setHeight(block.getHeight())
+  header.setMerkleRoot(block.getMerkleRoot())
+  header.setBlockchainConfirmationsInParentCount(confirmations)
+  return header
+}
+
+function prepareChildBlockHeadersMapForGenesis (currentBlockchainHeaders: Block[]): BlockchainHeaders {
+  const newMap = new BlockchainHeaders()
+  currentBlockchainHeaders.forEach(header => {
+    const blockchainHeader = copyHeader(header, 1)
+    const methodNameSet = `set${header.getBlockchain()[0].toUpperCase() + header.getBlockchain().slice(1)}List` // e.g. setBtcList
+    newMap[methodNameSet]([blockchainHeader])
+  })
+  return newMap
+}
+
 /**
  * Create a BlockchainHeader{} for new BcBlock, before count new confirmation count for each child block.
  *
@@ -388,18 +410,6 @@ export function prepareWork (previousBlockHash: string, childrenCurrentBlocks: B
  * @return {BlockchainHeader[]} Headers of rovered chains with confirmations count calculated
  */
 function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): BlockchainHeaders {
-  const copyHeader = (block: BlockchainHeader|Block, confirmations: number): BlockchainHeader => {
-    const header = new BlockchainHeader()
-    header.setBlockchain(block.getBlockchain())
-    header.setHash(block.getHash())
-    header.setPreviousHash(block.getPreviousHash())
-    header.setTimestamp(block.getTimestamp())
-    header.setHeight(block.getHeight())
-    header.setMerkleRoot(block.getMerkleRoot())
-    header.setBlockchainConfirmationsInParentCount(confirmations)
-    return header
-  }
-
   const chainWhichTriggeredMining = newChildBlock.getBlockchain()
   const newMap = new BlockchainHeaders()
   Object.keys(previousBlock.getBlockchainHeaders().toObject())
@@ -461,11 +471,16 @@ export function getNewBlockCount (previousBlockHeaders: BlockchainHeaders, curre
  */
 export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string, unfinishedBlock: ?BcBlock): [BcBlock, number] {
   const shouldAppend = !!unfinishedBlock
-  const childBlockHeaders = prepareChildBlockHeadersMap(
-    unfinishedBlock || lastPreviousBlock,
-    blockWhichTriggeredMining,
-    shouldAppend
-  )
+  let childBlockHeaders
+  if (lastPreviousBlock.getHeight() === GENESIS_DATA.height) {
+    childBlockHeaders = prepareChildBlockHeadersMapForGenesis(childrenCurrentBlocks)
+  } else {
+    childBlockHeaders = prepareChildBlockHeadersMap(
+      unfinishedBlock || lastPreviousBlock,
+      blockWhichTriggeredMining,
+      shouldAppend
+    )
+  }
   const blockHashes = getChildrenBlocksHashes(blockchainMapToList(childBlockHeaders))
   const newChainRoot = getChildrenRootHash(blockHashes)
   const newBlockCount = getNewBlockCount(lastPreviousBlock.getBlockchainHeaders(), childBlockHeaders)
