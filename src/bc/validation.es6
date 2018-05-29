@@ -6,7 +6,7 @@
  *
  * @flow
  */
-// const { inspect } = require('util')
+const { inspect } = require('util')
 const {
   all,
   aperture,
@@ -65,19 +65,27 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
     const getMethodName = `get${listName[0].toUpperCase()}${listName.slice(1)}`
     const chainHeaders = headersMap[getMethodName]()
     if (chainHeaders.length === 1) {
+      logger.debug(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered ${listName} single and valid`)
       return true
     }
 
     // return true if left height < right height condition is valid
     // for all pairs ([[a, b], [b, c], [c, d]]) of chain headers ([a, b, c, d])
     // (in other words if ordering is maintained)
-    return all(
+    const orderingCorrect = all(
       equals(true),
       aperture(2, chainHeaders).map(([a, b]) => a.getHeight() < b.getHeight())
     )
+    // $FlowFixMe
+    logger.debug(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered ${listName} multiple and valid: ${orderingCorrect}`)
+    if (!orderingCorrect) {
+      logger.debug(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered ${inspect(headersMap.toObject())}`)
+    }
+    return orderingCorrect
   })
 
   // check if all chain conditions are true
+  logger.info(inspect(chainsConditions))
   return all(equals(true), chainsConditions)
 }
 
