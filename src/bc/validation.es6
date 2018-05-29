@@ -25,7 +25,7 @@ const GENESIS_DATA = require('./genesis.raw')
 
 export default function isValidBlock (newBlock: BcBlock): bool {
   return theBlockChainFingerPrintMatchGenesisBlock(newBlock) &&
-    numberOfBlockchainsNeededMatchesChildBlock(newBlock) && // TODO
+    numberOfBlockchainsNeededMatchesChildBlock(newBlock) &&
     ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) &&
     isChainRootCorrectlyCalculated(newBlock) &&
     isMerkleRootCorrectlyCalculated(newBlock) &&
@@ -36,8 +36,9 @@ function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
   return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
 }
 
-function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock) {
-  return true
+function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock): bool {
+  // verify that all blockain header lists are non empty and that there is childBlockchainCount of them
+  return Object.values(newBlock.getBlockchainHeaders().toObject().filter(headersList => headersList.length > 0)).length === GENESIS_DATA.childBlockchainCount
 }
 
 function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): bool {
