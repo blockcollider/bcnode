@@ -255,6 +255,9 @@ export class PeerNode {
                 // })
                 const lowestBlock = this.metaverse.getLowestBlock()
                 if (lowestBlock && lowestBlock.getHash() !== winningMetaverse[0].getHash()) {
+                  this._blockPool.maximumHeight = lowestBlock.getHeight()
+                  this._blockPool.purge('bc.blockpool.')
+                  this._blockPool.purge('bc.block.')
                   this.metaverse.purge()
                   // insert into the metaverse
                   winningMetaverse.map(block => this.metaverse.addBlock(block))

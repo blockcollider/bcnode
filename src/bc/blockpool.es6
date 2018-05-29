@@ -15,10 +15,16 @@ const GENESIS_DATA = require('./genesis.raw')
 export class BlockPool {
   _persistence: any
   _syncEnabled: bool
+  _maximumHeight: ?number
 
   constructor (persistence: any) {
     this._persistence = persistence
     this._syncEnabled = true
+    this._maximumHeight = null
+  }
+
+  set maximumHeight (height: number) {
+    this._maximumHeight = height
   }
 
   async getLatest (key: string): BcBlock {
@@ -31,12 +37,11 @@ export class BlockPool {
     return await this._persistence.put(BLOCK_POOL_REFERENCE + 'latest', data)
   }
 
-  async disableSync (itr: number) {
-    this._syncEnabled = false
+  async deleteStep (itr: number) {
     try {
       await this._persistence.del(BLOCK_POOL_REFERENCE + itr)
       if (itr > GENESIS_DATA.height) {
-        return this.disableSync(itr--)
+        return this.deleteStep(itr--)
       }
     } catch (err) {
       return new Error(err)
@@ -68,7 +73,7 @@ export class BlockPool {
             })
         })
         .catch((_) => {
-          const latest = this.getLatest(BLOCK_COOLPREFERENCE)
+          const latest = this.getLatest(BLOCK_POOL_REFERENCE)
           const tasks = [
             this._persistence.put(BLOCK_POOL_REFERENCE + height, block),
             this._persistence.put(hash, BLOCK_POOL_REFERENCE + height)
@@ -99,10 +104,9 @@ export class BlockPool {
     const latest = this.getLatest(ref)
     this._syncEnabled = true
     return Promise.all([
-      this.disableSync(latest.getHeight())
+      this.deleteStep(latest.getHeight())
     ])
   }
-
 }
 
 export default BlockPool

@@ -42,15 +42,19 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
             return
           }
           manager.engine.blockFromPeer(block)
-          // TODO: should run with every block 
+          // TODO: should run with every block
 
-          shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
+          const shouldBeAdded = shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
+          // TODO add getter
+          manager.peerNode._blockPool._syncEnabled = !shouldBeAdded
 
           if (manager.engine.peerIsSyncing === true) {
             manager._lastQuorumSync = new Date()
             manager._quorumSyncing = true
-            if(manager.peerNode._blockPool._syncEnabled === true) {
-               manager.peerNode._blockPool.addBlock(
+            manager.peerNode._blockPool.purge('bc.blockpool.')
+            manager.peerNode._blockPool.purge('bc.block.')
+            if (manager.peerNode._blockPool._syncEnabled === true) {
+              manager.peerNode._blockPool.addBlock(block)
             }
           }
         } catch (e) {

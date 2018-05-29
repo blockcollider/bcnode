@@ -21,28 +21,29 @@ import type BcBlock from '../protos/core_pb'
 /**
  * High-level functions
  */
-export const shouldBlockBeAddedToMetaverse = (newBlock: BcBlock, metaverse: Metaverse, triggerSync: Function) => {
+export const shouldBlockBeAddedToMetaverse = (newBlock: BcBlock, metaverse: Metaverse, triggerSync: Function): bool => {
   if (timestampIsSignificantSecondsBelowLocalTime(newBlock)) {
     triggerSync()
-    return
+    return false
   }
 
   if (doesNewBlockPreviousHashReferenceBlockInMetaverse(newBlock, metaverse)) {
     metaverse.addBlock(newBlock)
-    return
+    return true
   }
 
   if (isNewBlockHeightLowerThanLowestInMetaverse(newBlock, metaverse)) {
     triggerSync()
-    return
+    return false
   }
 
   if (isNewBlockTimestampGreaterThanHighestInMetaverse(newBlock, metaverse)) {
     triggerSync()
-    return
+    return false
   }
 
   metaverse.addBlock(newBlock)
+  return true
 }
 
 const isTimestampWithin = (newBlock: BcBlock, seconds: number): boolean => {
