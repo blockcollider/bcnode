@@ -25,6 +25,7 @@ const BN = require('bn.js')
 const {
   call,
   compose,
+  concat,
   difference,
   flatten,
   flip,
@@ -42,10 +43,13 @@ const {
 } = require('ramda')
 
 const { blake2bl } = require('../utils/crypto')
-const { Block, BcBlock, BcTransaction, ChildBlockHeader, ChildBlockHeaders } = require('../protos/core_pb')
+const { Block, BcBlock, BcTransaction, BlockchainHeader, BlockchainHeaders } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
+const GENESIS_DATA = require('./genesis.raw')
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
+
+const concatAll = reduce(concat, [])
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -295,22 +299,22 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
  *
  */
 const toHexBuffer: ((string) => Buffer) = partialRight(invoker(2, 'from'), ['hex', Buffer])
-const hash: ((ChildBlockHeader|Block) => string) = invoker(0, 'getHash')
-const merkleRoot: ((ChildBlockHeader|Block) => string) = invoker(0, 'getMerkleRoot')
+const hash: ((BlockchainHeader|Block) => string) = invoker(0, 'getHash')
+const merkleRoot: ((BlockchainHeader|Block) => string) = invoker(0, 'getMerkleRoot')
 
 /**
  * Computes hash form a rovered block header as blake2bl(hash + mekleRoot)
- * @param {ChildBlockHeader|Block} block to hash
+ * @param {BlockchainHeader|Block} block to hash
  * @return {string} hash of the block
  */
-const blockHash: (ChildBlockHeader|Block => string) = compose(
+const blockHash: (BlockchainHeader|Block => string) = compose(
   blake2bl,
   join(''),
   zipWith(call, [hash, merkleRoot]),
   flip(repeat)(2)
 )
 
-export const getChildrenBlocksHashes: ((ChildBlockHeader[]|Block[]) => string[]) = map(blockHash)
+export const getChildrenBlocksHashes: ((BlockchainHeader[]|Block[]) => string[]) = map(blockHash)
 
 export const getChildrenRootHash = reduce((all: BN, blockHash: string) => {
   return all.xor(new BN(toHexBuffer(blockHash)))
@@ -363,7 +367,7 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
 }
 
 /**
- * Create a ChildBlockHeader{} for new BcBlock, before count new confirmation count for each child block.
+ * Create a BlockchainHeader{} for new BcBlock, before count new confirmation count for each child block.
  *
  * Assumption here is that confirmation count of all headers from previous block is taken and incrementend by one
  * except for the one which caused the new block being mine - for that case is is reset to 1
@@ -373,24 +377,24 @@ export function prepareWork (previousBlock: BcBlock, childrenCurrentBlocks: Bloc
  * @param {BcBlock} previousBlock Last known previously mined BC block
  * @param {Block} newChildBlock The last rovered block - this one triggered the mining
  * @param {bool} shouldAppend flags if the newChildBlock should be appended to a child block sublist or replace
- * @return {ChildBlockHeader[]} Headers of rovered chains with confirmations count calculated
+ * @return {BlockchainHeader[]} Headers of rovered chains with confirmations count calculated
  */
-function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): ChildBlockHeaders {
-  const copyHeader = (block: ChildBlockHeader|Block, confirmations: number): ChildBlockHeader => {
-    const header = new ChildBlockHeader()
+function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): BlockchainHeaders {
+  const copyHeader = (block: BlockchainHeader|Block, confirmations: number): BlockchainHeader => {
+    const header = new BlockchainHeader()
     header.setBlockchain(block.getBlockchain())
     header.setHash(block.getHash())
     header.setPreviousHash(block.getPreviousHash())
     header.setTimestamp(block.getTimestamp())
     header.setHeight(block.getHeight())
     header.setMerkleRoot(block.getMerkleRoot())
-    header.setChildBlockConfirmationsInParentCount(confirmations)
+    header.setBlockchainConfirmationsInParentCount(confirmations)
     return header
   }
 
   const chainWhichTriggeredMining = newChildBlock.getBlockchain()
-  const newMap = new ChildBlockHeaders()
-  Object.keys(previousBlock.getChildBlockHeaders().toObject())
+  const newMap = new BlockchainHeaders()
+  Object.keys(previousBlock.getBlockchainHeaders().toObject())
     .forEach((chainKeyName) => {
       const chain = chainKeyName.replace(/List$/, '')
       const methodNameGet = `get${chain[0].toUpperCase() + chain.slice(1)}List` // e.g. getBtcList
@@ -401,14 +405,14 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
         updatedHeaders = [copyHeader(newChildBlock, 1)]
         if (shouldAppend) {
           // console.log(`unshifting`)
-          updatedHeaders.unshift(previousBlock.getChildBlockHeaders()[methodNameGet]().map(header => {
+          updatedHeaders.unshift(previousBlock.getBlockchainHeaders()[methodNameGet]().map(header => {
             return copyHeader(header, 1)
           }))
         }
       } else {
-        updatedHeaders = previousBlock.getChildBlockHeaders()[methodNameGet]().map(header => {
+        updatedHeaders = previousBlock.getBlockchainHeaders()[methodNameGet]().map(header => {
           // console.log(`${chain} did not trigger mining, just copying with count+1`)
-          return copyHeader(header, header.getChildBlockConfirmationsInParentCount() + 1)
+          return copyHeader(header, header.getBlockchainConfirmationsInParentCount() + 1)
         })
       }
 
@@ -421,9 +425,9 @@ function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Blo
 /**
  * How many new child blocks are between previousBlockHeaders and currentBlockHeaders
  */
-export function getNewBlockCount (previousBlockHeaders: ChildBlockHeaders, currentBlockHeaders: ChildBlockHeaders) {
+export function getNewBlockCount (previousBlockHeaders: BlockchainHeaders, currentBlockHeaders: BlockchainHeaders) {
   // $FlowFixMe - protbuf toObject is not typed
-  const headersToHashes = (headers: ChildBlockHeaders) => Object.values(headers.toObject()).reduce((acc, curr) => acc.concat(curr), []).map(headerObj => headerObj.hash)
+  const headersToHashes = (headers: BlockchainHeaders) => Object.values(headers.toObject()).reduce((acc, curr) => acc.concat(curr), []).map(headerObj => headerObj.hash)
   const previousHashes = headersToHashes(previousBlockHeaders)
   const currentHashes = headersToHashes(currentBlockHeaders)
 
@@ -459,7 +463,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
     shouldAppend
   )
 
-  const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeaders(), childBlockHeaders)
+  const newBlockCount = getNewBlockCount(lastPreviousBlock.getBlockchainHeaders(), childBlockHeaders)
 
   let finalDifficulty
   let finalTimestamp = currentTimestamp
@@ -481,23 +485,40 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
     }
   }
 
-  const oldTransactions = lastPreviousBlock.getTransactionsList()
-  const newMerkleRoot = createMerkleRoot(
-    blockHashes.concat(oldTransactions.concat([minerAddress, 1]))
-  ) // blockchains, transactions, miner address, height
+  const newHeight = lastPreviousBlock.getHeight() + 1
+  // blockchains, transactions, miner address, height
+  const newMerkleRoot = createMerkleRoot(concatAll([blockHashes, newTransactions, [minerAddress, newHeight, GENESIS_DATA.version, GENESIS_DATA.schemaVersion, GENESIS_DATA.nrgGrant]]))
 
+  // nonce, distance, timestamp and difficulty are set to proper values after successful mining of this block
   const newBlock = new BcBlock()
   newBlock.setHash(blake2bl(lastPreviousBlock.getHash() + newMerkleRoot))
-  newBlock.setHeight(lastPreviousBlock.getHeight() + 1)
+  newBlock.setPreviousHash(lastPreviousBlock.getHash())
+  newBlock.setVersion(1)
+  newBlock.setSchemaVersion(1)
+  newBlock.setHeight(newHeight)
   newBlock.setMiner(minerAddress)
   newBlock.setDifficulty(finalDifficulty)
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
-  newBlock.setDistance(0)
+  newBlock.setDistance(0) // is set to proper value after successful mining
+  newBlock.setNrgGrant(GENESIS_DATA.nrgGrant)
+  newBlock.setTargetHash(GENESIS_DATA.targetHash)
+  newBlock.setTargetHeight(GENESIS_DATA.targetHeight)
+  newBlock.setTargetMiner(GENESIS_DATA.targetMiner)
+  newBlock.setTargetSignature(GENESIS_DATA.targetSignature)
+  newBlock.setTwn(GENESIS_DATA.twn)
+  newBlock.setTwsList(GENESIS_DATA.twsList)
+  newBlock.setEmblemWeight(GENESIS_DATA.emblemWeight)
+  newBlock.setEmblemChainBlockHash(GENESIS_DATA.emblemChainBlockHash)
+  newBlock.setEmblemChainFingerprintRoot(GENESIS_DATA.emblemChainFingerprintRoot)
+  newBlock.setEmblemChainAddress(GENESIS_DATA.emblemChainAddress)
   newBlock.setTxCount(0)
-  newBlock.setTransactionsList(newTransactions)
-  newBlock.setChildBlockchainCount(childrenCurrentBlocks.length)
-  newBlock.setChildBlockHeaders(childBlockHeaders)
+  newBlock.setTxsList(newTransactions)
+  newBlock.setBlockchainHeadersCount(childrenCurrentBlocks.length)
+  newBlock.setBlockchainFingerprintsRoot(GENESIS_DATA.blockchainFingerprintsRoot)
+  newBlock.setTxFeeBase(GENESIS_DATA.txFeeBase)
+  newBlock.setTxDistanceSumLimit(GENESIS_DATA.txDistanceSumLimit)
+  newBlock.setBlockchainHeaders(childBlockHeaders)
 
   return [newBlock, finalTimestamp]
 }
