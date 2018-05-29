@@ -43,11 +43,15 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           }
           manager.engine.blockFromPeer(block)
           // TODO: should run with every block 
+
           shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
-          if (manager.isQuorumSynced()) {
+
+          if (manager.engine.peerIsSyncing === true) {
             manager._lastQuorumSync = new Date()
             manager._quorumSyncing = true
-            //shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
+            if(manager.peerNode._blockPool._syncEnabled === true) {
+               manager.peerNode._blockPool.addBlock(
+            }
           }
         } catch (e) {
           debug(`Error decoding block from peer, reason: ${e.message}`)

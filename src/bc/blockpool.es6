@@ -96,7 +96,7 @@ export class BlockPool {
   }
 
   purge (ref: string) {
-    const latest = this.getLatest(BLOCK_POOL_REFERENCE)
+    const latest = this.getLatest(ref)
     this._syncEnabled = true
     return Promise.all([
       this.disableSync(latest.getHeight())
