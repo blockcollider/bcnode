@@ -18,8 +18,6 @@ import type BcBlock from '../protos/core_pb'
 // [x] - isNewBlockTimestampGreaterThanHighestInMetaverse
 // [x] - isNewBlockTimestampLowerThanLowestInMetaverse
 
-const { flatten } = require('ramda')
-
 /**
  * High-level functions
  */
@@ -45,8 +43,12 @@ export const shouldMetaverseBeReorganized = () => {
   return false
 }
 
+export const isTimestampWithin = (newBlock: BcBlock, seconds: number): boolean => {
+  return (Date.now() * 0.001 - newBlock.getTimestamp()) < seconds
+}
+
 export const timestampIs70secondsBelowLocalTime = (newBlock: BcBlock): boolean => {
-  return (Date.now() * 0.001 - newBlock.getTimestamp()) > 70
+  return isTimestampWithin(newBlock, 70) === false
 }
 
 export const doesNewBlockPreviousHashReferenceBlockInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
@@ -54,9 +56,7 @@ export const doesNewBlockPreviousHashReferenceBlockInMetaverse = (newBlock: BcBl
 }
 
 export const isNewBlockDifficultyLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  const blocks = flatten(metaverse.toArray())
-
-  blocks.forEach((block) => {
+  metaverse.toFlatArray().forEach((block) => {
     if (block.getDifficulty() <= newBlock.getDifficulty()) {
       return false
     }
@@ -66,9 +66,7 @@ export const isNewBlockDifficultyLowerThanLowestInMetaverse = (newBlock: BcBlock
 }
 
 export const isNewBlockHeightLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  const blocks = flatten(metaverse.toArray())
-
-  blocks.forEach((block) => {
+  metaverse.toFlatArray().forEach((block) => {
     if (block.getHeight() <= newBlock.getHeight()) {
       return false
     }
@@ -78,9 +76,7 @@ export const isNewBlockHeightLowerThanLowestInMetaverse = (newBlock: BcBlock, me
 }
 
 export const isNewBlockTimestampGreaterThanHighestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  const blocks = flatten(metaverse.toArray())
-
-  blocks.forEach((block) => {
+  metaverse.toFlatArray().forEach((block) => {
     if (block.getTimestamp() >= newBlock.getTimestamp()) {
       return false
     }
@@ -90,9 +86,7 @@ export const isNewBlockTimestampGreaterThanHighestInMetaverse = (newBlock: BcBlo
 }
 
 export const isNewBlockTimestampLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  const blocks = flatten(metaverse.toArray())
-
-  blocks.forEach((block) => {
+  metaverse.toFlatArray().forEach((block) => {
     if (block.getTimestamp() <= newBlock.getTimestamp()) {
       return false
     }
