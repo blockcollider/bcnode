@@ -26,6 +26,7 @@ const Engine = require('../engine').default
 const Signaling = require('./signaling').websocket
 const { PeerManager, DATETIME_STARTED_AT } = require('./manager/manager')
 const { validateBlockSequence } = require('../bc/validation')
+const { Metaverse } = require('../bc/metaverse')
 
 const { PROTOCOL_PREFIX, NETWORK_ID } = require('./protocol/version')
 
@@ -38,11 +39,13 @@ export class PeerNode {
   _bundle: Bundle // eslint-disable-line no-undef
   _manager: PeerManager // eslint-disable-line no-undef
   _peer: PeerInfo // eslint-disable-line no-undef
+  _metaverse: Metaverse
 
   constructor (engine: Engine) {
     this._engine = engine
     this._logger = logging.getLogger(__filename)
     this._manager = new PeerManager(this)
+    this._metaverse = new Metaverse(this._engine.persistence)
 
     if (config.p2p.stats.enabled) {
       this._interval = setInterval(() => {
@@ -235,10 +238,23 @@ export class PeerNode {
                     return 0
                   })
 
-                const winner = peerMetaverseByDifficultySum[0]
-                // TODO insert into the metaverse
-                // Report not syncing
-                // this.reportSyncPeriod(false)
+                const winningMetaverse = peerMetaverseByDifficultySum[0]
+                // TODO split the work among multiple correct candidates
+                // const syncCandidates = candidates.filter((candidate) => {
+                //   if (winner.getHash() === candidate[0].getHash()) {
+                //     return true
+                //   }
+                //   return false
+                // })
+                const lowestBlock = this._metaverse.getLowestBlock()
+                if (lowestBlock && lowestBlock.getHash() !== winningMetaverse[0].getHash()) {
+                  this._metaverse.purge()
+                  // insert into the metaverse
+                  winningMetaverse.map(block => this._metaverse.addBlock(block))
+                  this._metaverse.persist()
+                  // Report not syncing
+                  this.reportSyncPeriod(false)
+                }
               }
             }
           }

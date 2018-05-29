@@ -20,7 +20,7 @@ export class Metaverse {
   _height: number
   _persistence: any
 
-  constructor (commitDepth: number = COMMIT_METAVERSE_DEPTH, persistence: any) {
+  constructor (persistence: any, commitDepth: number = COMMIT_METAVERSE_DEPTH) {
     this._blocks = {}
     this._writeQueue = []
     this._persistence = persistence
@@ -101,6 +101,10 @@ export class Metaverse {
     return added
   }
 
+  purge () {
+    this._blocks = {}
+  }
+
   getHighestBlock (): ?BcBlock {
     const keys = Object.keys(this._blocks)
     if (keys.length > 0) {
@@ -148,11 +152,11 @@ export class Metaverse {
     return flatten(blocks)
   }
 
-  persistMetaverse (): Promise<*> {
+  persist(): Promise<*> {
     if (this._writeQueue.length > 0) {
       const tasks = []
       for (let i = 0; i < this._writeQueue.length; i++) {
-        tasks.push(this._persistence.pus('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
+        tasks.push(this._persistence.put('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
       }
       this._writeQueue = []
       return Promise.all(tasks)
