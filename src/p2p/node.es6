@@ -189,6 +189,7 @@ export class PeerNode {
 
   triggerBlockSync () {
     const peerMetaverses = []
+    // Notify miner to stop mining
     this.reportSyncPeriod(true)
 
     this.peerBook.getAllArray().map(peer => {
@@ -242,9 +243,10 @@ export class PeerNode {
 
                   return false
                 })
+                // TODO insert into the metaverse
+                // Report not syncing
+                // this.reportSyncPeriod(false)
               }
-            } else {
-              // TODO: Wait for block
             }
           }
         })

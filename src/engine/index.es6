@@ -246,7 +246,7 @@ export default class Engine {
     }
 
     // start mining only if all known chains are being rovered
-    if (this._canMine && equals(new Set(this._knownRovers), new Set(rovers))) {
+    if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       let currentBlocks
       let lastPreviousBlock
 
@@ -340,6 +340,10 @@ export default class Engine {
     } else {
       if (!this._canMine) {
         this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+        return Promise.resolve(false)
+      }
+      if (this._peerIsSyncing) {
+        this._logger.info(`Not mining because the peer is syncing}`)
         return Promise.resolve(false)
       }
       this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
