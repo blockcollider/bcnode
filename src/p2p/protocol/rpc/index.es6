@@ -36,7 +36,7 @@ const { PROTOCOL_PREFIX } = require('../version')
 // --> {"jsonrpc": "2.0", "method": "subtract", "params": {"minuend": 42, "subtrahend": 23}, "id": 4}
 // <-- {"jsonrpc": "2.0", "result": 19, "id": 4}
 
-const MAX_BLOCKS_COUNT = 7
+const MAX_BLOCKS_COUNT = 100000
 
 const handlers = {
   getHeaders: (manager: PeerManager, from: number, to: number) => {
