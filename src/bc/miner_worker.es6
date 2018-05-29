@@ -10,7 +10,7 @@
 import type { Logger } from 'winston'
 const process = require('process')
 const { getExpFactorDiff, getNewPreExpDifficulty, getNewBlockCount, mine } = require('./miner')
-const { ChildBlockHeaders, ChildBlockHeader, BcBlock } = require('../protos/core_pb')
+const { BlockchainHeaders, BlockchainHeader, BcBlock } = require('../protos/core_pb')
 const ts = require('../utils/time').default // ES6 default export
 
 const logging = require('../logger')
@@ -32,7 +32,7 @@ const main = () => {
   process.on('message', ({currentTimestamp, offset, work, minerKey, merkleRoot, difficulty, difficultyData}) => {
     ts.offsetOverride(offset)
     // Deserialize buffers from parent process, buffer will be serialized as object of this shape { <idx>: byte } - so use Object.values on it
-    const deserialize = (buffer: { [string]: number }, clazz: BcBlock|ChildBlockHeader|ChildBlockHeaders) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
+    const deserialize = (buffer: { [string]: number }, clazz: BcBlock|BlockchainHeader|BlockchainHeaders) => clazz.deserializeBinary(new Uint8Array(Object.values(buffer).map(n => parseInt(n, 10))))
 
     // function with all difficultyData closed in scope and
     // send it to mine with all arguments except of timestamp and use it
@@ -41,11 +41,11 @@ const main = () => {
       // Proto buffers are serialized - let's deserialize them
       const { lastPreviousBlock, newBlockHeaders } = difficultyData
       const lastPreviousBlockProto = deserialize(lastPreviousBlock, BcBlock)
-      const newBlockHeadersProto = deserialize(newBlockHeaders, ChildBlockHeaders)
+      const newBlockHeadersProto = deserialize(newBlockHeaders, BlockchainHeaders)
 
       // return function with scope closing all deserialized difficulty data
       return function (timestamp: number) {
-        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getChildBlockHeaders(), newBlockHeadersProto)
+        const newBlockCount = getNewBlockCount(lastPreviousBlockProto.getBlockchainHeaders(), newBlockHeadersProto)
 
         const preExpDiff = getNewPreExpDifficulty(
           timestamp,

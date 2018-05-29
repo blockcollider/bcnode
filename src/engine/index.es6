@@ -288,7 +288,7 @@ export default class Engine {
       this._unfinishedBlock = newBlock
       this._unfinishedBlockData = {
         lastPreviousBlock,
-        currentBlocks: newBlock.getChildBlockHeaders(),
+        currentBlocks: newBlock.getBlockchainHeaders(),
         block,
         iterations: undefined,
         timeDiff: undefined
@@ -328,7 +328,7 @@ export default class Engine {
             currentTimestamp,
             lastPreviousBlock: lastPreviousBlock.serializeBinary(),
             // $FlowFixMe
-            newBlockHeaders: newBlock.getChildBlockHeaders().serializeBinary()
+            newBlockHeaders: newBlock.getBlockchainHeaders().serializeBinary()
           }})
         // $FlowFixMe - Flow can't properly find worker pid
         return Promise.resolve(this._workerProcess.pid)
@@ -370,6 +370,7 @@ export default class Engine {
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
       this._logger.warn('There is not unfinished block to use solution for')
+      return
     }
     // $FlowFixMe
     this._unfinishedBlock.setNonce(solution.nonce)
@@ -435,7 +436,7 @@ export default class Engine {
         const methodNameGet = `get${roverName[0].toUpperCase() + roverName.slice(1)}List` // e.g. getBtcList
         // $FlowFixMe - flow does not now about methods of protobuf message instances
         const blocks = this._unfinishedBlockData.currentBlocks[methodNameGet]()
-        row.push(blocks.map(block => block.getChildBlockConfirmationsInParentCount()).join('|'))
+        row.push(blocks.map(block => block.getBlockchainConfirmationsInParentCount()).join('|'))
         row.push(blocks.map(block => block.getTimestamp() / 1000 << 0).join('|'))
         childBlockCount += blocks.length
       }
