@@ -6,6 +6,7 @@
  *
  * @flow
  */
+// const { inspect } = require('util')
 const {
   all,
   aperture,
@@ -38,18 +39,24 @@ export function isValidBlock (newBlock: BcBlock): bool {
 }
 
 function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
-  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation failed')
+  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation running')
   return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
 }
 
 function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock): bool {
-  logger.info('numberOfBlockchainsNeededMatchesChildBlock validation failed')
+  logger.info('numberOfBlockchainsNeededMatchesChildBlock validation running')
   // verify that all blockain header lists are non empty and that there is childBlockchainCount of them
-  return Object.values(newBlock.getBlockchainHeaders().toObject().filter(headersList => headersList.length > 0)).length === GENESIS_DATA.childBlockchainCount
+  const headerValues = Object.values(newBlock.getBlockchainHeaders().toObject())
+  // logger.info(inspect(headerValues, {depth: 3}))
+  // $FlowFixMe
+  const headerValuesWithLengthGtZero = headerValues.filter(headersList => headersList.length > 0)
+  // logger.info(inspect(headerValuesWithLengthGtZero, {depth: 3}))
+  // logger.info(GENESIS_DATA.childBlockchainCount)
+  return headerValuesWithLengthGtZero.length === GENESIS_DATA.childBlockchainCount
 }
 
 function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): bool {
-  logger.info('ifMoreThanOneHeaderPerBlockchainAreTheyOrdered validation failed')
+  logger.info('ifMoreThanOneHeaderPerBlockchainAreTheyOrdered validation running')
   const headersMap = newBlock.getBlockchainHeaders()
 
   // gather true/false for each chain signalling if either there is only one header
@@ -75,7 +82,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
 }
 
 function isChainRootCorrectlyCalculated (newBlock: BcBlock): bool {
-  logger.info('isChainRootCorrectlyCalculated validation failed')
+  logger.info('isChainRootCorrectlyCalculated validation running')
   const receivedChainRoot = newBlock.getChainRoot()
 
   const expectedBlockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
@@ -84,7 +91,7 @@ function isChainRootCorrectlyCalculated (newBlock: BcBlock): bool {
 }
 
 function isMerkleRootCorrectlyCalculated (newBlock: BcBlock): bool {
-  logger.info('isMerkleRootCorrectlyCalculated validation failed')
+  logger.info('isMerkleRootCorrectlyCalculated validation running')
   const receivedMerkleRoot = newBlock.getMerkleRoot()
 
   const blockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
@@ -98,7 +105,7 @@ function isMerkleRootCorrectlyCalculated (newBlock: BcBlock): bool {
 }
 
 function isDistanceCorrectlyCalculated (newBlock: BcBlock): bool {
-  logger.info('isDistanceCorrectlyCalculated validation failed')
+  logger.info('isDistanceCorrectlyCalculated validation running')
   const receivedDistance = newBlock.getDistance()
 
   const expectedWork = prepareWork(newBlock.getPreviousHash(), newBlock.getBlockchainHeaders())
