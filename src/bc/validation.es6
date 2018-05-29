@@ -19,7 +19,9 @@ const {
   getChildrenBlocksHashes,
   getChildrenRootHash,
   blockchainMapToList,
-  createMerkleRoot
+  createMerkleRoot,
+  prepareWork,
+  distance
 } = require('./miner')
 const GENESIS_DATA = require('./genesis.raw')
 
@@ -29,7 +31,7 @@ export default function isValidBlock (newBlock: BcBlock): bool {
     ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) &&
     isChainRootCorrectlyCalculated(newBlock) &&
     isMerkleRootCorrectlyCalculated(newBlock) &&
-    isDistanceCorrectlyCalculated(newBlock) // TODO
+    isDistanceCorrectlyCalculated(newBlock)
 }
 
 function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
@@ -66,7 +68,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
   return all(equals(true), chainsConditions)
 }
 
-function isChainRootCorrectlyCalculated (newBlock: BcBlock) {
+function isChainRootCorrectlyCalculated (newBlock: BcBlock): bool {
   const receivedChainRoot = newBlock.getChainRoot()
 
   const expectedBlockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
@@ -74,7 +76,7 @@ function isChainRootCorrectlyCalculated (newBlock: BcBlock) {
   return receivedChainRoot === expectedChainRoot
 }
 
-function isMerkleRootCorrectlyCalculated (newBlock: BcBlock) {
+function isMerkleRootCorrectlyCalculated (newBlock: BcBlock): bool {
   const receivedMerkleRoot = newBlock.getMerkleRoot()
 
   const blockHashes = getChildrenBlocksHashes(blockchainMapToList(newBlock.getBlockchainHeaders()))
@@ -87,6 +89,10 @@ function isMerkleRootCorrectlyCalculated (newBlock: BcBlock) {
   return receivedMerkleRoot === expectedMerkleRoot
 }
 
-function isDistanceCorrectlyCalculated (newBlock: BcBlock) {
-  return true
+function isDistanceCorrectlyCalculated (newBlock: BcBlock): bool {
+  const receivedDistance = newBlock.getDistance()
+
+  const expectedWork = prepareWork(newBlock.getPreviousHash(), newBlock.getBlockchainHeaders())
+  const expectedDistance = distance(expectedWork, blake2bl(newBlock.getMiner() + newBlock.getMerkleRoot() + blake2bl(newBlock.getNonce()) + newBlock.getTimestamp()))
+  return receivedDistance === expectedDistance
 }
