@@ -166,6 +166,7 @@ export function validateBlockSequence (blocks: BcBlock[]): bool {
   const validPairSubchains = pairs.map(([child, parent]) => {
     const childBlockchainHeaders = child.getBlockchainHeaders()
     const parentBlockchainHeaders = parent.getBlockchainHeaders()
+    // TODO this should be a map over all members of BlockchainHeaders instance to prevent error after adding another chain to Collider
     return [
       blockainHeadersOrdered(childBlockchainHeaders.getBtcList(), parentBlockchainHeaders.getBtcList()),
       blockainHeadersOrdered(childBlockchainHeaders.getEthList(), parentBlockchainHeaders.getEthList()),
