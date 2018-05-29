@@ -28,6 +28,8 @@ const { PeerManager, DATETIME_STARTED_AT } = require('./manager/manager')
 
 const { PROTOCOL_PREFIX, NETWORK_ID } = require('./protocol/version')
 
+const { PEER_QUORUM_SIZE } = require('./quorum')
+
 export class PeerNode {
   _logger: Object // eslint-disable-line no-undef
   _engine: Engine // eslint-disable-line no-undef
@@ -189,7 +191,7 @@ export class PeerNode {
           debug('Got metaverse from peer', peer.id.toB58String(), metaverse)
           peerMetaverses.push(metaverse)
 
-          if (peerMetaverses.length >= 12) {
+          if (peerMetaverses.length >= PEER_QUORUM_SIZE) {
             const candidates = peerMetaverses.map((peerMetaverse) => {
               if (true /* hereWillBeAdamsCheck() */ && peerMetaverse.length > 0) {
                 // TODO: Here we also use Tomas' helper +/- 6 seconds
@@ -201,7 +203,7 @@ export class PeerNode {
               return item !== null
             }) || []
 
-            if (candidates.length >= 12) {
+            if (candidates.length >= PEER_QUORUM_SIZE) {
               const uniqueCandidates = uniqBy((candidate) => candidate[0].hash, candidates)
               if (uniqueCandidates.length === 1) {
                 // TODO: Commit as active metaverse and begin full sync from known peers

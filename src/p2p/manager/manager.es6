@@ -26,7 +26,7 @@ const BC_P2P_PASSIVE = !!process.env.BC_P2P_PASSIVE
 
 export const DATETIME_STARTED_AT = Date.now()
 
-const PEER_QUORUM_SIZE = 1
+const { PEER_QUORUM_SIZE } = require('../quorum')
 
 export class PeerManager {
   _logger: Object // eslint-disable-line no-undef
