@@ -468,7 +468,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   )
   const blockHashes = getChildrenBlocksHashes(blockchainMapToList(childBlockHeaders))
   const newChainRoot = getChildrenRootHash(blockHashes)
-  const newBlockCount = getNewBlockCount(lastPreviousBlock.getChildBlockHeaders(), childBlockHeaders)
+  const newBlockCount = getNewBlockCount(lastPreviousBlock.getBlockchainHeaders(), childBlockHeaders)
 
   let finalDifficulty
   let finalTimestamp = currentTimestamp
