@@ -67,6 +67,10 @@ export class PeerNode {
     return this.manager.peerBook
   }
 
+  get reportSyncPeriod (): Function {
+    return this._engine.receiveSyncPeriod
+  }
+
   _pipelineStartNode () {
     debug('_pipelineStartNode')
 
@@ -185,6 +189,7 @@ export class PeerNode {
 
   triggerBlockSync () {
     const peerMetaverses = []
+    this.reportSyncPeriod(true)
 
     this.peerBook.getAllArray().map(peer => {
       this.manager.createPeer(peer)

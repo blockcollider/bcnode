@@ -64,6 +64,7 @@ export default class Engine {
   _unfinishedBlock: ?BcBlock
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
+  _peerIsSyncing: bool
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -88,6 +89,7 @@ export default class Engine {
     this._knownBlocksCache = LRUCache({
       max: 1024
     })
+    this._peerIsSyncing = false
 
     // Start NTP sync
     ts.start()
@@ -366,6 +368,10 @@ export default class Engine {
     } else {
       debug(`Received block is already in cache of known blocks - ${blockObj.hash}`)
     }
+  }
+
+  receiveSyncPeriod (peerIsSyncing: bool) {
+    this._peerIsSyncing = peerIsSyncing
   }
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
