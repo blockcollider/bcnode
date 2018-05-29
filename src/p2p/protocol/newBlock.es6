@@ -14,6 +14,7 @@ const debug = require('debug')('bcnode:protocol:newblock')
 const pull = require('pull-stream')
 
 const { BcBlock } = require('../../protos/core_pb')
+const { shouldBlockBeAddedToMetaverse } = require('../../engine/helper')
 
 const { PROTOCOL_PREFIX } = require('./version')
 
@@ -38,7 +39,7 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           if (manager.isQuorumSynced()) {
             manager._lastQuorumSync = new Date()
             manager._quorumSyncing = true
-            manager.peerNode.triggerBlockSync()
+            shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
           }
         } catch (e) {
           debug(`Error decoding block from peer, reason: ${e.message}`)

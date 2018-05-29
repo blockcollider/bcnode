@@ -21,48 +21,40 @@ import type BcBlock from '../protos/core_pb'
 /**
  * High-level functions
  */
-export const shouldBlockBeAddedToMetaverse = (newBlock: BcBlock) => {
-  // TODO: Implement
-  return true
+export const shouldBlockBeAddedToMetaverse = (newBlock: BcBlock, metaverse: Metaverse, triggerSync: Function) => {
+  if (timestampIsSignificantSecondsBelowLocalTime(newBlock)) {
+    triggerSync()
+    return
+  }
+
+  if (doesNewBlockPreviousHashReferenceBlockInMetaverse(newBlock, metaverse)) {
+    metaverse.addBlock(newBlock)
+    return
+  }
+
+  if (isNewBlockHeightLowerThanLowestInMetaverse(newBlock, metaverse)) {
+    triggerSync()
+    return
+  }
+
+  if (isNewBlockTimestampGreaterThanHighestInMetaverse(newBlock, metaverse)) {
+    triggerSync()
+    return
+  }
+
+  metaverse.addBlock(newBlock)
 }
 
-export const addBlockToMetaverse = (newBlock: BcBlock) => {
-
-}
-
-/**
- * Helper functions
- */
-export const isBlockValid = (newBlock: BcBlock) => {
-  // TODO: Implement
-  return true
-}
-
-export const shouldMetaverseBeReorganized = () => {
-  // TODO: Implement
-  return false
-}
-
-export const isTimestampWithin = (newBlock: BcBlock, seconds: number): boolean => {
+const isTimestampWithin = (newBlock: BcBlock, seconds: number): boolean => {
   return (Date.now() * 0.001 - newBlock.getTimestamp()) < seconds
 }
 
-export const timestampIs70secondsBelowLocalTime = (newBlock: BcBlock): boolean => {
-  return isTimestampWithin(newBlock, 70) === false
+export const timestampIsSignificantSecondsBelowLocalTime = (newBlock: BcBlock): boolean => {
+  return isTimestampWithin(newBlock, 12) === false
 }
 
 export const doesNewBlockPreviousHashReferenceBlockInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  return !!metaverse.getBlockByHash(newBlock.getPreviousHash())
-}
-
-export const isNewBlockDifficultyLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  metaverse.toFlatArray().forEach((block) => {
-    if (block.getDifficulty() <= newBlock.getDifficulty()) {
-      return false
-    }
-  })
-
-  return true
+  return metaverse.addBlock(newBlock)
 }
 
 export const isNewBlockHeightLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
@@ -78,16 +70,6 @@ export const isNewBlockHeightLowerThanLowestInMetaverse = (newBlock: BcBlock, me
 export const isNewBlockTimestampGreaterThanHighestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
   metaverse.toFlatArray().forEach((block) => {
     if (block.getTimestamp() >= newBlock.getTimestamp()) {
-      return false
-    }
-  })
-
-  return true
-}
-
-export const isNewBlockTimestampLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  metaverse.toFlatArray().forEach((block) => {
-    if (block.getTimestamp() <= newBlock.getTimestamp()) {
       return false
     }
   })

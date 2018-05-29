@@ -27,6 +27,7 @@ const Signaling = require('./signaling').websocket
 const { PeerManager, DATETIME_STARTED_AT } = require('./manager/manager')
 const { validateBlockSequence } = require('../bc/validation')
 const { Metaverse } = require('../bc/metaverse')
+const { BlockPool } = require('../bc/blockpool')
 
 const { PROTOCOL_PREFIX, NETWORK_ID } = require('./protocol/version')
 
@@ -40,12 +41,14 @@ export class PeerNode {
   _manager: PeerManager // eslint-disable-line no-undef
   _peer: PeerInfo // eslint-disable-line no-undef
   _metaverse: Metaverse
+  _blockPool: BlockPool
 
   constructor (engine: Engine) {
     this._engine = engine
     this._logger = logging.getLogger(__filename)
     this._manager = new PeerManager(this)
     this._metaverse = new Metaverse(this._engine.persistence)
+    this._blockPool = new BlockPool(this._engine.persistence)
 
     if (config.p2p.stats.enabled) {
       this._interval = setInterval(() => {
