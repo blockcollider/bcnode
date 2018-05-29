@@ -21,14 +21,14 @@ describe('RocksDb', () => {
   test('getBtAddressBalance', done => {
     const dataDir = `${TEST_DATA_DIR}_balances`
     const db = new RocksDb(dataDir)
-		const rawGenesisBlock = require('../../bc/genesis.raw.es6')
+    const rawGenesisBlock = require('../../bc/genesis.raw.es6')
     const goodAddress = '0x676932A26A3e9Ee9A23F836C939805433e60066F'
-    const badAddress = '32A26A3e9Ee9A23F836C939805433e600'
+    // const badAddress = '32A26A3e9Ee9A23F836C939805433e600'
 
     db.open()
-      .then(() => db.put("bc.block.latest", rawGenesisBlock))
-      .then(() => db.put("bc.block.1", rawGenesisBlock))
-      .then(() => db.getBtAddressBalance(goodAddress))
+      .then(() => db.put('bc.block.latest', rawGenesisBlock))
+      .then(() => db.put('bc.block.1', rawGenesisBlock))
+      .then(() => Promise.resolve(db.getBtAddressBalance(goodAddress)))
       .then((res) => {
         expect(res).toEqual({ unconfirmed: 0, confirmed: 0 })
         return db.close()
