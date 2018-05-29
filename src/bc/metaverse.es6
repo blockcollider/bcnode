@@ -16,8 +16,9 @@ const COMMIT_METAVERSE_DEPTH = 7
 export class Metaverse {
   _blocks: Object
   _commitDepth: number
-  _writeQueue: Array
+  _writeQueue: BcBlock[]
   _height: number
+  _persistence: any
 
   constructor (commitDepth: number = COMMIT_METAVERSE_DEPTH, persistence: any) {
     this._blocks = {}
@@ -101,7 +102,7 @@ export class Metaverse {
   }
 
   getHighestBlock (): ?BcBlock {
-    const keys = Object.keys(this.block)
+    const keys = Object.keys(this._blocks)
     if (keys.length > 0) {
       const last = keys.pop()
       const block = this._blocks[last][0]
@@ -112,7 +113,7 @@ export class Metaverse {
   }
 
   getLowestBlock (): ?BcBlock {
-    const keys = Object.keys(this.block)
+    const keys = Object.keys(this._blocks)
     if (keys.length > 0) {
       const last = keys.shift()
       const block = this._blocks[last][0]
@@ -125,7 +126,8 @@ export class Metaverse {
   shouldBroadcastBlock (block: BcBlock, force: boolean = false): boolean {
     const highestBlock = this.getHighestBlock()
     if (highestBlock !== null) {
-      if (this._addBlock(block, force) === true) {
+      if (this.addBlock(block, force) === true) {
+        // $FlowFixMe
         const height = highestBlock.getHeight()
         if (block.getHeight() >= height) {
           return true
@@ -146,15 +148,17 @@ export class Metaverse {
     return flatten(blocks)
   }
 
-  evalMetaverse (): Promise {
+  persistMetaverse (): Promise<*> {
     if (this._writeQueue.length > 0) {
       const tasks = []
       for (let i = 0; i < this._writeQueue.length; i++) {
-        tasks.push(this._persistence.set('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
+        tasks.push(this._persistence.pus('bc.block.' + this._writeQueue[i].getHeight(), this._writeQueue[i]))
       }
-      this.writeQueue = []
+      this._writeQueue = []
       return Promise.all(tasks)
     }
+
+    return Promise.resolve()
   }
 
   // print () {
@@ -166,19 +170,6 @@ export class Metaverse {
   //     }
   //   }
   // }
-
-  print () {
-    console.log(JSON.stringify(this.toObject(), null, 2))
-  }
-
-  toObject (): Object {
-    const res = {}
-    this.toArray().forEach((row, index) => {
-      res[this.minHeight + index] = row.map((block) => block.toObject())
-    })
-
-    return res
-  }
 }
 
 export default Metaverse
