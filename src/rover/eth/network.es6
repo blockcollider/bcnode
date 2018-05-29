@@ -156,7 +156,7 @@ export default class Network extends EventEmitter {
     }
 
     this._txCache.set(txHashHex, true)
-    this._logger.debug(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
+    // this._logger.debug(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
   }
 
   onNewBlock (block: EthereumBlock, peer: Object) {
