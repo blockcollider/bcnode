@@ -21,9 +21,10 @@ const {
   blockchainMapToList,
   createMerkleRoot
 } = require('./miner')
+const GENESIS_DATA = require('./genesis.raw')
 
 export default function isValidBlock (newBlock: BcBlock): bool {
-  return theBlockChainFingerPrintMatchGenesisBlock(newBlock) && // TODO
+  return theBlockChainFingerPrintMatchGenesisBlock(newBlock) &&
     numberOfBlockchainsNeededMatchesChildBlock(newBlock) && // TODO
     ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) &&
     isChainRootCorrectlyCalculated(newBlock) &&
@@ -31,8 +32,8 @@ export default function isValidBlock (newBlock: BcBlock): bool {
     isDistanceCorrectlyCalculated(newBlock) // TODO
 }
 
-function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock) {
-  return true
+function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
+  return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
 }
 
 function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock) {
