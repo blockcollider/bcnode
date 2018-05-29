@@ -12,6 +12,8 @@ import type { Bundle } from './../bundle'
 
 const debug = require('debug')('bcnode:peer:peer')
 const pull = require('pull-stream')
+const { type } = require('ramda')
+const { BcBlock } = require('../../protos/core_pb')
 
 const { PROTOCOL_PREFIX } = require('../protocol/version')
 
@@ -59,7 +61,8 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              resolve(msg)
+              const result = msg.map(b => BcBlock.deserializeBinary(b))
+              resolve(result)
             } catch (e) {
               return reject(e)
             }
@@ -96,7 +99,8 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              resolve(msg)
+              const result = BcBlock.deserializeBinary(msg)
+              resolve(result)
             } catch (e) {
               return reject(e)
             }
@@ -133,7 +137,8 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              resolve(msg)
+              const result = msg.map(b => BcBlock.deserializeBinary(b))
+              resolve(result)
             } catch (e) {
               return reject(e)
             }
@@ -170,7 +175,8 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              resolve(msg)
+              const result = msg.map(b => BcBlock.deserializeBinary(b))
+              resolve(result)
             } catch (e) {
               return reject(e)
             }

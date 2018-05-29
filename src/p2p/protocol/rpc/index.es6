@@ -49,12 +49,12 @@ const handlers = {
     }
 
     return manager.engine.persistence.get(ids)
-      .then((res) => res.map((block) => block.toObject()))
+      .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
   },
 
   getLatestHeader: (manager: PeerManager) => {
     return manager.engine.persistence.get('bc.block.latest')
-      .then((res) => Promise.resolve(res.toObject()))
+      .then((res) => Promise.resolve(res.serializeBinary().toString('base64')))
   },
 
   getLatestHeaders: (manager: PeerManager, count: number) => {
@@ -72,7 +72,7 @@ const handlers = {
         }
 
         return manager.engine.persistence.get(ids)
-          .then((res) => res.map((block) => block.toObject()))
+          .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
       })
   },
 
@@ -95,7 +95,7 @@ const handlers = {
         }
 
         return manager.engine.persistence.get(ids)
-          .then((res) => res.map((block) => block.toObject()))
+          .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
       })
   }
 }
