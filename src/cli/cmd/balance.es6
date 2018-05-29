@@ -19,15 +19,17 @@ export const cmd = (program: typeof Command, address: string) => {
   }
   const RocksDb = require('../../persistence').RocksDb
   const db = new RocksDb(DATA_DIR)
-  console.log("Loading balance for address " + address)
+  console.log('Loading balance for address ' + address)
   return db.open()
-  .then(() => db.getBtAddressBalance(address))
-  .then((res) => {
-    console.log(res)
-    db.close()
-  })
-  .catch((err) => {
-    db.close()
-    throw new Error(err)
-  })
+    .then(() => db.getBtAddressBalance(address))
+    .then((res) => {
+      const divider = 100000000
+      const { confirmed, unconfirmed } = res
+      console.log(`confirmed: ${confirmed / divider}, unconfirmed: ${unconfirmed / divider}`)
+      db.close()
+    })
+    .catch((err) => {
+      db.close()
+      throw new Error(err)
+    })
 }

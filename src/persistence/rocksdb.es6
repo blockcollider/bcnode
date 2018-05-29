@@ -9,6 +9,7 @@
 import type Logger from 'winston'
 const RocksDb = require('rocksdb')
 
+const { BcBlock } = require('../protos/core_pb')
 const { serialize, deserialize } = require('./codec')
 const { getLogger } = require('../logger')
 
@@ -153,12 +154,14 @@ export default class PersistenceRocksDb {
     for (let i = startBlock; i < endBlock; i++) {
       try {
         const block = await self.get('bc.block.' + i)
-        if (block !== undefined && block.miner === address) {
-          if (block.nrgGrant !== 1600000000) block.nrgGrant = 1600000000 // Force BT Reward
-          if (endBlock - i > 99 && block.nrgGrant !== undefined) {
-            accountBalances.confirmed += block.nrgGrant
-          } else if (endBlock - i < 99 && block.nrgGrant !== undefined) {
-            accountBalances.unconfirmed += block.nrgGrant
+        if (block !== undefined && block.getMiner() === address) {
+          if (block.getNrgGrant() !== 1600000000) {
+            block.setNrgGrant(1600000000) // Force BT Reward
+          }
+          if (endBlock - i > 99 && block.getNrgGrant() !== undefined) {
+            accountBalances.confirmed += block.getNrgGrant()
+          } else if (endBlock - i < 99 && block.getNrgGrant() !== undefined) {
+            accountBalances.unconfirmed += block.getNrgGrant()
           }
         }
       } catch (err) {
@@ -187,9 +190,9 @@ export default class PersistenceRocksDb {
           return reject(new Error(`${err.message} --> local Block Collider ledger not found, sychronize machine with network`))
         }
         try {
-          const latestBlock = deserialize(value)
-          if (latestBlock !== undefined && latestBlock.height !== undefined) {
-            const endBlock = latestBlock.height
+          const latestBlock: BcBlock = deserialize(value)
+          if (latestBlock !== undefined && latestBlock.getHeight() !== undefined) {
+            const endBlock = latestBlock.getHeight()
             return resolve(self.scanBlockGrants(address, 1, Number(endBlock)))
           } else {
             return reject(new Error(`No blocks stored on disk`))
