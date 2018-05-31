@@ -32,10 +32,10 @@ const GENESIS_DATA = require('./genesis.raw')
 const logger = getLogger(__filename)
 
 export function isValidBlock (newBlock: BcBlock): bool {
-  // if (!theBlockChainFingerPrintMatchGenesisBlock(newBlock)) {
-  //  logger.warn('failed: theBlockChainFingerPrintMatchGenesisBlock')
-  //  return false
-  // }
+  if (!theBlockChainFingerPrintMatchGenesisBlock(newBlock)) {
+    logger.warn('failed: theBlockChainFingerPrintMatchGenesisBlock')
+    return false
+  }
   if (!numberOfBlockchainsNeededMatchesChildBlock(newBlock)) {
     logger.warn('failed: numberOfBlockchainsNeededMatchesChildBlock')
     return false
@@ -59,10 +59,10 @@ export function isValidBlock (newBlock: BcBlock): bool {
   return true
 }
 
-// function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
-//  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation running')
-//  return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
-// }
+function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
+  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation running')
+  return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
+}
 
 function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock): bool {
   logger.info('numberOfBlockchainsNeededMatchesChildBlock validation running')
@@ -98,8 +98,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
       equals(true),
       aperture(2, chainHeaders).map(([a, b]) => a.getHeight() < b.getHeight())
     )
-    // $FlowFixMe
-    logger.debug(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered ${listName} multiple and valid: ${orderingCorrect}`)
+    logger.debug(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered ${listName} multiple and valid: ${orderingCorrect.toString()}`)
     if (!orderingCorrect) {
       logger.debug(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered ${inspect(headersMap.toObject())}`)
     }
@@ -107,7 +106,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
   })
 
   // check if all chain conditions are true
-  logger.info(inspect(chainsConditions))
+  logger.info(`ifMoreThanOneHeaderPerBlockchainAreTheyOrdered all chain conditions: ${inspect(chainsConditions)}`)
   return all(equals(true), chainsConditions)
 }
 
@@ -164,7 +163,7 @@ export function validateBlockSequence (blocks: BcBlock[]): bool {
   // BC: 10 > BC: 9 > BC: 8 ...
   const sortedBlocks = sort((a, b) => b.getHeight() - a.getHeight(), blocks)
 
-  logger.debug(`validateBlockSequence sorted blocks ${sortedBlocks.map(b => b.getHeight())}`)
+  logger.debug(`validateBlockSequence sorted blocks ${sortedBlocks.map(b => b.getHeight()).toString()}`)
   // validate that Bc blocks are all in the same chain
   const validPairs = aperture(2, sortedBlocks).map(([a, b]) => {
     return a.getPreviousHash() === b.getHash()
