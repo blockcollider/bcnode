@@ -28,6 +28,7 @@ const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
 const { isValidBlock } = require('../bc/validation')
+const { getBlockchainsBlocksCount } = require('../bc/helper')
 const { Block, BcBlock } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
@@ -301,12 +302,18 @@ export default class Engine {
         timeDiff: undefined
       }
 
-      if (this._workerProcess) { // TODO restart conditionaly - define conditions
+      // if blockchains block count === 5 we will create a block with 6 blockchain blocks (which gets bonus)
+      // if it's more, do not restart mining and start with new ones
+      if (this._workerProcess && this._unfinishedBlock) {
         this._logger.debug(`Restarting mining with a new rovered block`)
         // $FlowFixMe
         this._workerProcess.kill()
         // $FlowFixMe
         this._workerProcess.disconnect()
+        if (getBlockchainsBlocksCount(this._unfinishedBlock) > 6) {
+          this._unfinishedBlock = undefined
+          this._unfinishedBlockData = undefined
+        }
       }
 
       // if (!this._workerProcess) {
