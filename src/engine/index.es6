@@ -522,6 +522,7 @@ export default class Engine {
         })
     } else {
       this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
+      return Promise.resolve()
     }
   }
 }
