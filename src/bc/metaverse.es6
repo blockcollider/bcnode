@@ -239,8 +239,8 @@ export class Metaverse {
       all.push({
         hash: self._blocks[item][0].getHash(),
         prevHash: self._blocks[item][0].getPreviousHash(),
-        block: self._blocks[item][0],
-        blocksAtHeight: self._blocks[item][0]
+        block: self._blocks[item][0].toObject(),
+        blocksAtHeight: self._blocks[item][0].toObject()
       })
       return all
     }, [])
