@@ -14,7 +14,7 @@ const debug = require('debug')('bcnode:protocol:newblock')
 const pull = require('pull-stream')
 
 const { BcBlock } = require('../../protos/core_pb')
-const { shouldBlockBeAddedToMetaverse } = require('../../engine/helper')
+const { shouldBlockBeAddedToMultiverse } = require('../../engine/helper')
 const { isValidBlock } = require('../../bc/validation')
 
 const { PROTOCOL_PREFIX } = require('./version')
@@ -43,7 +43,7 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           }
           //manager.engine._processMinedBlock(block)
           manager.engine.blockFromPeer(block)
-          //const shouldBeAdded = shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
+          //const shouldBeAdded = shouldBlockBeAddedToMultiverse(block, manager.peerNode.multiverse, manager.peerNode.triggerBlockSync)
           // TODO add getter
           //manager.peerNode._blockPool._syncEnabled = !shouldBeAdded
 

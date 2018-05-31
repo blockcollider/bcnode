@@ -12,9 +12,9 @@ const { getGenesisBlock } = require('./genesis')
 const { flatten } = require('ramda')
 const logging = require('../logger')
 const _ = require('lodash')
-const COMMIT_METAVERSE_DEPTH = 7
+const COMMIT_MULTIVERSE_DEPTH = 7
 
-export class Metaverse {
+export class Multiverse {
   _blocks: Object
   _commitDepth: number
   _writeQueue: BcBlock[]
@@ -22,7 +22,7 @@ export class Metaverse {
   _logger: Object
   _persistence: any
 
-  constructor (persistence: any, commitDepth: number = COMMIT_METAVERSE_DEPTH) {
+  constructor (persistence: any, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
     this._blocks = {}
     this._writeQueue = []
     this._persistence = persistence
@@ -48,7 +48,7 @@ export class Metaverse {
     const parentHeight = height - 1
     let hasParent = false
     let hasChild = false
-    let inMetaverseLayer = false
+    let inMultiverseLayer = false
     let added = false
     let syncing = false
     this._logger.info('new multiverse candidate for height ' + height + ' (' + block.getHash() + ')')
@@ -78,7 +78,7 @@ export class Metaverse {
       }, false)
     }
     if (this._blocks[height] !== undefined) {
-      inMetaverseLayer = this._blocks[height].reduce((all, item) => {
+      inMultiverseLayer = this._blocks[height].reduce((all, item) => {
         if (item.getHash() === block.getHash()) {
           all = true
         }
@@ -86,7 +86,7 @@ export class Metaverse {
       }, false)
     }
     if (hasParent || hasChild || syncing) {
-      if (inMetaverseLayer === false) {
+      if (inMultiverseLayer === false) {
         if (this._blocks[height] === undefined) {
           this._blocks[height] = []
         }
@@ -228,7 +228,7 @@ export class Metaverse {
             })
         })
     } else {
-      self._logger.info('no updates to metaverse data structure')
+      self._logger.info('no updates to multiverse data structure')
     }
     return Promise.resolve()
   }
@@ -257,4 +257,4 @@ export class Metaverse {
   // }
 }
 
-export default Metaverse
+export default Multiverse

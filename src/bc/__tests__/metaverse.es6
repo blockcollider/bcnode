@@ -8,40 +8,40 @@
  */
 
 const { BcBlock } = require('../../protos/core_pb')
-const { Metaverse } = require('../metaverse')
+const { Multiverse } = require('../multiverse')
 
 const BASE_DIFFICULTY = 42
 
-describe.skip('Metaverse', () => {
+describe.skip('Multiverse', () => {
   test('constructor()', () => {
-    const metaverse = new Metaverse()
-    expect(metaverse.blocksCount).toEqual(0)
+    const multiverse = new Multiverse()
+    expect(multiverse.blocksCount).toEqual(0)
   })
 
   test('add() - first one', () => {
-    const metaverse = new Metaverse()
+    const multiverse = new Multiverse()
 
     const block = new BcBlock()
     block.setDifficulty(BASE_DIFFICULTY)
     block.setHeight(0)
 
-    metaverse.addBlock(block)
-    expect(metaverse.blocksCount).toEqual(1)
+    multiverse.addBlock(block)
+    expect(multiverse.blocksCount).toEqual(1)
   })
 
   test('add() - one for each depth', () => {
-    const metaverse = new Metaverse()
+    const multiverse = new Multiverse()
 
-    for (let i = 0; i < metaverse.maxDepth; i++) {
+    for (let i = 0; i < multiverse.maxDepth; i++) {
       const block = new BcBlock()
       block.setDifficulty(BASE_DIFFICULTY + i)
       block.setHeight(i)
-      metaverse.addBlock(block)
+      multiverse.addBlock(block)
     }
-    expect(metaverse.blocksCount).toEqual(metaverse.maxDepth)
+    expect(multiverse.blocksCount).toEqual(multiverse.maxDepth)
 
-    const blocksArray = metaverse.toArray()
-    for (let i = 0; i < metaverse.maxDepth; i++) {
+    const blocksArray = multiverse.toArray()
+    for (let i = 0; i < multiverse.maxDepth; i++) {
       const block = blocksArray[i][0]
       expect(block.getDifficulty()).toEqual(BASE_DIFFICULTY + i)
       expect(block.getHeight()).toEqual(i)
@@ -49,23 +49,23 @@ describe.skip('Metaverse', () => {
   })
 
   test('add() - N for each depth', () => {
-    const metaverse = new Metaverse()
+    const multiverse = new Multiverse()
     const blocksPerDepth = 5
 
-    for (let i = 0; i < metaverse.maxDepth; i++) {
+    for (let i = 0; i < multiverse.maxDepth; i++) {
       for (let j = 0; j < blocksPerDepth; j++) {
         const block = new BcBlock()
         block.setDifficulty(BASE_DIFFICULTY + (i * blocksPerDepth) + j)
         block.setHeight(i)
-        metaverse.addBlock(block)
+        multiverse.addBlock(block)
       }
     }
 
-    metaverse.print()
-    expect(metaverse.blocksCount).toEqual(blocksPerDepth * metaverse.maxDepth)
+    multiverse.print()
+    expect(multiverse.blocksCount).toEqual(blocksPerDepth * multiverse.maxDepth)
 
-    const blocksArray = metaverse.toArray()
-    for (let i = 0; i < metaverse.maxDepth; i++) {
+    const blocksArray = multiverse.toArray()
+    for (let i = 0; i < multiverse.maxDepth; i++) {
       for (let j = 0; j < blocksPerDepth; j++) {
         const block = blocksArray[i][j]
         expect(block.getDifficulty()).toEqual(BASE_DIFFICULTY + (i * blocksPerDepth) + j)

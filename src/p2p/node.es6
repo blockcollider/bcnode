@@ -26,7 +26,7 @@ const Engine = require('../engine').default
 const Signaling = require('./signaling').websocket
 const { PeerManager, DATETIME_STARTED_AT } = require('./manager/manager')
 const { validateBlockSequence } = require('../bc/validation')
-const { Metaverse } = require('../bc/metaverse')
+const { Multiverse } = require('../bc/multiverse')
 const { BlockPool } = require('../bc/blockpool')
 
 const { PROTOCOL_PREFIX, NETWORK_ID } = require('./protocol/version')
@@ -40,12 +40,12 @@ export class PeerNode {
   _bundle: Bundle // eslint-disable-line no-undef
   _manager: PeerManager // eslint-disable-line no-undef
   _peer: PeerInfo // eslint-disable-line no-undef
-  _metaverse: Metaverse
+  _multiverse: Multiverse
   _blockPool: BlockPool
 
   constructor (engine: Engine) {
     this._engine = engine
-    this._metaverse = new Metaverse(engine._persistence)
+    this._multiverse = new Multiverse(engine._persistence)
     this._blockPool = new BlockPool(engine._persistence)
     this._logger = logging.getLogger(__filename)
     this._manager = new PeerManager(this)
@@ -77,8 +77,8 @@ export class PeerNode {
     return this._engine.receiveSyncPeriod
   }
 
-  get metaverse (): Metaverse {
-    return this._metaverse
+  get multiverse (): Multiverse {
+    return this._multiverse
   }
 
   _pipelineStartNode () {
@@ -198,22 +198,22 @@ export class PeerNode {
   }
 
   triggerBlockSync () {
-    const peerMetaverses = []
+    const peerMultiverses = []
     // Notify miner to stop mining
     this.reportSyncPeriod(true)
 
     this.peerBook.getAllArray().map(peer => {
       this.manager.createPeer(peer)
-        .getMetaverse()
-        .then((metaverse) => {
-          debug('Got metaverse from peer', peer.id.toB58String(), metaverse)
-          peerMetaverses.push(metaverse)
+        .getMultiverse()
+        .then((multiverse) => {
+          debug('Got multiverse from peer', peer.id.toB58String(), multiverse)
+          peerMultiverses.push(multiverse)
 
-          if (peerMetaverses.length >= PEER_QUORUM_SIZE) {
-            const candidates = peerMetaverses.map((peerMetaverse) => {
-              if (peerMetaverse.length > 0 && validateBlockSequence(peerMetaverse)) {
+          if (peerMultiverses.length >= PEER_QUORUM_SIZE) {
+            const candidates = peerMultiverses.map((peerMultiverse) => {
+              if (peerMultiverse.length > 0 && validateBlockSequence(peerMultiverse)) {
                 // TODO: Here we also use Tomas' helper +/- 6 seconds
-                return peerMetaverse
+                return peerMultiverse
               } else {
                 return null
               }
@@ -224,9 +224,9 @@ export class PeerNode {
             if (candidates.length >= PEER_QUORUM_SIZE) {
               const uniqueCandidates = uniqBy((candidate) => candidate[0].getHash(), candidates)
               if (uniqueCandidates.length === 1) {
-                // TODO: Commit as active metaverse and begin full sync from known peers
+                // TODO: Commit as active multiverse and begin full sync from known peers
               } else {
-                const peerMetaverseByDifficultySum = uniqueCandidates
+                const peerMultiverseByDifficultySum = uniqueCandidates
                   // accumulator, element
                   .reduce((all, peerBlocks) => {
                     const difficultySum = sum(peerBlocks.map((peerBlock) => peerBlock.getDifficulty()))
@@ -245,7 +245,7 @@ export class PeerNode {
                     return 0
                   })
 
-                const winningMetaverse = peerMetaverseByDifficultySum[0]
+                const winningMultiverse = peerMultiverseByDifficultySum[0]
                 // TODO split the work among multiple correct candidates
                 // const syncCandidates = candidates.filter((candidate) => {
                 //   if (winner.getHash() === candidate[0].getHash()) {
@@ -253,13 +253,13 @@ export class PeerNode {
                 //   }
                 //   return false
                 // })
-                const lowestBlock = this.metaverse.getLowestBlock()
-                if (lowestBlock && lowestBlock.getHash() !== winningMetaverse[0].getHash()) {
+                const lowestBlock = this.multiverse.getLowestBlock()
+                if (lowestBlock && lowestBlock.getHash() !== winningMultiverse[0].getHash()) {
                   this._blockPool.maximumHeight = lowestBlock.getHeight()
-                  // this.metaverse.purge()
-                  // insert into the metaverse
-                  winningMetaverse.map(block => this.metaverse.addBlock(block))
-                  this.metaverse.persist()
+                  // this.multiverse.purge()
+                  // insert into the multiverse
+                  winningMultiverse.map(block => this.multiverse.addBlock(block))
+                  this.multiverse.persist()
                   // Report not syncing
                   this.reportSyncPeriod(false)
                 }

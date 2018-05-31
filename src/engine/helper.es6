@@ -7,42 +7,42 @@
  * @flow
  */
 
-import type Metaverse from '../bc/metaverse'
+import type Multiverse from '../bc/multiverse'
 import type BcBlock from '../protos/core_pb'
 
 // Functions
 // [x] - timestampIs70secondsBelowLocalTime
-// [x] - doesNewBlockPreviousHashReferenceBlockInMetaverse
-// [ ] - isNewBlockDifficultyLowerThanLowestInMetaverse
-// [x] - isNewBlockHeightLowerThanLowestInMetaverse
-// [x] - isNewBlockTimestampGreaterThanHighestInMetaverse
-// [x] - isNewBlockTimestampLowerThanLowestInMetaverse
+// [x] - doesNewBlockPreviousHashReferenceBlockInMultiverse
+// [ ] - isNewBlockDifficultyLowerThanLowestInMultiverse
+// [x] - isNewBlockHeightLowerThanLowestInMultiverse
+// [x] - isNewBlockTimestampGreaterThanHighestInMultiverse
+// [x] - isNewBlockTimestampLowerThanLowestInMultiverse
 
 /**
  * High-level functions
  */
-export const shouldBlockBeAddedToMetaverse = (newBlock: BcBlock, metaverse: Metaverse, triggerSync: Function): bool => {
+export const shouldBlockBeAddedToMultiverse = (newBlock: BcBlock, multiverse: Multiverse, triggerSync: Function): bool => {
   if (timestampIsSignificantSecondsBelowLocalTime(newBlock)) {
     triggerSync()
     return false
   }
 
-  if (doesNewBlockPreviousHashReferenceBlockInMetaverse(newBlock, metaverse)) {
-    metaverse.addBlock(newBlock)
+  if (doesNewBlockPreviousHashReferenceBlockInMultiverse(newBlock, multiverse)) {
+    multiverse.addBlock(newBlock)
     return true
   }
 
-  if (isNewBlockHeightLowerThanLowestInMetaverse(newBlock, metaverse)) {
+  if (isNewBlockHeightLowerThanLowestInMultiverse(newBlock, multiverse)) {
     triggerSync()
     return false
   }
 
-  if (isNewBlockTimestampGreaterThanHighestInMetaverse(newBlock, metaverse)) {
+  if (isNewBlockTimestampGreaterThanHighestInMultiverse(newBlock, multiverse)) {
     triggerSync()
     return false
   }
 
-  metaverse.addBlock(newBlock)
+  multiverse.addBlock(newBlock)
   return true
 }
 
@@ -54,12 +54,12 @@ export const timestampIsSignificantSecondsBelowLocalTime = (newBlock: BcBlock): 
   return isTimestampWithin(newBlock, 12) === false
 }
 
-export const doesNewBlockPreviousHashReferenceBlockInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  return metaverse.addBlock(newBlock)
+export const doesNewBlockPreviousHashReferenceBlockInMultiverse = (newBlock: BcBlock, multiverse: Multiverse): boolean => {
+  return multiverse.addBlock(newBlock)
 }
 
-export const isNewBlockHeightLowerThanLowestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  metaverse.toFlatArray().forEach((block) => {
+export const isNewBlockHeightLowerThanLowestInMultiverse = (newBlock: BcBlock, multiverse: Multiverse): boolean => {
+  multiverse.toFlatArray().forEach((block) => {
     if (block.getHeight() <= newBlock.getHeight()) {
       return false
     }
@@ -68,8 +68,8 @@ export const isNewBlockHeightLowerThanLowestInMetaverse = (newBlock: BcBlock, me
   return true
 }
 
-export const isNewBlockTimestampGreaterThanHighestInMetaverse = (newBlock: BcBlock, metaverse: Metaverse): boolean => {
-  metaverse.toFlatArray().forEach((block) => {
+export const isNewBlockTimestampGreaterThanHighestInMultiverse = (newBlock: BcBlock, multiverse: Multiverse): boolean => {
+  multiverse.toFlatArray().forEach((block) => {
     if (block.getTimestamp() >= newBlock.getTimestamp()) {
       return false
     }

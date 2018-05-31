@@ -366,7 +366,7 @@ export default class Engine {
       // Add to cache
       this._knownBlocksCache.set(blockObj.hash, blockObj)
 
-      // TODO: Update metaverse
+      // TODO: Update multiverse
 
       // Broadcast to other peers
       this.node.broadcastNewBlock(block)
@@ -505,12 +505,12 @@ export default class Engine {
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
     if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
       debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
-      //  add to metaverse and call persist
-      this.node.metaverse.addBlock(newBlock)
+      //  add to multiverse and call persist
+      this.node.multiverse.addBlock(newBlock)
 
       this._knownBlocksCache.set(newBlock.getHash(), newBlockObj)
 
-      return this.node.metaverse.persist()
+      return this.node.multiverse.persist()
         .then(() => {
           this._logger.debug('New BC block stored in DB')
 

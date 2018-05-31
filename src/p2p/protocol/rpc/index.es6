@@ -76,7 +76,7 @@ const handlers = {
       })
   },
 
-  getMetaverse: (manager: PeerManager) => {
+  getMultiverse: (manager: PeerManager) => {
     if (false && manager.isQuorumSyncing()) {
       return Promise.resolve([])
     }
