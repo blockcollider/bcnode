@@ -45,10 +45,10 @@ export class PeerNode {
 
   constructor (engine: Engine) {
     this._engine = engine
+    this._metaverse = new Metaverse(engine._persistence)
+    this._blockPool = new BlockPool(engine._persistence)
     this._logger = logging.getLogger(__filename)
     this._manager = new PeerManager(this)
-    this._metaverse = new Metaverse(this._engine.persistence)
-    this._blockPool = new BlockPool(this._engine.persistence)
 
     if (config.p2p.stats.enabled) {
       this._interval = setInterval(() => {
@@ -256,9 +256,7 @@ export class PeerNode {
                 const lowestBlock = this.metaverse.getLowestBlock()
                 if (lowestBlock && lowestBlock.getHash() !== winningMetaverse[0].getHash()) {
                   this._blockPool.maximumHeight = lowestBlock.getHeight()
-                  this._blockPool.purge('bc.blockpool.')
-                  this._blockPool.purge('bc.block.')
-                  this.metaverse.purge()
+                  // this.metaverse.purge()
                   // insert into the metaverse
                   winningMetaverse.map(block => this.metaverse.addBlock(block))
                   this.metaverse.persist()

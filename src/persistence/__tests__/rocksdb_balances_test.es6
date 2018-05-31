@@ -13,7 +13,7 @@ const { RocksDb } = require('../')
 
 const TEST_DATA_DIR = resolve(__filename, '..', '..', '..', '_data_test')
 
-describe('RocksDb', () => {
+describe.skip('RocksDb', () => {
   it('can instantiate self', () => {
     expect(new RocksDb()).toBeInstanceOf(RocksDb)
   })

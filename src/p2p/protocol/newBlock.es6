@@ -41,12 +41,11 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
             // TODO this peer should make to the the blacklist
             return
           }
+          //manager.engine._processMinedBlock(block)
           manager.engine.blockFromPeer(block)
-          // TODO: should run with every block
-
-          const shouldBeAdded = shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
+          //const shouldBeAdded = shouldBlockBeAddedToMetaverse(block, manager.peerNode.metaverse, manager.peerNode.triggerBlockSync)
           // TODO add getter
-          manager.peerNode._blockPool._syncEnabled = !shouldBeAdded
+          //manager.peerNode._blockPool._syncEnabled = !shouldBeAdded
 
           if (manager.engine.peerIsSyncing === true) {
             manager._lastQuorumSync = new Date()

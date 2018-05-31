@@ -23,6 +23,7 @@ const { createUnifiedBlock } = require('../helper')
 
 const NETWORK_TIMEOUT = 3000
 const BLOCK_VERSION = 536870912
+const LOCALDISK = true
 
 function _createUnifiedBlock (block: Object): Block { // TODO specify block type
   const msg = new Block()

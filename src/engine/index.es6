@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-present, BlockCollider developers, All rights reserved.
+ * Copyright (c) 2017-present, Block Collider developers, All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -35,6 +35,7 @@ const ts = require('../utils/time').default // ES6 default export
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 const MONITOR_ENABLED = process.env.BC_MONITOR === 'true'
+const PERSIST_ROVER_DATA = process.env.PERSIST_ROVER_DATA === 'true'
 const MINER_WORKER_PATH = resolve(__filename, '..', '..', 'bc', 'miner_worker.js')
 
 type UnfinishedBlockData = {
@@ -48,7 +49,7 @@ type UnfinishedBlockData = {
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _monitor: Monitor; // eslint-disable-line no-undef
-  _knownBlocksCache: Object // eslint-disable-line no-undef
+  _knownBlocksCache: Object; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _pubsub: PubSub; //  eslint-disable-line no-undef
@@ -64,15 +65,15 @@ export default class Engine {
   _unfinishedBlock: ?BcBlock
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
-  _peerIsSyncing: bool
+  _peerIsSyncing: boolean
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
     this._knownRovers = opts.rovers
     this._minerKey = opts.minerKey
     this._monitor = new Monitor(this, {})
-    this._node = new Node(this)
     this._persistence = new PersistenceRocksDb(DATA_DIR)
+    this._node = new Node(this)
     this._pubsub = new PubSub()
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
@@ -89,6 +90,7 @@ export default class Engine {
     this._knownBlocksCache = LRUCache({
       max: 1024
     })
+
     this._peerIsSyncing = false
 
     // Start NTP sync
@@ -132,7 +134,7 @@ export default class Engine {
           const newGenesisBlock = getGenesisBlock()
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
-          this._logger.debug('Genesis block was missing so we stored it')
+          this._logger.info('Genesis block saved to disk ' + newGenesisBlock.getHash())
         } catch (e) {
           this._logger.error(`Error while creating genesis block ${e.message}`)
           this.requestExit()
@@ -240,11 +242,13 @@ export default class Engine {
 
   async collectBlock (rovers: string[], block: BcBlock) {
     this._collectedBlocks[block.getBlockchain()] += 1
-
-    if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) {
+    // if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) { //--> MAINNET
+    if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) { // --> TESTNET
       this._canMine = true
     }
-
+    if (PERSIST_ROVER_DATA === true) {
+      this._writeRoverData(block)
+    }
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       let currentBlocks
@@ -339,14 +343,14 @@ export default class Engine {
       return Promise.resolve(false)
     } else {
       if (!this._canMine) {
-        this._logger.info(`Not mining because not collected enough blocks from all chains yet - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+        this._logger.info(`Rovers are assembling blocks to achieve the minimum multiverse - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
-        this._logger.info(`Not mining because the peer is syncing}`)
+        this._logger.info(`Client is syncing so mining and ledger updates are disabled until a synchronized state is been achieved.`)
         return Promise.resolve(false)
       }
-      this._logger.debug(`Not mining because not all known chains are being rovered (rovered: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
+      this._logger.debug(`Consumed blockchains has been manually overridden, mining services have been disabled. Present multiverse state: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
       return Promise.resolve(false)
     }
   }
@@ -442,6 +446,13 @@ export default class Engine {
     return this._rovers.killRovers()
   }
 
+  _writeRoverData (newBlock: BcBlock) {
+    const dataPath = ensureDebugPath(`bc/rover-block-data.csv`)
+    console.log(dataPath)
+    const rawData = JSON.stringify(newBlock)
+    writeFileSync(dataPath, `${rawData}\r\n`, { encoding: 'utf8', flag: 'a' })
+  }
+
   _writeMiningData (newBlock: BcBlock, solution: { iterations: number, timeDiff: number }) {
     // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
     const row = [
@@ -491,22 +502,26 @@ export default class Engine {
 
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     const newBlockObj = newBlock.toObject()
-    this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
-    debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
+    // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
+    if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
+      debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
+      //  add to metaverse and call persist
+      this.node.metaverse.addBlock(newBlock)
 
-    //  add to metaverse and call persist
-    this.node.metaverse.addBlock(newBlock)
-    this._knownBlocksCache.set(newBlockObj.hash, newBlockObj)
+      this._knownBlocksCache.set(newBlock.getHash(), newBlockObj)
 
-    return this.node.metaverse.persist()
-      .then(() => {
-        this._logger.debug('New BC block stored in DB')
+      return this.node.metaverse.persist()
+        .then(() => {
+          this._logger.debug('New BC block stored in DB')
 
-        return this._broadcastMinedBlock(newBlock, solution)
-      })
-      .catch((err) => {
-        // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-        this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
-      })
+          return this._broadcastMinedBlock(newBlock, solution)
+        })
+        .catch((err) => {
+          // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
+          this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
+        })
+    } else {
+      this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
+    }
   }
 }

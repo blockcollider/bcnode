@@ -314,7 +314,7 @@ const blockHash: (BlockchainHeader|Block => string) = compose(
 
 export const getChildrenBlocksHashes: ((BlockchainHeader[]|Block[]) => string[]) = map(blockHash)
 
-// TODO should maintain sort (btc -> eth -> lsk -> neo -> wav)
+// TODO should maintain sort (btc -> eth -> lbbhhsk -> neo -> wav)
 export const blockchainMapToList = (headersMap: BlockchainHeaders): BlockchainHeader[] => {
   return Object.keys(headersMap.toObject()).map(listName => {
     const getMethodName = `get${listName[0].toUpperCase()}${listName.slice(1)}`
@@ -405,7 +405,7 @@ function prepareChildBlockHeadersMapForGenesis (currentBlockchainHeaders: Block[
  * We're starting from 1 here because it is used for dividing
  *
  * @param {BcBlock} previousBlock Last known previously mined BC block
- * @param {Block} newChildBlock The last rovered block - this one triggered the mining
+ * @param {Block} newChildBlock The last rovereed block - this one triggered the mining
  * @param {bool} shouldAppend flags if the newChildBlock should be appended to a child block sublist or replace
  * @return {BlockchainHeader[]} Headers of rovered chains with confirmations count calculated
  */

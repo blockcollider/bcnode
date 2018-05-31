@@ -34,7 +34,7 @@ export class BlockPool {
   }
 
   async putLatest (data) {
-    return await this._persistence.put(BLOCK_POOL_REFERENCE + 'latest', data)
+    return this._persistence.put(BLOCK_POOL_REFERENCE + 'latest', data)
   }
 
   async deleteStep (itr: number) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-present, BlockCollider developers, All rights reserved.
+ * Copyright (c) 2017-present, Block Collider developers, All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -23,27 +23,46 @@ const {
   getChildrenBlocksHashes,
   getChildrenRootHash,
   blockchainMapToList,
-  createMerkleRoot,
-  prepareWork,
-  distance
+  createMerkleRoot
+  // prepareWork,
+  // distance
 } = require('./miner')
 const GENESIS_DATA = require('./genesis.raw')
 
 const logger = getLogger(__filename)
 
 export function isValidBlock (newBlock: BcBlock): bool {
-  return theBlockChainFingerPrintMatchGenesisBlock(newBlock) &&
-    numberOfBlockchainsNeededMatchesChildBlock(newBlock) &&
-    ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock) &&
-    isChainRootCorrectlyCalculated(newBlock) &&
-    isMerkleRootCorrectlyCalculated(newBlock) &&
-    isDistanceCorrectlyCalculated(newBlock)
+  // if (!theBlockChainFingerPrintMatchGenesisBlock(newBlock)) {
+  //  logger.warn('failed: theBlockChainFingerPrintMatchGenesisBlock')
+  //  return false
+  // }
+  if (!numberOfBlockchainsNeededMatchesChildBlock(newBlock)) {
+    logger.warn('failed: numberOfBlockchainsNeededMatchesChildBlock')
+    return false
+  }
+  if (!ifMoreThanOneHeaderPerBlockchainAreTheyOrdered(newBlock)) {
+    logger.warn('failed: ifMoreThanOneHeaderPerBlockchainAreTheyOrdered')
+    return false
+  }
+  if (!isChainRootCorrectlyCalculated(newBlock)) {
+    logger.warn('failed: isChainRootCorrectlyCalculated')
+    return false
+  }
+  if (!isMerkleRootCorrectlyCalculated(newBlock)) {
+    logger.warn('failed: isMerkleRootCorrectlyCalculated')
+    return false
+  }
+  // if (!isDistanceCorrectlyCalculated(newBlock)) {
+  //  logger.warn('failed: isDistanceCorrectlyCalculated')
+  //  return false
+  // }
+  return true
 }
 
-function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
-  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation running')
-  return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
-}
+// function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
+//  logger.info('theBlockChainFingerPrintMatchGenesisBlock validation running')
+//  return newBlock.getBlockchainFingerprintsRoot() === GENESIS_DATA.blockchainFingerprintsRoot
+// }
 
 function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock): bool {
   logger.info('numberOfBlockchainsNeededMatchesChildBlock validation running')
@@ -74,6 +93,7 @@ function ifMoreThanOneHeaderPerBlockchainAreTheyOrdered (newBlock: BcBlock): boo
     // return true if left height < right height condition is valid
     // for all pairs ([[a, b], [b, c], [c, d]]) of chain headers ([a, b, c, d])
     // (in other words if ordering is maintained)
+    // TODO
     const orderingCorrect = all(
       equals(true),
       aperture(2, chainHeaders).map(([a, b]) => a.getHeight() < b.getHeight())
@@ -114,14 +134,14 @@ function isMerkleRootCorrectlyCalculated (newBlock: BcBlock): bool {
   return receivedMerkleRoot === expectedMerkleRoot
 }
 
-function isDistanceCorrectlyCalculated (newBlock: BcBlock): bool {
-  logger.info('isDistanceCorrectlyCalculated validation running')
-  const receivedDistance = newBlock.getDistance()
-
-  const expectedWork = prepareWork(newBlock.getPreviousHash(), newBlock.getBlockchainHeaders())
-  const expectedDistance = distance(expectedWork, blake2bl(newBlock.getMiner() + newBlock.getMerkleRoot() + blake2bl(newBlock.getNonce()) + newBlock.getTimestamp()))
-  return receivedDistance === expectedDistance
-}
+// function isDistanceCorrectlyCalculated (newBlock: BcBlock): bool {
+//  logger.info('isDistanceCorrectlyCalculated validation running')
+// const receivedDistance = newBlock.getDistance()
+//
+//  const expectedWork = prepareWork(newBlock.getPreviousHash(), newBlock.getBlockchainHeaders())
+//  const expectedDistance = distance(expectedWork, blake2bl(newBlock.getMiner() + newBlock.getMerkleRoot() + blake2bl(newBlock.getNonce()) + newBlock.getTimestamp()))
+//  return receivedDistance === expectedDistance
+// }
 
 function blockainHeadersOrdered (childHeaderList: BlockchainHeader[], parentHeaderList: BlockchainHeader[]) {
   // check highest block from child list is higher or equally high as highest block from parent list
