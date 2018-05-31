@@ -356,25 +356,24 @@ export default class Engine {
   }
 
   blockFromPeer (block: Object) {
-    const blockObj = block.toObject()
-    this._logger.info('Received new block from peer', blockObj.height, blockObj.miner, blockObj)
+    this._logger.info('Received new block from peer', block.getHeight(), block.getMiner(), block.toObject())
 
     // TODO: Validate new block mined by peer
-    if (!this._knownBlocksCache.get(blockObj.hash)) {
-      debug(`Adding received block into cache of known blocks - ${blockObj.hash}`)
-
+    if (!this._knownBlocksCache.get(block.getHash())) {
+      debug(`Adding received block into cache of known blocks - ${block.getHash()}`)
       // Add to cache
-      this._knownBlocksCache.set(blockObj.hash, blockObj)
-
-      // TODO: Update multiverse
-
-      // Broadcast to other peers
-      this.node.broadcastNewBlock(block)
-
-      // Update UI
-      this._server._wsBroadcast({ type: 'block.announced', data: blockObj })
+      this._knownBlocksCache.set(block.getHash(), block)
+      if (this.node._metaverse.addBlock(block) === true) {
+        // If it was recent enough to be part of the Multiverse it to other peers.
+        this.node.broadcastNewBlock(block)
+        this.pubsub.publish('block.multiverse', {type: 'block.multiverse', data: block})
+        // Update UI
+        this._server._wsBroadcast({ type: 'block.announced', data: block })
+      } else {
+        this.pubsub.publish('block.pool', {type: 'block.pool', data: block})
+      }
     } else {
-      debug(`Received block is already in cache of known blocks - ${blockObj.hash}`)
+      debug(`Received block is already in cache of known blocks - ${block.getHash()}`)
     }
   }
 
@@ -448,7 +447,6 @@ export default class Engine {
 
   _writeRoverData (newBlock: BcBlock) {
     const dataPath = ensureDebugPath(`bc/rover-block-data.csv`)
-    console.log(dataPath)
     const rawData = JSON.stringify(newBlock)
     writeFileSync(dataPath, `${rawData}\r\n`, { encoding: 'utf8', flag: 'a' })
   }
@@ -501,19 +499,15 @@ export default class Engine {
   }
 
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
-    const newBlockObj = newBlock.toObject()
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
     if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
-      debugSaveObject(`bc/block/${newBlockObj.timestamp}-${newBlockObj.hash}.json`, newBlockObj)
-      //  add to multiverse and call persist
-      this.node.multiverse.addBlock(newBlock)
-
-      this._knownBlocksCache.set(newBlock.getHash(), newBlockObj)
-
-      return this.node.multiverse.persist()
+      debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
+      //  add to metaverse and call persist
+      this.node.metaverse.addBlock(newBlock)
+      this._knownBlocksCache.set(newBlock.getHash(), newBlock)
+      return this.node.metaverse.persist()
         .then(() => {
           this._logger.debug('New BC block stored in DB')
-
           return this._broadcastMinedBlock(newBlock, solution)
         })
         .catch((err) => {
