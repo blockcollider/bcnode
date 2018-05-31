@@ -34,11 +34,13 @@ export class Metaverse {
 
   get blocks (): Object {
     return this._blocks
-  }d
+  }
+
   get blocksCount (): number {
     const blocks = Object.keys(this._blocks)
     return blocks.length
   }
+
   addBlock (block: BcBlock, force: boolean = false): boolean {
     const self = this
     const height = block.getHeight()
@@ -192,7 +194,9 @@ export class Metaverse {
         const highestBlock = self.getHighestBlock()
         if (highestBlock !== false &&
             highestBlock !== undefined &&
+            // $FlowFixMe
             highestBlock.getHash() !== latestStoredBlock.getHash() &&
+            // $FlowFixMe
             highestBlock.getHeight() > latestStoredBlock.getHeight()) {
           tasks.push(self._persistence.put('bc.block.latest', highestBlock))
         }
@@ -228,6 +232,7 @@ export class Metaverse {
     }
     return Promise.resolve()
   }
+
   print () {
     const self = this
     const list = Object.keys(this._blocks).reduce((all, item) => {
