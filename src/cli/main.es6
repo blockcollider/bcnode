@@ -27,6 +27,7 @@ const { cmd: cmdConfig } = require('./cmd/config')
 const { cmd: cmdInfo } = require('./cmd/info')
 const { cmd: cmdStart } = require('./cmd/start')
 const { cmd: cmdBalance } = require('./cmd/balance')
+const { MINER_KEY_REGEX } = require('./minerKey')
 
 // $FlowFixMe
 const native = require('../../native/index.node')
@@ -86,7 +87,7 @@ export const main = async (args: string[] = process.argv) => {
     .command('start')
     .description('Start Block Collider')
     .usage('[opts]')
-    .option('--miner-key [key]', 'Miner key', /^(0x){1}[0-9a-fA-F]{40}$/i, new Error('malformed address used for miner key'))
+    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX)
     .option('-n, --node', 'Start P2P node')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')

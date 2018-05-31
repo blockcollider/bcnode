@@ -11,6 +11,7 @@ import type { Logger } from 'winston'
 
 const { Command } = require('commander')
 
+const { MINER_KEY_REGEX } = require('../minerKey')
 const logging = require('../../logger')
 const Engine = require('../../engine').default
 
@@ -29,10 +30,25 @@ export const cmd = async (program: typeof Command) => {
   const logger = logging.getLogger(__filename)
 
   // Create instance of engine
-  const minerKey = process.env.BC_MINER_KEY || program.opts().minerKey
+  let minerKey = process.env.BC_MINER_KEY || program.opts().minerKey
+  // If starting rovers we need to check miner key at first
+  if (rovers) {
+    if (!minerKey) {
+      logger.error('--miner-key required')
+      process.exit(-1)
+    }
+
+    if (!MINER_KEY_REGEX.test(minerKey)) {
+      logger.error('Malformed miner key')
+      process.exit(-2)
+    }
+
+    minerKey = minerKey.toLowerCase()
+  }
+
   const opts = {
     rovers: ROVERS,
-    minerKey: minerKey
+    minerKey
   }
 
   // Create engine instance
@@ -59,11 +75,6 @@ export const cmd = async (program: typeof Command) => {
       rovers === true
         ? ROVERS
         : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
-
-    if (!minerKey) {
-      logger.error('--miner-key required')
-      process.exit(-1)
-    }
 
     engine.startRovers(roversToStart)
   }
