@@ -118,6 +118,9 @@ export class Multiverse {
 
   purge () {
     this._blocks = {}
+    this._candidates = {}
+    this._writeQueue = []
+    this._logger.info('metaverse has been purged')
   }
 
   getHighestBlock (depth: ?Number, keys: ?Array, list:?Array): ?BcBlock {
