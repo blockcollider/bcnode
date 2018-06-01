@@ -16,6 +16,7 @@ const COMMIT_MULTIVERSE_DEPTH = 7
 
 export class Multiverse {
   _blocks: Object
+  _candidates: Object
   _commitDepth: number
   _writeQueue: BcBlock[]
   _height: number
@@ -40,6 +41,10 @@ export class Multiverse {
   get blocksCount (): number {
     const blocks = Object.keys(this._blocks)
     return blocks.length
+  }
+
+  get commitDepth (): number {
+    return this._commitDepth
   }
 
   addBlock (block: BcBlock, force: boolean = false): boolean {

@@ -77,9 +77,10 @@ const handlers = {
   },
 
   getMultiverse: (manager: PeerManager) => {
-    if (false && manager.isQuorumSyncing()) {
-      return Promise.resolve([])
-    }
+    // TODO: @schnor Can we delete this?
+    // if (false && manager.isQuorumSyncing()) {
+    //   return Promise.resolve([])
+    // }
 
     return manager.engine.persistence.get('bc.block.latest')
       .then((block) => {

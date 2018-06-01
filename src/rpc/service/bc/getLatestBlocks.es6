@@ -7,12 +7,14 @@
  * @flow
  */
 
+import type { RpcServer } from '../../server'
+
 const { Block } = require('../../../protos/core_pb')
 const { GetLatestBlocksResponse } = require('../../../protos/bc_pb')
 
 const rovers = require('../../../rover/manager').rovers
 
-export default function getLatestBlocks (context: Object, call: Object, callback: Function) {
+export default function getLatestBlocks (context: RpcServer, call: Object, callback: Function) {
   const keys = Object.keys(rovers).map((rover) => {
     return `${rover}.block.latest`
   })

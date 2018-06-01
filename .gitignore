@@ -114,3 +114,5 @@ dist/
 # Temporary stuff
 tmp/
 
+# Run scripts
+.run.*.sh

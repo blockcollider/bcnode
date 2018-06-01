@@ -6,14 +6,16 @@
  *
  * @flow
  */
+
 import type { Logger } from 'winston'
+import type { RpcServer } from '../../server'
 
 const { Null } = require('../../../protos/core_pb')
 const logging: Logger = require('../../../logger')
 
 const log = logging.getLogger(__filename)
 
-export default function (context: Object, call: Object, callback: Function) {
+export default function (context: RpcServer, call: Object, callback: Function) {
   const block = call.request
   const blockchain = block.getBlockchain()
   const key = `${blockchain}.block.latest`
@@ -45,6 +47,10 @@ export default function (context: Object, call: Object, callback: Function) {
       })
     })
   }).then(() => {
+    if (context.pubsub && context.pubsub.publish) {
+      context.pubsub.publish('rover.block', block)
+    }
+
     context.emitter.emit('collectBlock', { block })
   })
 }

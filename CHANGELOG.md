@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- [CLI] - Read miner key from $HOME/.bc/key.public.txt if exists 
+- [Global] - Automatically crate app data dir ($HOME/.bc)
 - [CLI] - Added command "balance <address>" to get NRG balance
 - [CLI] - --miner-key option validates formatted address 
 - [Sentry] - Log more details

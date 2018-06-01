@@ -12,6 +12,7 @@
 import type { Logger } from 'winston'
 
 const colors = require('colors')
+const debug = require('debug')('bcnode:cli:main')
 const fs = require('fs')
 const path = require('path')
 const process = require('process')
@@ -20,6 +21,7 @@ const Raven = require('raven')
 
 const config = require('../../config/config')
 const logging = require('../logger')
+const { ensureAppDataDir, getPublicKey } = require('../app')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
 const { getOsInfo } = require('../helper/os')
@@ -37,6 +39,9 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 export const main = async (args: string[] = process.argv) => {
   process.title = 'bcnode'
+
+  // Create appdata folder
+  ensureAppDataDir()
 
   const version = getVersion()
   const versionString = `${version.npm}#${version.git.short}`
@@ -87,7 +92,7 @@ export const main = async (args: string[] = process.argv) => {
     .command('start')
     .description('Start Block Collider')
     .usage('[opts]')
-    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX)
+    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX, getPublicKey())
     .option('-n, --node', 'Start P2P node')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')
@@ -190,7 +195,7 @@ const initErrorHandlers = (logger: Logger, errorHandlers: Object = {}) => {
 
   // Iterate ...
   errorNames.forEach((errorName) => {
-    logger.info(`Initializing ${errorName} handlers`)
+    debug(`Initializing ${errorName} handler`)
     const handlers = errorHandlers[errorName].map((handler) => {
       // Initialize handler if init() func is specified
       handler.init && handler.init()

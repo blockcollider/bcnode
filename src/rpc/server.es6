@@ -20,11 +20,13 @@ const { BcServiceImpl } = require('./service')
 const { RoverService } = require('../protos/rover_grpc_pb')
 const { RoverServiceImpl } = require('./service')
 
+const { PubSub } = require('../engine/pubsub')
+
 const GRPC_HOST = process.env.BC_GRPC_HOST || config.grpc.host
 const GRPC_PORT = process.env.BC_GRPC_PORT || config.grpc.port
 const GRPC_URL = `${GRPC_HOST}:${GRPC_PORT}`
 
-export default class RpcServer {
+export class RpcServer {
   _logger: Object; // eslint-disable-line no-undef
   _engine: Engine // eslint-disable-line no-undef
   _rpcServer: Object // eslint-disable-line no-undef
@@ -51,6 +53,15 @@ export default class RpcServer {
     return this._engine._emitter
   }
 
+  get logger (): Object {
+    return this._logger
+  }
+
+  get pubsub (): PubSub {
+    console.log('RPC SERVER', this)
+    return this._engine.pubsub
+  }
+
   get server () : Object {
     return this._rpcServer
   }
@@ -59,3 +70,5 @@ export default class RpcServer {
     return this._engine
   }
 }
+
+export default RpcServer
