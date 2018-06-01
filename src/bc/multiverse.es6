@@ -43,59 +43,63 @@ export class Multiverse {
   }
 
   getMissingBlocks (block: BcBlock): ?Object {
-    if (block === undefined)  { 
+    if (block === undefined) {
       this._logger.error('no block submitted to evaluate')
-      return false 
+      return false
     }
     const highestBlock = this.getHighestBlock()
-    const height = block.getHeight() 
-    const hash = block.getHash() 
-    const previousHash = block.getPreviousHash() 
-    const difficulty = block.getDifficulty() 
+    const height = block.getHeight()
+    const hash = block.getHash()
+    const previousHash = block.getPreviousHash()
+    const difficulty = block.getDifficulty()
     const template = {
-          queryHash: hash,
-          queryHeight: height,
-          mesage: "",
-          start: 0,
-          end: 0
+      queryHash: hash,
+      queryHeight: height,
+      mesage: '',
+      start: 0,
+      end: 0
     }
-    if (highestBlock !== null) { 
+    if (highestBlock !== null) {
       if (highestBlock.getHash() === hash) {
-          template.message = "blocks are the equal"
-          return  template
+        template.message = 'blocks are the equal to each-other'
+        return template
       }
       if (highestBlock.getHeight() === height) {
-          if (highestBlock.getDifficulty() < difficulty) { 
-             this.addBlock(block)
-             template.message = "purposed block will be the current height of the multiverse"
-             return template
-          }
+        if (highestBlock.getDifficulty() < difficulty) {
+          this.addBlock(block)
+          template.message = 'purposed block will be the current height of the multiverse'
+          return template
+        }
       }
-      if (highestBlock.getHash() ===  previousHash) {
+      if (highestBlock.getHash() === previousHash) {
         this.addBlock(block)
-        template.message = "purposed block is next block"
+        template.message = 'purposed block is next block'
         return template
       }
-      if(highestBlock.getHeight() + 2 < height) {
-        template.start = highestBlock.getHeight() - 2 
-        template.end = height + 1 
-        template.message = "purposed block is ahead and disconnected from multiverse"
+      if (highestBlock.getHeight() + 2 < height) {
+        template.start = highestBlock.getHeight() - 2
+        template.end = height + 1
+        template.message = 'purposed block is ahead and disconnected from multiverse'
         return template
       }
-      if(highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
+      if (highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
         this.addBlock(block)
-        template.start = height - 10 
-        template.end = height + 1 
-        template.message = "purposed block may represent a seperate branch betlow the multiverse"
+        template.start = height - 10
+        template.end = height + 1
+        template.message = 'purposed block may be in a multiverse layer'
         return template
       }
-      if(highestBlock.getHeight() > height) {
+      if (highestBlock.getHeight() > height) {
         this.addBlock(block)
-        template.start = height - 7 
-        template.end = height + 1 
-        template.message = "purposed block far behind multiverse"
+        template.from = height - 1
+        template.to = this.getLowestBlock().getHeight() + 1 // Plus one so we can check with the multiverse if side chain
+        template.messeage = 'purposed block far behnd multiverse'
         return template
       }
+      return template
+    } else {
+      this.addBlock(block)
+      template.message = 'no highest block has been selected for multiverse'
       return template
     }
   }
