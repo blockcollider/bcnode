@@ -283,10 +283,10 @@ export class Engine {
       this._knownBlocksCache.set(block.getHash(), block)
       if (this.node.multiverse.addBlock(block) === true) {
         // If it was recent enough to be part of the Multiverse it to other peers.
+        self.pubsub.publish('block.pool', {type: 'block', data: block})
         return this.node.multiverse.persist()
           .then(() => {
             self._logger.debug('New BC block stored in DB')
-            self.pubsub.publish('block.multiverse', {type: 'block.multiverse', data: block})
             self.node.broadcastNewBlock(block)
             // Update UI
             self._server._wsBroadcast({ type: 'block.announced', data: block })
@@ -296,7 +296,7 @@ export class Engine {
             self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
-        self.pubsub.publish('block.pool', {type: 'block.pool', data: block})
+        self.pubsub.publish('block.pool', {type: 'block', data: block})
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${block.getHash()}`)

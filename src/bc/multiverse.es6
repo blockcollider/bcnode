@@ -16,7 +16,6 @@ const COMMIT_MULTIVERSE_DEPTH = 7
 
 export class Multiverse {
   _blocks: Object
-  _candidates: Object
   _commitDepth: number
   _writeQueue: BcBlock[]
   _height: number
@@ -43,8 +42,66 @@ export class Multiverse {
     return blocks.length
   }
 
-  get commitDepth (): number {
-    return this._commitDepth
+  getMissingBlocks (block: BcBlock): ?Object {
+    if (block === undefined) {
+      this._logger.error('no block submitted to evaluate')
+      return false
+    }
+    const highestBlock = this.getHighestBlock()
+    const height = block.getHeight()
+    const hash = block.getHash()
+    const previousHash = block.getPreviousHash()
+    const difficulty = block.getDifficulty()
+    const template = {
+      queryHash: hash,
+      queryHeight: height,
+      mesage: '',
+      start: 0,
+      end: 0
+    }
+    if (highestBlock !== null) {
+      if (highestBlock.getHash() === hash) {
+        template.message = 'blocks are the equal to each-other'
+        return template
+      }
+      if (highestBlock.getHeight() === height) {
+        if (highestBlock.getDifficulty() < difficulty) {
+          this.addBlock(block)
+          template.message = 'purposed block will be the current height of the multiverse'
+          return template
+        }
+      }
+      if (highestBlock.getHash() === previousHash) {
+        this.addBlock(block)
+        template.message = 'purposed block is next block'
+        return template
+      }
+      if (highestBlock.getHeight() + 2 < height) {
+        template.start = highestBlock.getHeight() - 2
+        template.end = height + 1
+        template.message = 'purposed block is ahead and disconnected from multiverse'
+        return template
+      }
+      if (highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
+        this.addBlock(block)
+        template.start = height - 10
+        template.end = height + 1
+        template.message = 'purposed block may be in a multiverse layer'
+        return template
+      }
+      if (highestBlock.getHeight() > height) {
+        this.addBlock(block)
+        template.from = height - 1
+        template.to = this.getLowestBlock().getHeight() + 1 // Plus one so we can check with the multiverse if side chain
+        template.messeage = 'purposed block far behnd multiverse'
+        return template
+      }
+      return template
+    } else {
+      this.addBlock(block)
+      template.message = 'no highest block has been selected for multiverse'
+      return template
+    }
   }
 
   addBlock (block: BcBlock, force: boolean = false): boolean {
@@ -123,6 +180,9 @@ export class Multiverse {
 
   purge () {
     this._blocks = {}
+    this._candidates = {}
+    this._writeQueue = []
+    this._logger.info('metaverse has been purged')
   }
 
   getHighestBlock (depth: ?Number, keys: ?Array, list:?Array): ?BcBlock {
@@ -157,7 +217,7 @@ export class Multiverse {
       }
     })
     if (minimumDepthChains.length === 0) {
-      const performance = matches.reduce((order, chain) => {
+      const performance = list.reduce((order, chain) => {
         const sum = chain.reduce((all, b) => {
           return b.getDistance() + all
         }, 0)
