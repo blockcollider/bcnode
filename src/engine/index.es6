@@ -7,6 +7,8 @@
  * @flow
  */
 
+const ROVERS = Object.keys(require('../rover/manager').rovers)
+
 const debug = require('debug')('bcnode:engine')
 const { EventEmitter } = require('events')
 const { equals, all, values } = require('ramda')
@@ -14,7 +16,6 @@ const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
-const debug = require('debug')('bcnode:engine')
 
 const config = require('../../config/config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -448,8 +449,8 @@ export class Engine {
     }
   }
 
-  async startMining (rovers: string[], block: BcBlock): Promise<*> {
-    debug('Starting mining', rovers, block)
+  async startMining (rovers: string[] = ROVERS, block: BcBlock): Promise<*> {
+    debug('Starting mining', rovers || ROVERS, block)
 
     let currentBlocks
     let lastPreviousBlock
@@ -561,11 +562,11 @@ export class Engine {
     return Promise.resolve(true)
   }
 
-  restartMining (rovers: string[], block: BcBlock): Promise<boolean> {
+  restartMining (rovers: string[] = ROVERS, block: BcBlock): Promise<boolean> {
     debug('Restarting mining', rovers, block)
 
     this.stopMining()
-    return this.startMining(rovers, block)
+    return this.startMining(rovers || ROVERS, block)
       .then(res => {
         return Promise.resolve(!res)
       })
