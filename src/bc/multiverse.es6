@@ -126,7 +126,7 @@ export class Multiverse {
       list = []
     }
     if (depth === undefined) {
-      depth = 6
+      depth = 7
     }
     const currentHeight = keys.pop()
     const currentRow = this._blocks[currentHeight]

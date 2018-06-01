@@ -49,55 +49,52 @@ export class BlockPool {
   }
 
   addBlock (block: BcBlock): Promise<*> {
+    const self = this
     const height = block.getHeight()
     const hash = block.getHash()
     const previousHash = block.getPreviousHash()
-    if (this._syncEnabled) {
-      return this._persistence.get(previousHash)
-        .then((res) => {
-          this._persistence.get(res)
-            .then((possibleBlock) => {
-              const latest = this.getLatest(BLOCK_POOL_REFERENCE)
-              if (latest.getHeight() < possibleBlock.getHeight()) {
-                return this.putLatest(block)
-              }
-              return this._persistence.put('bc.block.' + height, possibleBlock)
-            })
-            .catch((_) => {
-              return Promise.all([
-                this._persistence.del(BLOCK_POOL_REFERENCE + height),
-                this._persistence.del(hash)])
-                .catch((err) => {
-                  throw Error(err)
-                })
-            })
-        })
-        .catch((_) => {
-          const latest = this.getLatest(BLOCK_POOL_REFERENCE)
-          const tasks = [
-            this._persistence.put(BLOCK_POOL_REFERENCE + height, block),
-            this._persistence.put(hash, BLOCK_POOL_REFERENCE + height)
-          ]
-          if (latest.getHeight() < block.getHeight()) {
-            tasks.push(this.putLatest(block))
-          }
-          return Promise.all(tasks)
-            .then(() => {
-              return this._persistence.get('bc.block.' + height)
-                .then((has) => {
-                  return has
-                })
-                .catch((err) => {
-                  throw new Error(err)
-                })
-            })
-            .catch((err) => {
-              throw new Error(err)
-            })
-        })
-    } else {
-      return Promise.resolve()
-    }
+    return self._persistence.get(previousHash)
+      .then((res) => {
+        self._persistence.get(res)
+          .then((possibleBlock) => {
+            const latest = self.getLatest(BLOCK_POOL_REFERENCE)
+            if (latest.getHeight() < possibleBlock.getHeight()) {
+              return self.putLatest(block)
+            }
+            return self._persistence.put('bc.block.' + height, possibleBlock)
+          })
+          .catch((_) => {
+            return Promise.all([
+              self._persistence.del(BLOCK_POOL_REFERENCE + height),
+              self._persistence.del(hash)])
+              .catch((err) => {
+                throw Error(err)
+              })
+          })
+      })
+      .catch((_) => {
+        const latest = this.getLatest(BLOCK_POOL_REFERENCE)
+        const tasks = [
+          self._persistence.put(BLOCK_POOL_REFERENCE + height, block),
+          self._persistence.put(hash, BLOCK_POOL_REFERENCE + height)
+        ]
+        if (latest.getHeight() < block.getHeight()) {
+          tasks.push(this.putLatest(block))
+        }
+        return Promise.all(tasks)
+          .then(() => {
+            return this._persistence.get('bc.block.' + height)
+              .then((has) => {
+                return has
+              })
+              .catch((err) => {
+                throw new Error(err)
+              })
+          })
+          .catch((err) => {
+            throw new Error(err)
+          })
+      })
   }
 
   purge (ref: string) {
