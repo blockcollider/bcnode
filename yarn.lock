@@ -2426,6 +2426,10 @@ bunyan@^1.8.5:
     mv "~2"
     safe-json-stringify "~1"
 
+byline@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/byline/-/byline-5.0.0.tgz#741c5216468eadc457b03410118ad77de8c1ddb1"
+
 bytebuffer@=5.0.1, bytebuffer@~5:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/bytebuffer/-/bytebuffer-5.0.1.tgz#582eea4b1a873b6d020a48d58df85f0bba6cfddd"
@@ -2596,6 +2600,14 @@ chalk@0.5.1:
     has-ansi "^0.1.0"
     strip-ansi "^0.3.0"
     supports-color "^0.2.0"
+
+chalk@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.0.tgz#a060a297a6b57e15b61ca63ce84995daa0fe6e52"
+  dependencies:
+    ansi-styles "^3.2.1"
+    escape-string-regexp "^1.0.5"
+    supports-color "^5.3.0"
 
 chalk@^1.0.0, chalk@^1.1.0, chalk@^1.1.1, chalk@^1.1.3:
   version "1.1.3"
@@ -4667,7 +4679,7 @@ event-cleanup@^1.0.3:
   dependencies:
     old "^0.1.2"
 
-event-stream@~3.3.0:
+event-stream@3.3.4, event-stream@~3.3.0:
   version "3.3.4"
   resolved "http://registry.npmjs.org/event-stream/-/event-stream-3.3.4.tgz#4ab4c9a0f5a54db9338b4c34d86bfce8f4b35571"
   dependencies:
@@ -5063,6 +5075,18 @@ first-chunk-stream@^2.0.0:
   resolved "https://registry.yarnpkg.com/first-chunk-stream/-/first-chunk-stream-2.0.0.tgz#1bdecdb8e083c0664b91945581577a43a9f31d70"
   dependencies:
     readable-stream "^2.0.2"
+
+fixme@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/fixme/-/fixme-0.5.0.tgz#229c37f4922c2cc67525082c3062a1c77d0d1015"
+  dependencies:
+    byline "5.0.0"
+    chalk "2.4.0"
+    event-stream "3.3.4"
+    isbinaryfile "3.0.2"
+    minimatch "3.0.4"
+    minimist "1.2.0"
+    readdirp "2.1.0"
 
 flat-cache@^1.2.1:
   version "1.3.0"
@@ -6514,7 +6538,7 @@ isarray@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-2.0.1.tgz#a37d94ed9cda2d59865c9f76fe596ee1f338741e"
 
-isbinaryfile@^3.0.2:
+isbinaryfile@3.0.2, isbinaryfile@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/isbinaryfile/-/isbinaryfile-3.0.2.tgz#4a3e974ec0cba9004d3fc6cde7209ea69368a621"
 
@@ -8491,7 +8515,7 @@ minimalistic-crypto-utils@^1.0.0, minimalistic-crypto-utils@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
 
-"minimatch@2 || 3", minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.3, minimatch@^3.0.4:
+"minimatch@2 || 3", minimatch@3.0.4, minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.3, minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
   dependencies:
@@ -10613,7 +10637,7 @@ readable-stream@~2.2.2:
     string_decoder "~1.0.0"
     util-deprecate "~1.0.1"
 
-readdirp@^2.0.0:
+readdirp@2.1.0, readdirp@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/readdirp/-/readdirp-2.1.0.tgz#4ed0ad060df3073300c48440373f72d1cc642d78"
   dependencies:
