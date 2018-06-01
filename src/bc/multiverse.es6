@@ -293,6 +293,7 @@ export class Multiverse {
       })
       return all
     }, [])
+    this._logger.info(list)
   }
   // print () {
   //   for (let i = 0; i < this.maxDepth; i++) {
