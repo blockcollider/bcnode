@@ -24,6 +24,7 @@ export class Multiverse {
 
   constructor (persistence: any, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
     this._blocks = {}
+    this._candidates = {}
     this._writeQueue = []
     this._persistence = persistence
     this._commitDepth = commitDepth
@@ -87,24 +88,24 @@ export class Multiverse {
     }
     if (hasParent || hasChild || syncing) {
       if (inMultiverseLayer === false) {
-        if (this._blocks[height] === undefined) {
-          this._blocks[height] = []
+        if (self._blocks[height] === undefined) {
+          self._blocks[height] = []
         }
-        this._blocks[height].push(block)
-        if (this._blocks[height].length > 1) {
-          this._blocks[height] = this._blocks[height].sort((a, b) => {
+        self._blocks[height].push(block)
+        if (self._blocks[height].length > 1) {
+          self._blocks[height] = self._blocks[height].sort((a, b) => {
             if (a.getDifficulty() > b.getDifficulty()) return 1
             if (a.getDifficulty() < b.getDifficulty()) return -1
             return 0
           })
-          if (this._blocks[height][0].getHash() === block.getHash()) {
+          if (self._blocks[height][0].getHash() === block.getHash()) {
             self._writeQueue.push(block)
             added = true
           }
         }
-        if (this._blocks[height] !== undefined &&
-            this._blocks[height].length > 0 &&
-            this._blocks[height][0].getHash() === block.getHash()) {
+        if (self._blocks[height] !== undefined &&
+            self._blocks[height].length > 0 &&
+            self._blocks[height][0].getHash() === block.getHash()) {
           self._writeQueue.push(block)
           added = true
         }
@@ -119,15 +120,64 @@ export class Multiverse {
     this._blocks = {}
   }
 
-  getHighestBlock (): ?BcBlock {
-    const keys = Object.keys(this._blocks)
+  getHighestBlock (depth: ?Number, keys: ?Array, list:?Array): ?BcBlock {
+    if (keys === undefined) {
+      keys = Object.keys(this._blocks)
+      list = []
+    }
+    if (depth === undefined) {
+      depth = 6
+    }
+    const currentHeight = keys.pop()
+    const currentRow = this._blocks[currentHeight]
+    let matches = []
+    currentRow.map((candidate) => {
+      matches = list.reduce((all, chain) => {
+        if (chain[0].getPreviousHash() === candidate.getHash()) {
+          all++
+          chain.unshift(candidate)
+        }
+        return all
+      }, 0)
+      if (matches === 0) { // this must be it's own chain
+        list.push([candidate])
+      }
+    })
     if (keys.length > 0) {
-      const last = keys.pop()
-      const block = this._blocks[last][0]
-      this._logger.info('block ' + last + ' with hash ' + block.getHash() + ' is latest highest block')
-      return block
+      return this.getHighestBlock(depth, keys, list)
+    }
+    const minimumDepthChains = list.filter((chain) => {
+      if (chain.length >= depth) {
+        return true
+      }
+    })
+    if (minimumDepthChains.length === 0) {
+      const performance = matches.reduce((order, chain) => {
+        const sum = chain.reduce((all, b) => {
+          return b.getDistance() + all
+        }, 0)
+        if (order.length === 0) {
+          order.push([chain, sum])
+        } else if (order[0][1] < sum) {
+          order.unshift([chain, sum])
+        }
+      }, [])
+      return performance[0][1]
+    } else if (minimumDepthChains.length === 1) {
+      return minimumDepthChains[0].pop()
     } else {
-      return false
+      const performance = minimumDepthChains.reduce((order, chain) => {
+        const sum = chain.reduce((all, b) => {
+          return b.getDistance() + all
+        }, 0)
+        if (order.length === 0) {
+          order.push([chain, sum])
+        } else if (order[0][1] < sum) {
+          order.unshift([chain, sum])
+        }
+        return order[0][1]
+      }, [])
+      return performance[0][1]
     }
   }
 
@@ -234,17 +284,15 @@ export class Multiverse {
   }
 
   print () {
-    const self = this
     const list = Object.keys(this._blocks).reduce((all, item) => {
       all.push({
-        hash: self._blocks[item][0].getHash(),
-        prevHash: self._blocks[item][0].getPreviousHash(),
-        block: self._blocks[item][0].toObject(),
-        blocksAtHeight: self._blocks[item][0].toObject()
+        hash: this._blocks[item][0].getHash(),
+        prevHash: this._blocks[item][0].getPreviousHash(),
+        block: this._blocks[item][0].toObject(),
+        blocksAtHeight: this._blocks[item][0].toObject()
       })
       return all
     }, [])
-    console.log(JSON.stringify(list, null, 2))
   }
   // print () {
   //   for (let i = 0; i < this.maxDepth; i++) {
