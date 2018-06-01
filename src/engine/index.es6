@@ -258,7 +258,7 @@ export class Engine {
 
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
-      return this._startMining(rovers, block)
+      return this.startMining(rovers, block)
     } else {
       if (!this._canMine) {
         this._logger.info(`Rovers are assembling blocks to achieve the minimum multiverse - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
@@ -446,7 +446,7 @@ export class Engine {
     }
   }
 
-  async _startMining (rovers: string[], block: BcBlock): Promise<*> {
+  async startMining (rovers: string[], block: BcBlock): Promise<*> {
     let currentBlocks
     let lastPreviousBlock
 
@@ -543,5 +543,23 @@ export class Engine {
       return Promise.resolve(this._workerProcess.pid)
     }
     return Promise.resolve(false)
+  }
+
+  stopMining (): Promise<*> {
+    if (!this._workerProcess) {
+      return Promise.resolve(false)
+    }
+
+    this._workerProcess.kill()
+    this._workerProcess = null
+    return Promise.resolve(true)
+  }
+
+  restartMining (rovers: string[], block: BcBlock): Promise<boolean> {
+    this.stopMining()
+    return this.startMining(rovers, block)
+      .then(res => {
+        return Promise.resolve(!res)
+      })
   }
 }
