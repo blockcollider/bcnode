@@ -42,6 +42,64 @@ export class Multiverse {
     return blocks.length
   }
 
+  getMissingBlocks (block: BcBlock): ?Object {
+    if (block === undefined)  { 
+      this._logger.error('no block submitted to evaluate')
+      return false 
+    }
+    const highestBlock = this.getHighestBlock()
+    const height = block.getHeight() 
+    const hash = block.getHash() 
+    const previousHash = block.getPreviousHash() 
+    const difficulty = block.getDifficulty() 
+    const template = {
+          queryHash: hash,
+          queryHeight: height,
+          mesage: "",
+          start: 0,
+          end: 0
+    }
+    if (highestBlock !== null) { 
+      if (highestBlock.getHash() === hash) {
+          template.message = "blocks are the equal"
+          return  template
+      }
+      if (highestBlock.getHeight() === height) {
+          if (highestBlock.getDifficulty() < difficulty) { 
+             this.addBlock(block)
+             template.message = "purposed block will be the current height of the multiverse"
+             return template
+          }
+      }
+      if (highestBlock.getHash() ===  previousHash) {
+        this.addBlock(block)
+        template.message = "purposed block is next block"
+        return template
+      }
+      if(highestBlock.getHeight() + 2 < height) {
+        template.start = highestBlock.getHeight() - 2 
+        template.end = height + 1 
+        template.message = "purposed block is ahead and disconnected from multiverse"
+        return template
+      }
+      if(highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
+        this.addBlock(block)
+        template.start = height - 10 
+        template.end = height + 1 
+        template.message = "purposed block may represent a seperate branch betlow the multiverse"
+        return template
+      }
+      if(highestBlock.getHeight() > height) {
+        this.addBlock(block)
+        template.start = height - 7 
+        template.end = height + 1 
+        template.message = "purposed block far behind multiverse"
+        return template
+      }
+      return template
+    }
+  }
+
   addBlock (block: BcBlock, force: boolean = false): boolean {
     const self = this
     const height = block.getHeight()
@@ -155,7 +213,7 @@ export class Multiverse {
       }
     })
     if (minimumDepthChains.length === 0) {
-      const performance = matches.reduce((order, chain) => {
+      const performance = list.reduce((order, chain) => {
         const sum = chain.reduce((all, b) => {
           return b.getDistance() + all
         }, 0)
