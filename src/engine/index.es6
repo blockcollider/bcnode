@@ -6,6 +6,8 @@
  *
  * @flow
  */
+
+const debug = require('debug')('bcnode:engine')
 const { EventEmitter } = require('events')
 const { equals, all, values } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
@@ -447,6 +449,8 @@ export class Engine {
   }
 
   async startMining (rovers: string[], block: BcBlock): Promise<*> {
+    debug('Starting mining', rovers, block)
+
     let currentBlocks
     let lastPreviousBlock
 
@@ -546,6 +550,8 @@ export class Engine {
   }
 
   stopMining (): Promise<*> {
+    debug('Stopping mining')
+
     if (!this._workerProcess) {
       return Promise.resolve(false)
     }
@@ -556,6 +562,8 @@ export class Engine {
   }
 
   restartMining (rovers: string[], block: BcBlock): Promise<boolean> {
+    debug('Restarting mining', rovers, block)
+
     this.stopMining()
     return this.startMining(rovers, block)
       .then(res => {
