@@ -363,6 +363,7 @@ export default class Engine {
   }
 
   blockFromPeer (block: Object) {
+    const self = this
     this._logger.info('Received new block from peer', block.getHeight(), block.getMiner(), block.toObject())
     // TODO: Validate new block mined by peer
     if (!this._knownBlocksCache.get(block.getHash())) {
@@ -373,18 +374,18 @@ export default class Engine {
         // If it was recent enough to be part of the Multiverse it to other peers.
         return this.node.multiverse.persist()
           .then(() => {
-            this._logger.debug('New BC block stored in DB')
-            this.pubsub.publish('block.multiverse', {type: 'block.multiverse', data: block})
-            this.node.broadcastNewBlock(block)
+            self._logger.debug('New BC block stored in DB')
+            self.pubsub.publish('block.multiverse', {type: 'block.multiverse', data: block})
+            self.node.broadcastNewBlock(block)
             // Update UI
-            this._server._wsBroadcast({ type: 'block.announced', data: block })
+            self._server._wsBroadcast({ type: 'block.announced', data: block })
           })
           .catch((err) => {
-            // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-            this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
+            self._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
+            self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
-        this.pubsub.publish('block.pool', {type: 'block.pool', data: block})
+        self.pubsub.publish('block.pool', {type: 'block.pool', data: block})
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${block.getHash()}`)
