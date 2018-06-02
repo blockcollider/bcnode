@@ -6,13 +6,16 @@
  *
  * @flow
  */
+
+const ROVERS = Object.keys(require('../rover/manager').rovers)
+
+const debug = require('debug')('bcnode:engine')
 const { EventEmitter } = require('events')
 const { equals, all, values } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
-const debug = require('debug')('bcnode:engine')
 
 const config = require('../../config/config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -257,7 +260,7 @@ export class Engine {
 
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
-      return this._startMining(rovers, block)
+      return this.startMining(rovers, block)
     } else {
       if (!this._canMine) {
         this._logger.info(`Rovers are assembling blocks to achieve the minimum multiverse - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
@@ -445,7 +448,9 @@ export class Engine {
     }
   }
 
-  async _startMining (rovers: string[], block: BcBlock): Promise<*> {
+  async startMining (rovers: string[] = ROVERS, block: BcBlock): Promise<*> {
+    debug('Starting mining', rovers || ROVERS, block)
+
     let currentBlocks
     let lastPreviousBlock
 
@@ -542,5 +547,27 @@ export class Engine {
       return Promise.resolve(this._workerProcess.pid)
     }
     return Promise.resolve(false)
+  }
+
+  stopMining (): Promise<*> {
+    debug('Stopping mining')
+
+    if (!this._workerProcess) {
+      return Promise.resolve(false)
+    }
+
+    this._workerProcess.kill()
+    this._workerProcess = null
+    return Promise.resolve(true)
+  }
+
+  restartMining (rovers: string[] = ROVERS, block: BcBlock): Promise<boolean> {
+    debug('Restarting mining', rovers, block)
+
+    this.stopMining()
+    return this.startMining(rovers || ROVERS, block)
+      .then(res => {
+        return Promise.resolve(!res)
+      })
   }
 }
