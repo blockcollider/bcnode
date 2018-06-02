@@ -40,7 +40,7 @@ export class Navbar extends Component<*, State> {
         </Brand>
 
         <NavItem className='navbar-light bg-light'>
-          <NavLink href='/#/blocks/latest' style={STYLE} className='navbar-light bg-light'>BC Chain</NavLink>
+          <NavLink href='/#/blocks/latest' style={STYLE} className='navbar-light bg-light'>Multichain</NavLink>
         </NavItem>
 
         <NavItem>
@@ -66,7 +66,8 @@ export class Navbar extends Component<*, State> {
             Dev
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem href='/#/doc'>Doc</DropdownItem>
+            <DropdownItem href='https://www.blockcollider.org'>Homepage</DropdownItem>
+            <DropdownItem href='/#/doc'>Documentation</DropdownItem>
             <DropdownItem href='/#/logs'>Logs</DropdownItem>
           </DropdownMenu>
         </Dropdown>
