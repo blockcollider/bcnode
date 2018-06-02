@@ -302,13 +302,11 @@ export default class Engine {
             self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
+        // self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
         self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
-        if (this.node.multiverse._writeQueue.length > 0) {
+        if (self.node.multiverse._writeQueue.length > 0) {
           return this.node.multiverse.persist()
-        } else {
-          self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
         }
-        // TODO: transfer to blockpool
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${block.getHash()}`)
