@@ -217,8 +217,8 @@ export class PeerNode {
               } else {
                 return null
               }
-            }).filter((item) => {
-              return item !== null
+            }).filter((itm) => {
+              return itm !== null
             }) || []
 
             if (candidates.length >= PEER_QUORUM_SIZE) {
@@ -230,7 +230,6 @@ export class PeerNode {
                   // accumulator, element
                   .reduce((all, peerBlocks) => {
                     const difficultySum = sum(peerBlocks.map((peerBlock) => peerBlock.getDifficulty()))
-
                     peerBlocks[0].difficultySum = difficultySum
                     all.push(peerBlocks[0])
                     return all

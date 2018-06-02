@@ -98,10 +98,6 @@ export class Engine {
     this._peerIsSyncing = false
     // Start NTP sync
     ts.start()
-
-    this.pubsub.subscribe('rover.block', '<engine>', (data) => {
-      console.log('NEW BLOCK FROM ROVER', data)
-    })
   }
 
   get pubsub (): PubSub {
@@ -291,6 +287,7 @@ export class Engine {
             self._logger.debug('New BC block stored in DB')
             self.node.broadcastNewBlock(block)
             // Update UI
+            self.pubsub.publish('update.block.latest', {type: 'update.block.latest', data: block})
             self._server._wsBroadcast({ type: 'block.announced', data: block })
           })
           .catch((err) => {
@@ -298,6 +295,7 @@ export class Engine {
             self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
+        // TODO: transfer to blockpool
         self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
       }
     } else {
@@ -428,6 +426,7 @@ export class Engine {
 
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
+    const self = this
     if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
       debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
       //  add to multiverse and call persist
@@ -435,12 +434,16 @@ export class Engine {
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
       return this.node.multiverse.persist()
         .then(() => {
-          this._logger.debug('New BC block stored in DB')
-          return this._broadcastMinedBlock(newBlock, solution)
+          self._logger.debug('New Block Collider block stored in DB')
+          const currentHighest = self.node.multiverse.getHighestBlock()
+          if (currentHighest.getHash() === newBlock.getHash()) {
+            self.pubsub.publish('update.block.latest', { data: newBlock })
+          }
+          return self._broadcastMinedBlock(newBlock, solution)
         })
         .catch((err) => {
           // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-          this._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
+          self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
         })
     } else {
       this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')

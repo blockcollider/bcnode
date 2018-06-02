@@ -10,6 +10,7 @@
 import type BcBlock from '../protos/core_pb'
 const { getGenesisBlock } = require('./genesis')
 const { flatten } = require('ramda')
+const { validateBlockSequence } = require('./validation.es6')
 const logging = require('../logger')
 const _ = require('lodash')
 const COMMIT_MULTIVERSE_DEPTH = 7
@@ -24,7 +25,6 @@ export class Multiverse {
 
   constructor (persistence: any, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
     this._blocks = {}
-    this._candidates = {}
     this._writeQueue = []
     this._persistence = persistence
     this._commitDepth = commitDepth
@@ -42,66 +42,88 @@ export class Multiverse {
     return blocks.length
   }
 
-  getMissingBlocks (block: BcBlock): ?Object {
+  getMissingBlocks (block: BcBlock) {
     if (block === undefined) {
       this._logger.error('no block submitted to evaluate')
       return false
     }
-    const highestBlock = this.getHighestBlock()
-    const height = block.getHeight()
-    const hash = block.getHash()
-    const previousHash = block.getPreviousHash()
-    const difficulty = block.getDifficulty()
-    const template = {
-      queryHash: hash,
-      queryHeight: height,
-      mesage: '',
-      start: 0,
-      end: 0
+    return false
+    // const highestBlock = this.getHighestBlock()
+    // const height = block.getHeight()
+    // const hash = block.getHash()
+    // const previousHash = block.getPreviousHash()
+    // const difficulty = block.getDifficulty()
+    // const template = {
+    //   queryHash: hash,
+    //   queryHeight: height,
+    //   message: '',
+    //   start: 0,
+    //   end: 0
+    // }
+    // if (highestBlock !== null) {
+    //   if (highestBlock.getHash() === hash) {
+    //     template.message = 'blocks are the equal to each-other'
+    //     return template
+    //   }
+    //   if (highestBlock.getHeight() === height) {
+    //     if (highestBlock.difficulty() < difficulty) {
+    //       this.addBlock(block)
+    //       template.message = 'purposed block will be the current height of the multiverse'
+    //       return template
+    //     }
+    //   }
+    //   if (highestBlock.getHash() === previousHash) {
+    //     this.addBlock(block)
+    //     template.message = 'purposed block is next block'
+    //     return template
+    //   }
+    //   if (highestBlock.getHeight() + 2 < height) {
+    //     template.start = highestBlock.getHeight() - 2
+    //     template.end = height + 1
+    //     template.message = 'purposed block is ahead and disconnected from multiverse'
+    //     return template
+    //   }
+    //   if (highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
+    //     this.addBlock(block)
+    //     template.start = height - 10
+    //     template.end = height + 1
+    //     template.message = 'purposed block may be in a multiverse layer'
+    //     return template
+    //   }
+    //   if (highestBlock.getHeight() > height) {
+    //     this.addBlock(block)
+    //     template.from = height - 1
+    //     template.to = this.getLowestBlock().getHeight() + 1 // Plus one so we can check with the multiverse if side chain
+    //     template.message = 'purposed block far behnd multiverse'
+    //     return template
+    //   }
+    //   return template
+    // } else {
+    //   this.addBlock(block)
+    //   template.message = 'no highest block has been selected for multiverse'
+    //   return template
+    // }
+  }
+
+  validateMultiverse (mv: Object):boolean {
+    if (Object.keys(mv).length < 3) {
+      this._logger.error('threshold not met, comparison between multiverse structures after dimension depth of 3')
+      return false
     }
-    if (highestBlock !== null) {
-      if (highestBlock.getHash() === hash) {
-        template.message = 'blocks are the equal to each-other'
-        return template
-      }
-      if (highestBlock.getHeight() === height) {
-        if (highestBlock.getDifficulty() < difficulty) {
-          this.addBlock(block)
-          template.message = 'purposed block will be the current height of the multiverse'
-          return template
-        }
-      }
-      if (highestBlock.getHash() === previousHash) {
-        this.addBlock(block)
-        template.message = 'purposed block is next block'
-        return template
-      }
-      if (highestBlock.getHeight() + 2 < height) {
-        template.start = highestBlock.getHeight() - 2
-        template.end = height + 1
-        template.message = 'purposed block is ahead and disconnected from multiverse'
-        return template
-      }
-      if (highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
-        this.addBlock(block)
-        template.start = height - 10
-        template.end = height + 1
-        template.message = 'purposed block may be in a multiverse layer'
-        return template
-      }
-      if (highestBlock.getHeight() > height) {
-        this.addBlock(block)
-        template.from = height - 1
-        template.to = this.getLowestBlock().getHeight() + 1 // Plus one so we can check with the multiverse if side chain
-        template.messeage = 'purposed block far behnd multiverse'
-        return template
-      }
-      return template
-    } else {
-      this.addBlock(block)
-      template.message = 'no highest block has been selected for multiverse'
-      return template
+    return true
+  }
+
+  isBestMultiverse (alt: Object): boolean {
+    const current = this._blocks
+    if (!this.validateMultiverse(alt)) {
+      this._logger.warn('candidate multiverse is malformed')
+      return false
     }
+    if (Object.keys(current).length < 7) {
+      this._logger.warn('current multiverse below suggested distance threshold')
+    }
+    // TODO: Switch to child chain comparisons
+    return false
   }
 
   addBlock (block: BcBlock, force: boolean = false): boolean {
@@ -180,18 +202,18 @@ export class Multiverse {
 
   purge () {
     this._blocks = {}
-    this._candidates = {}
     this._writeQueue = []
     this._logger.info('metaverse has been purged')
   }
 
-  getHighestBlock (depth: ?Number, keys: ?Array, list:?Array): ?BcBlock {
-    if (keys === undefined) {
+  getHighestBlock (depth: ?number = 7, keys: string[] = [], list: ?Array<*>): ?BcBlock {
+    if (keys.length === 0) {
       keys = Object.keys(this._blocks)
       list = []
     }
-    if (depth === undefined) {
-      depth = 7
+    if (Object.keys(this._blocks).length === 0) {
+      this._logger.error('unable to determine hight from incomplete multiverse')
+      return false
     }
     const currentHeight = keys.pop()
     const currentRow = this._blocks[currentHeight]
@@ -212,7 +234,7 @@ export class Multiverse {
       return this.getHighestBlock(depth, keys, list)
     }
     const minimumDepthChains = list.filter((chain) => {
-      if (chain.length >= depth) {
+      if (chain.length >= depth && validateBlockSequence(chain) === true) {
         return true
       }
     })

@@ -40,6 +40,7 @@ export class PeerManager {
 
   constructor (node: PeerNode) {
     debug('constructor()')
+    const self = this
     this._logger = logging.getLogger(__filename)
     this._peerNode = node
     this._peerBook = new ManagedPeerBook(this, 'main')
@@ -72,6 +73,12 @@ export class PeerManager {
         })
       }
     }, 10 * 1000)
+
+    //this.engine.pubsub.subscribe('update.block.latest', '<engine>', (block) => {
+    //  self.engine.restartMiner(block)
+    //})
+    //this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
+
   }
 
   get bundle (): Bundle {
