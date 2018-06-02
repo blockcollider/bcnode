@@ -93,7 +93,6 @@ export class Engine {
     })
 
     this._peerIsSyncing = false
-
     // Start NTP sync
     ts.start()
 
@@ -265,7 +264,7 @@ export class Engine {
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
-        this._logger.info(`Client is syncing so mining and ledger updates are disabled until a synchronized state is been achieved.`)
+        this._logger.info(`Client is syncing so mining and ledger updates are disabled until a synchronized state has been achieved.`)
         return Promise.resolve(false)
       }
       this._logger.debug(`Consumed blockchains has been manually overridden, mining services have been disabled. Present multiverse state: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
@@ -282,8 +281,8 @@ export class Engine {
       // Add to cache
       this._knownBlocksCache.set(block.getHash(), block)
       if (this.node.multiverse.addBlock(block) === true) {
-        // If it was recent enough to be part of the Multiverse it to other peers.
-        self.pubsub.publish('block.pool', {type: 'block', data: block})
+        // If it was recent enough to be part of the Multiverse send to other peers.
+        self.pubsub.publish('block.multiverse', {type: 'block.multiversed', data: block})
         return this.node.multiverse.persist()
           .then(() => {
             self._logger.debug('New BC block stored in DB')
@@ -296,7 +295,7 @@ export class Engine {
             self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
-        self.pubsub.publish('block.pool', {type: 'block', data: block})
+        self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${block.getHash()}`)

@@ -33,7 +33,7 @@ export class BlockPool {
     return latest
   }
 
-  async putLatest (data) {
+  putLatest (data) {
     return this._persistence.put(BLOCK_POOL_REFERENCE + 'latest', data)
   }
 
@@ -54,23 +54,25 @@ export class BlockPool {
     const hash = block.getHash()
     const previousHash = block.getPreviousHash()
     return self._persistence.get(previousHash)
+      // then -> check if a parent of the block exists in the main chain
       .then((res) => {
-        self._persistence.get(res)
-          .then((possibleBlock) => {
-            const latest = self.getLatest(BLOCK_POOL_REFERENCE)
-            if (latest.getHeight() < possibleBlock.getHeight()) {
-              return self.putLatest(block)
-            }
-            return self._persistence.put('bc.block.' + height, possibleBlock)
-          })
-          .catch((_) => {
-            return Promise.all([
-              self._persistence.del(BLOCK_POOL_REFERENCE + height),
-              self._persistence.del(hash)])
-              .catch((err) => {
-                throw Error(err)
-              })
-          })
+        // parent exists so determine if this block is also the new high for this chain 
+        return self._persistence.get(res)
+               .then((possibleBlock) => {
+                 const latest = self.getLatest(BLOCK_POOL_REFERENCE + 'latest')
+                 if (latest.getHeight() < possibleBlock.getHeight()) {
+                   return self.putLatest(block)
+                 }
+                 return self._persistence.put('bc.block.' + height, possibleBlock)
+               })
+               .catch((_) => {
+                 return Promise.all([
+                   self._persistence.del(BLOCK_POOL_REFERENCE + height),
+                   self._persistence.del(hash)])
+                   .catch((err) => {
+                     throw Error(err)
+                   })
+               })
       })
       .catch((_) => {
         const latest = this.getLatest(BLOCK_POOL_REFERENCE)
