@@ -50,7 +50,7 @@ type UnfinishedBlockData = {
   timeDiff: ?number
 }
 
-export class Engine {
+export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _monitor: Monitor; // eslint-disable-line no-undef
   _knownBlocksCache: Object; // eslint-disable-line no-undef
@@ -430,21 +430,25 @@ export class Engine {
     if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
       debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
       //  add to multiverse and call persist
-      this.node.multiverse.addBlock(newBlock)
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
-      return this.node.multiverse.persist()
-        .then(() => {
-          self._logger.debug('New Block Collider block stored in DB')
-          const currentHighest = self.node.multiverse.getHighestBlock()
-          if (currentHighest.getHash() === newBlock.getHash()) {
-            self.pubsub.publish('update.block.latest', { data: newBlock })
-          }
-          return self._broadcastMinedBlock(newBlock, solution)
-        })
-        .catch((err) => {
-          // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-          self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
-        })
+      const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
+      if (addedToMultiverse === true) {
+        return this.node.multiverse.persist()
+          .then(() => {
+            self._logger.debug('New Block Collider block stored in DB')
+            const currentHighest = self.node.multiverse.getHighestBlock()
+            if (currentHighest.getHash() === newBlock.getHash()) {
+              self.pubsub.publish('update.block.latest', { data: newBlock })
+            }
+            return self._broadcastMinedBlock(newBlock, solution)
+          })
+          .catch((err) => {
+            // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
+            self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
+          })
+      } else {
+        this._logger.warn('block discarded ' + newBlock.getHash())
+      }
     } else {
       this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
       return Promise.resolve()

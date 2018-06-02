@@ -137,10 +137,8 @@ export class Multiverse {
     let added = false
     let syncing = false
     this._logger.info('new multiverse candidate for height ' + height + ' (' + block.getHash() + ')')
-    if (this._blocks !== undefined) {
-      if (Object.keys(this._blocks).length < 7) {
-        syncing = true
-      }
+    if (Object.keys(this._blocks).length < 7) {
+      syncing = true
     }
     if (height === 1) {
       return false
@@ -170,8 +168,9 @@ export class Multiverse {
         return all
       }, false)
     }
+    this._logger.debug('hasParent: ' + hasParent + ' hasChild: ' + hasChild + ' syncing: ' + syncing)
     if (hasParent || hasChild || syncing) {
-      if (inMultiverseLayer === false) {
+      if (inMultiverseLayer === true) {
         if (self._blocks[height] === undefined) {
           self._blocks[height] = []
         }
@@ -188,8 +187,8 @@ export class Multiverse {
           }
         }
         if (self._blocks[height] !== undefined &&
-            self._blocks[height].length > 0 &&
-            self._blocks[height][0].getHash() === block.getHash()) {
+             self._blocks[height].length > 0 &&
+             self._blocks[height][0].getHash() === block.getHash()) {
           self._writeQueue.push(block)
           added = true
         }
@@ -197,6 +196,7 @@ export class Multiverse {
     } else if (force === true) {
       self._writeQueue.push(block)
     }
+    this._logger.info('now in writeQueue: ' + self._writeQueue.length)
     return added
   }
 
