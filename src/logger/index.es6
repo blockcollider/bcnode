@@ -34,7 +34,6 @@ const logger = new winston.Logger({
   transports: [
     // Console
     new winston.transports.Console({
-      colorize: true,
       timestamp: tsFormat,
       formatter: format,
       level: LOG_LEVEL

@@ -329,7 +329,7 @@ export class Multiverse {
         queue = queue.concat(self._writeQueue)
       }
       self._logger.info(queue.length + ' accepted changes optimize multiverse')
-      self._persistence.get('bc.block.latest').then((latestStoredBlock) => {
+      return self._persistence.get('bc.block.latest').then((latestStoredBlock) => {
         const highestBlock = self.getHighestBlock()
         if (highestBlock !== false &&
             highestBlock !== undefined &&
