@@ -10,7 +10,7 @@
 import type BcBlock from '../protos/core_pb'
 const { getGenesisBlock } = require('./genesis')
 const { flatten } = require('ramda')
-const { validateBlockSequence } = require('./validation.es6')
+const { validateBlockSequence } = require('./validation')
 const logging = require('../logger')
 const _ = require('lodash')
 const COMMIT_MULTIVERSE_DEPTH = 7

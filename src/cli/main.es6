@@ -19,9 +19,12 @@ const process = require('process')
 const program = require('commander')
 const Raven = require('raven')
 
+process.on('uncaughtException', (err) => {
+  console.log(err)
+})
+
 const config = require('../../config/config')
 const logging = require('../logger')
-const { ensureAppDataDir, getPublicKey } = require('../app')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
 const { getOsInfo } = require('../helper/os')
@@ -39,9 +42,6 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 export const main = async (args: string[] = process.argv) => {
   process.title = 'bcnode'
-
-  // Create appdata folder
-  ensureAppDataDir()
 
   const version = getVersion()
   const versionString = `${version.npm}#${version.git.short}`
@@ -92,7 +92,7 @@ export const main = async (args: string[] = process.argv) => {
     .command('start')
     .description('Start Block Collider')
     .usage('[opts]')
-    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX, getPublicKey())
+    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX)
     .option('-n, --node', 'Start P2P node')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')
