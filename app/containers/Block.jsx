@@ -35,7 +35,7 @@ export class BlockContainer extends Component<*> {
         <Helmet>
           <title>Block</title>
         </Helmet>
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>Block #{this.props.id}</h2>
+        <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>Block #{this.props.id}</h2>
 
         <div className='container bg-light'>
           { blockJson &&

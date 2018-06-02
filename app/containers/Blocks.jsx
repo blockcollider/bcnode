@@ -44,7 +44,7 @@ export class BlocksContainer extends Component<*> {
         <Helmet>
           <title>Blocks</title>
         </Helmet>
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
+        <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>
           Blocks
         </h2>
         <BlocksTable blocks={this.props.blocks} onClick={this.props.actions.showBlock} />

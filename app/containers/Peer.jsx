@@ -35,7 +35,7 @@ export class PeerContainer extends Component<*> {
           <title>Peer</title>
         </Helmet>
 
-        <h2 className='col-md-12 text-center' style={{marginTop: '20px', marginBottom: '20px'}}>
+        <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>
           Peer
         </h2>
       </div>

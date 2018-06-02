@@ -140,6 +140,7 @@ export class Multiverse {
     if (Object.keys(this._blocks).length < 7) {
       this._logger.info('empty multiverse detected node is syncing')
       syncing = true
+      force = true
     }
     if (this._blocks[parentHeight] !== undefined) {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
@@ -180,7 +181,7 @@ export class Multiverse {
             if (a.getDifficulty() < b.getDifficulty()) return -1
             return 0
           })
-          if (self._blocks[height][0].getHash() === block.getHash()) {
+          if (self._blocks[height][0] !== undefined && self._blocks[height][0].getHash() === block.getHash()) {
             self._writeQueue.push(block)
             added = true
           }
