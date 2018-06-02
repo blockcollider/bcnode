@@ -135,8 +135,10 @@ export default class Engine {
       } catch (_) { // genesis block not found
         try {
           const newGenesisBlock = getGenesisBlock()
+          this.node.multiverse.addBlock(newGenesisBlock)
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
+          await this.node.multiverse.persist()
           this._logger.info('Genesis block saved to disk ' + newGenesisBlock.getHash())
         } catch (e) {
           this._logger.error(`Error while creating genesis block ${e.message}`)
@@ -259,7 +261,12 @@ export default class Engine {
       return this.startMining(rovers, block)
     } else {
       if (!this._canMine) {
-        this._logger.info(`Rovers are assembling blocks to achieve the minimum multiverse - ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+        const msg = Object.keys(this._collectedBlocks).reduce((all, a) => {
+          const val = this._collectedBlocks[a]
+          all = all + a + ':' + val + '  '
+          return all
+        }, '')
+        this._logger.info(`rovers gathering blocks to reach minimum multiverse state ${msg}`)
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
@@ -295,8 +302,13 @@ export default class Engine {
             self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
-        // TODO: transfer to blockpool
         self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
+        if (this.node.multiverse._writeQueue.length > 0) {
+          return this.node.multiverse.persist()
+        } else {
+          self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
+        }
+        // TODO: transfer to blockpool
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${block.getHash()}`)

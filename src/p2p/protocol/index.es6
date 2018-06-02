@@ -15,8 +15,6 @@ const { register: registerRpc } = require('./rpc')
 const { register: registerStatus } = require('./status')
 
 export const registerProtocols = (manager: PeerManager, bundle: Bundle) => {
-  console.log('Registering protocols')
-
   registerNewBlock(manager, bundle)
   registerRpc(manager, bundle)
   registerStatus(manager, bundle)

@@ -13,7 +13,7 @@ const { Block } = require('../protos/core_pb')
 const { getLogger } = require('../logger')
 const logger = getLogger(__filename)
 
-const stringifyObject = (obj) => JSON.stringify(obj, null, 2)
+// const stringifyObject = (obj) => JSON.stringify(obj, null, 2)
 
 export function createUnifiedBlock (block: Object, transform: Function): Block {
   const unifiedBlock = transform(block)
@@ -26,7 +26,7 @@ export function createUnifiedBlock (block: Object, transform: Function): Block {
   debugSaveObject(path.join(dir, 'unified', filename), unifiedBlock.toObject())
 
   // $FlowFixMe
-  logger.info(`Created unified block: ${stringifyObject(obj)}`)
+  logger.info(`unified block created from ${obj.blockchain} ${obj.hash}`)
 
   return unifiedBlock
 }
