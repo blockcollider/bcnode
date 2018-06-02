@@ -456,6 +456,14 @@ export default class Engine {
             // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
             self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
           })
+      } else if (self.node.multiverse._writeQueue.length > 0) {
+        return this.node.multiverse.persist()
+          .then(() => {
+            return self.pubsub.publish('block.pool', { data: newBlock })
+          })
+          .catch((err) => {
+            return self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
+          })
       } else {
         this._logger.warn('block discarded ' + newBlock.getHash())
       }
