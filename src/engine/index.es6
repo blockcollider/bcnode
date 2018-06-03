@@ -113,6 +113,7 @@ export default class Engine {
   async init () {
     const roverNames = Object.keys(rovers)
     const { npm, git: { long } } = getVersion()
+    const newGenesisBlock = getGenesisBlock()
     const versionData = {
       version: npm,
       commit: long,
@@ -121,6 +122,7 @@ export default class Engine {
     // TODO get from CLI / config
     try {
       await this._persistence.open()
+      this.node.multiverse.addBlock(newGenesisBlock)
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
         this._logger.debug('Stored rovers to persistence')
@@ -131,11 +133,10 @@ export default class Engine {
       }
       try {
         await this.persistence.get('bc.block.1')
-        this._logger.debug('Genesis block present, everything ok')
+        await this.persistence.get('bc.block.latest')
+        this._logger.info('Genesis block present, everything ok')
       } catch (_) { // genesis block not found
         try {
-          const newGenesisBlock = getGenesisBlock()
-          this.node.multiverse.addBlock(newGenesisBlock)
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
           await this.node.multiverse.persist()
@@ -237,6 +238,7 @@ export default class Engine {
             this._logger.debug(`collectBlock handler: successfuly send to mining worker (PID: ${pid})`)
           }
         }).catch(err => {
+          console.trace(err)
           this._logger.error(`Could not send to mining worker, reason: ${errToString(err)}`)
           this._unfinishedBlock = undefined
           this._unfinishedBlockData = undefined
@@ -266,21 +268,21 @@ export default class Engine {
           all = all + a + ':' + val + '  '
           return all
         }, '')
-        this._logger.info(`rovers gathering blocks to reach minimum multiverse state ${msg}`)
+        this._logger.info(`generating multiverse state from ${msg}`)
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
-        this._logger.info(`Client is syncing so mining and ledger updates are disabled until a synchronized state has been achieved.`)
+        this._logger.info(`mining and ledger updates disabled until initial multiverse threshold is met`)
         return Promise.resolve(false)
       }
-      this._logger.debug(`Consumed blockchains has been manually overridden, mining services have been disabled. Present multiverse state: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
+      this._logger.debug(`consumed blockchains manually overridden, mining services disabled, active multiverse rovers: ${JSON.stringify(rovers)}, known: ${JSON.stringify(this._knownRovers)})`)
       return Promise.resolve(false)
     }
   }
 
   blockFromPeer (block: Object) {
     const self = this
-    this._logger.info('Received new block from peer', block.getHeight(), block.getMiner(), block.toObject())
+    this._logger.info('received new block from peer', block.getHeight(), block.getMiner(), block.toObject())
     // TODO: Validate new block mined by peer
     if (!this._knownBlocksCache.get(block.getHash())) {
       debug(`Adding received block into cache of known blocks - ${block.getHash()}`)
@@ -298,13 +300,14 @@ export default class Engine {
             self._server._wsBroadcast({ type: 'block.announced', data: block })
           })
           .catch((err) => {
+            console.trace(err)
             self._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
             self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
           })
       } else {
         // self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
         self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
-        if (self.node.multiverse._writeQueue.length > 0) {
+        if (self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
           return this.node.multiverse.persist()
         }
       }
@@ -443,25 +446,34 @@ export default class Engine {
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
       const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
       if (addedToMultiverse === true) {
-        return this.node.multiverse.persist()
+        this.node.multiverse.persist()
           .then(() => {
-            self._logger.debug('New Block Collider block stored in DB')
+            self._logger.info('New Block Collider block stored in DB')
             const currentHighest = self.node.multiverse.getHighestBlock()
-            if (currentHighest.getHash() === newBlock.getHash()) {
-              self.pubsub.publish('update.block.latest', { data: newBlock })
+            console.log('++++++++++++++++++++++++++++++++++')
+            console.log(currentHighest)
+            if (currentHighest !== undefined && currentHighest !== false) {
+              if (currentHighest.getHash() !== newBlock.getHash()) {
+                self.pubsub.publish('update.block.latest', { data: newBlock })
+              }
+              return self._broadcastMinedBlock(newBlock, solution)
+            } else {
+              return Promise.resolve()
             }
-            return self._broadcastMinedBlock(newBlock, solution)
           })
           .catch((err) => {
+            console.trace(err)
             // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
             self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
+            return Promise.reject(err)
           })
-      } else if (self.node.multiverse._writeQueue.length > 0) {
+      } else if (self.node.multiverse !== undefined && self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
         return this.node.multiverse.persist()
           .then(() => {
             return self.pubsub.publish('block.pool', { data: newBlock })
           })
           .catch((err) => {
+            console.trace(err)
             return self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
           })
       } else {

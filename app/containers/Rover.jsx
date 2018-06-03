@@ -28,7 +28,7 @@ export class RoverContainer extends Component<*> {
         </Helmet>
 
         <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>
-          Last {this.props.blocks.capacity()} of {this.props.blocksCount} rover discoveries
+            {this.props.blocksCount} member chain blocks discovered  
         </h2>
         {blocks}
       </div>

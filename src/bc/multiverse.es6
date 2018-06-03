@@ -8,7 +8,6 @@
  */
 
 import type BcBlock from '../protos/core_pb'
-const { getGenesisBlock } = require('./genesis')
 const { flatten } = require('ramda')
 const { validateBlockSequence } = require('./validation')
 const logging = require('../logger')
@@ -22,7 +21,6 @@ export class Multiverse {
   _height: number
   _logger: Object
   _persistence: any
-  _genesisBlock: Object
 
   constructor (persistence: any, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
     this._blocks = {}
@@ -31,7 +29,6 @@ export class Multiverse {
     this._commitDepth = commitDepth
     this._logger = logging.getLogger(__filename)
     this._height = 0
-    this._genesisBlock = getGenesisBlock()
   }
 
   get blocks (): Object {
@@ -138,7 +135,7 @@ export class Multiverse {
     let syncing = false
     this._logger.info('new multiverse candidate for height ' + height + ' (' + block.getHash() + ')')
     if (Object.keys(this._blocks).length < 7) {
-      this._logger.info('empty multiverse detected node is syncing')
+      this._logger.info('node is attempting to sync, multiverse filtering disabled')
       syncing = true
       force = true
     }
@@ -169,7 +166,7 @@ export class Multiverse {
     }
     this._logger.info('Block hasParent: ' + hasParent + ' hasChild: ' + hasChild + ' syncing: ' + syncing + ' height: ' + height)
     console.log(this._blocks)
-    if (hasParent || hasChild || syncing) {
+    if (hasParent || hasChild) {
       if (inMultiverseLayer === false) {
         if (self._blocks[height] === undefined) {
           self._blocks[height] = []
@@ -195,9 +192,14 @@ export class Multiverse {
       } else {
         this._logger.warn('block ' + block.getHash() + ' already in multiverse')
       }
-    } else if (force === true) {
+    } else if (force === true || syncing === true) {
+      if (self._blocks[height] === undefined) {
+        self._blocks[height] = []
+      }
+      self._blocks[height].push(block)
       self._writeQueue.push(block)
       added = true
+      return added
     }
     this._logger.info('now in writeQueue: ' + self._writeQueue.length)
     return added
@@ -215,7 +217,7 @@ export class Multiverse {
       list = []
     }
     if (Object.keys(this._blocks).length === 0) {
-      this._logger.error('unable to determine hight from incomplete multiverse')
+      this._logger.warn('unable to determine height from incomplete multiverse')
       return false
     }
     const currentHeight = keys.pop()
@@ -223,9 +225,11 @@ export class Multiverse {
     let matches = []
     currentRow.map((candidate) => {
       matches = list.reduce((all, chain) => {
-        if (chain[0].getPreviousHash() === candidate.getHash()) {
-          all++
-          chain.unshift(candidate)
+        if (chain !== undefined && chain[0] !== undefined) {
+          if (chain[0].getPreviousHash() === candidate.getHash()) {
+            all++
+            chain.unshift(candidate)
+          }
         }
         return all
       }, 0)
@@ -233,28 +237,38 @@ export class Multiverse {
         list.push([candidate])
       }
     })
+    // Cycle through the keys
     if (keys.length > 0) {
       return this.getHighestBlock(depth, keys, list)
     }
-    const minimumDepthChains = list.filter((chain) => {
+
+    const minimumDepthChains = list.reduce((all, chain) => {
       if (chain.length >= depth && validateBlockSequence(chain) === true) {
-        return true
+        all.push(chain)
       }
-    })
-    if (minimumDepthChains.length === 0) {
+      return all
+    }, [])
+    if (minimumDepthChains === undefined) {
+      return false
+    } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 0) {
       const performance = list.reduce((order, chain) => {
         const sum = chain.reduce((all, b) => {
-          return b.getDistance() + all
+          return b.getDifficulty() + all
         }, 0)
         if (order.length === 0) {
           order.push([chain, sum])
-        } else if (order[0][1] < sum) {
+        } else if (order[0][0] < sum) {
           order.unshift([chain, sum])
         }
+        return order
       }, [])
-      return performance[0][1]
-    } else if (minimumDepthChains.length === 1) {
-      return minimumDepthChains[0].pop()
+      console.log('PERFORMANCE1')
+      console.log('PERFORMANCE1')
+      console.log('PERFORMANCE1')
+      console.log(performance[0][0])
+      return performance[0][0][0]
+    } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 1) {
+      return minimumDepthChains[0].pop()[1]
     } else {
       const performance = minimumDepthChains.reduce((order, chain) => {
         const sum = chain.reduce((all, b) => {
@@ -262,12 +276,16 @@ export class Multiverse {
         }, 0)
         if (order.length === 0) {
           order.push([chain, sum])
-        } else if (order[0][1] < sum) {
+        } else if (order[0][0] < sum) {
           order.unshift([chain, sum])
         }
-        return order[0][1]
+        return order[0][0]
       }, [])
-      return performance[0][1]
+      console.log('PERFORMANCE2')
+      console.log('PERFORMANCE2')
+      console.log('PERFORMANCE2')
+      console.log(performance[0][0])
+      return performance[0][0][0]
     }
   }
 
@@ -306,13 +324,20 @@ export class Multiverse {
     return flatten(blocks)
   }
 
-  persist (): Promise<*> {
+  async persist (): Promise<*> {
     const self = this
+    const tasks = []
     let queue = []
     self.print()
     self._logger.info(self._writeQueue.length + ' purposed changes to optimize multiverse ')
-    if (self._writeQueue.length > 0) {
-      const tasks = []
+    if (self._blocks['1'] === undefined && self._writeQueue.length === 1 && self._writeQueue[0].getHeight() === 1) {
+      const genesisBlock = self._writeQueue.pop()
+      await Promise.all([
+        self._persistence.put('bc.block.1', genesisBlock),
+        self._persistence.put('bc.block.latest', genesisBlock)
+      ])
+      return Promise.resolve()
+    } else if (self._writeQueue !== undefined && self._writeQueue.length > 0) {
       if (self._writeQueue.length > 1) {
         const t = self._writeQueue.reduce((table, b, i) => {
           if (table[b.getHeight()] === undefined) {
@@ -330,8 +355,11 @@ export class Multiverse {
         queue = queue.concat(self._writeQueue)
       }
       self._logger.info(queue.length + ' accepted changes optimize multiverse')
-      return self._persistence.get('bc.block.latest').then((latestStoredBlock) => {
+      try {
+        const latestStoredBlock = await self._persistence.get('bc.block.latest')
         const highestBlock = self.getHighestBlock()
+        console.log('---------------------------')
+        console.log(highestBlock)
         if (highestBlock !== false &&
             highestBlock !== undefined &&
             // $FlowFixMe
@@ -339,34 +367,28 @@ export class Multiverse {
             // $FlowFixMe
             highestBlock.getHeight() > latestStoredBlock.getHeight()) {
           tasks.push(self._persistence.put('bc.block.latest', highestBlock))
+        } else {
+          tasks.push(self._persistence.put('bc.block.latest', latestStoredBlock))
         }
-        while (self._writeQueue.length > 0) { self._writeQueue.pop() }
-        while (queue.length > 0) {
-          let candidate = queue.pop()
-          let key = 'bc.block.' + candidate.getHeight()
-          tasks.push(self._persistence.put(key, candidate))
+        if (self._writeQueue !== undefined && queue !== undefined) {
+          while (self._writeQueue.length > 0) { self._writeQueue.pop() }
+          while (queue.length > 0) {
+            let candidate = queue.pop()
+            let key = 'bc.block.' + candidate.getHeight()
+            tasks.push(self._persistence.put(key, candidate))
+          }
         }
-        return Promise.all(tasks).then(() => {
+        if (tasks.length > 0) {
+          await Promise.all(tasks)
           return Promise.resolve()
-        })
-      })
-        .catch((err) => {
-          self._logger.error(err)
-          self._logger.error('ephermeral latest block not found')
-          const genesisBlock = getGenesisBlock()
-          return Promise.all([
-            self._persistence.put('bc.block.latest', genesisBlock),
-            self._persistence.put('bc.block.1', genesisBlock)
-          ])
-            .then(() => {
-              self._logger.warn('genesis block established as block 1')
-              return Promise.resolve()
-            })
-            .catch((err) => {
-              self._logger.error(err)
-              return Promise.reject(err)
-            })
-        })
+        }
+        return Promise.resolve()
+      } catch (err) {
+        console.trace(err)
+        self._logger.error(err)
+        self._logger.error('ephermeral latest block not found')
+        return Promise.resolve()
+      }
     } else {
       self._logger.info('no updates to multiverse data structure')
     }
@@ -385,15 +407,6 @@ export class Multiverse {
     }, [])
     this._logger.info(list)
   }
-  // print () {
-  //   for (let i = 0; i < this.maxDepth; i++) {
-  //     console.log(`DEPTH: ${i}, HEIGHT: ${this.minHeight + i}`)
-  //     const blocks = this.blocks.get(i) || []
-  //     for (let j = 0; j < blocks.length; j++) {
-  //       console.log(j, blocks[j].toObject())
-  //     }
-  //   }
-  // }
 }
 
 export default Multiverse
