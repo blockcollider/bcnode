@@ -8,12 +8,18 @@
  */
 
 const { fork } = require('child_process')
+const { glob } = require('glob')
+const fs = require('fs')
 const path = require('path')
 
+const debug = require('debug')('bcnode:rover:manager')
 const logging = require('../logger')
 const { errToString } = require('../helper/error')
+const { Block } = require('../protos/core_pb')
+const { RpcClient } = require('../rpc')
 
 const ROVER_RESTART_TIMEOUT = 5000
+const ROVED_DATA_PATH = path.resolve(__dirname, '..', '..', '_debug')
 
 /**
  * Rover lookup table
@@ -90,6 +96,46 @@ export default class RoverManager {
     })
 
     return Promise.resolve(true)
+  }
+
+  replay () {
+    debug('Replaying roved blocks')
+
+    const pattern = path.join(ROVED_DATA_PATH, '**/unified/*.json')
+    const files = glob.sync(pattern)
+      .sort((a, b) => {
+        const fnameA = path.posix.basename(a)
+        const fnameB = path.posix.basename(b)
+
+        if (fnameA < fnameB) {
+          return -1
+        } else if (fnameA > fnameB) {
+          return 1
+        }
+
+        return 0
+      })
+
+    const rpc = new RpcClient()
+
+    files.slice(-100).forEach((f) => {
+      const json = fs.readFileSync(f)
+      const obj = JSON.parse(json)
+
+      const block = new Block()
+      block.setBlockchain(obj.blockchain)
+      block.setHash(obj.hash)
+      block.setPreviousHash(obj.previousHash)
+      block.setTimestamp(obj.timestamp)
+      block.setHeight(obj.height)
+      block.setMerkleRoot(obj.merkleRoot)
+
+      rpc.rover.collectBlock(block, (err) => {
+        if (err) {
+          debug(`Unable to collect block ${f}`, err)
+        }
+      })
+    })
   }
 
   /**

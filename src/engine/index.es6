@@ -488,7 +488,7 @@ export default class Engine {
   }
 
   async startMining (rovers: string[] = ROVERS, block: BcBlock): Promise<*> {
-    debug('Starting mining', rovers || ROVERS, block)
+    debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
     let lastPreviousBlock
@@ -602,7 +602,7 @@ export default class Engine {
   }
 
   restartMining (rovers: string[] = ROVERS, block: BcBlock): Promise<boolean> {
-    debug('Restarting mining', rovers, block)
+    debug('Restarting mining', rovers, block.toObject())
 
     this.stopMining()
     return this.startMining(rovers || ROVERS, block)

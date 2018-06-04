@@ -137,6 +137,7 @@
     "fs-extra": "^5.0.0",
     "gauge": "^2.7.4",
     "getos": "^3.1.0",
+    "glob": "^7.1.2",
     "google-protobuf": "^3.5.0",
     "gossipmonger-memory-storage": "^0.1.0",
     "gossipmonger-peer": "^0.1.0",

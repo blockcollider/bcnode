@@ -76,6 +76,14 @@ export const cmd = async (program: typeof Command) => {
         ? ROVERS
         : rovers.split(',').map(roverName => roverName.trim().toLowerCase())
 
+    // TODO: Move somewhere else
+    const BC_ROVER_REPLAY = process.env.BC_ROVER_REPLAY
+    if (BC_ROVER_REPLAY === 'true' || BC_ROVER_REPLAY === '1') {
+      setTimeout(() => {
+        engine.rovers.replay()
+      }, 1000)
+    }
+
     engine.startRovers(roversToStart)
   }
 
