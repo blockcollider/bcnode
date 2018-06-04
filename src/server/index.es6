@@ -81,7 +81,7 @@ export default class Server {
     return this._server
   }
 
-  run (opts: Opts) {
+  run (opts: Opts): Promise<bool> {
     this._opts = opts
 
     this._logger.debug('Starting Server for Web UI')
@@ -120,6 +120,8 @@ export default class Server {
     server.listen(PORT, () => {
       this._logger.info(`Server available at http://0.0.0.0:${PORT}`)
     })
+
+    return Promise.resolve(true)
   }
 
   initWebSocket () {

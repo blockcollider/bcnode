@@ -339,6 +339,7 @@ export default class Engine {
       this._logger.warn('There is not unfinished block to use solution for')
       return
     }
+
     // $FlowFixMe
     this._unfinishedBlock.setNonce(solution.nonce)
     // $FlowFixMe
@@ -347,6 +348,7 @@ export default class Engine {
     this._unfinishedBlock.setTimestamp(solution.timestamp)
     // $FlowFixMe
     this._unfinishedBlock.setDifficulty(solution.difficulty)
+
     if (this._unfinishedBlockData) {
       this._unfinishedBlockData.iterations = solution.iterations
       this._unfinishedBlockData.timeDiff = solution.timeDiff
@@ -488,7 +490,7 @@ export default class Engine {
   }
 
   async startMining (rovers: string[] = ROVERS, block: BcBlock): Promise<*> {
-    debug('Starting mining', rovers || ROVERS, block)
+    debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
     let lastPreviousBlock
@@ -511,7 +513,7 @@ export default class Engine {
     // get latest known BC block
     try {
       lastPreviousBlock = await this._persistence.get('bc.block.latest')
-      console.log(lastPreviousBlock)
+      console.log('lastPreviousBlock', JSON.stringify(lastPreviousBlock.toObject(), null, 2))
       this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
     } catch (err) {
       this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
@@ -602,7 +604,7 @@ export default class Engine {
   }
 
   restartMining (rovers: string[] = ROVERS, block: BcBlock): Promise<boolean> {
-    debug('Restarting mining', rovers, block)
+    debug('Restarting mining', rovers, block.toObject())
 
     this.stopMining()
     return this.startMining(rovers || ROVERS, block)
