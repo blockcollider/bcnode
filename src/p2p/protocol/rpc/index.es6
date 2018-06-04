@@ -52,6 +52,10 @@ const handlers = {
       return Promise.reject(new Error(`From: ${fromHeight} > to: ${toHeight}`))
     }
 
+    if (toHeight - fromHeight > MAX_BLOCKS_COUNT) {
+      return Promise.reject(new Error(`Cannot return more than ${MAX_BLOCKS_COUNT} blocks`))
+    }
+
     const ids = []
     for (let i = fromHeight; i <= toHeight; i++) {
       ids.push(`bc.block.${i}`)
