@@ -17,7 +17,7 @@ const { isValidBlock, validateBlockSequence } = require('../../bc/validation')
 
 const { PROTOCOL_PREFIX } = require('../protocol/version')
 
-type HeaderIdentifier = [number, string] // height, hash
+export type HeaderIdentifier = [number, string] // height, hash
 
 export class Peer {
   _bundle: Bundle
