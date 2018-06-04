@@ -15,6 +15,7 @@ const {
   sort
 } = require('ramda')
 
+const { reject } = require('lodash')
 const { getLogger } = require('../logger')
 const { blake2bl } = require('../utils/crypto')
 const { concatAll } = require('../utils/ramda')
@@ -155,11 +156,15 @@ function blockainHeadersOrdered (childHeaderList: BlockchainHeader[], parentHead
   const highestChildHeader = pickHighestFromList(childHeaderList)
   const highestParentHeader = pickHighestFromList(parentHeaderList)
 
-  logger.debug(`blockainHeadersOrdered highestChild ${inspect(highestChildHeader.toObject())}, highestParent: ${inspect(highestParentHeader.toObject())}`)
-  return highestChildHeader.getHeight() >= highestParentHeader.getHeight()
+  // logger.debug(`blockainHeadersOrdered highestChild ${inspect(highestChildHeader.toObject())}, highestParent: ${inspect(highestParentHeader.toObject())}`)
+  return highestChildHeader !== undefined && highestParentHeader !== undefined && highestChildHeader.getHeight() >= highestParentHeader.getHeight()
 }
 
 export function validateBlockSequence (blocks: BcBlock[]): bool {
+  // if any of the submissions are undefined reject the sequence
+  if (reject(blocks).length > 0) {
+    return false
+  }
   // BC: 10 > BC: 9 > BC: 8 ...
   const sortedBlocks = sort((a, b) => b.getHeight() - a.getHeight(), blocks)
 

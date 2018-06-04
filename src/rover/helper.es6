@@ -26,7 +26,7 @@ export function createUnifiedBlock (block: Object, transform: Function): Block {
   debugSaveObject(path.join(dir, 'unified', filename), unifiedBlock.toObject())
 
   // $FlowFixMe
-  logger.info(`unified block created from ${obj.blockchain} ${obj.hash}`)
+  logger.info(`unified block built from ${obj.blockchain} ${obj.hash}`)
 
   return unifiedBlock
 }

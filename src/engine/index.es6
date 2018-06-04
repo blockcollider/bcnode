@@ -77,8 +77,8 @@ export default class Engine {
     this._minerKey = opts.minerKey
     this._monitor = new Monitor(this, {})
     this._persistence = new PersistenceRocksDb(DATA_DIR)
-    this._node = new Node(this)
     this._pubsub = new PubSub()
+    this._node = new Node(this)
     this._rovers = new RoverManager()
     this._emitter = new EventEmitter()
     this._rpc = new RpcServer(this)
@@ -111,6 +111,7 @@ export default class Engine {
    * - Store name of available rovers
    */
   async init () {
+    const self = this
     const roverNames = Object.keys(rovers)
     const { npm, git: { long } } = getVersion()
     const newGenesisBlock = getGenesisBlock()
@@ -156,6 +157,31 @@ export default class Engine {
     }
 
     this._logger.debug('Engine initialized')
+
+    this.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
+      const block = msg.data
+      self._persistence.put(msg.key, block)
+        .then(() => {
+          // deal with event loop
+          if (self._unfinishedBlock !== undefined && self._unfinishedBlock.getHash() === block.getHash()) {
+            self._unfinishedBlock = undefined
+          }
+          self._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
+        })
+        .catch((err) => {
+          self._logger.error(err)
+        })
+    })
+    this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
+      const block = msg.data
+      self._persistence.put('bc.block.latest', block)
+        .then(() => {
+          self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
+        })
+        .catch((err) => {
+          self._logger.error(err)
+        })
+    })
   }
 
   /**
@@ -230,7 +256,6 @@ export default class Engine {
         this._rovers.startRover(name)
       }
     })
-
     this._emitter.on('collectBlock', ({ block }) => {
       process.nextTick(() => {
         this.collectBlock(rovers, block).then((pid: number|false) => {
@@ -253,11 +278,9 @@ export default class Engine {
     if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) { // --> TESTNET
       this._canMine = true
     }
-
     if (PERSIST_ROVER_DATA === true) {
       this._writeRoverData(block)
     }
-
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       return this.startMining(rovers, block)
@@ -280,39 +303,42 @@ export default class Engine {
     }
   }
 
-  blockFromPeer (block: Object) {
-    const self = this
-    this._logger.info('received new block from peer', block.getHeight(), block.getMiner(), block.toObject())
+  blockFromPeer (newBlock: Object) {
+    this._logger.info('received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
-    if (!this._knownBlocksCache.get(block.getHash())) {
-      debug(`Adding received block into cache of known blocks - ${block.getHash()}`)
+    if (!this._knownBlocksCache.get(newBlock.getHash())) {
+      debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
-      this._knownBlocksCache.set(block.getHash(), block)
-      if (this.node.multiverse.addBlock(block) === true) {
-        // If it was recent enough to be part of the Multiverse send to other peers.
-        self.pubsub.publish('block.multiverse', {type: 'block.multiversed', data: block})
-        return this.node.multiverse.persist()
-          .then(() => {
-            self._logger.debug('New BC block stored in DB')
-            self.node.broadcastNewBlock(block)
-            // Update UI
-            self.pubsub.publish('update.block.latest', {type: 'update.block.latest', data: block})
-            self._server._wsBroadcast({ type: 'block.announced', data: block })
-          })
-          .catch((err) => {
-            console.trace(err)
-            self._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-            self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
-          })
-      } else {
-        // self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
-        self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
-        if (self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
-          return this.node.multiverse.persist()
-        }
-      }
+      this._knownBlocksCache.set(newBlock.getHash(), newBlock)
+
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>> update.block.latest')
+      // this.pubsub.publish('update.block.latest', { data: newBlock })
+
+      // if (this.node.multiverse.addBlock(block) === true) {
+      //  // If it was recent enough to be part of the Multiverse send to other peers.
+      //  self.pubsub.publish('block.multiverse', {type: 'block.multiversed', data: block})
+      //  return this.node.multiverse.persist()
+      //    .then(() => {
+      //      self._logger.debug('New BC block stored in DB')
+      //      self.node.broadcastNewBlock(block)
+      //      // Update UI
+      //      self.pubsub.publish('update.block.latest', {type: 'update.block.latest', data: block})
+      //      self._server._wsBroadcast({ type: 'block.announced', data: block })
+      //    })
+      //    .catch((err) => {
+      //      console.trace(err)
+      //      self._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
+      //      self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
+      //    })
+      // } else {
+      //  // self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
+      //  self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
+      //  if (self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
+      //    return this.node.multiverse.persist()
+      //  }
+      // }
     } else {
-      debug(`Received block is already in cache of known blocks - ${block.getHash()}`)
+      debug(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)
     }
   }
 
@@ -345,7 +371,9 @@ export default class Engine {
       return
     }
 
-    this._processMinedBlock(this._unfinishedBlock, solution)
+    if (this._unfinishedBlock !== undefined) {
+      this._processMinedBlock(this._unfinishedBlock, solution)
+    }
   }
 
   _handleWorkerError (error: Error) {
@@ -439,46 +467,66 @@ export default class Engine {
 
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
-    const self = this
-    if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
+    if (newBlock === undefined) {
+      // not a new block
+      return Promise.resolve()
+    } else if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
       debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
       //  add to multiverse and call persist
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
+      const beforeBlockHighest = this.node.multiverse.getHighestBlock()
       const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
-      if (addedToMultiverse === true) {
-        this.node.multiverse.persist()
-          .then(() => {
-            self._logger.info('New Block Collider block stored in DB')
-            const currentHighest = self.node.multiverse.getHighestBlock()
-            console.log('++++++++++++++++++++++++++++++++++')
-            console.log(currentHighest)
-            if (currentHighest !== undefined && currentHighest !== false) {
-              if (currentHighest.getHash() !== newBlock.getHash()) {
-                self.pubsub.publish('update.block.latest', { data: newBlock })
-              }
-              return self._broadcastMinedBlock(newBlock, solution)
-            } else {
-              return Promise.resolve()
-            }
-          })
-          .catch((err) => {
-            console.trace(err)
-            // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-            self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
-            return Promise.reject(err)
-          })
-      } else if (self.node.multiverse !== undefined && self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
-        return this.node.multiverse.persist()
-          .then(() => {
-            return self.pubsub.publish('block.pool', { data: newBlock })
-          })
-          .catch((err) => {
-            console.trace(err)
-            return self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
-          })
-      } else {
-        this._logger.warn('block discarded ' + newBlock.getHash())
+      console.log(this.node.multiverse._blocks)
+      const afterBlockHighest = this.node.multiverse.getHighestBlock()
+      console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
+      console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
+      console.log('addedToMultiverse: ' + addedToMultiverse)
+      if (beforeBlockHighest.getHash() === afterBlockHighest.getHash()) {
+        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+      } else if (addedToMultiverse === true) {
+        this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       }
+      // console.log('ADD THIS TO MULTIVERSE: ' + addedToMultiverse)
+      // if (addedToMultiverse === true) {
+      //  self.node.multiverse.persist()
+      //    .then(() => {
+      //      self._logger.info('New Block Collider block stored in DB')
+      //      const currentHighest = self.node.multiverse.getHighestBlock()
+      //      console.log('++++++++++++++++++++++++++++++++++')
+      //      console.log(currentHighest)
+      //      if (currentHighest !== undefined && currentHighest !== false) {
+      //        if (currentHighest.getHash() !== newBlock.getHash()) {
+      //          self.pubsub.publish('update.block.latest', { data: newBlock })
+      //        }
+      //        return self._broadcastMinedBlock(newBlock, solution)
+      //      } else {
+      //        return Promise.resolve()
+      //      }
+      //    })
+      //    .catch((err) => {
+      //      console.trace(err)
+      //      // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
+      //      self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
+      //      return Promise.reject(err)
+      //    })
+      // } else if (self.node.multiverse !== undefined && self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
+      //  return self.node.multiverse.persist()
+      //    .then(() => {
+      //      return self.pubsub.publish('block.pool', { data: newBlock })
+      //    })
+      //    .catch((err) => {
+      //      console.trace(err)
+      //      return self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
+      //    })
+      // } else {
+      //  self._logger.warn('block discarded ' + newBlock.getHash())
+      //  return self.node.multiverse.persist().then((r) => {
+      //    console.trace(r)
+      //  })
+      //    .catch((err) => {
+      //      console.trace(err)
+      //    })
+      // }
     } else {
       this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
       return Promise.resolve()
@@ -509,6 +557,7 @@ export default class Engine {
     // get latest known BC block
     try {
       lastPreviousBlock = await this._persistence.get('bc.block.latest')
+      console.log(lastPreviousBlock)
       this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
     } catch (err) {
       this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)

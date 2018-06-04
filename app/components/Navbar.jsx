@@ -39,8 +39,8 @@ export class Navbar extends Component<*, State> {
           <ConnectionState style={{marginLeft: '10px'}} connected={this.props.connected} type='dot' />
         </Brand>
 
-        <NavItem className='navbar-light bg-light'>
-          <NavLink href='/#/blocks/latest' style={STYLE} className='navbar-light bg-light'>Multichain</NavLink>
+        <NavItem>
+          <NavLink href='/#/blocks/latest' style={STYLE}>Multichain</NavLink>
         </NavItem>
 
         <NavItem>

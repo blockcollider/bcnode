@@ -28,7 +28,7 @@ export class RoverContainer extends Component<*> {
         </Helmet>
 
         <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>
-            {this.props.blocksCount} member chain blocks discovered  
+            Latest {this.props.blocksCount} Block Mutations
         </h2>
         {blocks}
       </div>
