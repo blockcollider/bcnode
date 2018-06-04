@@ -162,10 +162,6 @@ export default class Engine {
       const block = msg.data
       self._persistence.put(msg.key, block)
         .then(() => {
-          // deal with event loop
-          if (self._unfinishedBlock !== undefined && self._unfinishedBlock.getHash() === block.getHash()) {
-            self._unfinishedBlock = undefined
-          }
           self._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
         })
         .catch((err) => {
@@ -263,7 +259,6 @@ export default class Engine {
             this._logger.debug(`collectBlock handler: successfuly send to mining worker (PID: ${pid})`)
           }
         }).catch(err => {
-          console.trace(err)
           this._logger.error(`Could not send to mining worker, reason: ${errToString(err)}`)
           this._unfinishedBlock = undefined
           this._unfinishedBlockData = undefined
@@ -303,40 +298,30 @@ export default class Engine {
     }
   }
 
-  blockFromPeer (newBlock: Object) {
+  blockFromPeer (newBlock: BcBlock) {
     this._logger.info('received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
     if (!this._knownBlocksCache.get(newBlock.getHash())) {
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
+      const beforeBlockHighest = this.node.multiverse.getHighestBlock()
+      const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
+      const afterBlockHighest = this.node.multiverse.getHighestBlock()
+      console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
+      console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
+      console.log('addedToMultiverse: ' + addedToMultiverse)
+      if (beforeBlockHighest.getHash() === afterBlockHighest.getHash()) {
+        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+      } else if (addedToMultiverse === true) {
+        this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+      } else {
 
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>> update.block.latest')
-      // this.pubsub.publish('update.block.latest', { data: newBlock })
+        // TODO: Fix the getHighestBlock function --> this.node.multiverse.getHighestBlock()
+        // TODO: getMissingBlocks() function from multiverse
+        // TODO: compare two multiverses to eachother --> implement in multverse
 
-      // if (this.node.multiverse.addBlock(block) === true) {
-      //  // If it was recent enough to be part of the Multiverse send to other peers.
-      //  self.pubsub.publish('block.multiverse', {type: 'block.multiversed', data: block})
-      //  return this.node.multiverse.persist()
-      //    .then(() => {
-      //      self._logger.debug('New BC block stored in DB')
-      //      self.node.broadcastNewBlock(block)
-      //      // Update UI
-      //      self.pubsub.publish('update.block.latest', {type: 'update.block.latest', data: block})
-      //      self._server._wsBroadcast({ type: 'block.announced', data: block })
-      //    })
-      //    .catch((err) => {
-      //      console.trace(err)
-      //      self._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-      //      self._logger.error(`Unable to store BC block in DB, reason: ${err.message}`)
-      //    })
-      // } else {
-      //  // self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
-      //  self.pubsub.publish('block.pool', {type: 'block.pooled', data: block})
-      //  if (self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
-      //    return this.node.multiverse.persist()
-      //  }
-      // }
+      }
     } else {
       debug(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)
     }
@@ -467,69 +452,35 @@ export default class Engine {
 
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
-    if (newBlock === undefined) {
-      // not a new block
-      return Promise.resolve()
-    } else if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
-      debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
-      //  add to multiverse and call persist
-      this._knownBlocksCache.set(newBlock.getHash(), newBlock)
-      const beforeBlockHighest = this.node.multiverse.getHighestBlock()
-      const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
-      console.log(this.node.multiverse._blocks)
-      const afterBlockHighest = this.node.multiverse.getHighestBlock()
-      console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
-      console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
-      console.log('addedToMultiverse: ' + addedToMultiverse)
-      if (beforeBlockHighest.getHash() === afterBlockHighest.getHash()) {
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-      } else if (addedToMultiverse === true) {
-        this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+    try {
+      if (newBlock === undefined) {
+        // not a new block
+        this._logger.warn('failed to process work provided by miner')
+        return Promise.resolve()
+      } else if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
+        debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
+        //  add to multiverse and call persist
+        this._knownBlocksCache.set(newBlock.getHash(), newBlock)
+        const beforeBlockHighest = this.node.multiverse.getHighestBlock()
+        const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
+        const afterBlockHighest = this.node.multiverse.getHighestBlock()
+        console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
+        console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
+        console.log('addedToMultiverse: ' + addedToMultiverse)
+        if (beforeBlockHighest.getHash() === afterBlockHighest.getHash()) {
+          this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+        } else if (addedToMultiverse === true) {
+          this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+        }
+
+        return Promise.resolve(true)
+      } else {
+        this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
+        return Promise.resolve(true)
       }
-      // console.log('ADD THIS TO MULTIVERSE: ' + addedToMultiverse)
-      // if (addedToMultiverse === true) {
-      //  self.node.multiverse.persist()
-      //    .then(() => {
-      //      self._logger.info('New Block Collider block stored in DB')
-      //      const currentHighest = self.node.multiverse.getHighestBlock()
-      //      console.log('++++++++++++++++++++++++++++++++++')
-      //      console.log(currentHighest)
-      //      if (currentHighest !== undefined && currentHighest !== false) {
-      //        if (currentHighest.getHash() !== newBlock.getHash()) {
-      //          self.pubsub.publish('update.block.latest', { data: newBlock })
-      //        }
-      //        return self._broadcastMinedBlock(newBlock, solution)
-      //      } else {
-      //        return Promise.resolve()
-      //      }
-      //    })
-      //    .catch((err) => {
-      //      console.trace(err)
-      //      // this._unfinishedBlock = undefined // TODO check if correct place to cleanup after error
-      //      self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
-      //      return Promise.reject(err)
-      //    })
-      // } else if (self.node.multiverse !== undefined && self.node.multiverse._writeQueue !== undefined && self.node.multiverse._writeQueue.length > 0) {
-      //  return self.node.multiverse.persist()
-      //    .then(() => {
-      //      return self.pubsub.publish('block.pool', { data: newBlock })
-      //    })
-      //    .catch((err) => {
-      //      console.trace(err)
-      //      return self._logger.error(`Unable to persist Block Collider block in DB, reason: ${err.message}`)
-      //    })
-      // } else {
-      //  self._logger.warn('block discarded ' + newBlock.getHash())
-      //  return self.node.multiverse.persist().then((r) => {
-      //    console.trace(r)
-      //  })
-      //    .catch((err) => {
-      //      console.trace(err)
-      //    })
-      // }
-    } else {
-      this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
-      return Promise.resolve()
+    } catch (err) {
+      this._logger.warn('failed to process work provided by miner')
+      return Promise.resolve(true)
     }
   }
 

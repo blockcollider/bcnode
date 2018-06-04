@@ -11,7 +11,6 @@ import type BcBlock from '../protos/core_pb'
 const { flatten } = require('ramda')
 const { validateBlockSequence } = require('./validation')
 const logging = require('../logger')
-const _ = require('lodash')
 const COMMIT_MULTIVERSE_DEPTH = 7
 
 export class Multiverse {
@@ -142,7 +141,6 @@ export class Multiverse {
     }
     if (this._blocks[parentHeight] !== undefined) {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
-        console.log('-----------------> item: ' + item.getHash() + ' blockPreviousHash  ' + block.getPreviousHash())
         if (item.getHash() === block.getPreviousHash()) {
           all = true
         }
@@ -171,7 +169,6 @@ export class Multiverse {
         if (self._blocks[height] === undefined) {
           self._blocks[height] = []
         }
-        console.log('adding block ' + block.getHash() + ' to height ' + height)
         if (self._blocks[height][0] !== undefined && self._blocks[height][0].getHash() === block.getPreviousHash()) {
           self._blocks[height].push(block)
         } else {
@@ -197,14 +194,11 @@ export class Multiverse {
         this._logger.warn('block ' + block.getHash() + ' already in multiverse')
       }
     } else if (force === true || syncing === true) {
-      console.log('Block did not have parent or child however force: ' + force + ' and syncing: ' + syncing)
       if (self._blocks[height] === undefined) {
-        console.log('the layer does not exist for the blocks height ' + height + ' so one is to be created')
         self._blocks[height] = []
       }
       self._blocks[height].push(block)
       if (self._blocks[height].length > 1) {
-        console.log('there are more than 1 blocks in this layer so the difficulty is being sorted')
         self._blocks[height] = self._blocks[height].sort((a, b) => {
           if (a.getDifficulty() > b.getDifficulty()) return 1
           if (a.getDifficulty() < b.getDifficulty()) return -1
@@ -212,7 +206,6 @@ export class Multiverse {
         })
       }
       self._writeQueue.push(block)
-      console.log('added to queue as tru')
       added = true
       return added
     }
@@ -232,9 +225,10 @@ export class Multiverse {
     this._logger.info('metaverse has been purged')
   }
 
-  switchBetterBlock (block: BcBlock): ?BcBlock {
+  caseBetterMultiverse (block: BcBlock): ?BcBlock {
     const currentHighestBlock = this.getHighestBlock()
-    console.log(currentHighestBlock)
+    this._logger.info(currentHighestBlock)
+    // TODO: Stub function for the comparison of two multiverse structures
   }
 
   getHighestBlock (depth: ?number = 7, keys: string[] = [], list: ?Array<*>): ?BcBlock {
@@ -244,7 +238,6 @@ export class Multiverse {
     }
     if (Object.keys(this._blocks).length === 0) {
       this._logger.warn('unable to determine height from incomplete multiverse')
-      console.log('answer is 1')
       return false
     }
     const currentHeight = keys.pop()
@@ -264,7 +257,7 @@ export class Multiverse {
         list.push([candidate])
       }
     })
-    // Cycle through the keys
+    // Cycle through keys
     if (keys.length > 0) {
       return this.getHighestBlock(depth, keys, list)
     }
@@ -278,7 +271,6 @@ export class Multiverse {
       // Any new block is the highest
       return true
     } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 0) {
-      console.log('the list is of length: ' + list.length)
       const performance = list.reduce((order, chain) => {
         const sum = chain.reduce((all, b) => {
           return b.getDifficulty() + all
@@ -299,13 +291,6 @@ export class Multiverse {
         }
         return 0
       })
-      console.log('answer is 2')
-      console.log('answer is 2')
-      console.log('answer is 2')
-      console.log('answer is 2')
-      console.log('answer is 2')
-      console.log('answer is 2')
-      console.log(results[0])
       return results[0][0][0]
     } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 1) {
       return minimumDepthChains[0].pop()[1]
@@ -321,7 +306,6 @@ export class Multiverse {
         }
         return order[0][0]
       }, [])
-      console.log('answer is 3')
       return performance[0][0][0]
     }
   }
@@ -359,79 +343,6 @@ export class Multiverse {
   toFlatArray (): Array<BcBlock> {
     const blocks = this.toArray()
     return flatten(blocks)
-  }
-
-  persist (): Promise<*> {
-    const self = this
-    const tasks = []
-    let queue = []
-    self.print()
-    self._logger.info(self._writeQueue.length + ' purposed changes to optimize multiverse ')
-    if (self._blocks['1'] === undefined && self._writeQueue.length === 1 && self._writeQueue[0].getHeight() === 1) {
-      const genesisBlock = self._writeQueue.pop()
-      return Promise.all([
-        self._persistence.put('bc.block.1', genesisBlock),
-        self._persistence.put('bc.block.latest', genesisBlock)
-      ])
-    } else if (self._writeQueue !== undefined && self._writeQueue.length > 0) {
-      if (self._writeQueue.length > 1) {
-        const t = self._writeQueue.reduce((table, b, i) => {
-          if (table[b.getHeight()] === undefined) {
-            table[b.getHeight()] = b
-          } else {
-            const current = table[b.getHeight()]
-            if (b.getDifficulty() > current.getDifficulty()) {
-              table[b.getHeight()] = b
-            }
-          }
-          return table
-        }, {})
-        queue = _.values(t)
-      } else {
-        queue = queue.concat(self._writeQueue)
-      }
-      self._logger.info(queue.length + ' accepted changes optimize multiverse')
-      try {
-        self._persistence.get('bc.block.latest')
-          .then((latestStoredBlock) => {
-            const highestBlock = self.getHighestBlock()
-            if (highestBlock !== undefined &&
-                highestBlock !== false &&
-                // $FlowFixMe
-                highestBlock.getHash() !== latestStoredBlock.getHash() &&
-                // $FlowFixMe
-                highestBlock.getHeight() > latestStoredBlock.getHeight()) {
-              tasks.push(self._persistence.put('bc.block.latest', highestBlock))
-            } else {
-              tasks.push(self._persistence.put('bc.block.latest', latestStoredBlock))
-            }
-            if (self._writeQueue !== undefined && queue !== undefined) {
-              while (self._writeQueue.length > 0) { self._writeQueue.pop() }
-              while (queue.length > 0) {
-                let candidate = queue.pop()
-                let key = 'bc.block.' + candidate.getHeight()
-                tasks.push(self._persistence.put(key, candidate))
-              }
-            }
-            if (tasks.length > 0) {
-              return Promise.all(tasks)
-            }
-            return Promise.resolve()
-          })
-          .catch((err) => {
-            console.trace(err)
-            return Promise.resolve()
-          })
-      } catch (err) {
-        console.trace(err)
-        self._logger.error(err)
-        self._logger.error('ephermeral latest block not found')
-        return Promise.resolve()
-      }
-    } else {
-      self._logger.info('no updates to multiverse data structure')
-    }
-    return Promise.resolve()
   }
 
   print () {
