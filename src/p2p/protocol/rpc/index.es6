@@ -9,9 +9,12 @@
 
 import type { Bundle } from '../../bundle'
 import type { PeerManager } from '../../manager/manager'
+import type { HeaderIdentifier } from '../../peer/peer'
+import type { BcBlock } from '../../../protos/core_pb'
 
 const debug = require('debug')('bcnode:protocol:rpc')
 const pull = require('pull-stream')
+const { last } = require('ramda')
 
 const { PROTOCOL_PREFIX } = require('../version')
 
@@ -39,16 +42,38 @@ const { PROTOCOL_PREFIX } = require('../version')
 const MAX_BLOCKS_COUNT = 100000
 
 const handlers = {
-  getHeaders: (manager: PeerManager, from: number, to: number) => {
-    const start = Math.min(from, to)
-    const end = Math.min(start + MAX_BLOCKS_COUNT, Math.max(from, to))
+  // Params: e.g. from [7, b20377...60f444], [25, 592209...8cdd8d]
+  // returns array of base64 encoded serialized BcBlocks
+  getHeaders: (manager: PeerManager, from: HeaderIdentifier, to: HeaderIdentifier): Promise<string[]> => {
+    const [fromHeight, fromHash] = from
+    const [toHeight, toHash] = to
+
+    if (fromHeight > toHeight) {
+      return Promise.reject(new Error(`From: ${fromHeight} > to: ${toHeight}`))
+    }
+
+    if (toHeight - fromHeight > MAX_BLOCKS_COUNT) {
+      return Promise.reject(new Error(`Cannot return more than ${MAX_BLOCKS_COUNT} blocks`))
+    }
 
     const ids = []
-    for (let i = start; i <= end; i++) {
+    for (let i = fromHeight; i <= toHeight; i++) {
       ids.push(`bc.block.${i}`)
     }
 
     return manager.engine.persistence.get(ids)
+      .then((blocks) => {
+        // validate if first returned block.hash is fromHash and last is toHash
+        if (blocks[0].getHash() !== fromHash) {
+          return Promise.reject(new Error(`Wrong hash of from block, requested ${fromHash}, got ${blocks[0].getHash()}`))
+        }
+
+        if (last(blocks).getHash() !== toHash) {
+          return Promise.reject(new Error(`Wrong hash of to block, requested ${toHash}, got ${last(blocks).getHash()}`))
+        }
+      }, (err) => { // beware, rocksdb rejects when not found
+        return Promise.reject(new Error(`Could not retrieve some block between height ${fromHeight} and ${toHeight} from persistence, err: ${err}`))
+      })
       .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
   },
 
@@ -77,7 +102,7 @@ const handlers = {
   },
 
   getMultiverse: (manager: PeerManager) => {
-    // TODO: @schnor Can we delete this?
+    // TODO: @schnorr Can we delete this?
     // if (false && manager.isQuorumSyncing()) {
     //   return Promise.resolve([])
     // }

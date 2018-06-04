@@ -98,7 +98,7 @@ export default class PersistenceRocksDb {
    * @param key
    * @param opts
    */
-  get (key: string, opts: Object = { asBuffer: true }): Promise<Object> {
+  get (key: string, opts: Object = { asBuffer: true }): Promise<Object>|Promise<Array<Object>> {
     if (Array.isArray(key)) {
       const promises = key.map((k) => {
         return this.get(k)

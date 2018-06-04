@@ -13,8 +13,11 @@ import type { Bundle } from './../bundle'
 const debug = require('debug')('bcnode:peer:peer')
 const pull = require('pull-stream')
 const { BcBlock } = require('../../protos/core_pb')
+const { isValidBlock, validateBlockSequence } = require('../../bc/validation')
 
 const { PROTOCOL_PREFIX } = require('../protocol/version')
+
+export type HeaderIdentifier = [number, string] // height, hash
 
 export class Peer {
   _bundle: Bundle
@@ -33,8 +36,8 @@ export class Peer {
     return this._peerId
   }
 
-  getHeaders (from: number = 1, to: number = 10): Promise<*> {
-    debug(`getHeaders(${from}, ${to})`, this.peerId.id.toB58String())
+  getHeaders (from: HeaderIdentifier, to: HeaderIdentifier): Promise<*> {
+    debug(`getHeaders(${from.toString()}, ${to.toString()})`, this.peerId.id.toB58String())
 
     return new Promise((resolve, reject) => {
       this.bundle.dialProtocol(this.peerId, `${PROTOCOL_PREFIX}/rpc`, (err, conn) => {
@@ -60,8 +63,22 @@ export class Peer {
 
             try {
               const msg = JSON.parse(wireData)
-              const result = msg.map(b => BcBlock.deserializeBinary(Buffer.from(b, 'base64')))
-              resolve(result)
+              const blocks = msg.map(b => BcBlock.deserializeBinary(Buffer.from(b, 'base64')))
+              // validate each block separately
+              blocks.forEach(block => {
+                if (!isValidBlock()) {
+                  const reason = `Block ${block.getHeight()}, h: ${block.getHash()} is not a valid BC block`
+                  debug(reason)
+                  reject(new Error(reason))
+                }
+              })
+              // validate that the block sequence is valid
+              if (!validateBlockSequence(blocks)) {
+                const reason = `Block sequence not valid`
+                debug(reason)
+                reject(new Error(reason))
+              }
+              resolve(blocks)
             } catch (e) {
               return reject(e)
             }
