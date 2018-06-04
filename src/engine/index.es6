@@ -317,8 +317,11 @@ export default class Engine {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
 
-        // TODO: Fix the getHighestBlock function --> this.node.multiverse.getHighestBlock()
-        // TODO: getMissingBlocks() function from multiverse
+        // 1. TODO: Fix the getHighestBlock function --> this.node.multiverse.getHighestBlock()
+        // 2. TODO: getMissingBlocks() function from multiverse
+        //
+        //    (--> [startingBlochHash, startingBlockHeight] --> [endingBlockHash, endingBlockHeight])
+        //
         // TODO: compare two multiverses to eachother --> implement in multverse
 
       }

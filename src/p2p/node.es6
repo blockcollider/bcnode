@@ -258,7 +258,7 @@ export class PeerNode {
                   // this.multiverse.purge()
                   // insert into the multiverse
                   winningMultiverse.map(block => this.multiverse.addBlock(block))
-                  this.multiverse.persist()
+                  // TODO: Use RXP
                   // Report not syncing
                   this.reportSyncPeriod(false)
                 }
