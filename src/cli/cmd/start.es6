@@ -69,6 +69,15 @@ export const cmd = async (program: typeof Command) => {
     engine.startNode()
   }
 
+  // Should the Server be started?
+  if (rpc || ui || ws) {
+    engine.startServer({
+      rpc, // Enable RPC - /rpc
+      ui, // Enable UI - /
+      ws // Enable WS - /ws
+    })
+  }
+
   // Should the Rover be started?
   if (rovers) {
     const roversToStart =
@@ -79,21 +88,10 @@ export const cmd = async (program: typeof Command) => {
     // TODO: Move somewhere else
     const BC_ROVER_REPLAY = process.env.BC_ROVER_REPLAY
     if (BC_ROVER_REPLAY === 'true' || BC_ROVER_REPLAY === '1') {
-      setTimeout(() => {
-        engine.rovers.replay()
-      }, 1000)
+      engine.rovers.replay()
     }
 
     engine.startRovers(roversToStart)
-  }
-
-  // Should the Server be started?
-  if (rpc || ui || ws) {
-    engine.startServer({
-      rpc, // Enable RPC - /rpc
-      ui, // Enable UI - /
-      ws // Enable WS - /ws
-    })
   }
 
   // TODO: Wait for engine finish

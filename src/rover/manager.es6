@@ -130,6 +130,7 @@ export default class RoverManager {
       block.setHeight(obj.height)
       block.setMerkleRoot(obj.merkleRoot)
 
+      debug(`Replaying roved block`, f, obj)
       rpc.rover.collectBlock(block, (err) => {
         if (err) {
           debug(`Unable to collect block ${f}`, err)
