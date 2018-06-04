@@ -12,10 +12,11 @@ const {
   aperture,
   equals,
   flatten,
+  identity,
+  reject,
   sort
 } = require('ramda')
 
-const { reject } = require('lodash')
 const { getLogger } = require('../logger')
 const { blake2bl } = require('../utils/crypto')
 const { concatAll } = require('../utils/ramda')
@@ -162,7 +163,7 @@ function blockainHeadersOrdered (childHeaderList: BlockchainHeader[], parentHead
 
 export function validateBlockSequence (blocks: BcBlock[]): bool {
   // if any of the submissions are undefined reject the sequence
-  if (reject(blocks).length > 0) {
+  if (reject(identity, blocks).length > 0) {
     return false
   }
   // BC: 10 > BC: 9 > BC: 8 ...
