@@ -258,8 +258,7 @@ export default class Engine {
           }
         }).catch(err => {
           this._logger.error(`Could not send to mining worker, reason: ${errToString(err)}`)
-          this._unfinishedBlock = undefined
-          this._unfinishedBlockData = undefined
+          this._cleanUnfinishedBlock()
         })
       })
     })
@@ -330,6 +329,11 @@ export default class Engine {
     this._peerIsSyncing = peerIsSyncing
   }
 
+  _cleanUnfinishedBlock () {
+    this._unfinishedBlock = undefined
+    this._unfinishedBlockData = undefined
+  }
+
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
       this._logger.warn('There is not unfinished block to use solution for')
@@ -352,8 +356,7 @@ export default class Engine {
 
     if (!isValidBlock(this._unfinishedBlock)) {
       this._logger.warn(`The mined block is not valid`)
-      this._unfinishedBlock = undefined
-      this._unfinishedBlockData = undefined
+      this._cleanUnfinishedBlock()
       return
     }
 
@@ -365,8 +368,7 @@ export default class Engine {
 
   _handleWorkerError (error: Error) {
     this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
-    this._unfinishedBlock = undefined
-    this._unfinishedBlockData = undefined
+    this._cleanUnfinishedBlock()
     // $FlowFixMe - Flow can't properly type subprocess
     this._workerProcess.kill()
     // $FlowFixMe - Flow can't properly type subprocess
@@ -379,8 +381,7 @@ export default class Engine {
       this._logger.debug(`Mining worker finished its work (code: ${code})`)
     } else {
       this._logger.warn(`Mining worker process exited with code ${code}, signal ${signal}`)
-      this._unfinishedBlock = undefined
-      this._unfinishedBlockData = undefined
+      this._cleanUnfinishedBlock()
     }
     this._workerProcess = undefined
   }
@@ -429,8 +430,7 @@ export default class Engine {
     this._logger.info('Broadcasting mined block')
 
     this.node.broadcastNewBlock(newBlock)
-    this._unfinishedBlock = undefined
-    this._unfinishedBlockData = undefined
+    this._cleanUnfinishedBlock()
 
     try {
       const newBlockObj = {
@@ -515,8 +515,7 @@ export default class Engine {
 
     const currentTimestamp = ts.nowSeconds()
     if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
-      this._unfinishedBlock = undefined
-      this._unfinishedBlockData = undefined
+      this._cleanUnfinishedBlock()
     }
     const [newBlock, finalTimestamp] = prepareNewBlock(
       currentTimestamp,
