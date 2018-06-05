@@ -32,7 +32,7 @@ export class MinerContainer extends Component<*> {
         </Helmet>
 
         <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>
-          Mined blocks (last {this.props.blocks.capacity()} of {this.props.blocksCount})
+          Mined blocks (last {Math.min(this.props.blocks.capacity(), this.props.blocksCount)} of {this.props.blocksCount})
         </h2>
         <BlocksTable blocks={this.props.blocks.toarray()} extraCols={extraCols} onClick={this.props.actions.showBlock} />
       </div>
