@@ -514,6 +514,10 @@ export default class Engine {
     this._logger.debug(`Preparing new block`)
 
     const currentTimestamp = ts.nowSeconds()
+    if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) > 6) {
+      this._unfinishedBlock = undefined
+      this._unfinishedBlockData = undefined
+    }
     const [newBlock, finalTimestamp] = prepareNewBlock(
       currentTimestamp,
       lastPreviousBlock,
@@ -542,10 +546,6 @@ export default class Engine {
       this._workerProcess.kill()
       // $FlowFixMe
       this._workerProcess.disconnect()
-      if (getBlockchainsBlocksCount(this._unfinishedBlock) > 6) {
-        this._unfinishedBlock = undefined
-        this._unfinishedBlockData = undefined
-      }
     }
 
     // if (!this._workerProcess) {
