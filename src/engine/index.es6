@@ -514,7 +514,7 @@ export default class Engine {
     this._logger.debug(`Preparing new block`)
 
     const currentTimestamp = ts.nowSeconds()
-    if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) > 6) {
+    if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
       this._unfinishedBlock = undefined
       this._unfinishedBlockData = undefined
     }
