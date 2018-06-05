@@ -88,18 +88,18 @@ export function getExpFactorDiff (calculatedDifficulty: BN, parentBlockHeight: n
  *
  * @param currentBlockTime
  * @param previousBlockTime
- * @param previousDifficulty
+ * @param previousDistance
  * @param minimalDiffulty
  * @param newBlockCount
  * @returns
  */
-export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDifficulty: number, minimalDiffulty: number, newBlockCount: number): BN {
+export function getDiff (currentBlockTime: number, previousBlockTime: number, previousDistance: number, minimalDiffulty: number, newBlockCount: number): BN {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
 
   let bigMinimalDifficulty = new BN(minimalDiffulty, 16)
 
   const bigPreviousBlockTime = new BN(previousBlockTime, 16)
-  const bigPreviousDifficulty = new BN(previousDifficulty, 16)
+  const bigPreviousDistance = new BN(previousDistance, 16)
   const bigCurentBlockTime = new BN(currentBlockTime, 16)
   const bigMinus99 = new BN(-99, 16)
   const big1 = new BN(1, 16)
@@ -124,11 +124,11 @@ export function getDiff (currentBlockTime: number, previousBlockTime: number, pr
   }
 
   // y = previousDifficulty / 148 // 148 = 74 * 2 or the maximum absolute distance of two characters converted from ASCII code.
-  y = bigPreviousDifficulty.div(new BN(148))
+  y = bigPreviousDistance.div(new BN(148))
   // x = x * y
   x = x.mul(y)
-  // x = x + previousDifficulty
-  x = x.add(bigPreviousDifficulty)
+  // x = x + previousDistance
+  x = x.add(bigPreviousDistance)
 
   // x < minimalDiffulty
   if (x.lt(bigMinimalDifficulty)) {
@@ -346,7 +346,7 @@ export function getNewPreExpDifficulty (
   const preExpDiff = getDiff(
     currentTimestamp,
     lastPreviousBlock.getTimestamp(),
-    lastPreviousBlock.getDifficulty(),
+    lastPreviousBlock.getDistance(),
     MINIMUM_DIFFICULTY,
     newBlockCount
   ) // Calculate the final pre-singularity difficulty adjustment
