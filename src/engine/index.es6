@@ -7,6 +7,8 @@
  * @flow
  */
 
+import type { Multiverse } from '../bc/multiverse'
+
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const debug = require('debug')('bcnode:engine')
@@ -99,7 +101,18 @@ export default class Engine {
     // Start NTP sync
     ts.start()
   }
+  /**
+   * Get multiverse
+   * @returns {Multiverse|*}
+   */
+  get multiverse (): Multiverse {
+    return this.node.multiverse
+  }
 
+  /**
+   * Get pubsub wrapper instance
+   * @returns {PubSub}
+   */
   get pubsub (): PubSub {
     return this._pubsub
   }
@@ -122,7 +135,7 @@ export default class Engine {
     // TODO get from CLI / config
     try {
       await this._persistence.open()
-      this.node.multiverse.addBlock(newGenesisBlock)
+      this.multiverse.addBlock(newGenesisBlock)
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
         this._logger.debug('Stored rovers to persistence')
@@ -302,15 +315,18 @@ export default class Engine {
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
-      const beforeBlockHighest = this.node.multiverse.getHighestBlock()
-      const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
-      const afterBlockHighest = this.node.multiverse.getHighestBlock()
+
+      const beforeBlockHighest = this.multiverse.getHighestBlock()
+      const addedToMultiverse = this.multiverse.addBlock(newBlock)
+      const afterBlockHighest = this.multiverse.getHighestBlock()
+
       // $FlowFixMe
       this._logger.debug('beforeBlockHighest: ' + beforeBlockHighest.getHash())
       // $FlowFixMe
       this._logger.debug('afterBlockHighest: ' + afterBlockHighest.getHash())
       // $FlowFixMe
       this._logger.debug('addedToMultiverse: ' + addedToMultiverse)
+
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (addedToMultiverse === true) {
@@ -494,9 +510,9 @@ export default class Engine {
       //  add to multiverse and call persist
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
 
-      const beforeBlockHighest = this.node.multiverse.getHighestBlock()
-      const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
-      const afterBlockHighest = this.node.multiverse.getHighestBlock()
+      const beforeBlockHighest = this.multiverse.getHighestBlock()
+      const addedToMultiverse = this.multiverse.addBlock(newBlock)
+      const afterBlockHighest = this.multiverse.getHighestBlock()
 
       console.log('beforeBlockHighest height -> ' + beforeBlockHighest.getHeight() + ' ' + beforeBlockHighest.getHash())
       console.log('afterBlockHighest height -> ' + afterBlockHighest.getHeight() + ' ' + afterBlockHighest.getHash())
