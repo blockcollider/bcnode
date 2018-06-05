@@ -1,5 +1,11 @@
 [ignore]
+<PROJECT_ROOT>/_data.*
 <PROJECT_ROOT>/_debug.*
+<PROJECT_ROOT>/_logs.*
+<PROJECT_ROOT>/coverage/.*
+<PROJECT_ROOT>/doc/.*
+<PROJECT_ROOT>/docs/.*
+<PROJECT_ROOT>/examples/.*
 <PROJECT_ROOT>/lib/.*
 <PROJECT_ROOT>/node_modules/config-chain/.*
 <PROJECT_ROOT>/node_modules/npm/.*
@@ -7,9 +13,12 @@
 <PROJECT_ROOT>/node_modules/oboe/.*
 <PROJECT_ROOT>/node_modules/protobufjs/.*
 <PROJECT_ROOT>/node_modules/jest-worker/.*
+<PROJECT_ROOT>/protos/.*
 <PROJECT_ROOT>/public/.*
 <PROJECT_ROOT>/rust/.*
+<PROJECT_ROOT>/scripts/.*
 <PROJECT_ROOT>/snippets/.*
+<PROJECT_ROOT>/tmp/.*
 
 [include]
 <PROJECT_ROOT>/app/.*
