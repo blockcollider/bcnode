@@ -63,7 +63,7 @@ export class Multiverse {
         return template
       }
       if (highestBlock.getHeight() === height) {
-        if (highestBlock.difficulty() < difficulty) {
+        if (highestBlock.getDifficulty() < difficulty) {
           this.addBlock(block)
           template.message = 'purposed block will be the current height of the multiverse'
           return template
@@ -102,7 +102,7 @@ export class Multiverse {
     }
   }
 
-  validateMultiverse (mv: Object):boolean {
+  validateMultiverse (mv: Object): boolean {
     if (Object.keys(mv).length < 3) {
       this._logger.error('threshold not met, comparison between multiverse structures after dimension depth of 3')
       return false
@@ -142,7 +142,7 @@ export class Multiverse {
     }
     if (keyCount > 10) {
       // remove the oldest
-      delete this_.blocks[Object.keys(this._blocks)[0]]
+      delete this._blocks[Object.keys(this._blocks)[0]]
     }
     if (this._blocks[parentHeight] !== undefined) {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
