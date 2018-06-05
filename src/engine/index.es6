@@ -55,7 +55,7 @@ type UnfinishedBlockData = {
 export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _monitor: Monitor; // eslint-disable-line no-undef
-  _knownBlocksCache: Object; // eslint-disable-line no-undef
+  _knownBlocksCache: LRUCache<string, BcBlock>; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _pubsub: PubSub; //  eslint-disable-line no-undef
