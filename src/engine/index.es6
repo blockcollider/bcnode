@@ -387,6 +387,14 @@ export default class Engine {
       .then((res) => {
         // If block was successfully processed then _cleanUnfinishedBlock
         if (res) {
+          const newBlockObj = {
+            ...this._unfinishedBlock.toObject(),
+            iterations: solution.iterations,
+            timeDiff: solution.timeDiff
+          }
+
+          this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
+
           this._cleanUnfinishedBlock()
         }
       })
