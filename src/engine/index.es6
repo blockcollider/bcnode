@@ -111,7 +111,6 @@ export default class Engine {
    * - Store name of available rovers
    */
   async init () {
-    const self = this
     const roverNames = Object.keys(rovers)
     const { npm, git: { long } } = getVersion()
     const newGenesisBlock = getGenesisBlock()
@@ -159,22 +158,22 @@ export default class Engine {
 
     this.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
       const block = msg.data
-      self._persistence.put(msg.key, block)
+      this._persistence.put(msg.key, block)
         .then(() => {
-          self._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
+          this._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
         })
         .catch((err) => {
-          self._logger.error(err)
+          this._logger.error(err)
         })
     })
     this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
       const block = msg.data
-      self._persistence.put('bc.block.latest', block)
+      this._persistence.put('bc.block.latest', block)
         .then(() => {
-          self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
+          this.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
         })
         .catch((err) => {
-          self._logger.error(err)
+          this._logger.error(err)
         })
     })
   }
@@ -307,10 +306,13 @@ export default class Engine {
       const beforeBlockHighest = this.node.multiverse.getHighestBlock()
       const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
       const afterBlockHighest = this.node.multiverse.getHighestBlock()
-      console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
-      console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
-      console.log('addedToMultiverse: ' + addedToMultiverse)
-      if (beforeBlockHighest !== afterBlockHighest) {
+      // $FlowFixMe
+      this._logger.debug('beforeBlockHighest: ' + beforeBlockHighest.getHash())
+      // $FlowFixMe
+      this._logger.debug('afterBlockHighest: ' + afterBlockHighest.getHash())
+      // $FlowFixMe
+      this._logger.debug('addedToMultiverse: ' + addedToMultiverse)
+      if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
@@ -474,7 +476,7 @@ export default class Engine {
         return Promise.resolve(true)
       }
     } catch (err) {
-      this._logger.warn('failed to process work provided by miner')
+      this._logger.warn(`failed to process work provided by miner, err: ${errToString(err)}`)
       return Promise.resolve(true)
     }
   }
