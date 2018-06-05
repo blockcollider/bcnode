@@ -494,20 +494,21 @@ export default class Engine {
    */
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
-    try {
-      // Trying to process null/undefined block
-      if (newBlock === undefined) {
-        this._logger.warn('Failed to process work provided by miner')
-        return Promise.resolve(false)
-      }
 
+    // Trying to process null/undefined block
+    if (newBlock === null || newBlock === undefined) {
+      this._logger.warn('Failed to process work provided by miner')
+      return Promise.resolve(false)
+    }
+
+    try {
       // Received block which is already in cache
       if (this._knownBlocksCache.has(newBlock.getHash())) {
         this._logger.warn('Recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
         return Promise.resolve(false)
       }
 
-      //  add to multiverse and call persist
+      // Add to multiverse and call persist
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
 
       const beforeBlockHighest = this.multiverse.getHighestBlock()
