@@ -299,7 +299,7 @@ export class Multiverse {
       }).reverse()
       return results[0][0].pop()
     } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 1) {
-      return minimumDepthChains[0][0][0]
+      return minimumDepthChains[0][0]
     } else {
       const performance = minimumDepthChains.reduce((order, chain) => {
         const distances = chain.map((b) => {
