@@ -48,7 +48,25 @@ export class PubSub {
   }
 
   publish (topic: string, data: any) {
-    debug('Publishing new message', inspect(topic), data)
+    // TODO: Move to some helper
+    const toObject = (obj) => {
+      if (!obj) {
+        return obj
+      }
+
+      const keys = Object.keys(obj)
+      return keys.reduce((acc, field) => {
+        if (obj[field] && obj[field].toObject) {
+          acc[field] = obj[field].toObject()
+        } else {
+          acc[field] = obj[field]
+        }
+
+        return acc
+      }, {})
+    }
+
+    debug('Publishing new message', inspect(topic), JSON.stringify(toObject(data), null, 2))
     RxPubSub.publish(topic, data)
   }
 }
