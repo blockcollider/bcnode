@@ -409,7 +409,6 @@ export default class Engine {
       newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getDistance(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
     ]
 
-    let childBlockCount = 0
     this._knownRovers.forEach(roverName => {
       if (this._unfinishedBlockData && this._unfinishedBlockData.currentBlocks) {
         const methodNameGet = `get${roverName[0].toUpperCase() + roverName.slice(1)}List` // e.g. getBtcList
@@ -417,10 +416,9 @@ export default class Engine {
         const blocks = this._unfinishedBlockData.currentBlocks[methodNameGet]()
         row.push(blocks.map(block => block.getBlockchainConfirmationsInParentCount()).join('|'))
         row.push(blocks.map(block => block.getTimestamp() / 1000 << 0).join('|'))
-        childBlockCount += blocks.length
       }
     })
-    row.push(childBlockCount)
+    row.push(getBlockchainsBlocksCount(newBlock))
     const dataPath = ensureDebugPath(`bc/mining-data.csv`)
     writeFileSync(dataPath, `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
   }
