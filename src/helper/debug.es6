@@ -23,6 +23,7 @@ export const toObject = (obj: Object | Array<Object>) => {
 
     const keys = Object.keys(obj)
     return keys.reduce((acc, field) => {
+      // $FlowFixMe
       acc[field] = toObject(obj[field])
       return acc
     }, {})
