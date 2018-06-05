@@ -355,6 +355,9 @@ export default class Engine {
       return
     }
 
+    if (this._unfinishedBlock !== undefined && isDebugEnabled()) {
+      this._writeMiningData(this._unfinishedBlock, solution)
+    }
     this._processMinedBlock(this._unfinishedBlock, solution)
   }
 
@@ -401,9 +404,9 @@ export default class Engine {
   }
 
   _writeMiningData (newBlock: BcBlock, solution: { iterations: number, timeDiff: number }) {
-    // block_height, block_difficulty, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
+    // block_height, block_difficulty, block_distance, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
     const row = [
-      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
+      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getDistance(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
     ]
 
     let childBlockCount = 0
@@ -426,9 +429,6 @@ export default class Engine {
     this._logger.info('Broadcasting mined block')
 
     this.node.broadcastNewBlock(newBlock)
-    if (isDebugEnabled()) {
-      this._writeMiningData(newBlock, solution)
-    }
     this._unfinishedBlock = undefined
     this._unfinishedBlockData = undefined
 
