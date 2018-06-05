@@ -279,6 +279,8 @@ export default class Engine {
 
   async collectBlock (rovers: string[], block: BcBlock) {
     this._collectedBlocks[block.getBlockchain()] += 1
+
+    // TODO: Adjust minimum count of collected blocks needed to trigger mining
     // if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) { //--> MAINNET
     if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) { // --> TESTNET
       this._canMine = true
