@@ -34,6 +34,9 @@ const GENESIS_DATA = require('./genesis.raw')
 const logger = getLogger(__filename)
 
 export function isValidBlock (newBlock: BcBlock): bool {
+  if (newBlock === undefined) {
+    return false
+  }
   if (!theBlockChainFingerPrintMatchGenesisBlock(newBlock)) {
     logger.warn('failed: theBlockChainFingerPrintMatchGenesisBlock')
     return false

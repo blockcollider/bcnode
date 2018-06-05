@@ -140,7 +140,6 @@ export default class Engine {
         try {
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
-          await this.node.multiverse.persist()
           this._logger.info('Genesis block saved to disk ' + newGenesisBlock.getHash())
         } catch (e) {
           this._logger.error(`Error while creating genesis block ${e.message}`)
@@ -286,7 +285,7 @@ export default class Engine {
           all = all + a + ':' + val + '  '
           return all
         }, '')
-        this._logger.info(`generating multiverse state from ${msg}`)
+        this._logger.info(`generating multiverse of ${msg}`)
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
@@ -311,18 +310,13 @@ export default class Engine {
       console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
       console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
       console.log('addedToMultiverse: ' + addedToMultiverse)
-      if (beforeBlockHighest.getHash() === afterBlockHighest.getHash()) {
+      if (beforeBlockHighest !== afterBlockHighest) {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
 
-        // 1. TODO: Fix the getHighestBlock function --> this.node.multiverse.getHighestBlock()
-        // 2. TODO: getMissingBlocks() function from multiverse
-        //
-        //    (--> [startingBlochHash, startingBlockHeight] --> [endingBlockHash, endingBlockHeight])
-        //
-        // TODO: compare two multiverses to eachother --> implement in multverse
+        // Request the missing blocks
 
       }
     } else {
@@ -361,9 +355,7 @@ export default class Engine {
       return
     }
 
-    if (this._unfinishedBlock !== undefined) {
-      this._processMinedBlock(this._unfinishedBlock, solution)
-    }
+    this._processMinedBlock(this._unfinishedBlock, solution)
   }
 
   _handleWorkerError (error: Error) {
@@ -469,10 +461,10 @@ export default class Engine {
         const beforeBlockHighest = this.node.multiverse.getHighestBlock()
         const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
         const afterBlockHighest = this.node.multiverse.getHighestBlock()
-        console.log('beforeBlockHighest: ' + beforeBlockHighest.getHash())
-        console.log('afterBlockHighest: ' + afterBlockHighest.getHash())
+        console.log('beforeBlockHighest height -> ' + beforeBlockHighest.getHeight() + ' ' + beforeBlockHighest.getHash())
+        console.log('afterBlockHighest height -> ' + afterBlockHighest.getHeight() + ' ' + afterBlockHighest.getHash())
         console.log('addedToMultiverse: ' + addedToMultiverse)
-        if (beforeBlockHighest.getHash() === afterBlockHighest.getHash()) {
+        if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
           this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
         } else if (addedToMultiverse === true) {
           this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
@@ -513,7 +505,6 @@ export default class Engine {
     // get latest known BC block
     try {
       lastPreviousBlock = await this._persistence.get('bc.block.latest')
-      console.log('lastPreviousBlock', JSON.stringify(lastPreviousBlock.toObject(), null, 2))
       this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
     } catch (err) {
       this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
