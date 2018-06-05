@@ -330,6 +330,7 @@ export default class Engine {
   }
 
   _cleanUnfinishedBlock () {
+    debug('Cleaning unfinished block')
     this._unfinishedBlock = undefined
     this._unfinishedBlockData = undefined
   }
@@ -363,7 +364,14 @@ export default class Engine {
     if (this._unfinishedBlock !== undefined && isDebugEnabled()) {
       this._writeMiningData(this._unfinishedBlock, solution)
     }
+
     this._processMinedBlock(this._unfinishedBlock, solution)
+      .then((res) => {
+        // If block was successfully processed then _cleanUnfinishedBlock
+        if (res) {
+          this._cleanUnfinishedBlock()
+        }
+      })
   }
 
   _handleWorkerError (error: Error) {
@@ -426,6 +434,19 @@ export default class Engine {
     writeFileSync(dataPath, `${row.join(',')}\r\n`, { encoding: 'utf8', flag: 'a' })
   }
 
+  /**
+   * Broadcast new block
+   *
+   * - peers
+   * - pubsub
+   * - ws
+   *
+   * This function is called by this._processMinedBlock()
+   * @param newBlock
+   * @param solution
+   * @returns {Promise<boolean>}
+   * @private
+   */
   _broadcastMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     this._logger.info('Broadcasting mined block')
 
@@ -447,37 +468,52 @@ export default class Engine {
     return Promise.resolve(true)
   }
 
+  /**
+   * Deals with unfinished block after the solution is found
+   *
+   * @param newBlock
+   * @param solution
+   * @returns {Promise<boolean>} Promise indicating if the block was successfully processed
+   * @private
+   */
   _processMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     // TODO: reenable this._logger.info(`Mined new block: ${JSON.stringify(newBlockObj, null, 2)}`)
     try {
+      // Trying to process null/undefined block
       if (newBlock === undefined) {
-        // not a new block
-        this._logger.warn('failed to process work provided by miner')
-        return Promise.resolve()
-      } else if (this._knownBlocksCache.has(newBlock.getHash()) === false) {
-        debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
-        //  add to multiverse and call persist
-        this._knownBlocksCache.set(newBlock.getHash(), newBlock)
-        const beforeBlockHighest = this.node.multiverse.getHighestBlock()
-        const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
-        const afterBlockHighest = this.node.multiverse.getHighestBlock()
-        console.log('beforeBlockHighest height -> ' + beforeBlockHighest.getHeight() + ' ' + beforeBlockHighest.getHash())
-        console.log('afterBlockHighest height -> ' + afterBlockHighest.getHeight() + ' ' + afterBlockHighest.getHash())
-        console.log('addedToMultiverse: ' + addedToMultiverse)
-        if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
-          this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-        } else if (addedToMultiverse === true) {
-          this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
-        }
-
-        return Promise.resolve(true)
-      } else {
-        this._logger.warn('recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
-        return Promise.resolve(true)
+        this._logger.warn('Failed to process work provided by miner')
+        return Promise.resolve(false)
       }
+
+      // Received block which is already in cache
+      if (this._knownBlocksCache.has(newBlock.getHash())) {
+        this._logger.warn('Recieved duplicate new block ' + newBlock.getHeight() + ' (' + newBlock.getHash() + ')')
+        return Promise.resolve(false)
+      }
+
+      //  add to multiverse and call persist
+      this._knownBlocksCache.set(newBlock.getHash(), newBlock)
+
+      const beforeBlockHighest = this.node.multiverse.getHighestBlock()
+      const addedToMultiverse = this.node.multiverse.addBlock(newBlock)
+      const afterBlockHighest = this.node.multiverse.getHighestBlock()
+
+      console.log('beforeBlockHighest height -> ' + beforeBlockHighest.getHeight() + ' ' + beforeBlockHighest.getHash())
+      console.log('afterBlockHighest height -> ' + afterBlockHighest.getHeight() + ' ' + afterBlockHighest.getHash())
+      console.log('addedToMultiverse: ' + addedToMultiverse)
+
+      if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
+        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+      } else if (addedToMultiverse === true) {
+        this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+      }
+
+      // Store block in _debug folder and return promise indicating success
+      debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
+      return Promise.resolve(true)
     } catch (err) {
       this._logger.warn(`failed to process work provided by miner, err: ${errToString(err)}`)
-      return Promise.resolve(true)
+      return Promise.resolve(false)
     }
   }
 
