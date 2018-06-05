@@ -24,5 +24,6 @@ module.file_ext=.es
 module.file_ext=.es6
 module.file_ext=.js
 module.file_ext=.jsx
+module.file_ext=.json
 
 [strict]
