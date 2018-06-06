@@ -82,7 +82,8 @@
       "it",
       "test",
       "expect",
-      "jest"
+      "jest",
+      "location"
     ],
     "parser": "babel-eslint",
     "plugins": [

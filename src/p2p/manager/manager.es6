@@ -52,6 +52,10 @@ export class PeerManager {
     this._statsInterval = setInterval(() => {
       const stats = this.peerNode.bundle && this.peerNode.bundle.stats
       const peers = (stats && stats.peers()) || []
+      if (peers.length < 1) {
+        return
+      }
+
       const data = peers.reduce((acc, el) => {
         const peerStats = stats.forPeer(el)
         if (peerStats) {

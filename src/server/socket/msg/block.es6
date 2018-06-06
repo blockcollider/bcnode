@@ -16,10 +16,7 @@ module.exports = {
     const persistence = server._engine.persistence
     persistence.get(id)
       .then((block) => {
-        client.send(JSON.stringify({
-          type: 'block.set',
-          data: block.toObject()
-        }))
+        client.emit('block.set', block.toObject())
       })
       .catch((err) => {
         if (err) {
