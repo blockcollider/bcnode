@@ -9,6 +9,7 @@
 import type { Logger } from 'winston'
 import type { $Request, $Response, NextFunction } from 'express'
 
+const debug = require('debug')('bcnode:server:main')
 const path = require('path')
 const http = require('http')
 const bodyParser = require('body-parser')
@@ -18,6 +19,7 @@ const responseTime = require('response-time')
 const serveIndex = require('serve-index')
 const WebSocket = require('ws')
 const CircularBuffer = require('circular-buffer')
+const SocketIO = require('socket.io')
 
 const logging = require('../logger')
 const config = require('../../config/config')
@@ -43,12 +45,12 @@ export default class Server {
   _opts: Opts
   _app: express$Application // eslint-disable-line
   _engine: Engine
-  _wsServer: any
   _rpcClient: RpcClient
   _rpcServer: RpcServer
   _server: any
   _logger: Logger
   _roveredBlocksBuffer: CircularBuffer
+  _socket: ?SocketIO
 
   constructor (engine: Engine, rpcServer: RpcServer) {
     // Create express app instance
@@ -105,7 +107,7 @@ export default class Server {
     const server = (this._server = http.Server(this.app))
 
     if (this.opts.ws) {
-      this.initWebSocket()
+      this.initWebSocket(server)
     }
 
     if (this.opts.rpc) {
@@ -124,8 +126,38 @@ export default class Server {
     return Promise.resolve(true)
   }
 
-  initWebSocket () {
-    this._wsServer = new WebSocket.Server({ server: this._server, path: '/ws' })
+  initWebSocket (server) {
+    const serverSocket = SocketIO(server, {
+      path: '/ws',
+      transports: [
+        'websocket',
+        'polling'
+      ]
+    })
+
+    serverSocket.on('connection', (socket) => {
+      const ip = socket.request.connection.remoteAddress
+
+      debug('socket client connected', socket.id, ip)
+
+      socket.on('disconnect', () => {
+        debug('socket client disconnected', socket.id, ip)
+      })
+
+      socket.on('message', (msg) => {
+        debug('socket message received', msg)
+      })
+
+      socket.on('block.get', (msg) => {
+        socketDispatcher(this, socket, { type: 'block.get', data: msg })
+      })
+
+      socket.on('blocks.get', (msg) => {
+        socketDispatcher(this, socket, { type: 'blocks.get', data: msg })
+      })
+
+      this._wsSendInitialState(socket)
+    })
 
     // setup relaying events from rpc server to websockets
     this._rpcServer.emitter.on('collectBlock', ({ block }) => {
@@ -133,34 +165,7 @@ export default class Server {
       this._wsBroadcast({ type: 'block.latest', data: this._transformBlockToWire(block) })
     })
 
-    this._wsServer.on('connection', (client, req) => {
-      this._wsSendInitialState(client)
-
-      client.on('message', (msg) => {
-        let payload
-        try {
-          payload = JSON.parse(msg)
-        } catch (e) {
-          this._logger.warn('Unable to decode WS message', e)
-          return
-        }
-
-        socketDispatcher(this, client, payload)
-      })
-
-      client.on('close', reason => {
-        this._logger.debug('Client connection closed', req.connection.remoteAddress)
-      })
-
-      client.on('error', error => {
-        this._logger.warn(`Client exited with error\n${error.stack}`)
-      })
-    })
-
-    this._wsServer.on('error', (error) => {
-      // TODO restart WS server instead
-      this._logger.warn(`WS server exited (and will not be available until next start) with error ${error}`)
-    })
+    this._socket = serverSocket
   }
 
   initRpc () {
@@ -241,35 +246,26 @@ export default class Server {
   }
 
   _wsBroadcast (msg: Object) {
-    const clients = (this._wsServer && this._wsServer.clients) || []
-
-    clients.forEach(c => {
-      if (c.readyState === WebSocket.OPEN) {
-        this._logger.debug(`Sending message to client `)
-        try {
-          c.send(JSON.stringify(msg), e => {
-            if (e) {
-              this._logger.error(`Could not send\n ${e}`)
-              c.terminate()
-            }
-          })
-        } catch (e) {
-          this._logger.error(`Could not send\n ${e.stack}`)
-          c.terminate()
-        }
-      }
-    })
+    if (this._socket) {
+      this._socket.emit(msg.type, msg.data)
+    }
   }
 
   _wsBroadcastPeerConnected (peer: Object) {
-    this._wsBroadcast({type: 'peer.connected', data: this._transformPeerToWire(peer)})
+    this._wsBroadcast({
+      type: 'peer.connected',
+      data: this._transformPeerToWire(peer)
+    })
   }
 
   _wsBroadcastPeerDisonnected (peer: Object) {
-    this._wsBroadcast({type: 'peer.disconnected', data: this._transformPeerToWire(peer)})
+    this._wsBroadcast({
+      type: 'peer.disconnected',
+      data: this._transformPeerToWire(peer)
+    })
   }
 
-  _wsSendInitialState (client: WebSocket.Client) {
+  _wsSendInitialState (socket: WebSocket.Client) {
     let peers = []
 
     const node = this._engine._node
@@ -303,7 +299,7 @@ export default class Server {
     ]
 
     msgs.forEach((msg) => {
-      client.send(JSON.stringify(msg))
+      socket.emit(msg.type, msg.data)
     })
   }
 }

@@ -7,6 +7,8 @@
  * @flow
  */
 
+import SocketIO from 'socket.io-client'
+
 import { ACTIONS as PROFILE_ACTIONS } from '../profile/actions'
 import { ACTIONS as BLOCK_ACTIONS } from '../block/actions'
 import { ACTIONS as BLOCKS_ACTIONS } from '../blocks/actions'
@@ -31,26 +33,30 @@ const DISPATCH_TABLE = {
 }
 
 export const init = (dispatch : (msg : Object) => void) => {
-  const socket = new WebSocket(`ws://${location.hostname}:${location.port}/ws`) // eslint-disable-line
+  const socket = SocketIO(`ws://${location.hostname}:${location.port}`, {
+    path: '/ws',
+    transports: [
+      'websocket',
+      'polling'
+    ]
+  })
 
-  socket.onopen = () => {
+  socket.on('connect', () => {
     setTimeout(() => dispatch({type: ACTIONS.SOCKET_CONNECTED}), 1)
-  }
 
-  socket.onclose = () => {
-    dispatch({type: ACTIONS.SOCKET_DISCONNECTED})
-    window.setTimeout(() => init(dispatch), 1000)
-  }
+    socket.on('disconnect', () => {
+      setTimeout(() => dispatch({type: ACTIONS.SOCKET_DISCONNECTED}), 1)
+    })
 
-  socket.onmessage = (data) => {
-    // $FlowFixMe
-    const payload = JSON.parse(data.data)
-
-    const dispatchAction = DISPATCH_TABLE[payload.type]
-    if (dispatchAction) {
-      return dispatch({type: dispatchAction, payload: payload.data})
-    }
-  }
+    const events = Object.keys(DISPATCH_TABLE)
+    events.forEach((event) => {
+      console.log('Registering event handler', event)
+      socket.on(event, (data) => {
+        console.log('Socket event', event, data)
+        dispatch({type: DISPATCH_TABLE[event], payload: data})
+      })
+    })
+  })
 
   dispatch({type: ACTIONS.SOCKET_CREATED, payload: socket})
 
@@ -64,7 +70,7 @@ export const reducer = (state: Object = initialState, action: Object) => {
 
     case ACTIONS.SOCKET_CONNECTED:
       state.buffer.forEach((msg) => {
-        state.socket.send(JSON.stringify(msg))
+        state.socket.emit(msg.type, msg.data)
       })
       return { ...state, connected: true, buffer: [] }
 
@@ -73,7 +79,7 @@ export const reducer = (state: Object = initialState, action: Object) => {
 
     case ACTIONS.SOCKET_SEND:
       if (state.connected) {
-        state.socket.send(JSON.stringify(action.payload))
+        state.socket.emit(action.payload.type, action.payload.data)
         return state
       }
       return { ...state, buffer: [...state.buffer, action.payload] }

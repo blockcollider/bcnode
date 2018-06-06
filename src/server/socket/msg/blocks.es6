@@ -30,13 +30,10 @@ module.exports = {
         )
       })
       .then((blocks) => {
-        client.send(JSON.stringify({
-          type: 'blocks.set',
-          data: [
-            (firstBlock && firstBlock.toObject()),
-            ...blocks.map((block) => block.toObject())
-          ]
-        }))
+        client.emit('blocks.set', [
+          (firstBlock && firstBlock.toObject()),
+          ...blocks.map((block) => block.toObject())
+        ])
       })
       .catch((err) => {
         if (err) {

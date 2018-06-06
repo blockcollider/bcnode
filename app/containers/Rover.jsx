@@ -17,8 +17,8 @@ import RoverBlock from '../components/RoverBlock'
 export class RoverContainer extends Component<*> {
   render () {
     const blocks = take(24, this.props.blocks.toarray().sort((a, b) => b.timestamp - a.timestamp))
-      .map(block => {
-        return <RoverBlock {...block} block={block} key={block.hash} />
+      .map((block, idx) => {
+        return <RoverBlock {...block} block={block} key={idx} />
       })
 
     return (
