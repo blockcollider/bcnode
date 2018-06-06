@@ -14,7 +14,7 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const debug = require('debug')('bcnode:engine')
 const { EventEmitter } = require('events')
-const { equals, all, values } = require('ramda')
+const { equals, all, values, mixin } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
@@ -358,8 +358,9 @@ export default class Engine {
               queryHash: newBlock.getHash(),
               queryHeight: newBlock.getHeight(),
               low: newBlock.getHeight() - 7,
-              hig: newBlock.getHeight() + 2
+              high: newBlock.getHeight() + 2
             }
+            console.log(peerQuery)
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
               if (Object.keys(m._blocks).length >= 7) {
@@ -371,23 +372,24 @@ export default class Engine {
               // here we would sort by highest block totalDistance and compare with current
               // if its better, we restart the miner, enable resync, purge the db, and set _blocks to a clone of _blocks on the candidate
               //
-              // const ordered = candidates.sort((a, b) => {
-              //  if(a.getTotalDistance() > b.getTotalDistance()) {
-              //    return 1
-              //  }
-              //  if(a.getTotalDistance() < b.getTotalDistance()) {
-              //    return -1
-              //  }
-              //  return 0
-              // })
-              // const bestCandidate = ordered.shift()
-              // const highCandidateBlock = bestCandidateBlock.getHighestBlock()
-              // const lowCandidateBlock = bestCandidateBlock.getLowestBlock()
-              // if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
-              // lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock()) {
-              //     this.multiverse._blocks = _.cloneDeep(lowCandidateBlock._blocks)
-              //     delete bestCandidate
-              // }
+              const ordered = candidates.sort((a, b) => {
+                if (a.getTotalDistance() > b.getTotalDistance()) {
+                  return 1
+                }
+                if (a.getTotalDistance() < b.getTotalDistance()) {
+                  return -1
+                }
+                return 0
+              })
+              const bestCandidate = ordered.shift()
+              const highCandidateBlock = bestCandidate.getHighestBlock()
+              const lowCandidateBlock = bestCandidate.getLowestBlock()
+              if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
+              lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
+                this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
+                this._logger.info('applied new multiverse -> ' + bestCandidate.getHighestBlock().getHash())
+                bestCandidate._created = 0
+              }
             }
           }
         } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
@@ -395,6 +397,15 @@ export default class Engine {
         } else {
           // ignore
         }
+
+        // remove candidates older beyond a threshold
+        const keepCandidateThreshold = (Date.now() * 0.001) - (120 * 1000) // 120 seconds / 2 mins
+        this._verses = this._verses.filter(m => {
+          if (m._created > keepCandidateThreshold) {
+            return m
+          }
+        })
+
         // here trigger a cleanup for multiverses that are older than 2 minutes
         // console.log(missingBlocks)
       }
