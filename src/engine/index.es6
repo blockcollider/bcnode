@@ -66,6 +66,7 @@ export default class Engine {
   _knownRovers: string[]; // eslint-disable-line no-undef
   _minerKey: string; // eslint-disable-line no-undef
   _collectedBlocks: Object; // eslint-disable-line no-undef
+  _verses: Multiverse[]; // eslint-disable-line no-undef
   _canMine: bool; // eslint-disable-line no-undef
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
@@ -88,6 +89,7 @@ export default class Engine {
     this._server = new Server(this, this._rpc)
     this._collectedBlocks = {}
     this._subscribers = {}
+    this._verses = []
     for (let roverName of this._knownRovers) {
       this._collectedBlocks[roverName] = 0
     }
@@ -99,6 +101,7 @@ export default class Engine {
     })
 
     this._peerIsSyncing = false
+    this._peerIsResyncing = false
     // Start NTP sync
     ts.start()
   }
@@ -337,7 +340,7 @@ export default class Engine {
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
         if (newBlock.getHeight() > (afterBlockHighest.getHeight() - 8)) { // if true update or create candidate multiverse
-          const approved = this._mverses.reduce((approved, multiverse) => {
+          const approved = this._verses.reduce((approved, multiverse) => {
             const candidateApproved = multiverse.addBlock(newBlock)
             if (candidateApproved === true) {
               approved.push(multiverse)
@@ -348,7 +351,7 @@ export default class Engine {
           if (approved.length === 0) {
             const newMultiverse = new Multiverse()
             newMultiverse.addBlock(newBlock)
-            this._mverses.push(newMultiverse)
+            this._verses.push(newMultiverse)
           // else check if any of the multiverses are ready for comparison
           } else {
             const candidates = approved.filter((m) => {
@@ -367,7 +370,7 @@ export default class Engine {
         } else {
           // ignore
         }
-        // const missingBlocks = this.multiverse.getMissingBlocks(newBlock)
+        // here trigger a cleanup for multiverses that are older than 2 minutes
         // console.log(missingBlocks)
       }
     } else {
