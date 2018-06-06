@@ -40,7 +40,7 @@ export class Multiverse {
     return blocks.length
   }
 
-  getMissingBlocks (block: BcBlock) {
+  getMissingBlocks (block: BcBlock): Object {
     if (block === undefined) {
       this._logger.error('no block submitted to evaluate')
       return false
@@ -49,57 +49,47 @@ export class Multiverse {
     const height = block.getHeight()
     const hash = block.getHash()
     const previousHash = block.getPreviousHash()
-    const difficulty = block.getDifficulty()
+    const distance = block.getDistance()
     const template = {
       queryHash: hash,
       queryHeight: height,
       message: '',
-      start: 0,
-      end: 0
+      from: 0,
+      to: 0
     }
     if (highestBlock !== null) {
       if (highestBlock.getHash() === hash) {
         template.message = 'blocks are the equal to each-other'
         return template
-      }
-      if (highestBlock.getHeight() === height) {
-        if (highestBlock.getDifficulty() < difficulty) {
+      } else if (highestBlock.getHeight() === height) {
+        if (highestBlock.getDistance() < distance) {
           this.addBlock(block)
           template.message = 'purposed block will be the current height of the multiverse'
-          return template
         }
-      }
-      if (highestBlock.getHash() === previousHash) {
+      } else if (highestBlock.getHash() === previousHash) {
         this.addBlock(block)
         template.message = 'purposed block is next block'
-        return template
-      }
-      if (highestBlock.getHeight() + 2 < height) {
-        template.start = highestBlock.getHeight() - 2
-        template.end = height + 1
+      } else if (highestBlock.getHeight() + 2 < height) {
+        template.from = highestBlock.getHeight() - 2
+        template.to = height + 1
         template.message = 'purposed block is ahead and disconnected from multiverse'
-        return template
-      }
-      if (highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
+      } else if (highestBlock.getHeight() > height && (highestBlock.getHeight() - height <= 7)) {
         this.addBlock(block)
-        template.start = height - 10
-        template.end = height + 1
+        template.from = height - 10
+        template.to = height + 1
         template.message = 'purposed block may be in a multiverse layer'
-        return template
-      }
-      if (highestBlock.getHeight() > height) {
+      } else if (highestBlock.getHeight() > height) {
         this.addBlock(block)
         template.from = height - 1
         template.to = this.getLowestBlock().getHeight() + 1 // Plus one so we can check with the multiverse if side chain
         template.message = 'purposed block far behnd multiverse'
-        return template
       }
       return template
     } else {
       this.addBlock(block)
       template.message = 'no highest block has been selected for multiverse'
-      return template
     }
+    return template
   }
 
   validateMultiverse (mv: Object): boolean {

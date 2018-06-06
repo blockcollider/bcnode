@@ -48,6 +48,7 @@ const ts = require('../utils/time').default // ES6 default export
 const GENESIS_DATA = require('./genesis.raw')
 
 const MINIMUM_DIFFICULTY = new BN(11801972029393, 16)
+const MAX_TIMEOUT_SECONDS = 300
 
 /// /////////////////////////////////////////////////////////////////////
 /// ////////////////////////
@@ -235,7 +236,7 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
   let difficulty = threshold
   let result
   const tsStart = ts.now()
-  const maxCalculationEnd = tsStart + (10 * 1000)
+  const maxCalculationEnd = tsStart + (MAX_TIMEOUT_SECONDS * 1000)
   let currentLoopTimestamp = currentTimestamp
 
   let iterations = 0
@@ -275,7 +276,7 @@ export function mine (currentTimestamp: number, work: string, miner: string, mer
   const tsEnd = ts.now()
   const tsDiff = tsEnd - tsStart
   if (res === null) {
-    throw Error(`Mining took more than 10s, iterations: ${iterations}, tsDiff: ${tsDiff} ending...`)
+    throw Error(`Mining took more than 30s, iterations: ${iterations}, tsDiff: ${tsDiff} ending...`)
   }
 
   return res

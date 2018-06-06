@@ -334,9 +334,9 @@ export default class Engine {
       } else if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
-
         // Request the missing blocks
-
+        const missingBlocks = this.multiverse.getMissingBlocks(newBlock)
+        console.log(missingBlocks)
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)
@@ -355,7 +355,7 @@ export default class Engine {
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
     if (!this._unfinishedBlock) {
-      this._logger.warn('There is not unfinished block to use solution for')
+      this._logger.warn('There is not an unfinished block to use solution for')
       return
     }
 
