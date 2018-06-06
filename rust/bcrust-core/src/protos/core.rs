@@ -983,6 +983,7 @@ pub struct BcBlock {
     pub merkle_root: ::std::string::String,
     pub chain_root: ::std::string::String,
     pub distance: u64,
+    pub total_distance: u64,
     pub nonce: ::std::string::String,
     pub nrg_grant: u64,
     pub target_hash: ::std::string::String,
@@ -1333,7 +1334,30 @@ impl BcBlock {
         &mut self.distance
     }
 
-    // string nonce = 12;
+    // uint64 total_distance = 12;
+
+    pub fn clear_total_distance(&mut self) {
+        self.total_distance = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_total_distance(&mut self, v: u64) {
+        self.total_distance = v;
+    }
+
+    pub fn get_total_distance(&self) -> u64 {
+        self.total_distance
+    }
+
+    fn get_total_distance_for_reflect(&self) -> &u64 {
+        &self.total_distance
+    }
+
+    fn mut_total_distance_for_reflect(&mut self) -> &mut u64 {
+        &mut self.total_distance
+    }
+
+    // string nonce = 13;
 
     pub fn clear_nonce(&mut self) {
         self.nonce.clear();
@@ -1367,7 +1391,7 @@ impl BcBlock {
         &mut self.nonce
     }
 
-    // uint64 nrg_grant = 13;
+    // uint64 nrg_grant = 14;
 
     pub fn clear_nrg_grant(&mut self) {
         self.nrg_grant = 0;
@@ -1390,7 +1414,7 @@ impl BcBlock {
         &mut self.nrg_grant
     }
 
-    // string target_hash = 14;
+    // string target_hash = 15;
 
     pub fn clear_target_hash(&mut self) {
         self.target_hash.clear();
@@ -1424,7 +1448,7 @@ impl BcBlock {
         &mut self.target_hash
     }
 
-    // uint64 target_height = 15;
+    // uint64 target_height = 16;
 
     pub fn clear_target_height(&mut self) {
         self.target_height = 0;
@@ -1447,7 +1471,7 @@ impl BcBlock {
         &mut self.target_height
     }
 
-    // string target_miner = 16;
+    // string target_miner = 17;
 
     pub fn clear_target_miner(&mut self) {
         self.target_miner.clear();
@@ -1481,7 +1505,7 @@ impl BcBlock {
         &mut self.target_miner
     }
 
-    // string target_signature = 17;
+    // string target_signature = 18;
 
     pub fn clear_target_signature(&mut self) {
         self.target_signature.clear();
@@ -1515,7 +1539,7 @@ impl BcBlock {
         &mut self.target_signature
     }
 
-    // uint64 twn = 18;
+    // uint64 twn = 19;
 
     pub fn clear_twn(&mut self) {
         self.twn = 0;
@@ -1538,7 +1562,7 @@ impl BcBlock {
         &mut self.twn
     }
 
-    // repeated string tws = 19;
+    // repeated string tws = 20;
 
     pub fn clear_tws(&mut self) {
         self.tws.clear();
@@ -1571,7 +1595,7 @@ impl BcBlock {
         &mut self.tws
     }
 
-    // uint64 emblem_weight = 20;
+    // uint64 emblem_weight = 21;
 
     pub fn clear_emblem_weight(&mut self) {
         self.emblem_weight = 0;
@@ -1594,7 +1618,7 @@ impl BcBlock {
         &mut self.emblem_weight
     }
 
-    // string emblem_chain_block_hash = 21;
+    // string emblem_chain_block_hash = 22;
 
     pub fn clear_emblem_chain_block_hash(&mut self) {
         self.emblem_chain_block_hash.clear();
@@ -1628,7 +1652,7 @@ impl BcBlock {
         &mut self.emblem_chain_block_hash
     }
 
-    // string emblem_chain_fingerprint_root = 22;
+    // string emblem_chain_fingerprint_root = 23;
 
     pub fn clear_emblem_chain_fingerprint_root(&mut self) {
         self.emblem_chain_fingerprint_root.clear();
@@ -1662,7 +1686,7 @@ impl BcBlock {
         &mut self.emblem_chain_fingerprint_root
     }
 
-    // string emblem_chain_address = 23;
+    // string emblem_chain_address = 24;
 
     pub fn clear_emblem_chain_address(&mut self) {
         self.emblem_chain_address.clear();
@@ -1696,7 +1720,7 @@ impl BcBlock {
         &mut self.emblem_chain_address
     }
 
-    // uint64 tx_count = 24;
+    // uint64 tx_count = 25;
 
     pub fn clear_tx_count(&mut self) {
         self.tx_count = 0;
@@ -1719,7 +1743,7 @@ impl BcBlock {
         &mut self.tx_count
     }
 
-    // repeated .bc.BcTransaction txs = 25;
+    // repeated .bc.BcTransaction txs = 26;
 
     pub fn clear_txs(&mut self) {
         self.txs.clear();
@@ -1752,7 +1776,7 @@ impl BcBlock {
         &mut self.txs
     }
 
-    // uint64 tx_fee_base = 26;
+    // uint64 tx_fee_base = 27;
 
     pub fn clear_tx_fee_base(&mut self) {
         self.tx_fee_base = 0;
@@ -1775,7 +1799,7 @@ impl BcBlock {
         &mut self.tx_fee_base
     }
 
-    // uint64 tx_distance_sum_limit = 27;
+    // uint64 tx_distance_sum_limit = 28;
 
     pub fn clear_tx_distance_sum_limit(&mut self) {
         self.tx_distance_sum_limit = 0;
@@ -1798,7 +1822,7 @@ impl BcBlock {
         &mut self.tx_distance_sum_limit
     }
 
-    // uint64 blockchain_headers_count = 28;
+    // uint64 blockchain_headers_count = 29;
 
     pub fn clear_blockchain_headers_count(&mut self) {
         self.blockchain_headers_count = 0;
@@ -1821,7 +1845,7 @@ impl BcBlock {
         &mut self.blockchain_headers_count
     }
 
-    // .bc.BlockchainHeaders blockchain_headers = 29;
+    // .bc.BlockchainHeaders blockchain_headers = 30;
 
     pub fn clear_blockchain_headers(&mut self) {
         self.blockchain_headers.clear();
@@ -1862,7 +1886,7 @@ impl BcBlock {
         &mut self.blockchain_headers
     }
 
-    // string blockchain_fingerprints_root = 30;
+    // string blockchain_fingerprints_root = 31;
 
     pub fn clear_blockchain_fingerprints_root(&mut self) {
         self.blockchain_fingerprints_root.clear();
@@ -1974,92 +1998,99 @@ impl ::protobuf::Message for BcBlock {
                     self.distance = tmp;
                 },
                 12 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nonce)?;
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.total_distance = tmp;
                 },
                 13 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nonce)?;
+                },
+                14 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
                     self.nrg_grant = tmp;
                 },
-                14 => {
+                15 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.target_hash)?;
                 },
-                15 => {
+                16 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
                     self.target_height = tmp;
                 },
-                16 => {
+                17 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.target_miner)?;
                 },
-                17 => {
+                18 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.target_signature)?;
                 },
-                18 => {
+                19 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
                     self.twn = tmp;
                 },
-                19 => {
+                20 => {
                     ::protobuf::rt::read_repeated_string_into(wire_type, is, &mut self.tws)?;
                 },
-                20 => {
+                21 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
                     self.emblem_weight = tmp;
                 },
-                21 => {
+                22 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.emblem_chain_block_hash)?;
                 },
-                22 => {
+                23 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.emblem_chain_fingerprint_root)?;
                 },
-                23 => {
+                24 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.emblem_chain_address)?;
                 },
-                24 => {
+                25 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
                     self.tx_count = tmp;
                 },
-                25 => {
-                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.txs)?;
-                },
                 26 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_uint64()?;
-                    self.tx_fee_base = tmp;
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.txs)?;
                 },
                 27 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.tx_distance_sum_limit = tmp;
+                    self.tx_fee_base = tmp;
                 },
                 28 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.blockchain_headers_count = tmp;
+                    self.tx_distance_sum_limit = tmp;
                 },
                 29 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.blockchain_headers)?;
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.blockchain_headers_count = tmp;
                 },
                 30 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.blockchain_headers)?;
+                },
+                31 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.blockchain_fingerprints_root)?;
                 },
                 _ => {
@@ -2107,64 +2138,67 @@ impl ::protobuf::Message for BcBlock {
         if self.distance != 0 {
             my_size += ::protobuf::rt::value_size(11, self.distance, ::protobuf::wire_format::WireTypeVarint);
         }
+        if self.total_distance != 0 {
+            my_size += ::protobuf::rt::value_size(12, self.total_distance, ::protobuf::wire_format::WireTypeVarint);
+        }
         if !self.nonce.is_empty() {
-            my_size += ::protobuf::rt::string_size(12, &self.nonce);
+            my_size += ::protobuf::rt::string_size(13, &self.nonce);
         }
         if self.nrg_grant != 0 {
-            my_size += ::protobuf::rt::value_size(13, self.nrg_grant, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(14, self.nrg_grant, ::protobuf::wire_format::WireTypeVarint);
         }
         if !self.target_hash.is_empty() {
-            my_size += ::protobuf::rt::string_size(14, &self.target_hash);
+            my_size += ::protobuf::rt::string_size(15, &self.target_hash);
         }
         if self.target_height != 0 {
-            my_size += ::protobuf::rt::value_size(15, self.target_height, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(16, self.target_height, ::protobuf::wire_format::WireTypeVarint);
         }
         if !self.target_miner.is_empty() {
-            my_size += ::protobuf::rt::string_size(16, &self.target_miner);
+            my_size += ::protobuf::rt::string_size(17, &self.target_miner);
         }
         if !self.target_signature.is_empty() {
-            my_size += ::protobuf::rt::string_size(17, &self.target_signature);
+            my_size += ::protobuf::rt::string_size(18, &self.target_signature);
         }
         if self.twn != 0 {
-            my_size += ::protobuf::rt::value_size(18, self.twn, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(19, self.twn, ::protobuf::wire_format::WireTypeVarint);
         }
         for value in &self.tws {
-            my_size += ::protobuf::rt::string_size(19, &value);
+            my_size += ::protobuf::rt::string_size(20, &value);
         };
         if self.emblem_weight != 0 {
-            my_size += ::protobuf::rt::value_size(20, self.emblem_weight, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(21, self.emblem_weight, ::protobuf::wire_format::WireTypeVarint);
         }
         if !self.emblem_chain_block_hash.is_empty() {
-            my_size += ::protobuf::rt::string_size(21, &self.emblem_chain_block_hash);
+            my_size += ::protobuf::rt::string_size(22, &self.emblem_chain_block_hash);
         }
         if !self.emblem_chain_fingerprint_root.is_empty() {
-            my_size += ::protobuf::rt::string_size(22, &self.emblem_chain_fingerprint_root);
+            my_size += ::protobuf::rt::string_size(23, &self.emblem_chain_fingerprint_root);
         }
         if !self.emblem_chain_address.is_empty() {
-            my_size += ::protobuf::rt::string_size(23, &self.emblem_chain_address);
+            my_size += ::protobuf::rt::string_size(24, &self.emblem_chain_address);
         }
         if self.tx_count != 0 {
-            my_size += ::protobuf::rt::value_size(24, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(25, self.tx_count, ::protobuf::wire_format::WireTypeVarint);
         }
         for value in &self.txs {
             let len = value.compute_size();
             my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         };
         if self.tx_fee_base != 0 {
-            my_size += ::protobuf::rt::value_size(26, self.tx_fee_base, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(27, self.tx_fee_base, ::protobuf::wire_format::WireTypeVarint);
         }
         if self.tx_distance_sum_limit != 0 {
-            my_size += ::protobuf::rt::value_size(27, self.tx_distance_sum_limit, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(28, self.tx_distance_sum_limit, ::protobuf::wire_format::WireTypeVarint);
         }
         if self.blockchain_headers_count != 0 {
-            my_size += ::protobuf::rt::value_size(28, self.blockchain_headers_count, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(29, self.blockchain_headers_count, ::protobuf::wire_format::WireTypeVarint);
         }
         if let Some(ref v) = self.blockchain_headers.as_ref() {
             let len = v.compute_size();
             my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         }
         if !self.blockchain_fingerprints_root.is_empty() {
-            my_size += ::protobuf::rt::string_size(30, &self.blockchain_fingerprints_root);
+            my_size += ::protobuf::rt::string_size(31, &self.blockchain_fingerprints_root);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -2205,66 +2239,69 @@ impl ::protobuf::Message for BcBlock {
         if self.distance != 0 {
             os.write_uint64(11, self.distance)?;
         }
+        if self.total_distance != 0 {
+            os.write_uint64(12, self.total_distance)?;
+        }
         if !self.nonce.is_empty() {
-            os.write_string(12, &self.nonce)?;
+            os.write_string(13, &self.nonce)?;
         }
         if self.nrg_grant != 0 {
-            os.write_uint64(13, self.nrg_grant)?;
+            os.write_uint64(14, self.nrg_grant)?;
         }
         if !self.target_hash.is_empty() {
-            os.write_string(14, &self.target_hash)?;
+            os.write_string(15, &self.target_hash)?;
         }
         if self.target_height != 0 {
-            os.write_uint64(15, self.target_height)?;
+            os.write_uint64(16, self.target_height)?;
         }
         if !self.target_miner.is_empty() {
-            os.write_string(16, &self.target_miner)?;
+            os.write_string(17, &self.target_miner)?;
         }
         if !self.target_signature.is_empty() {
-            os.write_string(17, &self.target_signature)?;
+            os.write_string(18, &self.target_signature)?;
         }
         if self.twn != 0 {
-            os.write_uint64(18, self.twn)?;
+            os.write_uint64(19, self.twn)?;
         }
         for v in &self.tws {
-            os.write_string(19, &v)?;
+            os.write_string(20, &v)?;
         };
         if self.emblem_weight != 0 {
-            os.write_uint64(20, self.emblem_weight)?;
+            os.write_uint64(21, self.emblem_weight)?;
         }
         if !self.emblem_chain_block_hash.is_empty() {
-            os.write_string(21, &self.emblem_chain_block_hash)?;
+            os.write_string(22, &self.emblem_chain_block_hash)?;
         }
         if !self.emblem_chain_fingerprint_root.is_empty() {
-            os.write_string(22, &self.emblem_chain_fingerprint_root)?;
+            os.write_string(23, &self.emblem_chain_fingerprint_root)?;
         }
         if !self.emblem_chain_address.is_empty() {
-            os.write_string(23, &self.emblem_chain_address)?;
+            os.write_string(24, &self.emblem_chain_address)?;
         }
         if self.tx_count != 0 {
-            os.write_uint64(24, self.tx_count)?;
+            os.write_uint64(25, self.tx_count)?;
         }
         for v in &self.txs {
-            os.write_tag(25, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_tag(26, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
         };
         if self.tx_fee_base != 0 {
-            os.write_uint64(26, self.tx_fee_base)?;
+            os.write_uint64(27, self.tx_fee_base)?;
         }
         if self.tx_distance_sum_limit != 0 {
-            os.write_uint64(27, self.tx_distance_sum_limit)?;
+            os.write_uint64(28, self.tx_distance_sum_limit)?;
         }
         if self.blockchain_headers_count != 0 {
-            os.write_uint64(28, self.blockchain_headers_count)?;
+            os.write_uint64(29, self.blockchain_headers_count)?;
         }
         if let Some(ref v) = self.blockchain_headers.as_ref() {
-            os.write_tag(29, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_tag(30, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
         }
         if !self.blockchain_fingerprints_root.is_empty() {
-            os.write_string(30, &self.blockchain_fingerprints_root)?;
+            os.write_string(31, &self.blockchain_fingerprints_root)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -2364,6 +2401,11 @@ impl ::protobuf::MessageStatic for BcBlock {
                     "distance",
                     BcBlock::get_distance_for_reflect,
                     BcBlock::mut_distance_for_reflect,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "total_distance",
+                    BcBlock::get_total_distance_for_reflect,
+                    BcBlock::mut_total_distance_for_reflect,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "nonce",
@@ -2483,6 +2525,7 @@ impl ::protobuf::Clear for BcBlock {
         self.clear_merkle_root();
         self.clear_chain_root();
         self.clear_distance();
+        self.clear_total_distance();
         self.clear_nonce();
         self.clear_nrg_grant();
         self.clear_target_hash();
@@ -3160,41 +3203,42 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x18\x02\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03eth\x12&\n\x03lsk\x18\
     \x03\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03lsk\x12&\n\x03neo\x18\x04\
     \x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03neo\x12&\n\x03wav\x18\x05\x20\
-    \x03(\x0b2\x14.bc.BlockchainHeaderR\x03wav\"\xdc\x08\n\x07BcBlock\x12\
-    \x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x02\
-    \x20\x01(\tR\x0cpreviousHash\x12\x18\n\x07version\x18\x03\x20\x01(\x04R\
-    \x07version\x12%\n\x0eschema_version\x18\x04\x20\x01(\x04R\rschemaVersio\
-    n\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x14\n\x05miner\
-    \x18\x06\x20\x01(\tR\x05miner\x12\x1e\n\ndifficulty\x18\x07\x20\x01(\x02\
-    R\ndifficulty\x12\x1c\n\ttimestamp\x18\x08\x20\x01(\x04R\ttimestamp\x12\
-    \x1f\n\x0bmerkle_root\x18\t\x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain_roo\
-    t\x18\n\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x0b\x20\x01(\
-    \x04R\x08distance\x12\x14\n\x05nonce\x18\x0c\x20\x01(\tR\x05nonce\x12\
-    \x1b\n\tnrg_grant\x18\r\x20\x01(\x04R\x08nrgGrant\x12\x1f\n\x0btarget_ha\
-    sh\x18\x0e\x20\x01(\tR\ntargetHash\x12#\n\rtarget_height\x18\x0f\x20\x01\
-    (\x04R\x0ctargetHeight\x12!\n\x0ctarget_miner\x18\x10\x20\x01(\tR\x0btar\
-    getMiner\x12)\n\x10target_signature\x18\x11\x20\x01(\tR\x0ftargetSignatu\
-    re\x12\x10\n\x03twn\x18\x12\x20\x01(\x04R\x03twn\x12\x10\n\x03tws\x18\
-    \x13\x20\x03(\tR\x03tws\x12#\n\remblem_weight\x18\x14\x20\x01(\x04R\x0ce\
-    mblemWeight\x125\n\x17emblem_chain_block_hash\x18\x15\x20\x01(\tR\x14emb\
-    lemChainBlockHash\x12A\n\x1demblem_chain_fingerprint_root\x18\x16\x20\
-    \x01(\tR\x1aemblemChainFingerprintRoot\x120\n\x14emblem_chain_address\
-    \x18\x17\x20\x01(\tR\x12emblemChainAddress\x12\x19\n\x08tx_count\x18\x18\
-    \x20\x01(\x04R\x07txCount\x12#\n\x03txs\x18\x19\x20\x03(\x0b2\x11.bc.BcT\
-    ransactionR\x03txs\x12\x1e\n\x0btx_fee_base\x18\x1a\x20\x01(\x04R\ttxFee\
-    Base\x121\n\x15tx_distance_sum_limit\x18\x1b\x20\x01(\x04R\x12txDistance\
-    SumLimit\x128\n\x18blockchain_headers_count\x18\x1c\x20\x01(\x04R\x16blo\
-    ckchainHeadersCount\x12D\n\x12blockchain_headers\x18\x1d\x20\x01(\x0b2\
-    \x15.bc.BlockchainHeadersR\x11blockchainHeaders\x12@\n\x1cblockchain_fin\
-    gerprints_root\x18\x1e\x20\x01(\tR\x1ablockchainFingerprintsRoot\"#\n\rB\
-    cTransaction\x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9a\x02\n\
-    \x10BlockchainHeader\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockcha\
-    in\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\
-    \x18\x03\x20\x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\
-    \x01(\x04R\ttimestamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06heigh\
-    t\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12V\n(blockc\
-    hain_confirmations_in_parent_count\x18\x07\x20\x01(\x04R$blockchainConfi\
-    rmationsInParentCountb\x06proto3\
+    \x03(\x0b2\x14.bc.BlockchainHeaderR\x03wav\"\x83\t\n\x07BcBlock\x12\x12\
+    \n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x02\x20\
+    \x01(\tR\x0cpreviousHash\x12\x18\n\x07version\x18\x03\x20\x01(\x04R\x07v\
+    ersion\x12%\n\x0eschema_version\x18\x04\x20\x01(\x04R\rschemaVersion\x12\
+    \x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x14\n\x05miner\x18\
+    \x06\x20\x01(\tR\x05miner\x12\x1e\n\ndifficulty\x18\x07\x20\x01(\x02R\nd\
+    ifficulty\x12\x1c\n\ttimestamp\x18\x08\x20\x01(\x04R\ttimestamp\x12\x1f\
+    \n\x0bmerkle_root\x18\t\x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain_root\
+    \x18\n\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x0b\x20\x01(\x04\
+    R\x08distance\x12%\n\x0etotal_distance\x18\x0c\x20\x01(\x04R\rtotalDista\
+    nce\x12\x14\n\x05nonce\x18\r\x20\x01(\tR\x05nonce\x12\x1b\n\tnrg_grant\
+    \x18\x0e\x20\x01(\x04R\x08nrgGrant\x12\x1f\n\x0btarget_hash\x18\x0f\x20\
+    \x01(\tR\ntargetHash\x12#\n\rtarget_height\x18\x10\x20\x01(\x04R\x0ctarg\
+    etHeight\x12!\n\x0ctarget_miner\x18\x11\x20\x01(\tR\x0btargetMiner\x12)\
+    \n\x10target_signature\x18\x12\x20\x01(\tR\x0ftargetSignature\x12\x10\n\
+    \x03twn\x18\x13\x20\x01(\x04R\x03twn\x12\x10\n\x03tws\x18\x14\x20\x03(\t\
+    R\x03tws\x12#\n\remblem_weight\x18\x15\x20\x01(\x04R\x0cemblemWeight\x12\
+    5\n\x17emblem_chain_block_hash\x18\x16\x20\x01(\tR\x14emblemChainBlockHa\
+    sh\x12A\n\x1demblem_chain_fingerprint_root\x18\x17\x20\x01(\tR\x1aemblem\
+    ChainFingerprintRoot\x120\n\x14emblem_chain_address\x18\x18\x20\x01(\tR\
+    \x12emblemChainAddress\x12\x19\n\x08tx_count\x18\x19\x20\x01(\x04R\x07tx\
+    Count\x12#\n\x03txs\x18\x1a\x20\x03(\x0b2\x11.bc.BcTransactionR\x03txs\
+    \x12\x1e\n\x0btx_fee_base\x18\x1b\x20\x01(\x04R\ttxFeeBase\x121\n\x15tx_\
+    distance_sum_limit\x18\x1c\x20\x01(\x04R\x12txDistanceSumLimit\x128\n\
+    \x18blockchain_headers_count\x18\x1d\x20\x01(\x04R\x16blockchainHeadersC\
+    ount\x12D\n\x12blockchain_headers\x18\x1e\x20\x01(\x0b2\x15.bc.Blockchai\
+    nHeadersR\x11blockchainHeaders\x12@\n\x1cblockchain_fingerprints_root\
+    \x18\x1f\x20\x01(\tR\x1ablockchainFingerprintsRoot\"#\n\rBcTransaction\
+    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9a\x02\n\x10Blockchain\
+    Header\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\
+    \x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\
+    \x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttim\
+    estamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0b\
+    merkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12V\n(blockchain_confirmati\
+    ons_in_parent_count\x18\x07\x20\x01(\x04R$blockchainConfirmationsInParen\
+    tCountb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
