@@ -385,9 +385,11 @@ export default class Engine {
               const highCandidateBlock = bestCandidate.getHighestBlock()
               const lowCandidateBlock = bestCandidate.getLowestBlock()
               if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
+              highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
               lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
                 this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                 this._logger.info('applied new multiverse -> ' + bestCandidate.getHighestBlock().getHash())
+                // sets multiverse for removal
                 bestCandidate._created = 0
               }
             }
@@ -397,7 +399,6 @@ export default class Engine {
         } else {
           // ignore
         }
-
         // remove candidates older beyond a threshold
         const keepCandidateThreshold = (Date.now() * 0.001) - (120 * 1000) // 120 seconds / 2 mins
         this._verses = this._verses.filter(m => {
@@ -405,9 +406,6 @@ export default class Engine {
             return m
           }
         })
-
-        // here trigger a cleanup for multiverses that are older than 2 minutes
-        // console.log(missingBlocks)
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)

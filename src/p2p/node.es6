@@ -213,7 +213,6 @@ export class PeerNode {
           if (peerMultiverses.length >= PEER_QUORUM_SIZE) {
             const candidates = peerMultiverses.map((peerMultiverse) => {
               if (peerMultiverse.length > 0 && validateBlockSequence(peerMultiverse)) {
-                // TODO: Here we also use Tomas' helper +/- 6 seconds
                 return peerMultiverse
               } else {
                 return null
@@ -243,7 +242,6 @@ export class PeerNode {
                     }
                     return 0
                   })
-
                 const winningMultiverse = peerMultiverseByDifficultySum[0]
                 // TODO split the work among multiple correct candidates
                 // const syncCandidates = candidates.filter((candidate) => {
@@ -255,7 +253,6 @@ export class PeerNode {
                 const lowestBlock = this.multiverse.getLowestBlock()
                 if (lowestBlock && lowestBlock.getHash() !== winningMultiverse[0].getHash()) {
                   this._blockPool.maximumHeight = lowestBlock.getHeight()
-                  // this.multiverse.purge()
                   // insert into the multiverse
                   winningMultiverse.map(block => this.multiverse.addBlock(block))
                   // TODO: Use RXP
