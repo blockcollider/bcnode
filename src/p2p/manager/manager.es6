@@ -15,6 +15,7 @@ const PeerInfo = require('peer-info')
 const pull = require('pull-stream')
 
 const { ManagedPeerBook } = require('../book/book')
+const { toObject } = require('../../helper/debug')
 const { Peer } = require('../peer')
 const { PeerNode } = require('../node')
 const { registerProtocols } = require('../protocol')
@@ -170,7 +171,7 @@ export class PeerManager {
     this.createPeer(peer)
       .getLatestHeader()
       .then((header) => {
-        debug('Peer latest header', peer.id.toB58String(), header)
+        debug('Peer latest header', peer.id.toB58String(), toObject(header))
       })
 
     this._checkPeerStatus(peer)

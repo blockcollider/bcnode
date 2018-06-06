@@ -16,6 +16,7 @@ const { uniqBy, sum } = require('ramda')
 
 const debug = require('debug')('bcnode:p2p:node')
 const config = require('../../config/config')
+const { toObject } = require('../helper/debug')
 const { getVersion } = require('../helper/version')
 const logging = require('../logger')
 
@@ -206,7 +207,7 @@ export class PeerNode {
       this.manager.createPeer(peer)
         .getMultiverse()
         .then((multiverse) => {
-          debug('Got multiverse from peer', peer.id.toB58String(), multiverse)
+          debug('Got multiverse from peer', peer.id.toB58String(), toObject(multiverse))
           peerMultiverses.push(multiverse)
 
           if (peerMultiverses.length >= PEER_QUORUM_SIZE) {

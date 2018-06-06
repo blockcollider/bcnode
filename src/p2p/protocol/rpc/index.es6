@@ -74,12 +74,12 @@ const handlers = {
       }, (err) => { // beware, rocksdb rejects when not found
         return Promise.reject(new Error(`Could not retrieve some block between height ${fromHeight} and ${toHeight} from persistence, err: ${err}`))
       })
-      .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
+      .then((res) => res.map((block) => block.serializeBinary()))
   },
 
   getLatestHeader: (manager: PeerManager) => {
     return manager.engine.persistence.get('bc.block.latest')
-      .then((res) => res.serializeBinary().toString('base64'))
+      .then((res) => [res.serializeBinary()])
   },
 
   getLatestHeaders: (manager: PeerManager, count: number) => {
@@ -97,7 +97,7 @@ const handlers = {
         }
 
         return manager.engine.persistence.get(ids)
-          .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
+          .then((res) => res.map((block) => block.serializeBinary()))
       })
   },
 
@@ -121,7 +121,7 @@ const handlers = {
         }
 
         return manager.engine.persistence.get(ids)
-          .then((res) => res.map((block) => block.serializeBinary().toString('base64')))
+          .then((res) => res.map((block) => block.serializeBinary()))
       })
   }
 }
@@ -143,7 +143,7 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           const msg = JSON.parse(wireData)
           const method = handlers[msg.method]
           method(manager, ...msg.params).then((res) => {
-            pull(pull.values([JSON.stringify(res)]), conn)
+            pull(pull.values(res), conn)
           })
         } catch (e) {
           console.log('ERROR', e)
