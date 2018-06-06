@@ -56,6 +56,9 @@ class BlocksTable extends Component<*> {
               <Ellipsis text={block.hash} />
             </BlockLink>
           </td>
+          <td>
+            <Ellipsis text={block.miner} />
+          </td>
           <td style={fixedStyle}>{block.difficulty}</td>
           <td style={fixedStyle}>{block.distance}</td>
           <td>{block.nonce}</td>
@@ -75,6 +78,7 @@ class BlocksTable extends Component<*> {
               <th scope='col'>#</th>
               <th scope='col'>Height</th>
               <th scope='col'>Hash</th>
+              <th scope='col'>Miner</th>
               <th scope='col'>Difficulty</th>
               <th scope='col'>Distance</th>
               <th scope='col'>Nonce</th>
