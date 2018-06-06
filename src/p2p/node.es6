@@ -240,7 +240,6 @@ export class PeerNode {
                     } else if (a.difficultySum < b.difficultySum) {
                       return -1
                     }
-
                     return 0
                   })
 

@@ -339,7 +339,8 @@ export default class Engine {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
-        if (newBlock.getHeight() > (afterBlockHighest.getHeight() - 8)) { // if true update or create candidate multiverse
+        if (newBlock.getHeight() > 8 &&
+            newBlock.getHeight() > (afterBlockHighest.getHeight() - 8)) { // if true update or create candidate multiverse
           const approved = this._verses.reduce((approved, multiverse) => {
             const candidateApproved = multiverse.addBlock(newBlock)
             if (candidateApproved === true) {
@@ -351,7 +352,7 @@ export default class Engine {
             const newMultiverse = new Multiverse()
             newMultiverse.addBlock(newBlock)
             this._verses.push(newMultiverse)
-            // @korcak --> send PeerQuery to peer
+            // @korczis --> send PeerQuery to peer
             const peerQuery = {
               queryHash: newBlock.getHash(),
               queryHeight: newBlock.getHeight(),
@@ -368,6 +369,24 @@ export default class Engine {
             if (candidates.length > 0) {
               // here we would sort by highest block totalDistance and compare with current
               // if its better, we restart the miner, enable resync, purge the db, and set _blocks to a clone of _blocks on the candidate
+              //
+              // const ordered = candidates.sort((a, b) => {
+              //  if(a.getTotalDistance() > b.getTotalDistance()) {
+              //    return 1
+              //  }
+              //  if(a.getTotalDistance() < b.getTotalDistance()) {
+              //    return -1
+              //  }
+              //  return 0
+              // })
+              // const bestCandidate = ordered.shift()
+              // const highCandidateBlock = bestCandidateBlock.getHighestBlock()
+              // const lowCandidateBlock = bestCandidateBlock.getLowestBlock()
+              // if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
+              // lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock()) {
+              //     this.multiverse._blocks = _.cloneDeep(lowCandidateBlock._blocks)
+              //     delete bestCandidate
+              // }
             }
           }
         } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool

@@ -18,6 +18,7 @@ export class Multiverse {
   _commitDepth: number
   _writeQueue: BcBlock[]
   _height: number
+  _created: number
   _logger: Object
 
   constructor (commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
@@ -26,6 +27,7 @@ export class Multiverse {
     this._commitDepth = commitDepth
     this._logger = logging.getLogger(__filename)
     this._height = 0
+    this._created = Math.floor(Date.now() * 0.001)
   }
 
   get blocks (): Object {
