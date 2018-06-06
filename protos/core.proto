@@ -24,8 +24,8 @@ message BlockchainHeaders {
 message BcBlock {
     string hash = 1;
     string previous_hash = 2;
-    uint64 version = 3; // new
-    uint64 schema_version = 4; // new
+    uint64 version = 3;
+    uint64 schema_version = 4;
     uint64 height = 5;
     string miner = 6;
     float difficulty = 7;
@@ -33,25 +33,26 @@ message BcBlock {
     string merkle_root = 9;
     string chain_root = 10;
     uint64 distance = 11;
-    string nonce = 12;
-    uint64 nrg_grant = 13; // new
-    string target_hash = 14; // new
-    uint64 target_height = 15; // new
-    string target_miner = 16; // new
-    string target_signature = 17; // new
-    uint64 twn = 18; // new
-    repeated string tws = 19; // new
-    uint64 emblem_weight = 20; // new
-    string emblem_chain_block_hash = 21; // new
-    string emblem_chain_fingerprint_root = 22; // new
-    string emblem_chain_address = 23; // new
-    uint64 tx_count = 24;
-    repeated BcTransaction txs = 25;
-    uint64 tx_fee_base = 26; // new
-    uint64 tx_distance_sum_limit = 27; // new
-    uint64 blockchain_headers_count = 28;
-    BlockchainHeaders blockchain_headers = 29;
-    string blockchain_fingerprints_root = 30; // new
+    uint64 total_distance = 12;
+    string nonce = 13;
+    uint64 nrg_grant = 14;
+    string target_hash = 15;
+    uint64 target_height = 16;
+    string target_miner = 17;
+    string target_signature = 18;
+    uint64 twn = 19;
+    repeated string tws = 20;
+    uint64 emblem_weight = 21;
+    string emblem_chain_block_hash = 22;
+    string emblem_chain_fingerprint_root = 23;
+    string emblem_chain_address = 24;
+    uint64 tx_count = 25;
+    repeated BcTransaction txs = 26;
+    uint64 tx_fee_base = 27;
+    uint64 tx_distance_sum_limit = 28;
+    uint64 blockchain_headers_count = 29;
+    BlockchainHeaders blockchain_headers = 30;
+    string blockchain_fingerprints_root = 31;
 }
 
 message BcTransaction {
