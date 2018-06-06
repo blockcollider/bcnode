@@ -8,6 +8,7 @@
  */
 
 import type { Multiverse } from '../bc/multiverse'
+import type { BcBlock } from '../protos/core_pb'
 
 const ROVERS = Object.keys(require('../rover/manager').rovers)
 
@@ -34,7 +35,7 @@ const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
 const { isValidBlock } = require('../bc/validation')
 const { getBlockchainsBlocksCount } = require('../bc/helper')
-const { Block, BcBlock } = require('../protos/core_pb')
+const { Block } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
 const ts = require('../utils/time').default // ES6 default export
@@ -354,23 +355,27 @@ export default class Engine {
   }
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
-    if (!this._unfinishedBlock) {
+    if (this._unfinishedBlock === undefined || this._unfinishedBlock === null) {
       this._logger.warn('There is not an unfinished block to use solution for')
       return
     }
 
+    const { nonce, distance, timestamp, difficulty, iterations, timeDiff } = solution
+
     // $FlowFixMe
-    this._unfinishedBlock.setNonce(solution.nonce)
+    this._unfinishedBlock.setNonce(nonce)
     // $FlowFixMe
-    this._unfinishedBlock.setDistance(solution.distance)
+    this._unfinishedBlock.setDistance(distance)
     // $FlowFixMe
-    this._unfinishedBlock.setTimestamp(solution.timestamp)
+    this._unfinishedBlock.setTotalDistance(this._unfinishedBlock.getTotalDistance() + distance)
     // $FlowFixMe
-    this._unfinishedBlock.setDifficulty(solution.difficulty)
+    this._unfinishedBlock.setTimestamp(timestamp)
+    // $FlowFixMe
+    this._unfinishedBlock.setDifficulty(difficulty)
 
     if (this._unfinishedBlockData) {
-      this._unfinishedBlockData.iterations = solution.iterations
-      this._unfinishedBlockData.timeDiff = solution.timeDiff
+      this._unfinishedBlockData.iterations = iterations
+      this._unfinishedBlockData.timeDiff = timeDiff
     }
 
     if (!isValidBlock(this._unfinishedBlock)) {
@@ -441,9 +446,9 @@ export default class Engine {
   }
 
   _writeMiningData (newBlock: BcBlock, solution: { iterations: number, timeDiff: number }) {
-    // block_height, block_difficulty, block_distance, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
+    // block_height, block_difficulty, block_distance, block_total_distance, block_timestamp, iterations_count, mining_duration_ms, btc_confirmation_count, btc_current_timestamp, eth_confirmation_count, eth_current_timestamp, lsk_confirmation_count, lsk_current_timestamp, neo_confirmation_count, neo_current_timestamp, wav_confirmation_count, wav_current_timestamp
     const row = [
-      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getDistance(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
+      newBlock.getHeight(), newBlock.getDifficulty(), newBlock.getDistance(), newBlock.getTotalDistance(), newBlock.getTimestamp(), solution.iterations, solution.timeDiff
     ]
 
     this._knownRovers.forEach(roverName => {

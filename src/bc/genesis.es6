@@ -40,6 +40,7 @@ export function getGenesisBlock () {
     GENESIS_DATA.merkleRoot,
     GENESIS_DATA.chainRoot,
     GENESIS_DATA.distance,
+    GENESIS_DATA.totalDistance,
     GENESIS_DATA.nonce,
     GENESIS_DATA.nrgGrant,
     GENESIS_DATA.targetHash,
