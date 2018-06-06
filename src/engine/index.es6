@@ -72,6 +72,7 @@ export default class Engine {
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
   _peerIsSyncing: boolean
+  _peerIsResyncing: boolean
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -334,9 +335,40 @@ export default class Engine {
       } else if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
-        // Request the missing blocks
-        const missingBlocks = this.multiverse.getMissingBlocks(newBlock)
-        console.log(missingBlocks)
+        // determine if the block is above the minimum to be considered for an active multiverse
+        if (newBlock.getHeight() > (afterBlockHighest.getHeight() - 8)) { // if true update or create candidate multiverse
+          const approved = this._mverses.reduce((approved, multiverse) => {
+            const candidateApproved = multiverse.addBlock(newBlock)
+            if (candidateApproved === true) {
+              approved.push(multiverse)
+            }
+            return approved
+          }, [])
+          // if none of the multiverses accepted the new block create its own and request more information from the peer
+          if (approved.length === 0) {
+            const newMultiverse = new Multiverse()
+            newMultiverse.addBlock(newBlock)
+            this._mverses.push(newMultiverse)
+          // else check if any of the multiverses are ready for comparison
+          } else {
+            const candidates = approved.filter((m) => {
+              if (Object.keys(m._blocks).length >= 7) {
+                return m
+              }
+              return false
+            })
+            if (candidates.length > 0) {
+              // here we would sort by highest block totalDistance and compare with current
+              // if its better, we restart the miner, enable resync, purge the db, and set _blocks to a clone of _blocks on the candidate
+            }
+          }
+        } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
+          // pass
+        } else {
+          // ignore
+        }
+        // const missingBlocks = this.multiverse.getMissingBlocks(newBlock)
+        // console.log(missingBlocks)
       }
     } else {
       debug(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)

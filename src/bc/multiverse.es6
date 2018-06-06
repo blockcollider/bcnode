@@ -19,13 +19,10 @@ export class Multiverse {
   _writeQueue: BcBlock[]
   _height: number
   _logger: Object
-  _persistence: any
-  _pubsub: any
 
-  constructor (persistence: any, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
+  constructor (commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
     this._blocks = {}
     this._writeQueue = []
-    this._persistence = persistence
     this._commitDepth = commitDepth
     this._logger = logging.getLogger(__filename)
     this._height = 0
@@ -130,7 +127,7 @@ export class Multiverse {
       syncing = true
       force = true
     }
-    if (keyCount > 10) {
+    if (keyCount > 16) {
       // remove the oldest
       delete this._blocks[Object.keys(this._blocks)[0]]
     }
