@@ -347,13 +347,18 @@ export default class Engine {
             }
             return approved
           }, [])
-          // if none of the multiverses accepted the new block create its own and request more information from the peer
-          if (approved.length === 0) {
+          if (approved.length === 0) { // if none of the multiverses accepted the new block create its own and request more information from the peer
             const newMultiverse = new Multiverse()
             newMultiverse.addBlock(newBlock)
             this._verses.push(newMultiverse)
-          // else check if any of the multiverses are ready for comparison
-          } else {
+            // @korcak --> send PeerQuery to peer
+            const peerQuery = {
+              queryHash: newBlock.getHash(),
+              queryHeight: newBlock.getHeight(),
+              low: newBlock.getHeight() - 7,
+              hig: newBlock.getHeight() + 2
+            }
+          } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
               if (Object.keys(m._blocks).length >= 7) {
                 return m
