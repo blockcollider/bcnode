@@ -23,7 +23,7 @@ process.on('uncaughtException', (err) => {
   console.log(err)
 })
 
-const config = require('../../config/config')
+const { config } = require('../config')
 const logging = require('../logger')
 const { ensureDebugDir } = require('../debug')
 const { getVersion } = require('../helper/version')
@@ -59,7 +59,7 @@ export const main = async (args: string[] = process.argv) => {
   program
     .command('config')
     .description('Configuration file(s)')
-    .usage('<options>')
+    .usage('[opts]')
     .option('--show', 'Show config file used')
     .action((cmd) => {
       return cmdConfig(cmd)
@@ -69,7 +69,7 @@ export const main = async (args: string[] = process.argv) => {
   program
     .command('info')
     .description('Various metrics')
-    .usage('<options>')
+    .usage('[opts]')
     .option('--all', 'Show all', false)
     .option('--dirs', 'Path of directories used', false)
     .option('--machine', 'Machine info', false)

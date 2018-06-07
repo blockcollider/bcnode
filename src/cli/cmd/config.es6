@@ -7,12 +7,12 @@
  * @flow
  */
 
-const config = require('../../../config/config')
+const { config } = require('../../config')
 
 const { Command } = require('commander')
 
 export const cmd = (program: typeof Command) => {
-  if (program.opts().show) {
+  if (program.opts && program.opts().show) {
     console.log(JSON.stringify(config, null, 2))
     return
   }

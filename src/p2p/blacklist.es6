@@ -9,7 +9,7 @@
 
 const PeerInfo = require('peer-info')
 
-const config = require('../../config/config')
+const { config } = require('../config')
 const logging = require('../logger')
 const PeerBook = require('peer-book')
 const Node = require('./node').default

@@ -21,7 +21,7 @@ const rlp = require('rlp-encoding')
 const logging = require('../../logger')
 const { getPrivateKey } = require('../utils')
 
-const config = require('../../../config/config')
+const { config } = require('../../config')
 
 const BOOTNODES = ethereumCommon
   .bootstrapNodes

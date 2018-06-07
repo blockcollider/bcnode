@@ -18,7 +18,7 @@ process.on('unhandledRejection', (err) => {
 })
 
 const Controller = require('./controller').default
-const config = require('../../../config/config')
+const { config } = require('../../config')
 
 const ROVER_TITLE = 'bc-rover-neo'
 

@@ -7,7 +7,6 @@
  * @flow
  */
 
-import type { Multiverse } from '../bc/multiverse'
 import type { BcBlock } from '../protos/core_pb'
 
 const ROVERS = Object.keys(require('../rover/manager').rovers)
@@ -20,8 +19,9 @@ const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
 
-const config = require('../../config/config')
+const { config } = require('../config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
+const { Multiverse } = require('../bc/multiverse')
 const logging = require('../logger')
 const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')

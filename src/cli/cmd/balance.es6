@@ -7,7 +7,7 @@
  * @flow
  */
 
-const config = require('../../../config/config')
+const { config } = require('../../config')
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 
 const { Command } = require('commander')

@@ -15,7 +15,7 @@ const pull = require('pull-stream')
 const { uniqBy, sum } = require('ramda')
 
 const debug = require('debug')('bcnode:p2p:node')
-const config = require('../../config/config')
+const { config } = require('../config')
 const { toObject } = require('../helper/debug')
 const { getVersion } = require('../helper/version')
 const logging = require('../logger')
