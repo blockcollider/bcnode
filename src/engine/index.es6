@@ -19,6 +19,7 @@ const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
+const BN = require('bn.js')
 
 const config = require('../../config/config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -435,7 +436,7 @@ export default class Engine {
     // $FlowFixMe
     this._unfinishedBlock.setDistance(distance)
     // $FlowFixMe
-    this._unfinishedBlock.setTotalDistance(this._unfinishedBlock.getTotalDistance() + distance)
+    this._unfinishedBlock.setTotalDistance(new BN(this._unfinishedBlock.getTotalDistance()).add(new BN(distance)).toString())
     // $FlowFixMe
     this._unfinishedBlock.setTimestamp(timestamp)
     // $FlowFixMe
