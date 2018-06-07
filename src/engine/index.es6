@@ -361,6 +361,8 @@ export default class Engine {
               high: newBlock.getHeight() + 2
             }
             console.log(peerQuery)
+            // TODO: @kroczis replace this with direct to peer request
+            this.node.triggerBlockSync()
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
               if (Object.keys(m._blocks).length >= 7) {
@@ -388,7 +390,7 @@ export default class Engine {
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
               lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
                 this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
-                this._logger.info('applied new multiverse -> ' + bestCandidate.getHighestBlock().getHash())
+                this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 // sets multiverse for removal
                 bestCandidate._created = 0
               }
