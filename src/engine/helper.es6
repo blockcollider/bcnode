@@ -10,6 +10,8 @@
 import type Multiverse from '../bc/multiverse'
 import type BcBlock from '../protos/core_pb'
 
+const BN = require('bn.js')
+
 // Functions
 // [x] - timestampIs70secondsBelowLocalTime
 // [x] - doesNewBlockPreviousHashReferenceBlockInMultiverse
@@ -76,4 +78,20 @@ export const isNewBlockTimestampGreaterThanHighestInMultiverse = (newBlock: BcBl
   })
 
   return true
+}
+
+export const blockByTotalDistanceSorter = (a: BcBlock, b: BcBlock) => {
+  const aTotalDistance = new BN(a.getTotalDistance())
+  const bTotalDistance = new BN(b.getTotalDistance())
+  // a > b
+  if (aTotalDistance.gt(bTotalDistance)) {
+    return 1
+  }
+
+  // b > a
+  if (aTotalDistance.lt(bTotalDistance)) {
+    return -1
+  }
+
+  return 0
 }
