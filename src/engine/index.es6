@@ -372,7 +372,7 @@ export default class Engine {
             this._verses.push(newMultiverse)
 
             this._logger.info('new multiverse created for block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
-            // this.node.triggerBlockSync()
+            // this.node.triggerBlockSync() // --> give me multiverse
 
             conn.getPeerInfo((err, peerInfo) => {
               if (err) {
@@ -413,7 +413,7 @@ export default class Engine {
                 this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                 this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 this._peerIsResyncing = true
-                this.blockpool._checkpoint = bestCandidate
+                this.blockpool._checkpoint = lowCandidateBlock
                 // sets multiverse for removal
                 bestCandidate._created = 0
               }
