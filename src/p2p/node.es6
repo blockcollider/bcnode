@@ -29,6 +29,7 @@ const { PeerManager, DATETIME_STARTED_AT } = require('./manager/manager')
 const { validateBlockSequence } = require('../bc/validation')
 const { Multiverse } = require('../bc/multiverse')
 const { BlockPool } = require('../bc/blockpool')
+const { blockByTotalDistanceSorter } = require('../bc/helper')
 
 const { PROTOCOL_PREFIX, NETWORK_ID } = require('./protocol/version')
 
@@ -232,22 +233,9 @@ export class PeerNode {
                 // TODO: Commit as active multiverse and begin full sync from known peers
               } else {
                 const peerMultiverseByDifficultySum = uniqueCandidates
-                  // accumulator, element
-                  .reduce((all, peerBlocks) => {
-                    // TODO use getTotalDistance() instead of suming diff
-                    const difficultySum = sum(peerBlocks.map((peerBlock) => peerBlock.getDifficulty()))
-                    peerBlocks[0].difficultySum = difficultySum
-                    all.push(peerBlocks[0])
-                    return all
-                  }, [])
-                  .sort((a, b) => {
-                    if (a.difficultySum > b.difficultySum) {
-                      return 1
-                    } else if (a.difficultySum < b.difficultySum) {
-                      return -1
-                    }
-                    return 0
-                  })
+                  .map(peerBlocks => peerBlocks[0])
+                  .sort(blockByTotalDistanceSorter)
+
                 const winningMultiverse = peerMultiverseByDifficultySum[0]
                 // TODO split the work among multiple correct candidates
                 // const syncCandidates = candidates.filter((candidate) => {
