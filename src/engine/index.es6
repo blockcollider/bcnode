@@ -298,7 +298,7 @@ export default class Engine {
     })
   }
 
-  async collectBlock (rovers: string[], block: BcBlock) {
+  async collectBlock (rovers: string[], block: Block) {
     this._collectedBlocks[block.getBlockchain()] += 1
 
     // TODO: Adjust minimum count of collected blocks needed to trigger mining
@@ -353,8 +353,12 @@ export default class Engine {
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-      } else if (addedToMultiverse === true) {
+        this.stopMining()
+      }
+
+      if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+        this.stopMining()
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
         if (newBlock.getHeight() > 8 &&
@@ -500,6 +504,7 @@ export default class Engine {
           }
 
           this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
+          this._broadcastMinedBlock(this._unfinishedBlock, solution)
 
           this._cleanUnfinishedBlock()
         }
@@ -650,7 +655,7 @@ export default class Engine {
     }
   }
 
-  async startMining (rovers: string[] = ROVERS, block: BcBlock): Promise<*> {
+  async startMining (rovers: string[] = ROVERS, block: Block): Promise<*> {
     debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
@@ -750,25 +755,26 @@ export default class Engine {
     return Promise.resolve(false)
   }
 
-  stopMining (): Promise<*> {
+  stopMining (): bool {
     debug('Stopping mining')
 
     if (!this._workerProcess) {
-      return Promise.resolve(false)
+      return false
     }
 
     this._workerProcess.kill()
+    this._workerProcess.disconnect()
     this._workerProcess = null
-    return Promise.resolve(true)
+    return true
   }
 
-  restartMining (rovers: string[] = ROVERS, block: BcBlock): Promise<boolean> {
-    debug('Restarting mining', rovers, block.toObject())
-
-    this.stopMining()
-    return this.startMining(rovers || ROVERS, block)
-      .then(res => {
-        return Promise.resolve(!res)
-      })
-  }
+  // restartMining (rovers: string[] = ROVERS): Promise<boolean> {
+  //   debug('Restarting mining', rovers)
+  //
+  //   this.stopMining()
+  //   return this.startMining(rovers || ROVERS)
+  //     .then(res => {
+  //       return Promise.resolve(!res)
+  //     })
+  // }
 }
