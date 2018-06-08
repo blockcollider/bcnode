@@ -33,7 +33,7 @@ message BcBlock {
     string merkle_root = 9;
     string chain_root = 10;
     uint64 distance = 11;
-    uint64 total_distance = 12;
+    string total_distance = 12;
     string nonce = 13;
     uint64 nrg_grant = 14;
     string target_hash = 15;

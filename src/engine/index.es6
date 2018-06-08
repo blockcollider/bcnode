@@ -19,6 +19,7 @@ const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
+const BN = require('bn.js')
 
 const config = require('../../config/config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -38,6 +39,7 @@ const { getBlockchainsBlocksCount } = require('../bc/helper')
 const { Block } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
+const { blockByTotalDistanceSorter } = require('./helper')
 const ts = require('../utils/time').default // ES6 default export
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
@@ -371,18 +373,9 @@ export default class Engine {
               return false
             })
             if (candidates.length > 0) {
-              // here we would sort by highest block totalDistance and compare with current
+              // here we sort by highest block totalDistance and compare with current
               // if its better, we restart the miner, enable resync, purge the db, and set _blocks to a clone of _blocks on the candidate
-              //
-              const ordered = candidates.sort((a, b) => {
-                if (a.getTotalDistance() > b.getTotalDistance()) {
-                  return 1
-                }
-                if (a.getTotalDistance() < b.getTotalDistance()) {
-                  return -1
-                }
-                return 0
-              })
+              const ordered = candidates.sort(blockByTotalDistanceSorter)
               const bestCandidate = ordered.shift()
               const highCandidateBlock = bestCandidate.getHighestBlock()
               const lowCandidateBlock = bestCandidate.getLowestBlock()
@@ -437,7 +430,7 @@ export default class Engine {
     // $FlowFixMe
     this._unfinishedBlock.setDistance(distance)
     // $FlowFixMe
-    this._unfinishedBlock.setTotalDistance(this._unfinishedBlock.getTotalDistance() + distance)
+    this._unfinishedBlock.setTotalDistance(new BN(this._unfinishedBlock.getTotalDistance()).add(new BN(distance)).toString())
     // $FlowFixMe
     this._unfinishedBlock.setTimestamp(timestamp)
     // $FlowFixMe
