@@ -11,7 +11,7 @@ const grpc = require('grpc')
 const { BcClient } = require('../protos/bc_grpc_pb')
 const { RoverClient } = require('../protos/rover_grpc_pb')
 
-const config = require('../../config/config')
+const { config } = require('../config')
 
 const GRPC_HOST = process.env.BC_GRPC_HOST || config.grpc.host
 const GRPC_PORT = process.env.BC_GRPC_PORT || config.grpc.port

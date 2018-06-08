@@ -18,7 +18,7 @@ export const configFile: string = 'config.json'
  *
  * @type {string}
  */
-export const configPath: string = path.resolve(configDir, configFile)
+export const configPath: string = process.env.BC_CONFIG || path.resolve(configDir, configFile)
 
 /**
  * Parsed config data
@@ -31,6 +31,4 @@ const configData: Object = require(configPath)
  * Get config
  * @returns {*}
  */
-export default function config () {
-  return configData
-}
+export const config = configData

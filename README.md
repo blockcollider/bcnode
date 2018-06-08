@@ -30,12 +30,13 @@ Following environment variables can be used for advanced tweaking
 
 | Name           | Description                               |
 |----------------|-------------------------------------------|
+| BC_CONFIG      | Path to custom config file; string        |
 | BC_DEBUG       | Collect data in _debug folder; true/false |
 | BC_DATA_DIR    | Data directory; path                      |
 | BC_GRPC_HOST   | gRPC bind host; IP                        |
 | BC_GRPC_PORT   | gRPC port; 0..65535                       |
 | BC_LOG         | Override log level; debug/info/warn/error |
-| BC_MINER_KEY   | Miner keyl string                         |
+| BC_MINER_KEY   | Miner key; string                         |
 | BC_MONITOR     | Print Stats periodically; true/false      |
 | BC_UI_PORT     | Web UI port; 0..65535                     |
 | BC_P2P_PASSIVE | Be passive, ignore discovered peers       |

@@ -11,7 +11,7 @@
 const WSStar = require('libp2p-websocket-star')
 const PeerInfo = require('peer-info')
 
-const config = require('../../../config/config')
+const { config } = require('../../config')
 
 class BcWSStar extends WSStar {
 }

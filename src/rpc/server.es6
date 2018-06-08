@@ -9,7 +9,7 @@
 const { EventEmitter } = require('events')
 
 const grpc = require('grpc')
-const config = require('../../config/config')
+const { config } = require('../config')
 
 const Engine = require('../engine').default
 const logging = require('../logger')

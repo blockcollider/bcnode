@@ -7,7 +7,6 @@
  * @flow
  */
 
-import type { Multiverse } from '../bc/multiverse'
 import type { BcBlock } from '../protos/core_pb'
 
 const ROVERS = Object.keys(require('../rover/manager').rovers)
@@ -21,8 +20,9 @@ const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
 const BN = require('bn.js')
 
-const config = require('../../config/config')
+const { config } = require('../config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
+const { Multiverse } = require('../bc/multiverse')
 const logging = require('../logger')
 const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')
@@ -331,7 +331,7 @@ export default class Engine {
     }
   }
 
-  blockFromPeer (newBlock: BcBlock) {
+  blockFromPeer (conn: Object, newBlock: BcBlock) {
     const self = this
     this._logger.info('received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
@@ -370,16 +370,29 @@ export default class Engine {
             const newMultiverse = new Multiverse(true)
             newMultiverse.addBlock(newBlock)
             this._verses.push(newMultiverse)
-            // @korczis --> send PeerQuery to peer
-            // const peerQuery = {
-            //   queryHash: newBlock.getHash(),
-            //   queryHeight: newBlock.getHeight(),
-            //   low: newBlock.getHeight() - 7,
-            //   high: newBlock.getHeight() + 2
-            // }
-            // TODO: @kroczis replace this with direct to peer request
+
             this._logger.info('new multiverse created for block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
-            this.node.triggerBlockSync() // --> give me multiverse
+            // this.node.triggerBlockSync() // --> give me multiverse
+
+            conn.getPeerInfo((err, peerInfo) => {
+              if (err) {
+                return false
+              }
+
+              const peerQuery = {
+                queryHash: newBlock.getHash(),
+                queryHeight: newBlock.getHeight(),
+                low: Math.max(newBlock.getHeight() - 7, 1),
+                high: newBlock.getHeight() + 2
+              }
+              debug('Querying peer for blocks', peerQuery)
+
+              this.node.manager.createPeer(peerInfo)
+                .query(peerQuery)
+                .then((blocks) => {
+                  blocks.map((block) => newMultiverse.addBlock(block))
+                })
+            })
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
               if (Object.keys(m._blocks).length >= 7) {

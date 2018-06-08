@@ -22,7 +22,7 @@ const CircularBuffer = require('circular-buffer')
 const SocketIO = require('socket.io')
 
 const logging = require('../logger')
-const config = require('../../config/config')
+const { config } = require('../config')
 const { Null, Block } = require('../protos/core_pb')
 const Engine = require('../engine').default
 const { RpcClient, RpcServer } = require('../rpc')

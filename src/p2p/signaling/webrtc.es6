@@ -11,7 +11,7 @@ const wrtc = require('wrtc')
 const WStar = require('libp2p-webrtc-star')
 const PeerInfo = require('peer-info')
 
-const config = require('../../../config/config')
+const { config } = require('../../config')
 
 export default {
   initialize: (peerInfo: PeerInfo) => {
