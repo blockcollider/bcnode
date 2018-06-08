@@ -33,6 +33,7 @@ export class BlockPool {
   // ranch dressing
   _eventTriggerResync () {
     // Request to update the data with a resync command
+    // TODO: Impliment miner stop and peer cycling
     this.pubsub.publish('update.resync.pool', {})
   }
 

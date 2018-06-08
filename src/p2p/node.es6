@@ -12,7 +12,7 @@ const { inspect } = require('util')
 const PeerInfo = require('peer-info')
 const waterfall = require('async/waterfall')
 const pull = require('pull-stream')
-const { uniqBy, sum } = require('ramda')
+const { uniqBy } = require('ramda')
 
 const debug = require('debug')('bcnode:p2p:node')
 const { config } = require('../config')
