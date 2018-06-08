@@ -119,9 +119,9 @@ export default class Engine {
 
   /**
    * Get blockpool
-   * @returns {Multiverse|*}
+   * @returns {BlockPool|*}
    */
-  get multiverse (): BlockPool {
+  get blockpool (): BlockPool {
     return this.node.blockpool
   }
 
