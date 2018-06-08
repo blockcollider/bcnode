@@ -44,8 +44,10 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
             // TODO this peer should make to the the blacklist
             return
           }
+
           // manager.engine._processMinedBlock(block)
-          manager.engine.blockFromPeer(block)
+          manager.engine.blockFromPeer(conn, block)
+
           // const shouldBeAdded = shouldBlockBeAddedToMultiverse(block, manager.peerNode.multiverse, manager.peerNode.triggerBlockSync)
           // TODO add getter
           // manager.peerNode._blockPool._syncEnabled = !shouldBeAdded

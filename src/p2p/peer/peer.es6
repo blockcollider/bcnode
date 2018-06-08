@@ -10,6 +10,7 @@
 import type PeerInfo from 'peer-info'
 import type { Bundle } from './../bundle'
 
+const { inspect } = require('util')
 const debug = require('debug')('bcnode:peer:peer')
 const pull = require('pull-stream')
 const { BcBlock } = require('../../protos/core_pb')
@@ -174,6 +175,43 @@ export class Peer {
           jsonrpc: '2.0',
           method: 'getMultiverse',
           params: [],
+          id: 42
+        }
+
+        pull(pull.values([JSON.stringify(msg)]), conn)
+
+        pull(
+          conn,
+          pull.collect((err, wireData) => {
+            if (err) {
+              return reject(err)
+            }
+
+            try {
+              const result = wireData.map(b => BcBlock.deserializeBinary(Uint8Array.from(b).buffer))
+              resolve(result)
+            } catch (e) {
+              return reject(e)
+            }
+          })
+        )
+      })
+    })
+  }
+
+  query (params: Object = {}): Promise<*> {
+    debug(`query(${inspect(params)})`, this.peerId.id.toB58String())
+
+    return new Promise((resolve, reject) => {
+      this.bundle.dialProtocol(this.peerId, `${PROTOCOL_PREFIX}/rpc`, (err, conn) => {
+        if (err) {
+          return reject(err)
+        }
+
+        const msg = {
+          jsonrpc: '2.0',
+          method: 'query',
+          params: [params],
           id: 42
         }
 

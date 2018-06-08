@@ -13,10 +13,6 @@ const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
 const { Command } = require('commander')
 
 export const cmd = (program: typeof Command, address: string) => {
-  if (program.opts().show) {
-    console.log(JSON.stringify(config, null, 2))
-    return
-  }
   const RocksDb = require('../../persistence').RocksDb
   const db = new RocksDb(DATA_DIR)
   console.log('Loading balance for address ' + address)

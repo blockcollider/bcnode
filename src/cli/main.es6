@@ -82,7 +82,6 @@ export const main = async (args: string[] = process.argv) => {
     .command('balance <address>')
     .description('Confirmed/unconfirmed address NRG balance')
     .usage('balance <address> <options>')
-    .option('-s, --show', 'Print config to console')
     .action((address, cmd) => {
       return cmdBalance(cmd, address)
     })
@@ -92,7 +91,7 @@ export const main = async (args: string[] = process.argv) => {
     .command('start')
     .description('Start Block Collider')
     .usage('[opts]')
-    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX)
+    .option('--miner-key [key]', 'Miner key', MINER_KEY_REGEX, process.env.BC_MINER_KEY)
     .option('-n, --node', 'Start P2P node')
     .option('--rovers [items]', 'start rover', ROVERS.join(', '))
     .option('-R, --no-rovers', 'do not start any rover')

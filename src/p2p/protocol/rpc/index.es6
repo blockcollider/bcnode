@@ -123,6 +123,28 @@ const handlers = {
         return manager.engine.persistence.get(ids)
           .then((res) => res.map((block) => block.serializeBinary()))
       })
+  },
+
+  query: (manager: PeerManager, q: Object = {}) => {
+    const id = `bc.block.${q.queryHeight}`
+
+    manager.engine.persistence.get(id)
+      .then((b) => {
+        if (b.getHash() !== q.queryHash) {
+          return []
+        }
+
+        return manager.engine.persistence.get('bc.block.latest')
+      })
+      .then((latestBlock) => {
+        const ids = []
+        for (let i = Math.max(1, q.low); i <= Math.min(q.high, latestBlock.getHeight()); i++) {
+          ids.push(`bc.block.${i}`)
+        }
+
+        return manager.engine.persistence.get(ids)
+          .then((res) => res.map((block) => block.serializeBinary()))
+      })
   }
 }
 
