@@ -140,6 +140,7 @@ export default class Engine {
    * - Store name of available rovers
    */
   async init () {
+    const self = this
     const roverNames = Object.keys(rovers)
     const { npm, git: { long } } = getVersion()
     const newGenesisBlock = getGenesisBlock()
@@ -205,6 +206,7 @@ export default class Engine {
       this._persistence.put('bc.block.latest', block)
         .then(() => {
           this.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
+          self.startMining(self._knownRovers, block)
         })
         .catch((err) => {
           this._logger.error(err)
@@ -352,13 +354,12 @@ export default class Engine {
       this._logger.debug('addedToMultiverse: ' + addedToMultiverse)
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
         this.stopMining()
+        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       }
 
       if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
-        this.stopMining()
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
         if (newBlock.getHeight() > 8 &&
@@ -386,20 +387,44 @@ export default class Engine {
               const peerQuery = {
                 queryHash: newBlock.getHash(),
                 queryHeight: newBlock.getHeight(),
-                low: Math.max(newBlock.getHeight() - 7, 1),
+                low: Math.max(newBlock.getHeight() - 9, 1),
                 high: newBlock.getHeight() + 2
               }
               debug('Querying peer for blocks', peerQuery)
 
-              this.node.manager.createPeer(peerInfo)
+              const bestPeer = this.node.manager.createPeer(peerInfo)
                 .query(peerQuery)
                 .then((blocks) => {
                   blocks.map((block) => newMultiverse.addBlock(block))
+                  if (Object.keys(newMultiverse).length > 6) {
+                    const bestCandidate = newMultiverse
+                    const highCandidateBlock = bestCandidate.getHighestBlock()
+                    const lowCandidateBlock = bestCandidate.getLowestBlock()
+                    if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
+                    highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
+                    lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
+                      this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
+                      this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
+                      this._peerIsResyncing = true
+                      this.blockpool._checkpoint = lowCandidateBlock
+                      // sets multiverse for removal
+                      bestCandidate._created = 0
+                      bestPeer.query({
+                        queryHash: newBlock.getHash(),
+                        queryHeight: newBlock.getHeight(),
+                        low: 1,
+                        high: newBlock.getHeight() + 2
+                      })
+                        .then((blocks) => {
+                          blocks.map((block) => self.blockFromPeer(block))
+                        })
+                    }
+                  }
                 })
             })
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
-              if (Object.keys(m._blocks).length >= 7) {
+              if (Object.keys(m._blocks).length >= 6) {
                 return m
               }
               return false
