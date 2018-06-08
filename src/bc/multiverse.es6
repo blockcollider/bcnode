@@ -151,7 +151,7 @@ export class Multiverse {
       }, false)
     }
     if (this._blocks[childHeight] !== undefined) {
-      hasChild = this._blocks[parentHeight].reduce((all, item) => {
+      hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
           all = true
         }
