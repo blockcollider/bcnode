@@ -34,6 +34,7 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
+const { BlockPool } = require('../bc/blockpool')
 const { isValidBlock } = require('../bc/validation')
 const { getBlockchainsBlocksCount } = require('../bc/helper')
 const { Block } = require('../protos/core_pb')
@@ -114,6 +115,14 @@ export default class Engine {
    */
   get multiverse (): Multiverse {
     return this.node.multiverse
+  }
+
+  /**
+   * Get blockpool
+   * @returns {Multiverse|*}
+   */
+  get multiverse (): BlockPool {
+    return this.node.blockpool
   }
 
   /**
@@ -352,18 +361,18 @@ export default class Engine {
             return approved
           }, [])
           if (approved.length === 0) { // if none of the multiverses accepted the new block create its own and request more information from the peer
-            const newMultiverse = new Multiverse()
+            const newMultiverse = new Multiverse(true)
             newMultiverse.addBlock(newBlock)
             this._verses.push(newMultiverse)
             // @korczis --> send PeerQuery to peer
-            const peerQuery = {
-              queryHash: newBlock.getHash(),
-              queryHeight: newBlock.getHeight(),
-              low: newBlock.getHeight() - 7,
-              high: newBlock.getHeight() + 2
-            }
-            console.log(peerQuery)
+            // const peerQuery = {
+            //   queryHash: newBlock.getHash(),
+            //   queryHeight: newBlock.getHeight(),
+            //   low: newBlock.getHeight() - 7,
+            //   high: newBlock.getHeight() + 2
+            // }
             // TODO: @kroczis replace this with direct to peer request
+            this._logger.info('new multiverse created for block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
             this.node.triggerBlockSync()
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
@@ -390,8 +399,17 @@ export default class Engine {
             }
           }
         } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
+          this._logger.info('pass to block pool ' + newBlock.getHeight() + ' ' + newBlock.getHash())
+          this.blockpool.addBlock(newBlock)
+            .then((state) => {
+
+            })
+            .catch((err) => {
+              this._logger.error(err)
+            })
           // pass
         } else {
+          this._logger.info('ignoring block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
           // ignore
         }
         // remove candidates older beyond a threshold

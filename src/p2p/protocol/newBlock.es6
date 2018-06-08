@@ -34,6 +34,8 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
 
         try {
           console.log(conn)
+          console.log('-------------')
+          console.log(protocol)
           const bytes = wireData[0]
           const raw = new Uint8Array(bytes)
           const block = BcBlock.deserializeBinary(raw)

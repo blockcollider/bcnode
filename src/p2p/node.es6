@@ -47,7 +47,7 @@ export class PeerNode {
   constructor (engine: Engine) {
     this._engine = engine
     this._multiverse = new Multiverse()
-    this._blockPool = new BlockPool(engine._persistence)
+    this._blockPool = new BlockPool(engine._persistence, engine._pubsub)
     this._logger = logging.getLogger(__filename)
     this._manager = new PeerManager(this)
 
@@ -76,6 +76,10 @@ export class PeerNode {
 
   get reportSyncPeriod (): Function {
     return this._engine.receiveSyncPeriod
+  }
+
+  get blockpool (): BlockPool {
+    return this._blockPool
   }
 
   get multiverse (): Multiverse {
@@ -198,6 +202,7 @@ export class PeerNode {
     })
   }
 
+  // get the best multiverse from all peers
   triggerBlockSync () {
     const peerMultiverses = []
     // Notify miner to stop mining
