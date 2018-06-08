@@ -522,7 +522,7 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   newBlock.setMerkleRoot(newMerkleRoot)
   newBlock.setChainRoot(blake2bl(newChainRoot.toString()))
   newBlock.setDistance(0) // is set to proper value after successful mining
-  newBlock.setTotalDistance(lastPreviousBlock.getDistance()) // distance from mining solution will be added to this after mining
+  newBlock.setTotalDistance(lastPreviousBlock.getTotalDistance()) // distance from mining solution will be added to this after mining
   newBlock.setNrgGrant(GENESIS_DATA.nrgGrant)
   newBlock.setTargetHash(GENESIS_DATA.targetHash)
   newBlock.setTargetHeight(GENESIS_DATA.targetHeight)

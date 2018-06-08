@@ -18,6 +18,7 @@ const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
+const BN = require('bn.js')
 
 const { config } = require('../config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -33,11 +34,13 @@ const { PubSub } = require('./pubsub')
 const { RpcServer } = require('../rpc/index')
 const { prepareWork, prepareNewBlock } = require('../bc/miner')
 const { getGenesisBlock } = require('../bc/genesis')
+const { BlockPool } = require('../bc/blockpool')
 const { isValidBlock } = require('../bc/validation')
 const { getBlockchainsBlocksCount } = require('../bc/helper')
 const { Block } = require('../protos/core_pb')
 const { errToString } = require('../helper/error')
 const { getVersion } = require('../helper/version')
+const { blockByTotalDistanceSorter } = require('./helper')
 const ts = require('../utils/time').default // ES6 default export
 
 const DATA_DIR = process.env.BC_DATA_DIR || config.persistence.path
@@ -115,6 +118,14 @@ export default class Engine {
   }
 
   /**
+   * Get blockpool
+   * @returns {BlockPool|*}
+   */
+  get blockpool (): BlockPool {
+    return this.node.blockpool
+  }
+
+  /**
    * Get pubsub wrapper instance
    * @returns {PubSub}
    */
@@ -184,6 +195,11 @@ export default class Engine {
           this._logger.error(err)
         })
     })
+
+    this.pubsub.subscribe('state.checkpoint.complete', '<engine>', (msg) => {
+      this._peerIsResyncing = false
+    })
+
     this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
       const block = msg.data
       this._persistence.put('bc.block.latest', block)
@@ -316,6 +332,7 @@ export default class Engine {
   }
 
   blockFromPeer (newBlock: BcBlock) {
+    const self = this
     this._logger.info('received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
     if (!this._knownBlocksCache.get(newBlock.getHash())) {
@@ -350,17 +367,19 @@ export default class Engine {
             return approved
           }, [])
           if (approved.length === 0) { // if none of the multiverses accepted the new block create its own and request more information from the peer
-            const newMultiverse = new Multiverse()
+            const newMultiverse = new Multiverse(true)
             newMultiverse.addBlock(newBlock)
             this._verses.push(newMultiverse)
             // @korczis --> send PeerQuery to peer
-            const peerQuery = {
-              queryHash: newBlock.getHash(),
-              queryHeight: newBlock.getHeight(),
-              low: newBlock.getHeight() - 7,
-              high: newBlock.getHeight() + 2
-            }
-            console.log(peerQuery)
+            // const peerQuery = {
+            //   queryHash: newBlock.getHash(),
+            //   queryHeight: newBlock.getHeight(),
+            //   low: newBlock.getHeight() - 7,
+            //   high: newBlock.getHeight() + 2
+            // }
+            // TODO: @kroczis replace this with direct to peer request
+            this._logger.info('new multiverse created for block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
+            this.node.triggerBlockSync()
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
               if (Object.keys(m._blocks).length >= 7) {
@@ -369,18 +388,9 @@ export default class Engine {
               return false
             })
             if (candidates.length > 0) {
-              // here we would sort by highest block totalDistance and compare with current
+              // here we sort by highest block totalDistance and compare with current
               // if its better, we restart the miner, enable resync, purge the db, and set _blocks to a clone of _blocks on the candidate
-              //
-              const ordered = candidates.sort((a, b) => {
-                if (a.getTotalDistance() > b.getTotalDistance()) {
-                  return 1
-                }
-                if (a.getTotalDistance() < b.getTotalDistance()) {
-                  return -1
-                }
-                return 0
-              })
+              const ordered = candidates.sort(blockByTotalDistanceSorter)
               const bestCandidate = ordered.shift()
               const highCandidateBlock = bestCandidate.getHighestBlock()
               const lowCandidateBlock = bestCandidate.getLowestBlock()
@@ -388,15 +398,25 @@ export default class Engine {
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
               lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
                 this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
-                this._logger.info('applied new multiverse -> ' + bestCandidate.getHighestBlock().getHash())
+                this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
+                this._peerIsResyncing = true
+                this.blockpool._checkpoint = bestCandidate
                 // sets multiverse for removal
                 bestCandidate._created = 0
               }
             }
           }
         } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
+          this.blockpool.addBlock(newBlock)
+            .then((state) => {
+              self._logger.info('pass to block pool ' + newBlock.getHeight() + ' ' + newBlock.getHash())
+            })
+            .catch((err) => {
+              self._logger.error(err)
+            })
           // pass
         } else {
+          self._logger.info('ignoring block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
           // ignore
         }
         // remove candidates older beyond a threshold
@@ -435,7 +455,7 @@ export default class Engine {
     // $FlowFixMe
     this._unfinishedBlock.setDistance(distance)
     // $FlowFixMe
-    this._unfinishedBlock.setTotalDistance(this._unfinishedBlock.getTotalDistance() + distance)
+    this._unfinishedBlock.setTotalDistance(new BN(this._unfinishedBlock.getTotalDistance()).add(new BN(distance)).toString())
     // $FlowFixMe
     this._unfinishedBlock.setTimestamp(timestamp)
     // $FlowFixMe

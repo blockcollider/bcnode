@@ -19,15 +19,20 @@ export class Multiverse {
   _writeQueue: BcBlock[]
   _height: number
   _created: number
+  _selective: boolean
   _logger: Object
 
-  constructor (commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
+  constructor (selective: boolean = false, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
+    this._selective = selective
     this._blocks = {}
     this._writeQueue = []
     this._commitDepth = commitDepth
     this._logger = logging.getLogger(__filename)
     this._height = 0
     this._created = Math.floor(Date.now() * 0.001)
+    if (selective === true) {
+      this._logger.warn('selective multiverse created')
+    }
   }
 
   get blocks (): Object {
@@ -124,8 +129,12 @@ export class Multiverse {
     let added = false
     let syncing = false
     this._logger.info('new multiverse candidate for height ' + height + ' (' + block.getHash() + ')')
-    if (keyCount < 7) {
+    if (keyCount < 7 && this._selective === false) {
       this._logger.info('node is attempting to sync, multiverse filtering disabled')
+      syncing = true
+      force = true
+    // keyCount must be 2 to account for the genesis block and the next block
+    } else if (keyCount < 2) {
       syncing = true
       force = true
     }

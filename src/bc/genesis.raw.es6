@@ -13,7 +13,7 @@ module.exports = {
   "merkleRoot": "b277537249649f9e7e56d549805ccfdec56fddd6153c6bf4ded85c3e072ccbdf",
   "chainRoot": "b4816d65eabac8f1a143805ffc6f4ca148c4548e020de3db21207a4849ea9abe",
   "distance": 1,
-  "totalDistance": 1,
+  "totalDistance": "1",
   "nonce": 0,
 
   "nrgGrant": 1600000000,

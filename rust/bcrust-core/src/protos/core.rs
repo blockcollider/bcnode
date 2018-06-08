@@ -983,7 +983,7 @@ pub struct BcBlock {
     pub merkle_root: ::std::string::String,
     pub chain_root: ::std::string::String,
     pub distance: u64,
-    pub total_distance: u64,
+    pub total_distance: ::std::string::String,
     pub nonce: ::std::string::String,
     pub nrg_grant: u64,
     pub target_hash: ::std::string::String,
@@ -1334,26 +1334,37 @@ impl BcBlock {
         &mut self.distance
     }
 
-    // uint64 total_distance = 12;
+    // string total_distance = 12;
 
     pub fn clear_total_distance(&mut self) {
-        self.total_distance = 0;
+        self.total_distance.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_total_distance(&mut self, v: u64) {
+    pub fn set_total_distance(&mut self, v: ::std::string::String) {
         self.total_distance = v;
     }
 
-    pub fn get_total_distance(&self) -> u64 {
-        self.total_distance
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_total_distance(&mut self) -> &mut ::std::string::String {
+        &mut self.total_distance
     }
 
-    fn get_total_distance_for_reflect(&self) -> &u64 {
+    // Take field
+    pub fn take_total_distance(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.total_distance, ::std::string::String::new())
+    }
+
+    pub fn get_total_distance(&self) -> &str {
         &self.total_distance
     }
 
-    fn mut_total_distance_for_reflect(&mut self) -> &mut u64 {
+    fn get_total_distance_for_reflect(&self) -> &::std::string::String {
+        &self.total_distance
+    }
+
+    fn mut_total_distance_for_reflect(&mut self) -> &mut ::std::string::String {
         &mut self.total_distance
     }
 
@@ -1998,11 +2009,7 @@ impl ::protobuf::Message for BcBlock {
                     self.distance = tmp;
                 },
                 12 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_uint64()?;
-                    self.total_distance = tmp;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.total_distance)?;
                 },
                 13 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nonce)?;
@@ -2138,8 +2145,8 @@ impl ::protobuf::Message for BcBlock {
         if self.distance != 0 {
             my_size += ::protobuf::rt::value_size(11, self.distance, ::protobuf::wire_format::WireTypeVarint);
         }
-        if self.total_distance != 0 {
-            my_size += ::protobuf::rt::value_size(12, self.total_distance, ::protobuf::wire_format::WireTypeVarint);
+        if !self.total_distance.is_empty() {
+            my_size += ::protobuf::rt::string_size(12, &self.total_distance);
         }
         if !self.nonce.is_empty() {
             my_size += ::protobuf::rt::string_size(13, &self.nonce);
@@ -2239,8 +2246,8 @@ impl ::protobuf::Message for BcBlock {
         if self.distance != 0 {
             os.write_uint64(11, self.distance)?;
         }
-        if self.total_distance != 0 {
-            os.write_uint64(12, self.total_distance)?;
+        if !self.total_distance.is_empty() {
+            os.write_string(12, &self.total_distance)?;
         }
         if !self.nonce.is_empty() {
             os.write_string(13, &self.nonce)?;
@@ -2402,7 +2409,7 @@ impl ::protobuf::MessageStatic for BcBlock {
                     BcBlock::get_distance_for_reflect,
                     BcBlock::mut_distance_for_reflect,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "total_distance",
                     BcBlock::get_total_distance_for_reflect,
                     BcBlock::mut_total_distance_for_reflect,
@@ -3212,33 +3219,33 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     ifficulty\x12\x1c\n\ttimestamp\x18\x08\x20\x01(\x04R\ttimestamp\x12\x1f\
     \n\x0bmerkle_root\x18\t\x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain_root\
     \x18\n\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x0b\x20\x01(\x04\
-    R\x08distance\x12%\n\x0etotal_distance\x18\x0c\x20\x01(\x04R\rtotalDista\
-    nce\x12\x14\n\x05nonce\x18\r\x20\x01(\tR\x05nonce\x12\x1b\n\tnrg_grant\
-    \x18\x0e\x20\x01(\x04R\x08nrgGrant\x12\x1f\n\x0btarget_hash\x18\x0f\x20\
-    \x01(\tR\ntargetHash\x12#\n\rtarget_height\x18\x10\x20\x01(\x04R\x0ctarg\
-    etHeight\x12!\n\x0ctarget_miner\x18\x11\x20\x01(\tR\x0btargetMiner\x12)\
-    \n\x10target_signature\x18\x12\x20\x01(\tR\x0ftargetSignature\x12\x10\n\
-    \x03twn\x18\x13\x20\x01(\x04R\x03twn\x12\x10\n\x03tws\x18\x14\x20\x03(\t\
-    R\x03tws\x12#\n\remblem_weight\x18\x15\x20\x01(\x04R\x0cemblemWeight\x12\
-    5\n\x17emblem_chain_block_hash\x18\x16\x20\x01(\tR\x14emblemChainBlockHa\
-    sh\x12A\n\x1demblem_chain_fingerprint_root\x18\x17\x20\x01(\tR\x1aemblem\
-    ChainFingerprintRoot\x120\n\x14emblem_chain_address\x18\x18\x20\x01(\tR\
-    \x12emblemChainAddress\x12\x19\n\x08tx_count\x18\x19\x20\x01(\x04R\x07tx\
-    Count\x12#\n\x03txs\x18\x1a\x20\x03(\x0b2\x11.bc.BcTransactionR\x03txs\
-    \x12\x1e\n\x0btx_fee_base\x18\x1b\x20\x01(\x04R\ttxFeeBase\x121\n\x15tx_\
-    distance_sum_limit\x18\x1c\x20\x01(\x04R\x12txDistanceSumLimit\x128\n\
-    \x18blockchain_headers_count\x18\x1d\x20\x01(\x04R\x16blockchainHeadersC\
-    ount\x12D\n\x12blockchain_headers\x18\x1e\x20\x01(\x0b2\x15.bc.Blockchai\
-    nHeadersR\x11blockchainHeaders\x12@\n\x1cblockchain_fingerprints_root\
-    \x18\x1f\x20\x01(\tR\x1ablockchainFingerprintsRoot\"#\n\rBcTransaction\
-    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9a\x02\n\x10Blockchain\
-    Header\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\
-    \x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\
-    \x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttim\
-    estamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0b\
-    merkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12V\n(blockchain_confirmati\
-    ons_in_parent_count\x18\x07\x20\x01(\x04R$blockchainConfirmationsInParen\
-    tCountb\x06proto3\
+    R\x08distance\x12%\n\x0etotal_distance\x18\x0c\x20\x01(\tR\rtotalDistanc\
+    e\x12\x14\n\x05nonce\x18\r\x20\x01(\tR\x05nonce\x12\x1b\n\tnrg_grant\x18\
+    \x0e\x20\x01(\x04R\x08nrgGrant\x12\x1f\n\x0btarget_hash\x18\x0f\x20\x01(\
+    \tR\ntargetHash\x12#\n\rtarget_height\x18\x10\x20\x01(\x04R\x0ctargetHei\
+    ght\x12!\n\x0ctarget_miner\x18\x11\x20\x01(\tR\x0btargetMiner\x12)\n\x10\
+    target_signature\x18\x12\x20\x01(\tR\x0ftargetSignature\x12\x10\n\x03twn\
+    \x18\x13\x20\x01(\x04R\x03twn\x12\x10\n\x03tws\x18\x14\x20\x03(\tR\x03tw\
+    s\x12#\n\remblem_weight\x18\x15\x20\x01(\x04R\x0cemblemWeight\x125\n\x17\
+    emblem_chain_block_hash\x18\x16\x20\x01(\tR\x14emblemChainBlockHash\x12A\
+    \n\x1demblem_chain_fingerprint_root\x18\x17\x20\x01(\tR\x1aemblemChainFi\
+    ngerprintRoot\x120\n\x14emblem_chain_address\x18\x18\x20\x01(\tR\x12embl\
+    emChainAddress\x12\x19\n\x08tx_count\x18\x19\x20\x01(\x04R\x07txCount\
+    \x12#\n\x03txs\x18\x1a\x20\x03(\x0b2\x11.bc.BcTransactionR\x03txs\x12\
+    \x1e\n\x0btx_fee_base\x18\x1b\x20\x01(\x04R\ttxFeeBase\x121\n\x15tx_dist\
+    ance_sum_limit\x18\x1c\x20\x01(\x04R\x12txDistanceSumLimit\x128\n\x18blo\
+    ckchain_headers_count\x18\x1d\x20\x01(\x04R\x16blockchainHeadersCount\
+    \x12D\n\x12blockchain_headers\x18\x1e\x20\x01(\x0b2\x15.bc.BlockchainHea\
+    dersR\x11blockchainHeaders\x12@\n\x1cblockchain_fingerprints_root\x18\
+    \x1f\x20\x01(\tR\x1ablockchainFingerprintsRoot\"#\n\rBcTransaction\x12\
+    \x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\"\x9a\x02\n\x10BlockchainHead\
+    er\x12\x1e\n\nblockchain\x18\x01\x20\x01(\tR\nblockchain\x12\x12\n\x04ha\
+    sh\x18\x02\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\
+    \x0cpreviousHash\x12\x1c\n\ttimestamp\x18\x04\x20\x01(\x04R\ttimestamp\
+    \x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x1f\n\x0bmerkle\
+    _root\x18\x06\x20\x01(\tR\nmerkleRoot\x12V\n(blockchain_confirmations_in\
+    _parent_count\x18\x07\x20\x01(\x04R$blockchainConfirmationsInParentCount\
+    b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

@@ -827,7 +827,7 @@ proto.bc.BcBlock.toObject = function(includeInstance, msg) {
     merkleRoot: jspb.Message.getFieldWithDefault(msg, 9, ""),
     chainRoot: jspb.Message.getFieldWithDefault(msg, 10, ""),
     distance: jspb.Message.getFieldWithDefault(msg, 11, 0),
-    totalDistance: jspb.Message.getFieldWithDefault(msg, 12, 0),
+    totalDistance: jspb.Message.getFieldWithDefault(msg, 12, ""),
     nonce: jspb.Message.getFieldWithDefault(msg, 13, ""),
     nrgGrant: jspb.Message.getFieldWithDefault(msg, 14, 0),
     targetHash: jspb.Message.getFieldWithDefault(msg, 15, ""),
@@ -929,7 +929,7 @@ proto.bc.BcBlock.deserializeBinaryFromReader = function(msg, reader) {
       msg.setDistance(value);
       break;
     case 12:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {string} */ (reader.readString());
       msg.setTotalDistance(value);
       break;
     case 13:
@@ -1117,8 +1117,8 @@ proto.bc.BcBlock.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getTotalDistance();
-  if (f !== 0) {
-    writer.writeUint64(
+  if (f.length > 0) {
+    writer.writeString(
       12,
       f
     );
@@ -1427,15 +1427,15 @@ proto.bc.BcBlock.prototype.setDistance = function(value) {
 
 
 /**
- * optional uint64 total_distance = 12;
- * @return {number}
+ * optional string total_distance = 12;
+ * @return {string}
  */
 proto.bc.BcBlock.prototype.getTotalDistance = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 12, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
 };
 
 
-/** @param {number} value */
+/** @param {string} value */
 proto.bc.BcBlock.prototype.setTotalDistance = function(value) {
   jspb.Message.setField(this, 12, value);
 };

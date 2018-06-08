@@ -33,6 +33,9 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
         }
 
         try {
+          console.log(conn)
+          console.log('-------------')
+          console.log(protocol)
           const bytes = wireData[0]
           const raw = new Uint8Array(bytes)
           const block = BcBlock.deserializeBinary(raw)
@@ -41,11 +44,11 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
             // TODO this peer should make to the the blacklist
             return
           }
-          //manager.engine._processMinedBlock(block)
+          // manager.engine._processMinedBlock(block)
           manager.engine.blockFromPeer(block)
-          //const shouldBeAdded = shouldBlockBeAddedToMultiverse(block, manager.peerNode.multiverse, manager.peerNode.triggerBlockSync)
+          // const shouldBeAdded = shouldBlockBeAddedToMultiverse(block, manager.peerNode.multiverse, manager.peerNode.triggerBlockSync)
           // TODO add getter
-          //manager.peerNode._blockPool._syncEnabled = !shouldBeAdded
+          // manager.peerNode._blockPool._syncEnabled = !shouldBeAdded
 
           if (manager.engine.peerIsSyncing === true) {
             manager._lastQuorumSync = new Date()
