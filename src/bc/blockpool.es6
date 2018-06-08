@@ -30,7 +30,7 @@ export class BlockPool {
     this._pubsub = pubsub
     this._genesisBlock = getGenesisBlock()
   }
-
+  // ranch dressing
   _eventTriggerResync () {
     // Request to update the data with a resync command
     this.pubsub.publish('update.resync.pool', {})

@@ -379,7 +379,7 @@ export default class Engine {
             // }
             // TODO: @kroczis replace this with direct to peer request
             this._logger.info('new multiverse created for block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
-            this.node.triggerBlockSync()
+            this.node.triggerBlockSync() // --> give me multiverse
           } else { // else check if any of the multiverses are ready for comparison
             const candidates = approved.filter((m) => {
               if (Object.keys(m._blocks).length >= 7) {
@@ -400,7 +400,7 @@ export default class Engine {
                 this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                 this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 this._peerIsResyncing = true
-                this.blockpool._checkpoint = bestCandidate
+                this.blockpool._checkpoint = lowCandidateBlock
                 // sets multiverse for removal
                 bestCandidate._created = 0
               }
