@@ -234,6 +234,7 @@ export class PeerNode {
                 const peerMultiverseByDifficultySum = uniqueCandidates
                   // accumulator, element
                   .reduce((all, peerBlocks) => {
+                    // TODO use getTotalDistance() instead of suming diff
                     const difficultySum = sum(peerBlocks.map((peerBlock) => peerBlock.getDifficulty()))
                     peerBlocks[0].difficultySum = difficultySum
                     all.push(peerBlocks[0])
@@ -256,6 +257,7 @@ export class PeerNode {
                 //   return false
                 // })
                 const lowestBlock = this.multiverse.getLowestBlock()
+                // TODO handle winningMultiverse[0] === undefined, see sentry BCNODE-6F
                 if (lowestBlock && lowestBlock.getHash() !== winningMultiverse[0].getHash()) {
                   this._blockPool.maximumHeight = lowestBlock.getHeight()
                   // insert into the multiverse
