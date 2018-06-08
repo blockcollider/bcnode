@@ -195,6 +195,11 @@ export default class Engine {
           this._logger.error(err)
         })
     })
+
+    this.pubsub.subscribe('state.checkpoint.complete', '<engine>', (msg) => {
+      this._peerIsResyncing = false
+    })
+
     this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
       const block = msg.data
       this._persistence.put('bc.block.latest', block)
@@ -327,6 +332,7 @@ export default class Engine {
   }
 
   blockFromPeer (newBlock: BcBlock) {
+    const self = this
     this._logger.info('received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
     if (!this._knownBlocksCache.get(newBlock.getHash())) {
@@ -393,23 +399,24 @@ export default class Engine {
               lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
                 this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                 this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
+                this._peerIsResyncing = true
+                this.blockpool._checkpoint = bestCandidate
                 // sets multiverse for removal
                 bestCandidate._created = 0
               }
             }
           }
         } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
-          this._logger.info('pass to block pool ' + newBlock.getHeight() + ' ' + newBlock.getHash())
           this.blockpool.addBlock(newBlock)
             .then((state) => {
-
+              self._logger.info('pass to block pool ' + newBlock.getHeight() + ' ' + newBlock.getHash())
             })
             .catch((err) => {
-              this._logger.error(err)
+              self._logger.error(err)
             })
           // pass
         } else {
-          this._logger.info('ignoring block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
+          self._logger.info('ignoring block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
           // ignore
         }
         // remove candidates older beyond a threshold
