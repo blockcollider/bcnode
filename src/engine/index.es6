@@ -405,7 +405,7 @@ export default class Engine {
                     if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
                     highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
                     new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
-                      self.multiverse._blocks = clone(lowCandidateBlock._blocks)
+                      self.multiverse._blocks = clone(bestCandidate._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
                       self.blockpool._checkpoint = lowCandidateBlock
@@ -442,7 +442,7 @@ export default class Engine {
               if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
               new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
-                self.multiverse._blocks = clone(lowCandidateBlock._blocks)
+                self.multiverse._blocks = clone(bestCandidate._blocks)
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true
                 self.blockpool._checkpoint = lowCandidateBlock
