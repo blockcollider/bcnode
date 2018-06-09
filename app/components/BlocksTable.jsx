@@ -24,6 +24,11 @@ const BlockLink = (props: Object) => {
       color: 'black'
     }
   }
+
+  if (props.style) {
+    linkProps.style = props.style
+  }
+
   return (
     <a {...linkProps}>{props.children}</a>
   )
@@ -32,7 +37,7 @@ const BlockLink = (props: Object) => {
 class BlocksTable extends Component<*> {
   render () {
     let i = 0
-    const blocks = this.props.blocks.map((block) => {
+    const blocks = this.props.blocks.map((block, idx) => {
       const extraFields = (this.props.extraCols || []).map(
         (colName, idx) => {
           const val = typeof colName[1] === 'function' ? colName[1](block) : block[colName[1]]
@@ -45,6 +50,14 @@ class BlocksTable extends Component<*> {
       const fixedStyle = {
         fontFamily: 'monospace'
       }
+
+      let wrongPrevHash = false
+      if (this.props.blocks[idx + 1]) {
+        const a = this.props.blocks[idx + 1].hash
+        const b = this.props.blocks[idx].previousHash
+        wrongPrevHash = (a !== b)
+      }
+
       return (
         <tr key={block.hash}>
           <th scope='row'>{i++}</th>
@@ -52,9 +65,13 @@ class BlocksTable extends Component<*> {
             <BlockLink block={block} onClick={this.props.onClick}>{block.height}</BlockLink>
           </td>
           <td>
-            <BlockLink block={block} onClick={this.props.onClick}>
+            <BlockLink block={block} onClick={this.props.onClick} >
               <Ellipsis text={block.hash} />
             </BlockLink>
+          </td>
+          <td>
+            <Ellipsis text={block.previousHash} style={wrongPrevHash ? {text: 'red'} : {text: 'red'}} />
+            { wrongPrevHash && <i style={{paddingLeft: 3, filter: 'invert(100%)', color: 'red'}} className='fas fa-exclamation-circle' /> }
           </td>
           <td>
             <Ellipsis text={block.miner} />
@@ -78,6 +95,7 @@ class BlocksTable extends Component<*> {
               <th scope='col'>#</th>
               <th scope='col'>Height</th>
               <th scope='col'>Hash</th>
+              <th scope='col'>Previous Hash</th>
               <th scope='col'>Miner</th>
               <th scope='col'>Difficulty</th>
               <th scope='col'>Distance</th>

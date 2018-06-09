@@ -1,4 +1,4 @@
-/* e
+/**
  * Copyright (c) 2017-present, Block Collider developers, All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
@@ -396,6 +396,7 @@ export default class Engine {
               const bestPeer = this.node.manager.createPeer(peerInfo)
                 .query(peerQuery)
                 .then((blocks) => {
+                  debug('Got query response', blocks)
                   blocks.map((block) => newMultiverse.addBlock(block))
                   if (Object.keys(newMultiverse).length > 6) {
                     const bestCandidate = newMultiverse
@@ -529,6 +530,7 @@ export default class Engine {
             timeDiff: solution.timeDiff
           }
 
+          // NOTE: Review if 'block.mined' is not triggered twice
           this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
           this._broadcastMinedBlock(this._unfinishedBlock, solution)
 
