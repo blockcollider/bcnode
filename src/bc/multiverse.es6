@@ -122,8 +122,7 @@ export class Multiverse {
     const getAllBlockchainHashes = (block: BcBlock) => {
       const headersObj = block.getBlockchainHeaders().toObject()
       return Object.keys(headersObj).reduce((acc, blockchainListKey) => {
-        acc.push(headersObj[blockchainListKey].map(headerObj => headerObj.hash))
-        return acc
+        return acc.concat(headersObj[blockchainListKey].map(headerObj => headerObj.hash))
       }, [])
     }
     const self = this
