@@ -188,9 +188,10 @@ export default class Engine {
 
     this.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
       const block = msg.data
-      this._persistence.put(msg.key, block)
+      self._persistence.put(msg.key, block)
         .then(() => {
-          this._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
+          self._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
+          self.startMining(self._knownRovers, block)
         })
         .catch((err) => {
           this._logger.error(err)
@@ -203,10 +204,9 @@ export default class Engine {
 
     this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
       const block = msg.data
-      this._persistence.put('bc.block.latest', block)
+      self._persistence.put('bc.block.latest', block)
         .then(() => {
-          this.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
-          self.startMining(self._knownRovers, block)
+          self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
         })
         .catch((err) => {
           this._logger.error(err)
@@ -403,10 +403,10 @@ export default class Engine {
                     if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
                     highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
                     lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
-                      this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
-                      this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
-                      this._peerIsResyncing = true
-                      this.blockpool._checkpoint = lowCandidateBlock
+                      self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
+                      self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
+                      self._peerIsResyncing = true
+                      self.blockpool._checkpoint = lowCandidateBlock
                       // sets multiverse for removal
                       bestCandidate._created = 0
                       bestPeer.query({
@@ -439,12 +439,21 @@ export default class Engine {
               if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
               lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
-                this.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
-                this._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
-                this._peerIsResyncing = true
-                this.blockpool._checkpoint = lowCandidateBlock
+                self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
+                self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
+                self._peerIsResyncing = true
+                self.blockpool._checkpoint = lowCandidateBlock
                 // sets multiverse for removal
                 bestCandidate._created = 0
+                bestPeer.query({
+                  queryHash: newBlock.getHash(),
+                  queryHeight: newBlock.getHeight(),
+                  low: 1,
+                  high: newBlock.getHeight() + 2
+                })
+                  .then((blocks) => {
+                    blocks.map((block) => self.blockFromPeer(block))
+                  })
               }
             }
           }
@@ -672,7 +681,9 @@ export default class Engine {
       }
 
       // Store block in _debug folder and return promise indicating success
-      debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
+      if (newBlock !== undefined) {
+        debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
+      }
       return Promise.resolve(true)
     } catch (err) {
       this._logger.warn(`failed to process work provided by miner, err: ${errToString(err)}`)
