@@ -147,9 +147,12 @@ export class Multiverse {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
         if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
-          const parentHeaders = item.getBlockchainHeaders().map((a) => {
-            return a.getHash()
-          })
+          const parentHeadersObject = item.getBlockchainHeaders()
+          const parentHeaders = Object.keys(parentHeadersObject).reduce((all, chain) => {
+            const sample = parentHeadersObject[chain].pop()
+            all.push(sample.getHash())
+            return all
+          }, [])
           const blockHeaders = blockBlockchainHeaders.map((a) => {
             return a.getHash()
           })
@@ -164,9 +167,12 @@ export class Multiverse {
       hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
-          const childHeaders = item.getBlockchainHeaders().map((a) => {
-            return a.getHash()
-          })
+          const childHeadersObject = item.getBlockchainHeaders()
+          const childHeaders = Object.keys(childHeadersObject).reduce((all, chain) => {
+            const sample = childHeadersObject[chain].pop()
+            all.push(sample.getHash())
+            return all
+          }, [])
           const blockHeaders = blockBlockchainHeaders.map((a) => {
             return a.getHash()
           })
