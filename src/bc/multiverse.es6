@@ -147,18 +147,24 @@ export class Multiverse {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
         if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
-          const parentHeadersObject = item.getBlockchainHeaders().toObject()
-          const parentHeaders = Object.keys(parentHeadersObject).reduce((all, chain) => {
-            const sample = parentHeadersObject[chain].pop()
-            all.push(sample.getHash())
-            return all
-          }, [])
-          const blockHeaders = blockBlockchainHeaders.map((a) => {
-            return a.getHash()
-          })
-          if (!equals(parentHeaders, blockHeaders)) {
-            all = true
-          }
+          all = true
+          // TODO: @akloboucnik  best want to do the following...?
+          // const parentHeadersObject = item.getBlockchainHeaders().toObject()
+          // const parentHeaders = Object.keys(parentHeadersObject).reduce((all, chain) => {
+          //   const sample = parentHeadersObject[chain]
+          //   console.log(sample)
+          //   console.log(sample)
+          //   console.log(sample)
+          //   console.log(sample)
+          //   all.push(sample.getHash())
+          //   return all
+          // }, [])
+          // const blockHeaders = blockBlockchainHeaders.map((a) => {
+          //   return a.getHash()
+          // })
+          // if (!equals(parentHeaders, blockHeaders)) {
+          //   all = true
+          // }
         }
         return all
       }, false)
@@ -167,18 +173,20 @@ export class Multiverse {
       hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
-          const childHeadersObject = item.getBlockchainHeaders().toObject()
-          const childHeaders = Object.keys(childHeadersObject).reduce((all, chain) => {
-            const sample = childHeadersObject[chain].pop()
-            all.push(sample.getHash())
-            return all
-          }, [])
-          const blockHeaders = blockBlockchainHeaders.map((a) => {
-            return a.getHash()
-          })
-          if (!equals(childHeaders, blockHeaders)) {
-            all = true
-          }
+          all = true
+          // TODO: @akloboucnik  best want to do the following...?
+          // const childHeadersObject = item.getBlockchainHeaders().toObject()
+          // const childHeaders = Object.keys(childHeadersObject).reduce((all, chain) => {
+          //  const sample = childHeadersObject[chain]
+          //  all.push(sample.getHash())
+          //  return all
+          // }, [])
+          // const blockHeaders = blockBlockchainHeaders.map((a) => {
+          //  return a.getHash()
+          // })
+          // if (!equals(childHeaders, blockHeaders)) {
+          //  all = true
+          // }
         }
         return all
       }, false)
