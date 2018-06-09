@@ -8,7 +8,7 @@
  */
 
 import type BcBlock from '../protos/core_pb'
-const { equals, flatten, sum } = require('ramda')
+const { flatten, sum } = require('ramda')
 const { validateBlockSequence } = require('./validation')
 const logging = require('../logger')
 const COMMIT_MULTIVERSE_DEPTH = 7
@@ -123,7 +123,7 @@ export class Multiverse {
     const childHeight = height + 1
     const parentHeight = height - 1
     const keyCount = Object.keys(this._blocks).length
-    const blockBlockchainHeaders = block.getBlockchainHeaders()
+    // const blockBlockchainHeaders = block.getBlockchainHeaders()
     let hasParent = false
     let hasChild = false
     let inMultiverseLayer = false
