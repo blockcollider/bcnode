@@ -118,12 +118,20 @@ export class Multiverse {
   }
 
   addBlock (block: BcBlock, force: boolean = false): boolean {
+    // TODO @klob extract to helpers
+    const getAllBlockchainHashes = (block: BcBlock) => {
+      const headersObj = block.getBlockchainHeaders().toObject()
+      return Object.keys(headersObj).reduce((acc, blockchainListKey) => {
+        acc.push(headersObj[blockchainListKey].map(headerObj => headerObj.hash))
+        return acc
+      }, [])
+    }
     const self = this
     const height = block.getHeight()
     const childHeight = height + 1
     const parentHeight = height - 1
     const keyCount = Object.keys(this._blocks).length
-    // const blockBlockchainHeaders = block.getBlockchainHeaders()
+    const blockHeaderHashes = getAllBlockchainHashes(block)
     let hasParent = false
     let hasChild = false
     let inMultiverseLayer = false
@@ -134,7 +142,7 @@ export class Multiverse {
       this._logger.info('node is attempting to sync, multiverse filtering disabled')
       syncing = true
       force = true
-    // keyCount must be 2 to account for the genesis block and the next block
+      // keyCount must be 2 to account for the genesis block and the next block
     } else if (keyCount < 1) {
       syncing = true
       force = true
@@ -147,16 +155,8 @@ export class Multiverse {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
         if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
-          const parentHeadersObject = item.getBlockchainHeaders().toObject()
-          const parentHeaders = Object.keys(parentHeadersObject).reduce((all, chain) => {
-            const sample = parentHeadersObject[chain].pop()
-            sample && all.push(sample.getHash()) // TODO @klob - improve this reduce
-            return all
-          }, [])
-          const blockHeaders = blockBlockchainHeaders.map((a) => {
-            return a.getHash()
-          })
-          if (!equals(parentHeaders, blockHeaders)) {
+          const parentHeaderHashes = getAllBlockchainHashes(item)
+          if (!equals(parentHeaderHashes, blockHeaderHashes)) {
             all = true
           }
         }
@@ -167,16 +167,8 @@ export class Multiverse {
       hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
-          const childHeadersObject = item.getBlockchainHeaders().toObject()
-          const childHeaders = Object.keys(childHeadersObject).reduce((all, chain) => {
-            const sample = childHeadersObject[chain].pop()
-            sample && all.push(sample.getHash()) // TODO @klob - improve this reduce
-            return all
-          }, [])
-          const blockHeaders = blockBlockchainHeaders.map((a) => {
-            return a.getHash()
-          })
-          if (!equals(childHeaders, blockHeaders)) {
+          const childHeaderHashes = getAllBlockchainHashes(item)
+          if (!equals(childHeaderHashes, blockHeaderHashes)) {
             all = true
           }
         }
