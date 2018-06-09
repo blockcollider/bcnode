@@ -207,7 +207,6 @@ export default class Engine {
         .then(() => {
           if (self._workerProcess === undefined) {
             self._workerProcess = false
-            self.startMining(self._knownRovers, block)
           }
           self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
         })
@@ -340,7 +339,7 @@ export default class Engine {
     const self = this
     this._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
-    if (!this._knownBlocksCache.get(newBlock.getHash())) {
+    if (!self._knownBlocksCache.get(newBlock.getHash())) {
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
@@ -357,7 +356,7 @@ export default class Engine {
       this._logger.debug('addedToMultiverse: ' + addedToMultiverse)
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
-        this.stopMining()
+        self.stopMining()
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (addedToMultiverse === true) { // !important as update block latest also stored height
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
@@ -450,8 +449,8 @@ export default class Engine {
               }
             }
           }
-        } else if (this._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
-          this.blockpool.addBlock(newBlock)
+        } else if (self._peerIsResyncing === true) { // if we are resyncing pass the block to block pool
+          self.blockpool.addBlock(newBlock)
             .then((state) => {
               self._logger.info('pass to block pool ' + newBlock.getHeight() + ' ' + newBlock.getHash())
             })
