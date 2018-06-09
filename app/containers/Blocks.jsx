@@ -47,6 +47,20 @@ export class BlocksContainer extends Component<*> {
         <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>
           Blocks
         </h2>
+
+        { this.props.blocks[0] && <nav aria-label='Blocks pagination'>
+          <ul className='pagination justify-content-end'>
+            <li className='page-item'>
+              <a className='page-link'
+                href={'/#' + getLink(this.props.blocks[0].height + this.props.perPage)}>Newer</a>
+            </li>
+            <li className='page-item'>
+              <a className='page-link'
+                href={'/#' + getLink(this.props.blocks[0].height - this.props.perPage)}>Older</a>
+            </li>
+          </ul>
+        </nav>}
+
         <BlocksTable blocks={this.props.blocks} onClick={this.props.actions.showBlock} />
 
         { this.props.blocks[0] && <nav aria-label='Blocks pagination'>

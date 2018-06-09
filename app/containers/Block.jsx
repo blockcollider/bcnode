@@ -29,13 +29,35 @@ export class BlockContainer extends Component<*> {
   }
 
   render () {
+    const getLink = (id: number) => `/block/${id}`
     const blockJson = this.props.block && JSON.stringify(this.props.block, null, 4)
+
+    const pagination = (
+      blockJson &&
+      <div>
+        <nav aria-label='Blocks pagination'>
+          <ul className='pagination justify-content-end'>
+            <li className='page-item'>
+              <a className='page-link'
+                href={'/#' + getLink(this.props.block.height + 1)}>Newer</a>
+            </li>
+            <li className='page-item'>
+              <a className='page-link'
+                href={'/#' + getLink(this.props.block.height - 1)}>Older</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    )
+
     return (
       <div className='d-flex flex-wrap flex-row'>
         <Helmet>
           <title>Block</title>
         </Helmet>
         <h2 className='col-md-12 text-center' style={{marginTop: '16px', marginBottom: '16px'}}>Block #{this.props.id}</h2>
+
+        { pagination }
 
         <div className='container bg-light'>
           { blockJson &&
@@ -44,6 +66,8 @@ export class BlockContainer extends Component<*> {
             </pre>
           }
         </div>
+
+        { pagination }
       </div>
     )
   }
