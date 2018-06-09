@@ -393,7 +393,7 @@ export default class Engine {
               }
               debug('Querying peer for blocks', peerQuery)
 
-              console.log("***********************CANDIDATE 1*******************")
+              console.log('***********************CANDIDATE 1*******************')
               const bestPeer = this.node.manager.createPeer(peerInfo)
                 .query(peerQuery)
                 .then((blocks) => {
@@ -404,7 +404,7 @@ export default class Engine {
                     const lowCandidateBlock = bestCandidate.getLowestBlock()
                     if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
                     highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
-                    new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance())) {
+                    new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
                       self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
@@ -434,14 +434,14 @@ export default class Engine {
             if (candidates.length > 0) {
               // here we sort by highest block totalDistance and compare with current
               // if its better, we restart the miner, enable resync, purge the db, and set _blocks to a clone of _blocks on the candidate
-              console.log("***********************CANDIDATE 2*******************")
+              console.log('***********************CANDIDATE 2*******************')
               const ordered = candidates.sort(blockByTotalDistanceSorter)
               const bestCandidate = ordered.shift()
               const highCandidateBlock = bestCandidate.getHighestBlock()
               const lowCandidateBlock = bestCandidate.getLowestBlock()
               if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
-              new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance())) {
+              new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
                 self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true
