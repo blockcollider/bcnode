@@ -1,4 +1,4 @@
-/**
+/* e
  * Copyright (c) 2017-present, Block Collider developers, All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
@@ -191,7 +191,6 @@ export default class Engine {
       self._persistence.put(msg.key, block)
         .then(() => {
           self._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
-          self.startMining(self._knownRovers, block)
         })
         .catch((err) => {
           this._logger.error(err)
@@ -206,6 +205,10 @@ export default class Engine {
       const block = msg.data
       self._persistence.put('bc.block.latest', block)
         .then(() => {
+          if (self._workerProcess === undefined) {
+            self._workerProcess = false
+            self.startMining(self._knownRovers, block)
+          }
           self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
         })
         .catch((err) => {
@@ -444,16 +447,6 @@ export default class Engine {
                 self._peerIsResyncing = true
                 self.blockpool._checkpoint = lowCandidateBlock
                 // sets multiverse for removal
-                bestCandidate._created = 0
-                bestPeer.query({
-                  queryHash: newBlock.getHash(),
-                  queryHeight: newBlock.getHeight(),
-                  low: 1,
-                  high: newBlock.getHeight() + 2
-                })
-                  .then((blocks) => {
-                    blocks.map((block) => self.blockFromPeer(block))
-                  })
               }
             }
           }

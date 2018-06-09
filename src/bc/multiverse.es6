@@ -134,7 +134,7 @@ export class Multiverse {
       syncing = true
       force = true
     // keyCount must be 2 to account for the genesis block and the next block
-    } else if (keyCount < 2) {
+    } else if (keyCount < 1) {
       syncing = true
       force = true
     }
@@ -145,6 +145,7 @@ export class Multiverse {
     if (this._blocks[parentHeight] !== undefined) {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
         if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
+          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all
@@ -153,6 +154,7 @@ export class Multiverse {
     if (this._blocks[childHeight] !== undefined) {
       hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
+          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is CHILD of ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all

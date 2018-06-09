@@ -411,9 +411,10 @@ function prepareChildBlockHeadersMapForGenesis (currentBlockchainHeaders: Block[
  * @return {BlockchainHeader[]} Headers of rovered chains with confirmations count calculated
  */
 function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): BlockchainHeaders {
-  console.log(newChildBlock)
-  console.log(newChildBlock)
-  const chainWhichTriggeredMining = newChildBlock.getBlockchain()
+  let chainWhichTriggeredMining = 'bc'
+  if (newChildBlock.getBlockchain !== undefined) {
+    chainWhichTriggeredMining = newChildBlock.getBlockchain()
+  }
   const newMap = new BlockchainHeaders()
   Object.keys(previousBlock.getBlockchainHeaders().toObject())
     .forEach((chainKeyName) => {
