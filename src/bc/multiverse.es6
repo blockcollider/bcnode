@@ -8,7 +8,7 @@
  */
 
 import type BcBlock from '../protos/core_pb'
-const { flatten, sum } = require('ramda')
+const { equals, flatten, sum } = require('ramda')
 const { validateBlockSequence } = require('./validation')
 const logging = require('../logger')
 const COMMIT_MULTIVERSE_DEPTH = 7
@@ -123,6 +123,7 @@ export class Multiverse {
     const childHeight = height + 1
     const parentHeight = height - 1
     const keyCount = Object.keys(this._blocks).length
+    const blockBlockchainHeaders = block.getBlockchainHeaders()
     let hasParent = false
     let hasChild = false
     let inMultiverseLayer = false
@@ -146,7 +147,15 @@ export class Multiverse {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
         if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
-          all = true
+          const parentHeaders = item.getBlockchainHeaders().map((a) => {
+            return a.getHash()
+          })
+          const blockHeaders = blockBlockchainHeaders.map((a) => {
+            return a.getHash()
+          })
+          if (!equals(parentHeaders, blockHeaders)) {
+            all = true
+          }
         }
         return all
       }, false)
@@ -155,7 +164,15 @@ export class Multiverse {
       hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
-          all = true
+          const childHeaders = item.getBlockchainHeaders().map((a) => {
+            return a.getHash()
+          })
+          const blockHeaders = blockBlockchainHeaders.map((a) => {
+            return a.getHash()
+          })
+          if (!equals(childHeaders, blockHeaders)) {
+            all = true
+          }
         }
         return all
       }, false)
