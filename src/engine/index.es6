@@ -362,7 +362,7 @@ export default class Engine {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
-        if (newBlock.getHeight() > 8 &&
+        if (newBlock.getHeight() > 6 &&
             newBlock.getHeight() > (afterBlockHighest.getHeight() - 8)) { // if true update or create candidate multiverse
           const approved = this._verses.reduce((approved, multiverse) => {
             const candidateApproved = multiverse.addBlock(newBlock)
