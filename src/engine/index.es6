@@ -194,7 +194,20 @@ export default class Engine {
     })
 
     this.pubsub.subscribe('update.checkpoint.start', '<engine>', (msg) => {
-      this._peerIsResyncing = false
+      self._peerIsResyncing = true
+    })
+
+    this.pubsub.subscribe('state.resync.failed', '<engine>', (msg) => {
+      self._logger.info('pausing mining to reestablish multiverse')
+      self._peerIsResyncing = true
+      self.stopMining()
+      self.blockpool.purge()
+        .then((res) => {
+
+        })
+        .catch((err) => {
+          self._logger.error(err)
+        })
     })
 
     this.pubsub.subscribe('state.checkpoint.end', '<engine>', (msg) => {
@@ -202,7 +215,11 @@ export default class Engine {
     })
 
     this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
+      self.stopMining()
       self.updateLatestAndStore(msg.data)
+        .then((res) => {
+          // complete
+        })
     })
   }
 
@@ -230,15 +247,18 @@ export default class Engine {
       const previousLatest = await self._persistence.get('bc.block.latest')
       if (previousLatest.getHash() === block.getPreviousHash()) {
         await self._persistence.put('bc.block.latest', block)
+        await self._persistence.put('bc.block.' + block.getHeight(), block)
         if (self._workerProcess === undefined) {
           self._workerProcess = false
         }
-        self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
+        return Promise.resolve(true)
       } else {
         self._logger.warn('new purposed latest block does not match the last')
       }
     } catch (err) {
       await self._persistence.put('bc.block.latest', block)
+      await self._persistence.put('bc.block.' + block.getHeight(), block)
+      return Promise.resolve(true)
     }
   }
 
@@ -349,7 +369,7 @@ export default class Engine {
           all = all + a + ':' + val + '  '
           return all
         }, '')
-        this._logger.info(`generating multiverse of ${msg}`)
+        this._logger.info(`assemlbing multiverse from blockchains ${msg}`)
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
@@ -392,14 +412,14 @@ export default class Engine {
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
         self.stopMining()
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+        self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (addedToMultiverse === true) { // !important as update block latest also stored height
-        this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+        self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
         if (newBlock.getHeight() > 6 &&
             newBlock.getHeight() > (afterBlockHighest.getHeight() - 8)) { // if true update or create candidate multiverse
-          const approved = this._verses.reduce((approved, multiverse) => {
+          const approved = self._verses.reduce((approved, multiverse) => {
             const candidateApproved = multiverse.addBlock(newBlock)
             if (candidateApproved === true) {
               approved.push(multiverse)
@@ -409,7 +429,7 @@ export default class Engine {
           if (approved.length === 0) { // if none of the multiverses accepted the new block create its own and request more information from the peer
             const newMultiverse = new Multiverse(true)
             newMultiverse.addBlock(newBlock)
-            this._verses.push(newMultiverse)
+            self._verses.push(newMultiverse)
 
             this._logger.info('new multiverse created for block ' + newBlock.getHeight() + ' ' + newBlock.getHash())
             // this.node.triggerBlockSync() // --> give me multiverse
@@ -559,14 +579,6 @@ export default class Engine {
       .then((res) => {
         // If block was successfully processed then _cleanUnfinishedBlock
         if (res) {
-          const newBlockObj = {
-            ...this._unfinishedBlock.toObject(),
-            iterations: solution.iterations,
-            timeDiff: solution.timeDiff
-          }
-
-          // NOTE: Review if 'block.mined' is not triggered twice
-          this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
           this._broadcastMinedBlock(this._unfinishedBlock, solution)
 
           this._cleanUnfinishedBlock()
@@ -735,7 +747,7 @@ export default class Engine {
           return block
         })
       }))
-      this._logger.debug(`Got ${currentBlocks.length} blocks from persistence`)
+      this._logger.info(`Loaded ${currentBlocks.length} blocks from persistence`)
     } catch (err) {
       this._logger.warn(`Error while getting current blocks, reason: ${err.message}`)
       throw err
@@ -743,7 +755,7 @@ export default class Engine {
 
     // get latest known BC block
     try {
-      lastPreviousBlock = await this._persistence.get('bc.block.latest')
+      const lastPreviousBlock = await this._persistence.get('bc.block.latest')
       this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
     } catch (err) {
       this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
@@ -784,6 +796,7 @@ export default class Engine {
       this._workerProcess.kill()
       // $FlowFixMe
       this._workerProcess.disconnect()
+      this._workerProcess = null
     }
 
     // if (!this._workerProcess) {

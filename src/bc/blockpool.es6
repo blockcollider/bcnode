@@ -31,15 +31,15 @@ export class BlockPool {
     this._genesisBlock = getGenesisBlock()
   }
   // ranch dressing
-  _eventTriggerResync () {
+  _eventResyncFailed () {
     // Request to update the data with a resync command
     // TODO: Impliment miner stop and peer cycling
-    this.pubsub.publish('update.resync.pool', {})
+    this.pubsub.publish('update.resync.failed', {})
   }
 
   _eventCheckpointReached (lastBlock: BcBlock) {
     // the blockchain has been fully populated from genesis block to checkpoint
-    this.pubsub.publish('state.checkpoint.end', { checkpoint: this._checkpoint, genesisChildBlock: lastBlock })
+    this.pubsub.publish('state.checkpoint.end', { checkpoint: this._checkpoint, genesisSecondBlock: lastBlock })
     this._checkpoint = false
   }
 
@@ -88,12 +88,18 @@ export class BlockPool {
       return Promise.resolve(true)
     }
     try {
-      const earliest = await this._persistence.get('bc.block.earliest')
+      const earliest = await self._persistence.get('bc.block.earliest')
       // the sequence is complete trigger complete event
       if (block.getHash() === earliest.previousHash() &&
          previousHash === self._genesisBlock.getHash()) {
         self._eventCheckpointReached(block)
-        return this._persistence.del('bc.block.earliest') // clean up and remove earliest for next sync
+        return await self._persistence.del('bc.block.earliest') // clean up and remove earliest for next sync
+      }
+      if (block.getHash() === earliest.previousHash() &&
+         block.getHeight() === 2 &&
+         previousHash !== self._genesisBlock.getHash()) {
+        self._eventResyncFailed()
+        return await self._persistence.del('bc.block.earliest') // clean up and remove earliest for next sync
       }
       if (earliest.getHash() === hash) {
         return Promise.resolve(true)

@@ -169,12 +169,6 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
         try {
           const msg = JSON.parse(wireData)
           const method = handlers[msg.method]
-          console.log(handlers)
-          console.log(msg.method)
-          console.log(msg.method)
-          console.log(msg.method)
-          console.log(msg.method)
-          console.log(msg.method)
           const action = method(manager, ...msg.params)
           if (action !== undefined) {
             action.then((res) => {
@@ -185,9 +179,11 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
               })
           } else {
             console.log('ERROR unable to find method: ' + msg.method)
+            return Promise.resolve(false)
           }
         } catch (e) {
           console.log('ERROR', e)
+          return Promise.resolve(false)
         }
       })
     )
