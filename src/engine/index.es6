@@ -152,7 +152,6 @@ export default class Engine {
     // TODO get from CLI / config
     try {
       await this._persistence.open()
-      this.multiverse.addBlock(newGenesisBlock)
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
         this._logger.debug('Stored rovers to persistence')
@@ -163,12 +162,14 @@ export default class Engine {
       }
       try {
         await this.persistence.get('bc.block.1')
-        await this.persistence.get('bc.block.latest')
+        const latestBlock = await this.persistence.get('bc.block.latest')
+        self.multiverse.addBlock(latestBlock)
         this._logger.info('Genesis block present, everything ok')
       } catch (_) { // genesis block not found
         try {
           await this.persistence.put('bc.block.1', newGenesisBlock)
           await this.persistence.put('bc.block.latest', newGenesisBlock)
+          self.multiverse.addBlock(newGenesisBlock)
           this._logger.info('Genesis block saved to disk ' + newGenesisBlock.getHash())
         } catch (e) {
           this._logger.error(`Error while creating genesis block ${e.message}`)
@@ -188,32 +189,56 @@ export default class Engine {
 
     this.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
       const block = msg.data
-      self._persistence.put(msg.key, block)
-        .then(() => {
-          self._logger.info('block #' + block.getHeight() + ' saved with hash ' + block.getHash())
-        })
-        .catch((err) => {
-          this._logger.error(err)
-        })
+      self.storeHeight(block)
     })
 
-    this.pubsub.subscribe('state.checkpoint.complete', '<engine>', (msg) => {
+    this.pubsub.subscribe('update.checkpoint.start', '<engine>', (msg) => {
       this._peerIsResyncing = false
     })
 
-    this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
-      const block = msg.data
-      self._persistence.put('bc.block.latest', block)
-        .then(() => {
-          if (self._workerProcess === undefined) {
-            self._workerProcess = false
-          }
-          self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
-        })
-        .catch((err) => {
-          this._logger.error(err)
-        })
+    this.pubsub.subscribe('state.checkpoint.end', '<engine>', (msg) => {
+      self._peerIsResyncing = false
     })
+
+    this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
+      self.updateLatestAndStore(msg.data)
+    })
+  }
+
+  async storeHeight (block: BcBlock) {
+    const self = this
+    // Block is genesis block
+    if (block.getHeight() < 2) {
+      return
+    }
+    try {
+      const previousHeight = await self._persistence.get('bc.block.' + (block.getHeight() - 1))
+      if (previousHeight.getHash() === block.getPreviousHash()) {
+        await self._persistence.put('bc.block.' + block.getHeight(), block)
+      } else {
+        self._logger.warn('new purposed latest block does not match the last')
+      }
+    } catch (err) {
+      self._logger.warn('unable to store block ' + block.getHeight() + ' - ' + block.getHash())
+    }
+  }
+
+  async updateLatestAndStore (block: BcBlock) {
+    const self = this
+    try {
+      const previousLatest = await self._persistence.get('bc.block.latest')
+      if (previousLatest.getHash() === block.getPreviousHash()) {
+        await self._persistence.put('bc.block.latest', block)
+        if (self._workerProcess === undefined) {
+          self._workerProcess = false
+        }
+        self.pubsub.publish('state.block.height', { key: 'bc.block.' + block.getHeight(), data: block })
+      } else {
+        self._logger.warn('new purposed latest block does not match the last')
+      }
+    } catch (err) {
+      await self._persistence.put('bc.block.latest', block)
+    }
   }
 
   /**

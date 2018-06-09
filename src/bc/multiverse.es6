@@ -1,4 +1,4 @@
-/**
+/* e
  * Copyright (c) 2017-present, blockcollider.org developers, All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
@@ -152,8 +152,8 @@ export class Multiverse {
     //  delete this._blocks[Object.keys(this._blocks)[0]]
     // }
     if (this._blocks[parentHeight] !== undefined) {
-      hasParent = this._blocks[parentHeight].reduce((all, item) => {
-        if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
+      hasParent = this._blocks[parentHeight].reduce((all, item, i) => {
+        if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1) && i === 0) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
           const parentHeaderHashes = getAllBlockchainHashes(item)
           if (!equals(parentHeaderHashes, blockHeaderHashes)) {
@@ -164,8 +164,8 @@ export class Multiverse {
       }, false)
     }
     if (this._blocks[childHeight] !== undefined) {
-      hasChild = this._blocks[childHeight].reduce((all, item) => {
-        if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
+      hasChild = this._blocks[childHeight].reduce((all, item, i) => {
+        if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight() && i === 0) {
           console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
           const childHeaderHashes = getAllBlockchainHashes(item)
           if (!equals(childHeaderHashes, blockHeaderHashes)) {

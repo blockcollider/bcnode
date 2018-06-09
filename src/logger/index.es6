@@ -9,6 +9,7 @@
 import type Logger from 'winston'
 const { resolve, sep } = require('path')
 const winston = require('winston')
+const { format } = winston
 const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
@@ -18,7 +19,7 @@ const tsFormat = () => new Date().toISOString()
 
 const LOG_LEVEL = process.env.BC_LOG || 'info'
 
-const format = options => {
+const formatTemplate = options => {
   const ts = options.timestamp()
   const level = options.level.toUpperCase()
   const msg = undefined !== options.message ? options.message : ' '
@@ -36,7 +37,7 @@ const logger = new winston.Logger({
     new winston.transports.Console({
       level: LOG_LEVEL,
       timestamp: tsFormat,
-      formatter: format,
+      formatter: formatTemplate,
       humanReadableUnhandledException: true,
       colorize: true
     }),

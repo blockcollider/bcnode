@@ -175,9 +175,17 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
           console.log(msg.method)
           console.log(msg.method)
           console.log(msg.method)
-          method(manager, ...msg.params).then((res) => {
-            pull(pull.values(res), conn)
-          })
+          const action = method(manager, ...msg.params)
+          if (action !== undefined) {
+            action.then((res) => {
+              pull(pull.values(res), conn)
+            })
+              .catch((err) => {
+                console.trace(err)
+              })
+          } else {
+            console.log('ERROR unable to find method: ' + msg.method)
+          }
         } catch (e) {
           console.log('ERROR', e)
         }

@@ -39,7 +39,7 @@ export class BlockPool {
 
   _eventCheckpointReached (lastBlock: BcBlock) {
     // the blockchain has been fully populated from genesis block to checkpoint
-    this.pubsub.publish('state.checkpoint.complete', { checkpoint: this._checkpoint, genesisChildBlock: lastBlock })
+    this.pubsub.publish('state.checkpoint.end', { checkpoint: this._checkpoint, genesisChildBlock: lastBlock })
     this._checkpoint = false
   }
 
