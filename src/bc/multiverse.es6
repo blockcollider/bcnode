@@ -8,7 +8,7 @@
  */
 
 import type BcBlock from '../protos/core_pb'
-const { flatten, sum } = require('ramda')
+const { equals, flatten, sum } = require('ramda')
 const { validateBlockSequence } = require('./validation')
 const logging = require('../logger')
 const COMMIT_MULTIVERSE_DEPTH = 7
@@ -122,6 +122,7 @@ export class Multiverse {
     const getAllBlockchainHashes = (block: BcBlock) => {
       const headersObj = block.getBlockchainHeaders().toObject()
       return Object.keys(headersObj).reduce((acc, blockchainListKey) => {
+        console.log(blockchainListKey, headersObj[blockchainListKey]);
         return acc.concat(headersObj[blockchainListKey].map(headerObj => headerObj.hash))
       }, [])
     }
