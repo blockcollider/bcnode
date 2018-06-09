@@ -164,6 +164,7 @@ export default class Engine {
         await this.persistence.get('bc.block.1')
         const latestBlock = await this.persistence.get('bc.block.latest')
         self.multiverse.addBlock(latestBlock)
+        self.multiverse._selective = true
         this._logger.info('Genesis block present, everything ok')
       } catch (_) { // genesis block not found
         try {
@@ -379,6 +380,15 @@ export default class Engine {
       this._logger.debug('afterBlockHighest: ' + afterBlockHighest.getHash())
       // $FlowFixMe
       this._logger.debug('addedToMultiverse: ' + addedToMultiverse)
+
+      if (addedToMultiverse === false) {
+        this._logger.warn('!!!! Block failed to join multiverse')
+        this._logger.warn('!!!!     height: ' + newBlock.getHeight())
+        this._logger.warn('!!!!     hash: ' + newBlock.getHash())
+        this._logger.warn('!!!!     previousHash: ' + newBlock.getPreviousHash())
+        this._logger.warn('!!!!     distance: ' + newBlock.getDistance())
+        this._logger.warn('!!!!     totalDistance: ' + newBlock.getTotalDistance())
+      }
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
         self.stopMining()
