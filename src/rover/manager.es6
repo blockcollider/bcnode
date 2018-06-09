@@ -11,6 +11,7 @@ const { fork } = require('child_process')
 const { glob } = require('glob')
 const fs = require('fs')
 const path = require('path')
+const { flatten, groupBy } = require('ramda')
 
 const debug = require('debug')('bcnode:rover:manager')
 const logging = require('../logger')
@@ -102,7 +103,19 @@ export default class RoverManager {
     debug('Replaying roved blocks')
 
     const pattern = path.join(ROVED_DATA_PATH, '**/unified/*.json')
-    const files = glob.sync(pattern)
+    let files = glob.sync(pattern)
+
+    const g = groupBy((p) => {
+      const parts = p.split(path.sep)
+      return parts[parts.length - 4]
+    })
+
+    const groups = g(files)
+    const tmp = Object.keys(groups).map((k) => {
+      return groups[k].slice(-10)
+    }) || []
+
+    files = flatten(tmp)
       .sort((a, b) => {
         const fnameA = path.posix.basename(a)
         const fnameB = path.posix.basename(b)
@@ -118,7 +131,7 @@ export default class RoverManager {
 
     const rpc = new RpcClient()
 
-    files.slice(-100).forEach((f) => {
+    files.forEach((f) => {
       const json = fs.readFileSync(f)
       const obj = JSON.parse(json)
 
