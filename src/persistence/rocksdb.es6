@@ -9,6 +9,7 @@
 import type Logger from 'winston'
 const RocksDb = require('rocksdb')
 
+const debug = require('debug')('bcnode:persistence:rocksdb')
 const { BcBlock } = require('../protos/core_pb')
 const { serialize, deserialize } = require('./codec')
 const { getLogger } = require('../logger')
@@ -75,6 +76,8 @@ export default class PersistenceRocksDb {
    * @param opts
    */
   put (key: string, value: any, opts: Object = {}): Promise<*> {
+    debug('put()', key)
+
     let serialized
     try {
       serialized = serialize(value)
@@ -99,12 +102,15 @@ export default class PersistenceRocksDb {
    * @param opts
    */
   get (key: string, opts: Object = { asBuffer: true }): Promise<Object>|Promise<Array<Object>> {
+    debug('get()', key)
+
     if (Array.isArray(key)) {
       const promises = key.map((k) => {
         return this.get(k)
       })
 
-      return Promise.all(promises)
+      return promises.map((p) => p.catch(e => null))
+        .then((results) => results.filter(a => a))
     }
 
     return new Promise((resolve, reject) => {
@@ -128,6 +134,8 @@ export default class PersistenceRocksDb {
    * @param opts
    */
   del (key: string, opts: Object = {}): Promise<*> {
+    debug('del()', key)
+
     return new Promise((resolve, reject) => {
       this.db.del(key, opts, err => {
         if (err) {

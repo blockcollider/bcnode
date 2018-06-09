@@ -15,6 +15,7 @@ import type { BcBlock } from '../../../protos/core_pb'
 const debug = require('debug')('bcnode:protocol:rpc')
 const pull = require('pull-stream')
 const { last } = require('ramda')
+const { errToString } = require('../../../helper/error')
 
 const { PROTOCOL_PREFIX } = require('../version')
 
@@ -144,6 +145,10 @@ const handlers = {
 
         return manager.engine.persistence.get(ids)
           .then((res) => res.map((block) => block.serializeBinary()))
+      })
+      .catch((e) => {
+        debug('Query failed', errToString(e))
+        return []
       })
   }
 }
