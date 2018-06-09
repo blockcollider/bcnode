@@ -13,7 +13,7 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const debug = require('debug')('bcnode:engine')
 const { EventEmitter } = require('events')
-const { equals, all, values, mixin } = require('ramda')
+const { equals, all, values, clone } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
 const { writeFileSync } = require('fs')
@@ -405,7 +405,7 @@ export default class Engine {
                     if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
                     highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
                     new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
-                      self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
+                      self.multiverse._blocks = clone(lowCandidateBlock._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
                       self.blockpool._checkpoint = lowCandidateBlock
@@ -442,7 +442,7 @@ export default class Engine {
               if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
               new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
-                self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
+                self.multiverse._blocks = clone(lowCandidateBlock._blocks)
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true
                 self.blockpool._checkpoint = lowCandidateBlock
