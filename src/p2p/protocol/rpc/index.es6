@@ -164,7 +164,7 @@ export const register = (manager: PeerManager, bundle: Bundle) => {
         try {
           const msg = JSON.parse(wireData)
           const method = handlers[msg.method]
-          console.log(handles)
+          console.log(handlers)
           console.log(msg.method)
           console.log(msg.method)
           console.log(msg.method)
