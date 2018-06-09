@@ -338,7 +338,7 @@ export default class Engine {
 
   blockFromPeer (conn: Object, newBlock: BcBlock) {
     const self = this
-    this._logger.info('received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
+    this._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
     if (!this._knownBlocksCache.get(newBlock.getHash())) {
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
@@ -359,9 +359,7 @@ export default class Engine {
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
         this.stopMining()
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-      }
-
-      if (addedToMultiverse === true) {
+      } else if (addedToMultiverse === true) { // !important as update block latest also stored height
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
@@ -405,7 +403,7 @@ export default class Engine {
                     const lowCandidateBlock = bestCandidate.getLowestBlock()
                     if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
                     highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
-                    lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
+                    lowCandidateBlock.getTotalDistance() > self.multiverse.getLowestBlock().getTotalDistance()) {
                       self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
@@ -441,7 +439,7 @@ export default class Engine {
               const lowCandidateBlock = bestCandidate.getLowestBlock()
               if (highCandidateBlock.getTotalDistance() > afterBlockHighest.getTotalDistance() &&
               highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
-              lowCandidateBlock.getTotalDistance() > this.multiverse.getLowestBlock().getTotalDistance()) {
+              lowCandidateBlock.getTotalDistance() > self.multiverse.getLowestBlock().getTotalDistance()) {
                 self.multiverse._blocks = mixin({}, lowCandidateBlock._blocks)
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true

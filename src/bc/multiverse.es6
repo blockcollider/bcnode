@@ -138,14 +138,14 @@ export class Multiverse {
       syncing = true
       force = true
     }
-    if (keyCount > 16) {
-      // remove the oldest
-      delete this._blocks[Object.keys(this._blocks)[0]]
-    }
+    // if (keyCount > 16) {
+    //  // remove the oldest
+    //  delete this._blocks[Object.keys(this._blocks)[0]]
+    // }
     if (this._blocks[parentHeight] !== undefined) {
       hasParent = this._blocks[parentHeight].reduce((all, item) => {
         if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
-          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of ' + block.getHeight() + ' ' + block.getHash())
+          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all
@@ -154,7 +154,7 @@ export class Multiverse {
     if (this._blocks[childHeight] !== undefined) {
       hasChild = this._blocks[childHeight].reduce((all, item) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
-          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is CHILD of ' + block.getHeight() + ' ' + block.getHash())
+          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all
@@ -202,18 +202,10 @@ export class Multiverse {
           return 0
         })
       }
-      self._writeQueue.push(block)
       added = true
       return added
     }
-    this._logger.info('now in writeQueue: ' + self._writeQueue.length)
     return added
-  }
-
-  async save (multiverse: ?Object) {
-    if (multiverse !== undefined) {
-
-    }
   }
 
   purge () {
