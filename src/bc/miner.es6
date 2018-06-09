@@ -412,7 +412,7 @@ function prepareChildBlockHeadersMapForGenesis (currentBlockchainHeaders: Block[
  */
 function prepareChildBlockHeadersMap (previousBlock: BcBlock, newChildBlock: Block, shouldAppend: bool): BlockchainHeaders {
   let chainWhichTriggeredMining = 'bc'
-  if (newChildBlock.getBlockchain !== undefined) {
+  if (newChildBlock.getBlockchain() !== undefined) {
     chainWhichTriggeredMining = newChildBlock.getBlockchain()
   }
   const newMap = new BlockchainHeaders()
