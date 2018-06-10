@@ -155,10 +155,10 @@ export class Multiverse {
     }
     if (keyCount > 16) {
       // remove the oldest
-      const orderedKeys = Object.keys(this._blocks).sort((a,b) {
-          if(a > b) { return 1 }
-          if(a < b) { return -1 }
-            return 0
+      const orderedKeys = Object.keys(this._blocks).sort((a, b) => {
+        if (a > b) { return 1 }
+        if (a < b) { return -1 }
+        return 0
       })
       this._blocks[orderedKeys[0]] = 1
     }
