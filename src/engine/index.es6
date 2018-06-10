@@ -946,10 +946,16 @@ export default class Engine {
       return false
     }
 
-    this._workerProcess.removeAllListeners()
-    this._workerProcess.kill()
-    this._workerProcess.disconnect()
-    this._workerProcess = null
+    try {
+      this._workerProcess.removeAllListeners()
+      this._workerProcess.kill()
+      this._wokerProcess.disconnect()
+      this._workerProcess = null
+    } catch (err) {
+      this._logger.debug(`Stopping mining failed, reason: ${err.message}`)
+      return false
+    }
+
     return true
   }
 
