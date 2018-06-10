@@ -10,6 +10,7 @@
 import type BcBlock from '../protos/core_pb'
 const { equals, flatten, sum } = require('ramda')
 const { validateBlockSequence } = require('./validation')
+const { standardId } = require('./helper')
 const logging = require('../logger')
 const COMMIT_MULTIVERSE_DEPTH = 7
 
@@ -20,9 +21,11 @@ export class Multiverse {
   _height: number
   _created: number
   _selective: boolean
+  _id: string
   _logger: Object
 
   constructor (selective: boolean = false, commitDepth: number = COMMIT_MULTIVERSE_DEPTH) {
+    this._id = standardId()
     this._selective = selective
     this._blocks = {}
     this._writeQueue = []
@@ -164,14 +167,14 @@ export class Multiverse {
     if (this._blocks[parentHeight] !== undefined) {
       hasParentHash = this._blocks[parentHeight].reduce((all, item, i) => {
         if (item.getHash() === block.getPreviousHash()) {
-          console.log('!!! block ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
+          console.log('(' + self._id + ') !!! block ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all
       }, false)
       hasParentHeight = this._blocks[parentHeight].reduce((all, item, i) => {
         if (item.getHeight() === (block.getHeight() - 1)) {
-          console.log('!!! block ' + item.getHeight() + '  is parent of block ' + block.getHeight() + ' ' + block.getHash())
+          console.log('(' + self._id + ') !!! block ' + item.getHeight() + '  is parent of block ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all
@@ -183,14 +186,14 @@ export class Multiverse {
     if (this._blocks[childHeight] !== undefined) {
       hasChildHash = this._blocks[childHeight].reduce((all, item, i) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
-          console.log('!!! block ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
+          console.log('(' + self._id + ') !!! block ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all
       }, false)
       hasChildHeight = this._blocks[childHeight].reduce((all, item, i) => {
         if ((item.getHeight() - 1) === block.getHeight()) {
-          console.log('!!! block ' + item.getHeight() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
+          console.log('(' + self._id + ') !!! block ' + item.getHeight() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
           all = true
         }
         return all

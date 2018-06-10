@@ -441,9 +441,9 @@ export default class Engine {
 
   blockFromPeer (conn: Object, newBlock: BcBlock) {
     const self = this
-    self._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
-    if (!self._knownBlocksCache.get(newBlock.getHash())) {
+    if (newBlock !== undefined && !self._knownBlocksCache.get(newBlock.getHash())) {
+      self._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
@@ -453,19 +453,19 @@ export default class Engine {
       const afterBlockHighest = self.multiverse.getHighestBlock()
 
       // $FlowFixMe
-      this._logger.debug('beforeBlockHighest: ' + beforeBlockHighest.getHash())
+      this._logger.debug('(' + self.multiverse._id + ') beforeBlockHighest: ' + beforeBlockHighest.getHash())
       // $FlowFixMe
-      this._logger.debug('afterBlockHighest: ' + afterBlockHighest.getHash())
+      this._logger.debug('(' + self.multiverse._id + ') afterBlockHighest: ' + afterBlockHighest.getHash())
       // $FlowFixMe
-      this._logger.debug('addedToMultiverse: ' + addedToMultiverse)
+      this._logger.debug('(' + self.multiverse._id + ') addedToMultiverse: ' + addedToMultiverse)
 
       if (addedToMultiverse === false) {
-        this._logger.warn('!!!! Block failed to join multiverse')
-        this._logger.warn('!!!!     height: ' + newBlock.getHeight())
-        this._logger.warn('!!!!     hash: ' + newBlock.getHash())
-        this._logger.warn('!!!!     previousHash: ' + newBlock.getPreviousHash())
-        this._logger.warn('!!!!     distance: ' + newBlock.getDistance())
-        this._logger.warn('!!!!     totalDistance: ' + newBlock.getTotalDistance())
+        this._logger.warn('(' + self.multiverse._id + ') !!!! Block failed to join multiverse')
+        this._logger.warn('(' + self.multiverse._id + ') !!!!     height: ' + newBlock.getHeight())
+        this._logger.warn('(' + self.multiverse._id + ') !!!!     hash: ' + newBlock.getHash())
+        this._logger.warn('(' + self.multiverse._id + ') !!!!     previousHash: ' + newBlock.getPreviousHash())
+        this._logger.warn('(' + self.multiverse._id + ') !!!!     distance: ' + newBlock.getDistance())
+        this._logger.warn('(' + self.multiverse._id + ') !!!!     totalDistance: ' + newBlock.getTotalDistance())
       }
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
@@ -737,6 +737,10 @@ export default class Engine {
   _broadcastMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
     this._logger.info('Broadcasting mined block')
 
+    if (newBlock === undefined) {
+      return Promise.reject(new Error('cannot broadcast empty block'))
+    }
+
     this.node.broadcastNewBlock(newBlock)
     this._cleanUnfinishedBlock()
 
@@ -809,6 +813,9 @@ export default class Engine {
 
   async startMining (rovers: string[] = ROVERS, block: Block): Promise<*> {
     const self = this
+    if (block === undefined) {
+      return Promise.reject(new Error('cannot start mining on empty block'))
+    }
     debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
@@ -893,6 +900,7 @@ export default class Engine {
           return Promise.resolve(self._workerProcess.pid)
         }
       } catch (err) {
+        console.trace(err)
         self._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
         return Promise.reject(err)
       }

@@ -8,6 +8,16 @@
  */
 const { BcBlock, BlockchainHeader } = require('../protos/core_pb')
 
+function chr4 (): string {
+  return Math.random().toString(16).slice(-4)
+}
+export function standardId (): string {
+  return chr4() + chr4() +
+    '-' + chr4() +
+    '-' + chr4() +
+    '-' + chr4() +
+    '-' + chr4() + chr4() + chr4()
+}
 export const getBlockchainsBlocksCount = (block: BcBlock) => {
   // $FlowFixMe
   const headersLists: BlockchainHeader[][] = Object.values(block.getBlockchainHeaders().toObject())
