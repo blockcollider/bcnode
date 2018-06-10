@@ -19,6 +19,7 @@ const { resolve } = require('path')
 const { writeFileSync } = require('fs')
 const LRUCache = require('lru-cache')
 const BN = require('bn.js')
+const semver = require('semver')
 
 const { config } = require('../config')
 const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
@@ -164,6 +165,19 @@ export default class Engine {
     // TODO get from CLI / config
     try {
       await this._persistence.open()
+      try {
+        const DB_LOCATION = resolve(`${__dirname}/../../${this.persistence._db.location}`)
+        const DELETE_MESSAGE = `Your DB version is old, please delete data folder '${DB_LOCATION}' and run bcnode again`
+        let version = await this.persistence.get('appversion')
+        if (semver.lt(version.version, '0.6.0')) {
+          this._logger.warn(DELETE_MESSAGE)
+          process.exit(8)
+        }
+      } catch (_) {
+        // version was not stored - very old version so log a request to delete _data and exit
+        this._logger.warn(DELETE_MESSAGE)
+        process.exit(8)
+      }
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
         this._logger.debug('Stored rovers to persistence')
