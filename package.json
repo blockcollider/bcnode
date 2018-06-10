@@ -1,10 +1,10 @@
 {
   "name": "bcnode",
-  "version": "0.5.5",
-  "description": "Block Collider with miners and rovers",
+  "version": "0.6.0",
+  "description": "Block Collider JS Network Node with miner and rovers",
   "main": "lib/src/init.js",
   "scripts": {
-    "bcnode": "./bin/cli --ws --rovers --ui --node --miner-key ABCDEF",
+    "bcnode": "./bin/cli --ws --rovers --ui --node --miner-key MY_PUBLIC_ADDRESS",
     "benchmark": "./bin/benchmark",
     "check": "yarn run dist",
     "doc": "./node_modules/.bin/esdoc || true",
@@ -92,7 +92,7 @@
   },
   "dependencies": {
     "@cityofzion/neo-js": "0.7.0",
-    "async": "~2.6.0",
+    "async": "^2.6.1",
     "atob": "2.1.1",
     "avon": "korczis/avon#master",
     "axios": "^0.18.0",

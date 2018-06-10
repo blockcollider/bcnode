@@ -13,6 +13,7 @@ const ROVERS = Object.keys(require('../rover/manager').rovers)
 
 const debug = require('debug')('bcnode:engine')
 const { EventEmitter } = require('events')
+const { queue } = require('async')
 const { equals, all, values, clone } = require('ramda')
 const { fork, ChildProcess } = require('child_process')
 const { resolve } = require('path')
@@ -76,7 +77,7 @@ export default class Engine {
   _canMine: bool; // eslint-disable-line no-undef
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
-  _rawBlock: ?Object
+  _rawBlock: Object[]
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
   _peerIsSyncing: boolean
@@ -86,7 +87,7 @@ export default class Engine {
     this._logger = logging.getLogger(__filename)
     this._knownRovers = opts.rovers
     this._minerKey = opts.minerKey
-    this._rawBlock = {}
+    this._rawBlock = []
     this._monitor = new Monitor(this, {})
     this._persistence = new PersistenceRocksDb(DATA_DIR)
     this._pubsub = new PubSub()
@@ -162,6 +163,9 @@ export default class Engine {
       commit: long,
       db_version: 1
     }
+    const engineQueue = queue((fn, cb) => {
+      return fn.then((res) => { cb(null, res) }).catch((err) => { cb(err) })
+    })
     const DB_LOCATION = resolve(`${__dirname}/../../${this.persistence._db.location}`)
     const DELETE_MESSAGE = `Your DB version is old, please delete data folder '${DB_LOCATION}' and run bcnode again`
     // TODO get from CLI / config
@@ -215,41 +219,51 @@ export default class Engine {
 
     this._logger.debug('Engine initialized')
 
-    this.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
+    self.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
       const block = msg.data
       self.storeHeight(block)
+      engineQueue.push(self.storeHeight(block), function (err, data) {
+        if (err) {
+          console.trace(err)
+          self._logger.error(err)
+        }
+      })
     })
 
-    this.pubsub.subscribe('update.checkpoint.start', '<engine>', (msg) => {
+    self.pubsub.subscribe('update.checkpoint.start', '<engine>', (msg) => {
       self._peerIsResyncing = true
     })
 
-    this.pubsub.subscribe('state.resync.failed', '<engine>', (msg) => {
+    self.pubsub.subscribe('state.resync.failed', '<engine>', (msg) => {
       self._logger.info('pausing mining to reestablish multiverse')
       self._peerIsResyncing = true
-      self.stopMining()
-      self.blockpool.purge()
-        .then((res) => {
-
-        })
-        .catch((err) => {
+      engineQueue.push(self.blockpool.purge(msg.data), function (err, data) {
+        if (err) {
+          console.trace(err)
           self._logger.error(err)
-        })
+        } else {
+          if (self._canMine === true) {
+            self.restartMining()
+          }
+        }
+      })
     })
 
-    this.pubsub.subscribe('state.checkpoint.end', '<engine>', (msg) => {
+    self.pubsub.subscribe('state.checkpoint.end', '<engine>', (msg) => {
       self._peerIsResyncing = false
     })
 
-    this.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
-      self.stopMining()
-      self.updateLatestAndStore(msg.data)
-        .then((res) => {
-          // if a fresh block is available rerun it with the updated latest block
-          if (self._rawBlocks.has('bc.block.latestchild')) {
-            self.startMining(self._rovers, self._rawBlock)
+    self.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
+      engineQueue.push(self.updateLatestAndStore(msg.data), function (err, data) {
+        if (err) {
+          console.trace(err)
+          self._logger.error(err)
+        } else {
+          if (self._canMine === true) {
+            self.restartMining()
           }
-        })
+        }
+      })
     })
   }
 
@@ -423,7 +437,7 @@ export default class Engine {
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       self._rawBlocks.set('bc.block.latestchild', block)
-      self.rawBlock = block
+      self._rawBlock.push(block)
       return self.startMining(rovers, block)
 
         .catch((err) => {
@@ -457,7 +471,7 @@ export default class Engine {
     const self = this
     // TODO: Validate new block mined by peer
     if (newBlock !== undefined && !self._knownBlocksCache.get(newBlock.getHash())) {
-      self._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
+      self._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight())
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
@@ -827,10 +841,10 @@ export default class Engine {
 
   async startMining (rovers: string[] = ROVERS, block: Block): Promise<*> {
     const self = this
-    if (block === undefined) {
-      return Promise.reject(new Error('cannot start mining on empty block'))
-    }
-    debug('Starting mining', rovers || ROVERS, block.toObject())
+    // if (block === undefined) {
+    //  return Promise.reject(new Error('cannot start mining on empty block'))
+    // }
+    // debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
     let lastPreviousBlock
@@ -943,6 +957,12 @@ export default class Engine {
     debug('Restarting mining', rovers)
 
     this.stopMining()
+    if (this._rawBlock.length > 0) {
+      return this.startMining(rovers || ROVERS, this._rawBlock.pop())
+        .then(res => {
+          return Promise.resolve(!res)
+        })
+    }
     return this.startMining(rovers || ROVERS)
       .then(res => {
         return Promise.resolve(!res)

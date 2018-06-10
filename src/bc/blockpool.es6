@@ -31,10 +31,10 @@ export class BlockPool {
     this._genesisBlock = getGenesisBlock()
   }
   // ranch dressing
-  _eventResyncFailed () {
+  _eventResyncFailed (block: BcBlock) {
     // Request to update the data with a resync command
     // TODO: Impliment miner stop and peer cycling
-    this.pubsub.publish('update.resync.failed', {})
+    this.pubsub.publish('update.resync.failed', { data: BcBlock })
   }
 
   _eventCheckpointReached (lastBlock: BcBlock) {

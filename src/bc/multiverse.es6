@@ -406,7 +406,8 @@ export class Multiverse {
   }
 
   print () {
-    this._logger.info(this._blocks)
+    // this._logger.info(this._blocks)
+    console.log('multiverse print disabled')
   }
 }
 
