@@ -51,12 +51,13 @@ class BlocksTable extends Component<*> {
         fontFamily: 'monospace'
       }
 
-      let wrongPrevHash = false
-      if (this.props.blocks[idx + 1]) {
-        const a = this.props.blocks[idx + 1].hash
-        const b = this.props.blocks[idx].previousHash
-        wrongPrevHash = (a !== b)
-      }
+      // let wrongPrevHash = false
+      // if (this.props.blocks[idx + 1]) {
+      //   const a = this.props.blocks[idx + 1].hash
+      //   const b = this.props.blocks[idx].previousHash
+      //   wrongPrevHash = (a !== b)
+      // }
+      // { wrongPrevHash && <i style={{paddingLeft: 3, filter: 'invert(100%)', color: 'red'}} className='fas fa-exclamation-circle' /> }
 
       return (
         <tr key={block.hash}>
@@ -70,8 +71,7 @@ class BlocksTable extends Component<*> {
             </BlockLink>
           </td>
           <td>
-            <Ellipsis text={block.previousHash} style={wrongPrevHash ? {text: 'red'} : {text: 'red'}} />
-            { wrongPrevHash && <i style={{paddingLeft: 3, filter: 'invert(100%)', color: 'red'}} className='fas fa-exclamation-circle' /> }
+            <Ellipsis text={block.previousHash} />
           </td>
           <td>
             <Ellipsis text={block.miner} />

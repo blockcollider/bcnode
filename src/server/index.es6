@@ -100,6 +100,19 @@ export default class Server {
       help: Null
     }
 
+    this._app.get('/balance', (req, res, next) => {
+      const minerKey = this.engine.minerKey
+      if (minerKey) {
+        this._engine.persistence.getBtAddressBalance(minerKey)
+          .then((result) => {
+            result.address = minerKey
+            res.json(result)
+          })
+      } else {
+        res.json({})
+      }
+    })
+
     this._app.use('/rpc', jsonRpcMiddleware(mapping))
 
     // Create http server
