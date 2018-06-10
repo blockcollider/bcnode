@@ -224,11 +224,10 @@ export default class Engine {
       self.stopMining()
       self.updateLatestAndStore(msg.data)
         .then((res) => {
-          // complete
+          // if a fresh block is available rerun it with the updated latest block
           if (self._rawBlocks.has('bc.block.latestchild')) {
             self._emitter.emit('collectBlock', self._rawBlocks.get('bc.block.latestchild'))
           }
-          self.startMining
         })
     })
   }
