@@ -476,7 +476,7 @@ export function getNewBlockCount (previousBlockHeaders: BlockchainHeaders, curre
 export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: BcBlock, childrenCurrentBlocks: Block[], blockWhichTriggeredMining: Block, newTransactions: BcTransaction[], minerAddress: string, unfinishedBlock: ?BcBlock): [BcBlock, number] {
   const shouldAppend = !!unfinishedBlock
   let childBlockHeaders
-  if (lastPreviousBlock.getHeight() === GENESIS_DATA.height) {
+  if (lastPreviousBlock !== undefined && lastPreviousBlock.getHeight() === GENESIS_DATA.height) {
     childBlockHeaders = prepareChildBlockHeadersMapForGenesis(childrenCurrentBlocks)
   } else {
     childBlockHeaders = prepareChildBlockHeadersMap(

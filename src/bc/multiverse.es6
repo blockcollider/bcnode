@@ -132,9 +132,15 @@ export class Multiverse {
     const parentHeight = height - 1
     const keyCount = Object.keys(this._blocks).length
     const blockHeaderHashes = getAllBlockchainHashes(block)
+    let uniqueParentHeaders = false
+    let hasParentHash = false
+    let hasParentHeight = false
     let hasParent = false
+    let hasChildHash = false
+    let hasChildHeight = false
     let hasChild = false
-    let inMultiverseLayer = false
+    let uniqueChildHeaders = false
+    let alreadyInMultiverse = false
     let added = false
     let syncing = false
     this._logger.info('new multiverse candidate for height ' + height + ' (' + block.getHash() + ')')
@@ -152,40 +158,64 @@ export class Multiverse {
     //  delete this._blocks[Object.keys(this._blocks)[0]]
     // }
     if (this._blocks[parentHeight] !== undefined) {
-      hasParent = this._blocks[parentHeight].reduce((all, item, i) => {
-        if (item.getHash() === block.getPreviousHash() && item.getHeight() === (block.getHeight() - 1)) {
-          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
-          const parentHeaderHashes = getAllBlockchainHashes(item)
-          if (!equals(parentHeaderHashes, blockHeaderHashes)) {
-            all = true
-          }
+      hasParentHash = this._blocks[parentHeight].reduce((all, item, i) => {
+        if (item.getHash() === block.getPreviousHash()) {
+          console.log('!!! block ' + item.getHash() + ' is PARENT of --> ' + block.getHeight() + ' ' + block.getHash())
+          all = true
         }
         return all
       }, false)
+      hasParentHeight = this._blocks[parentHeight].reduce((all, item, i) => {
+        if (item.getHeight() === (block.getHeight() - 1)) {
+          console.log('!!! block ' + item.getHeight() + '  is parent of block ' + block.getHeight() + ' ' + block.getHash())
+          all = true
+        }
+        return all
+      }, false)
+      const parentBlockHeaders = getAllBlockchainHashes(this._blocks[parentHeight][0])
+      uniqueParentHeaders = !equals(parentBlockHeaders, blockHeaderHashes)
+      hasParent = hasParentHash === true && hasParentHeight === true && uniqueParentHeaders === true
     }
     if (this._blocks[childHeight] !== undefined) {
-      hasChild = this._blocks[childHeight].reduce((all, item, i) => {
+      hasChildHash = this._blocks[childHeight].reduce((all, item, i) => {
         if (item.getPreviousHash() === block.getHash() && (item.getHeight() - 1) === block.getHeight()) {
-          console.log('!!! block ' + item.getHeight() + ' ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
-          const childHeaderHashes = getAllBlockchainHashes(item)
-          if (!equals(childHeaderHashes, blockHeaderHashes)) {
-            all = true
-          }
+          console.log('!!! block ' + item.getHash() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
+          all = true
         }
         return all
       }, false)
+      hasChildHeight = this._blocks[childHeight].reduce((all, item, i) => {
+        if ((item.getHeight() - 1) === block.getHeight()) {
+          console.log('!!! block ' + item.getHeight() + ' <-- is CHILD of ' + block.getHeight() + ' ' + block.getHash())
+          all = true
+        }
+        return all
+      }, false)
+      const childBlockHeaders = getAllBlockchainHashes(this._blocks[childHeight][0])
+      uniqueChildHeaders = !equals(childBlockHeaders, blockHeaderHashes)
+      hasChild = hasChildHash === true && hasChildHeight === true && uniqueChildHeaders === true
     }
     if (this._blocks[height] !== undefined) {
-      inMultiverseLayer = this._blocks[height].reduce((all, item) => {
+      alreadyInMultiverse = this._blocks[height].reduce((all, item) => {
         if (item.getHash() === block.getHash()) {
           all = true
         }
         return all
       }, false)
     }
-    this._logger.info('Block hasParent: ' + hasParent + ' hasChild: ' + hasChild + ' syncing: ' + syncing + ' height: ' + height + ' inMultiverseLayer: ' + inMultiverseLayer)
+    if (hasChild === false && hasParent === false) {
+      const failures = {}
+      failures['hasParentHash'] = hasParentHash
+      failures['hasParentHeight'] = hasParentHeight
+      failures['uniqueParentHeaders'] = uniqueParentHeaders
+      failures['hasChildHash'] = hasChildHash
+      failures['hasChildHeight'] = hasChildHeight
+      failures['uniqueChildHeaders'] = uniqueChildHeaders
+      this._logger.info(failures)
+    }
+    this._logger.info('Block hasParent: ' + hasParent + ' hasChild: ' + hasChild + ' syncing: ' + syncing + ' height: ' + height + ' alreadyInMultiverse: ' + alreadyInMultiverse)
     if (hasParent === true || hasChild === true) {
-      if (inMultiverseLayer === false) {
+      if (alreadyInMultiverse === false) {
         if (self._blocks[height] === undefined) {
           self._blocks[height] = []
         }

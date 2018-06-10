@@ -163,6 +163,7 @@ export default class Engine {
       try {
         await this.persistence.get('bc.block.1')
         const latestBlock = await this.persistence.get('bc.block.latest')
+        self._logger.info('highest block height on disk ' + latestBlock.getHeight())
         self.multiverse.addBlock(latestBlock)
         self.multiverse._selective = true
         this._logger.info('Genesis block present, everything ok')
@@ -230,13 +231,14 @@ export default class Engine {
       return
     }
     try {
-      const previousHeight = await self._persistence.get('bc.block.' + (block.getHeight() - 1))
+      const previousHeight = await self.persistence.get('bc.block.' + (block.getHeight() - 1))
       if (previousHeight.getHash() === block.getPreviousHash()) {
-        await self._persistence.put('bc.block.' + block.getHeight(), block)
+        await self.persistence.put('bc.block.' + block.getHeight(), block)
       } else {
         self._logger.warn('new purposed latest block does not match the last')
       }
     } catch (err) {
+      console.trace(err)
       self._logger.warn('unable to store block ' + block.getHeight() + ' - ' + block.getHash())
     }
   }
@@ -244,10 +246,10 @@ export default class Engine {
   async updateLatestAndStore (block: BcBlock) {
     const self = this
     try {
-      const previousLatest = await self._persistence.get('bc.block.latest')
+      const previousLatest = await self.persistence.get('bc.block.latest')
       if (previousLatest.getHash() === block.getPreviousHash()) {
-        await self._persistence.put('bc.block.latest', block)
-        await self._persistence.put('bc.block.' + block.getHeight(), block)
+        await self.persistence.put('bc.block.latest', block)
+        await self.persistence.put('bc.block.' + block.getHeight(), block)
         if (self._workerProcess === undefined) {
           self._workerProcess = false
         }
@@ -256,8 +258,8 @@ export default class Engine {
         self._logger.warn('new purposed latest block does not match the last')
       }
     } catch (err) {
-      await self._persistence.put('bc.block.latest', block)
-      await self._persistence.put('bc.block.' + block.getHeight(), block)
+      await self.persistence.put('bc.block.latest', block)
+      await self.persistence.put('bc.block.' + block.getHeight(), block)
       return Promise.resolve(true)
     }
   }
@@ -349,6 +351,7 @@ export default class Engine {
   }
 
   async collectBlock (rovers: string[], block: Block) {
+    const self = this
     this._collectedBlocks[block.getBlockchain()] += 1
 
     // TODO: Adjust minimum count of collected blocks needed to trigger mining
@@ -362,14 +365,22 @@ export default class Engine {
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       return this.startMining(rovers, block)
+        .catch((err) => {
+          self._logger.error(err)
+        })
     } else {
       if (!this._canMine) {
-        const msg = Object.keys(this._collectedBlocks).reduce((all, a) => {
+        const keys = Object.keys(this._collectedBlocks)
+        const values = '|' + keys.reduce((all, a, i) => {
           const val = this._collectedBlocks[a]
-          all = all + a + ':' + val + '  '
+          if (i === (keys.length - 1)) {
+            all = all + a + ':' + val
+          } else {
+            all = all + a + ':' + val + ' '
+          }
           return all
-        }, '')
-        this._logger.info(`assemlbing multiverse from blockchains ${msg}`)
+        }, '') + '|'
+        this._logger.info('constructing multiverse from blockchains ' + values)
         return Promise.resolve(false)
       }
       if (this._peerIsSyncing) {
@@ -463,6 +474,7 @@ export default class Engine {
                       self.multiverse._blocks = clone(bestCandidate._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
+                      self.stopMining()
                       self.blockpool._checkpoint = lowCandidateBlock
                       // sets multiverse for removal
                       bestCandidate._created = 0
@@ -527,6 +539,7 @@ export default class Engine {
         })
       }
     } else {
+      console.log(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)
       debug(`Received block is already in cache of known blocks - ${newBlock.getHash()}`)
     }
   }
@@ -733,6 +746,11 @@ export default class Engine {
   }
 
   async startMining (rovers: string[] = ROVERS, block: Block): Promise<*> {
+    const self = this
+    if (this._workerProcess !== null && this._workerProcess !== undefined) {
+      this._logger.warn('miner already running')
+      return Promise.resolve(true)
+    }
     debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
@@ -742,95 +760,89 @@ export default class Engine {
     try {
       const getKeys: string[] = rovers.map(chain => `${chain}.block.latest`)
       currentBlocks = await Promise.all(getKeys.map((key) => {
-        return this._persistence.get(key).then(block => {
+        return self.persistence.get(key).then(block => {
           this._logger.debug(`Got "${key}"`)
           return block
         })
       }))
       this._logger.info(`Loaded ${currentBlocks.length} blocks from persistence`)
+      // get latest known BC block
+      try {
+        lastPreviousBlock = await self.persistence.get('bc.block.latest')
+        this._logger.info(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
+        this._logger.debug(`Preparing new block`)
+
+        const currentTimestamp = ts.nowSeconds()
+        if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
+          this._cleanUnfinishedBlock()
+        }
+        const [newBlock, finalTimestamp] = prepareNewBlock(
+          currentTimestamp,
+          lastPreviousBlock,
+          currentBlocks,
+          block,
+          [], // TODO: Transactions added here for AT period
+          this._minerKey,
+          this._unfinishedBlock
+        )
+        const work = prepareWork(lastPreviousBlock.getHash(), newBlock.getBlockchainHeaders())
+        newBlock.setTimestamp(finalTimestamp)
+        this._unfinishedBlock = newBlock
+        this._unfinishedBlockData = {
+          lastPreviousBlock,
+          currentBlocks: newBlock.getBlockchainHeaders(),
+          block,
+          iterations: undefined,
+          timeDiff: undefined
+        }
+
+        // if blockchains block count === 5 we will create a block with 6 blockchain blocks (which gets bonus)
+        // if it's more, do not restart mining and start with new ones
+        if (this._workerProcess && this._unfinishedBlock) {
+          this._logger.debug(`Restarting mining with a new rovered block`)
+          this.restartMiner()
+        }
+
+        // if (!this._workerProcess) {
+        this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+        const proc: ChildProcess = fork(MINER_WORKER_PATH)
+        this._workerProcess = proc
+        // } else {
+        //   this._logger.debug(`Sending work to existing miner process (pid: ${this._workerProcess.pid}), work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
+        // }
+        if (this._workerProcess !== null) {
+          // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+          this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
+          // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+          this._workerProcess.on('error', this._handleWorkerError.bind(this))
+          // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+          this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
+          // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
+          this._workerProcess.send({
+            currentTimestamp,
+            offset: ts.offset,
+            work,
+            minerKey: this._minerKey,
+            merkleRoot: newBlock.getMerkleRoot(),
+            difficulty: newBlock.getDifficulty(),
+            difficultyData: {
+              currentTimestamp,
+              lastPreviousBlock: lastPreviousBlock.serializeBinary(),
+              // $FlowFixMe
+              newBlockHeaders: newBlock.getBlockchainHeaders().serializeBinary()
+            }})
+          // $FlowFixMe - Flow can't properly find worker pid
+          return Promise.resolve(this._workerProcess.pid)
+        }
+      } catch (err) {
+        this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
+        return Promise.reject(err)
+      }
+      return Promise.resolve(false)
     } catch (err) {
       this._logger.warn(`Error while getting current blocks, reason: ${err.message}`)
-      throw err
+      return Promise.reject(err)
     }
-
-    // get latest known BC block
-    try {
-      const lastPreviousBlock = await this._persistence.get('bc.block.latest')
-      this._logger.debug(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
-    } catch (err) {
-      this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
-      throw err
-    }
-
-    this._logger.debug(`Preparing new block`)
-
-    const currentTimestamp = ts.nowSeconds()
-    if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
-      this._cleanUnfinishedBlock()
-    }
-    const [newBlock, finalTimestamp] = prepareNewBlock(
-      currentTimestamp,
-      lastPreviousBlock,
-      currentBlocks,
-      block,
-      [], // TODO add transactions
-      this._minerKey,
-      this._unfinishedBlock
-    )
-    const work = prepareWork(lastPreviousBlock.getHash(), newBlock.getBlockchainHeaders())
-    newBlock.setTimestamp(finalTimestamp)
-    this._unfinishedBlock = newBlock
-    this._unfinishedBlockData = {
-      lastPreviousBlock,
-      currentBlocks: newBlock.getBlockchainHeaders(),
-      block,
-      iterations: undefined,
-      timeDiff: undefined
-    }
-
-    // if blockchains block count === 5 we will create a block with 6 blockchain blocks (which gets bonus)
-    // if it's more, do not restart mining and start with new ones
-    if (this._workerProcess && this._unfinishedBlock) {
-      this._logger.debug(`Restarting mining with a new rovered block`)
-      // $FlowFixMe
-      this._workerProcess.kill()
-      // $FlowFixMe
-      this._workerProcess.disconnect()
-      this._workerProcess = null
-    }
-
-    // if (!this._workerProcess) {
-    this._logger.debug(`Starting miner process with work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
-    const proc: ChildProcess = fork(MINER_WORKER_PATH)
-    this._workerProcess = proc
-    // } else {
-    //   this._logger.debug(`Sending work to existing miner process (pid: ${this._workerProcess.pid}), work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
-    // }
-    if (this._workerProcess !== null) {
-      // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-      this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
-      // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-      this._workerProcess.on('error', this._handleWorkerError.bind(this))
-      // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-      this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
-      // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-      this._workerProcess.send({
-        currentTimestamp,
-        offset: ts.offset,
-        work,
-        minerKey: this._minerKey,
-        merkleRoot: newBlock.getMerkleRoot(),
-        difficulty: newBlock.getDifficulty(),
-        difficultyData: {
-          currentTimestamp,
-          lastPreviousBlock: lastPreviousBlock.serializeBinary(),
-          // $FlowFixMe
-          newBlockHeaders: newBlock.getBlockchainHeaders().serializeBinary()
-        }})
-      // $FlowFixMe - Flow can't properly find worker pid
-      return Promise.resolve(this._workerProcess.pid)
-    }
-    return Promise.resolve(false)
   }
 
   stopMining (): bool {
@@ -840,19 +852,20 @@ export default class Engine {
       return false
     }
 
+    this._workerProcess.removeAllListeners()
     this._workerProcess.kill()
     this._workerProcess.disconnect()
     this._workerProcess = null
     return true
   }
 
-  // restartMining (rovers: string[] = ROVERS): Promise<boolean> {
-  //   debug('Restarting mining', rovers)
-  //
-  //   this.stopMining()
-  //   return this.startMining(rovers || ROVERS)
-  //     .then(res => {
-  //       return Promise.resolve(!res)
-  //     })
-  // }
+  restartMining (rovers: string[] = ROVERS): Promise<boolean> {
+    debug('Restarting mining', rovers)
+
+    this.stopMining()
+    return this.startMining(rovers || ROVERS)
+      .then(res => {
+        return Promise.resolve(!res)
+      })
+  }
 }
