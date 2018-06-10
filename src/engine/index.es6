@@ -251,16 +251,23 @@ export default class Engine {
     const self = this
     try {
       const previousLatest = await self.persistence.get('bc.block.latest')
+      let persistNewBlock = false
+      if (previousLatest.getHeight() < (block.getHeight() - 7)) {
+        persistNewBlock = true
+      }
       if (previousLatest.getHash() === block.getPreviousHash()) {
+        persistNewBlock = true
+      }
+      if (persistNewBlock === true){
         await self.persistence.put('bc.block.latest', block)
         await self.persistence.put('bc.block.' + block.getHeight(), block)
         if (self._workerProcess === undefined) {
           self._workerProcess = false
         }
-        return Promise.resolve(true)
       } else {
         self._logger.warn('new purposed latest block does not match the last')
       }
+      return Promise.resolve(true)
     } catch (err) {
       await self.persistence.put('bc.block.latest', block)
       await self.persistence.put('bc.block.' + block.getHeight(), block)

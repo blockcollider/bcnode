@@ -47,7 +47,7 @@ export class PeerNode {
 
   constructor (engine: Engine) {
     this._engine = engine
-    this._multiverse = new Multiverse(true)
+    this._multiverse = new Multiverse() /// !important this is a (nonselective) multiverse
     this._blockPool = new BlockPool(engine._persistence, engine._pubsub)
     this._logger = logging.getLogger(__filename)
     this._manager = new PeerManager(this)
