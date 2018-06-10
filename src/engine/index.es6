@@ -174,9 +174,9 @@ export default class Engine {
           process.exit(8)
         }
       } catch (_) {
-        // version was not stored - very old version so log a request to delete _data and exit
-        this._logger.warn(DELETE_MESSAGE)
-        process.exit(8)
+        // silently continue - the version is not present so
+        // a) very old db
+        // b) user just remove database so let's store it
       }
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
