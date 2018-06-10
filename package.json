@@ -12,7 +12,7 @@
     "fixme": "./node_modules/fixme/bin/cli src/**/*.es6",
     "flow:watch": "./node_modules/flow-watch/src/flow-watch.js",
     "lint:standard": "standard src/**/*.es6",
-    "lint:flow": "flow",
+    "lint:flow": "flow || true",
     "proto": "./node_modules/grpc-tools/bin/protoc.js --proto_path=protos --js_out=import_style=commonjs,binary:src/protos protos/*.proto --grpc_out=src/protos --plugin=protoc-gen-grpc=./node_modules/grpc-tools/bin/grpc_node_plugin && yarn run proto-fix",
     "proto-fix": "./scripts/proto-fix.sh",
     "transpile": "babel src --source-maps=true --config-file ./.babelrc --out-dir lib --ignore ./lib/,./node_modules,./.babelrc,./package.json,./npm-debug.log",

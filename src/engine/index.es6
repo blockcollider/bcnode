@@ -162,12 +162,12 @@ export default class Engine {
       commit: long,
       db_version: 1
     }
+    const DB_LOCATION = resolve(`${__dirname}/../../${this.persistence._db.location}`)
+    const DELETE_MESSAGE = `Your DB version is old, please delete data folder '${DB_LOCATION}' and run bcnode again`
     // TODO get from CLI / config
     try {
       await this._persistence.open()
       try {
-        const DB_LOCATION = resolve(`${__dirname}/../../${this.persistence._db.location}`)
-        const DELETE_MESSAGE = `Your DB version is old, please delete data folder '${DB_LOCATION}' and run bcnode again`
         let version = await this.persistence.get('appversion')
         if (semver.lt(version.version, '0.6.0')) {
           this._logger.warn(DELETE_MESSAGE)
