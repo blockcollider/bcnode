@@ -153,10 +153,15 @@ export class Multiverse {
       syncing = true
       force = true
     }
-    // if (keyCount > 16) {
-    //  // remove the oldest
-    //  delete this._blocks[Object.keys(this._blocks)[0]]
-    // }
+    if (keyCount > 16) {
+      // remove the oldest
+      const orderedKeys = Object.keys(this._blocks).sort((a,b) {
+          if(a > b) { return 1 }
+          if(a < b) { return -1 }
+            return 0
+      })
+      this._blocks[orderedKeys[0]] = 1
+    }
     if (this._blocks[parentHeight] !== undefined) {
       hasParentHash = this._blocks[parentHeight].reduce((all, item, i) => {
         if (item.getHash() === block.getPreviousHash()) {

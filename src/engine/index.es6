@@ -75,6 +75,7 @@ export default class Engine {
   _canMine: bool; // eslint-disable-line no-undef
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
+  _rawBlock: ?Object
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
   _peerIsSyncing: boolean
@@ -84,6 +85,7 @@ export default class Engine {
     this._logger = logging.getLogger(__filename)
     this._knownRovers = opts.rovers
     this._minerKey = opts.minerKey
+    this._rawBlock = {}
     this._monitor = new Monitor(this, {})
     this._persistence = new PersistenceRocksDb(DATA_DIR)
     this._pubsub = new PubSub()
@@ -226,12 +228,16 @@ export default class Engine {
         .then((res) => {
           // if a fresh block is available rerun it with the updated latest block
           if (self._rawBlocks.has('bc.block.latestchild')) {
-            self._emitter.emit('collectBlock', self._rawBlocks.get('bc.block.latestchild'))
+            self.startMiner(self._rovers, self._rawBlock)
           }
         })
     })
   }
 
+  /**
+   * Store a block in persistence unless its Genesis Block
+   * @returns Promise
+   */
   async storeHeight (block: BcBlock) {
     const self = this
     // Block is genesis block
@@ -247,18 +253,24 @@ export default class Engine {
     }
   }
 
+  /**
+   * Store a block in persistence unless its Genesis Block
+   * @returns Promise
+   */
   async updateLatestAndStore (block: BcBlock) {
     const self = this
     try {
       const previousLatest = await self.persistence.get('bc.block.latest')
       let persistNewBlock = false
+      console.log('comparing new block ' + block.getHeight() + ' with the latest block at ' + block.getHeight())
       if (previousLatest.getHeight() < (block.getHeight() - 7)) {
         persistNewBlock = true
       }
       if (previousLatest.getHash() === block.getPreviousHash()) {
         persistNewBlock = true
       }
-      if (persistNewBlock === true){
+      if (persistNewBlock === true &&
+         block.getTimestamp() > previousLatest.getTimestamp()) { // notice you cannot create two blocks in the same second (for when BC moves to 1s block propogation waves)
         await self.persistence.put('bc.block.latest', block)
         await self.persistence.put('bc.block.' + block.getHeight(), block)
         if (self._workerProcess === undefined) {
@@ -281,6 +293,14 @@ export default class Engine {
    */
   get node (): Node {
     return this._node
+  }
+
+  /**
+   * Get node
+   * @return {Object}
+   */
+  get rawBlock (): ?Object {
+    return this._rawBlock
   }
 
   /**
@@ -366,8 +386,7 @@ export default class Engine {
     this._collectedBlocks[block.getBlockchain()] += 1
 
     // TODO: Adjust minimum count of collected blocks needed to trigger mining
-    // if (!this._canMine && all((numCollected: number) => numCollected >= 2, values(this._collectedBlocks))) { //--> MAINNET
-    if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) { // --> TESTNET
+    if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(self._collectedBlocks))) {
       this._canMine = true
     }
 
@@ -377,7 +396,9 @@ export default class Engine {
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       self._rawBlocks.set('bc.block.latestchild', block)
-      return this.startMining(rovers, block)
+      self.rawBlock = block
+      return self.startMining(rovers, block)
+
         .catch((err) => {
           self._logger.error(err)
         })
@@ -407,16 +428,16 @@ export default class Engine {
 
   blockFromPeer (conn: Object, newBlock: BcBlock) {
     const self = this
-    this._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
+    self._logger.info('!!!!!!!!!! received new block from peer', newBlock.getHeight(), newBlock.getMiner(), newBlock.toObject())
     // TODO: Validate new block mined by peer
     if (!self._knownBlocksCache.get(newBlock.getHash())) {
       debug(`Adding received block into cache of known blocks - ${newBlock.getHash()}`)
       // Add to cache
       this._knownBlocksCache.set(newBlock.getHash(), newBlock)
 
-      const beforeBlockHighest = this.multiverse.getHighestBlock()
-      const addedToMultiverse = this.multiverse.addBlock(newBlock)
-      const afterBlockHighest = this.multiverse.getHighestBlock()
+      const beforeBlockHighest = self.multiverse.getHighestBlock()
+      const addedToMultiverse = self.multiverse.addBlock(newBlock)
+      const afterBlockHighest = self.multiverse.getHighestBlock()
 
       // $FlowFixMe
       this._logger.debug('beforeBlockHighest: ' + beforeBlockHighest.getHash())
@@ -769,10 +790,6 @@ export default class Engine {
 
   async startMining (rovers: string[] = ROVERS, block: Block): Promise<*> {
     const self = this
-    if (this._workerProcess !== null && this._workerProcess !== undefined) {
-      this._logger.warn('miner already running')
-      return Promise.resolve(true)
-    }
     debug('Starting mining', rovers || ROVERS, block.toObject())
 
     let currentBlocks
@@ -791,8 +808,8 @@ export default class Engine {
       // get latest known BC block
       try {
         lastPreviousBlock = await self.persistence.get('bc.block.latest')
-        this._logger.info(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
-        this._logger.debug(`Preparing new block`)
+        self._logger.info(`Got last previous block (height: ${lastPreviousBlock.getHeight()}) from persistence`)
+        self._logger.debug(`Preparing new block`)
 
         const currentTimestamp = ts.nowSeconds()
         if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
@@ -804,13 +821,13 @@ export default class Engine {
           currentBlocks,
           block,
           [], // TODO: Transactions added here for AT period
-          this._minerKey,
-          this._unfinishedBlock
+          self._minerKey,
+          self._unfinishedBlock
         )
         const work = prepareWork(lastPreviousBlock.getHash(), newBlock.getBlockchainHeaders())
         newBlock.setTimestamp(finalTimestamp)
-        this._unfinishedBlock = newBlock
-        this._unfinishedBlockData = {
+        self._unfinishedBlock = newBlock
+        self._unfinishedBlockData = {
           lastPreviousBlock,
           currentBlocks: newBlock.getBlockchainHeaders(),
           block,
@@ -822,7 +839,7 @@ export default class Engine {
         // if it's more, do not restart mining and start with new ones
         if (this._workerProcess && this._unfinishedBlock) {
           this._logger.debug(`Restarting mining with a new rovered block`)
-          this.restartMiner()
+          return self.restartMiner()
         }
 
         // if (!this._workerProcess) {
@@ -832,15 +849,15 @@ export default class Engine {
         // } else {
         //   this._logger.debug(`Sending work to existing miner process (pid: ${this._workerProcess.pid}), work: "${work}", difficulty: ${newBlock.getDifficulty()}, ${JSON.stringify(this._collectedBlocks, null, 2)}`)
         // }
-        if (this._workerProcess !== null) {
+        if (self._workerProcess !== null) {
           // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-          this._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
+          self._workerProcess.on('message', this._handleWorkerFinishedMessage.bind(this))
           // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-          this._workerProcess.on('error', this._handleWorkerError.bind(this))
+          self._workerProcess.on('error', this._handleWorkerError.bind(this))
           // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-          this._workerProcess.on('exit', this._handleWorkerExit.bind(this))
+          self._workerProcess.on('exit', this._handleWorkerExit.bind(this))
           // $FlowFixMe - Flow can't find out that ChildProcess is extended form EventEmitter
-          this._workerProcess.send({
+          self._workerProcess.send({
             currentTimestamp,
             offset: ts.offset,
             work,
@@ -854,15 +871,15 @@ export default class Engine {
               newBlockHeaders: newBlock.getBlockchainHeaders().serializeBinary()
             }})
           // $FlowFixMe - Flow can't properly find worker pid
-          return Promise.resolve(this._workerProcess.pid)
+          return Promise.resolve(self._workerProcess.pid)
         }
       } catch (err) {
-        this._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
+        self._logger.warn(`Error while getting last previous BC block, reason: ${err.message}`)
         return Promise.reject(err)
       }
       return Promise.resolve(false)
     } catch (err) {
-      this._logger.warn(`Error while getting current blocks, reason: ${err.message}`)
+      self._logger.warn(`Error while getting current blocks, reason: ${err.message}`)
       return Promise.reject(err)
     }
   }

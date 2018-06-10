@@ -228,10 +228,14 @@ export default class Server {
   }
 
   _transformBlockToWire (block: Block) {
-    return {
-      timestamp: block.getTimestamp(),
-      blockchain: block.getBlockchain(),
-      hash: block.getHash()
+    if (block !== undefined && block.getTimestamp !== undefined) {
+      return {
+        timestamp: block.getTimestamp(),
+        blockchain: block.getBlockchain(),
+        hash: block.getHash()
+      }
+    } else {
+      return {}
     }
   }
 
