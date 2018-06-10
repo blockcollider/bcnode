@@ -228,7 +228,7 @@ export default class Engine {
         .then((res) => {
           // if a fresh block is available rerun it with the updated latest block
           if (self._rawBlocks.has('bc.block.latestchild')) {
-            self.startMiner(self._rovers, self._rawBlock)
+            self.startMining(self._rovers, self._rawBlock)
           }
         })
     })
@@ -853,7 +853,7 @@ export default class Engine {
         // if it's more, do not restart mining and start with new ones
         if (this._workerProcess && this._unfinishedBlock) {
           this._logger.debug(`Restarting mining with a new rovered block`)
-          return self.restartMiner()
+          return self.restartMining()
         }
 
         // if (!this._workerProcess) {
@@ -912,7 +912,7 @@ export default class Engine {
     return true
   }
 
-  restartMiner (rovers: string[] = ROVERS): Promise<boolean> {
+  restartMining (rovers: string[] = ROVERS): Promise<boolean> {
     debug('Restarting mining', rovers)
 
     this.stopMining()
