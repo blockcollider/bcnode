@@ -811,7 +811,7 @@ export default class Engine {
 
     // get latest block from each child blockchain
     try {
-      const getKeys: string[] = self.rovers.map(chain => `${chain}.block.latest`)
+      const getKeys: string[] = ROVERS.map(chain => `${chain}.block.latest`)
       currentBlocks = await Promise.all(getKeys.map((key) => {
         return self.persistence.get(key).then(block => {
           this._logger.debug(`Got "${key}"`)
