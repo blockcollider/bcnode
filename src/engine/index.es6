@@ -82,6 +82,7 @@ export default class Engine {
   _unfinishedBlockData: ?UnfinishedBlockData
   _peerIsSyncing: boolean
   _peerIsResyncing: boolean
+  _storageQueue: any
 
   constructor (logger: Object, opts: { rovers: string[], minerKey: string}) {
     this._logger = logging.getLogger(__filename)
@@ -104,6 +105,9 @@ export default class Engine {
     }
     this._canMine = false
     this._unfinishedBlockData = { block: undefined, lastPreviousBlock: undefined, currentBlocks: {}, timeDiff: undefined, iterations: undefined }
+    this._storageQueue = queue((fn, cb) => {
+      return fn.then((res) => { cb(null, res) }).catch((err) => { cb(err) })
+    })
 
     this._knownBlocksCache = LRUCache({
       max: 1024
@@ -241,10 +245,6 @@ export default class Engine {
         if (err) {
           console.trace(err)
           self._logger.error(err)
-        } else {
-          if (self._canMine === true) {
-            self.restartMining()
-          }
         }
       })
     })
@@ -258,10 +258,6 @@ export default class Engine {
         if (err) {
           console.trace(err)
           self._logger.error(err)
-        } else {
-          if (self._canMine === true) {
-            self.restartMining()
-          }
         }
       })
     })
@@ -561,16 +557,13 @@ export default class Engine {
                         high: newBlock.getHeight() + 2
                       })
                         .then((blocks) => {
-                          const tasks = blocks.map((block) => {
-                            return self.blockpool.addBlock(block)
+                          blocks.map((block) => {
+                            self._storageQueue.push(self.blockpool.addBlock(block), function (err, data) {
+                              if (err) {
+                                self._logger.error(err)
+                              }
+                            })
                           })
-                          Promise.all(tasks)
-                            .then((res) => {
-                              // TODO: @korczis ->  this is breaking
-                            })
-                            .catch((err) => {
-                              console.trace(err)
-                            })
                         })
                         .catch((err) => {
                           self._logger.error(new Error('unable to complete resync with peer'))
@@ -645,6 +638,7 @@ export default class Engine {
   }
 
   _handleWorkerFinishedMessage (solution: { distance: number, nonce : string, difficulty: number, timestamp: number, iterations: number, timeDiff: number }) {
+    const self = this
     if (this._unfinishedBlock === undefined || this._unfinishedBlock === null) {
       this._logger.warn('There is not an unfinished block to use solution for')
       return
@@ -682,9 +676,12 @@ export default class Engine {
       .then((res) => {
         // If block was successfully processed then _cleanUnfinishedBlock
         if (res) {
-          this._broadcastMinedBlock(this._unfinishedBlock, solution)
-
-          this._cleanUnfinishedBlock()
+          try {
+            self._broadcastMinedBlock(self._unfinishedBlock, solution)
+            self._cleanUnfinishedBlock()
+          } catch (err) {
+            self._cleanUnfinishedBlock()
+          }
         }
       })
   }
@@ -763,27 +760,28 @@ export default class Engine {
    * @private
    */
   _broadcastMinedBlock (newBlock: BcBlock, solution: Object): Promise<*> {
+    const self = this
     this._logger.info('Broadcasting mined block')
 
     if (newBlock === undefined) {
       return Promise.reject(new Error('cannot broadcast empty block'))
     }
 
-    this.node.broadcastNewBlock(newBlock)
-    this._cleanUnfinishedBlock()
-
     try {
-      const newBlockObj = {
-        ...newBlock.toObject(),
-        iterations: solution.iterations,
-        timeDiff: solution.timeDiff
+      self.node.broadcastNewBlock(newBlock)
+      try {
+        const newBlockObj = {
+          ...newBlock.toObject(),
+          iterations: solution.iterations,
+          timeDiff: solution.timeDiff
+        }
+        self.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
+      } catch (e) {
+        return Promise.reject(e)
       }
-
-      this.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
-    } catch (e) {
-      console.log('ERROR BROADCASTING', e)
+    } catch (err) {
+      return Promise.reject(err)
     }
-
     return Promise.resolve(true)
   }
 
@@ -946,9 +944,9 @@ export default class Engine {
       return false
     }
 
+    this._workerProcess.disconnect()
     this._workerProcess.removeAllListeners()
     this._workerProcess.kill()
-    this._workerProcess.disconnect()
     this._workerProcess = null
     return true
   }
@@ -962,10 +960,8 @@ export default class Engine {
         .then(res => {
           return Promise.resolve(!res)
         })
+    } else {
+      return Promise.resolve(true)
     }
-    return this.startMining(rovers || ROVERS)
-      .then(res => {
-        return Promise.resolve(!res)
-      })
   }
 }
