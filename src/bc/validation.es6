@@ -71,6 +71,10 @@ function theBlockChainFingerPrintMatchGenesisBlock (newBlock: BcBlock): bool {
 
 function numberOfBlockchainsNeededMatchesChildBlock (newBlock: BcBlock): bool {
   logger.info('numberOfBlockchainsNeededMatchesChildBlock validation running')
+  // skip for genesis block - it chas no blockchain blocks embedded
+  if (newBlock.getHeight() === GENESIS_DATA.hash && newBlock.getHeight() === 1) {
+    return true
+  }
   // verify that all blockain header lists are non empty and that there is childBlockchainCount of them
   const headerValues = Object.values(newBlock.getBlockchainHeaders().toObject())
   // logger.info(inspect(headerValues, {depth: 3}))
