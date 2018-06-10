@@ -1,4 +1,4 @@
-/**
+/* e
  * Copyright (c) 2017-present, Block Collider developers, All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
@@ -296,11 +296,19 @@ export default class Engine {
   }
 
   /**
-   * Get node
+   * Get rawBlock
    * @return {Object}
    */
   get rawBlock (): ?Object {
     return this._rawBlock
+  }
+
+  /**
+   * Get rawBlock
+   * @return {Object}
+   */
+  set rawBlock (block: Object): ?Object {
+    this._rawBlock = block
   }
 
   /**
@@ -480,6 +488,8 @@ export default class Engine {
 
             conn.getPeerInfo((err, peerInfo) => {
               if (err) {
+                console.trace(err)
+                self._logger.error(err)
                 return false
               }
 
@@ -523,11 +533,15 @@ export default class Engine {
                           })
                           Promise.all(tasks)
                             .then((res) => {
-
+                              // TODO: @korczis ->  this is breaking
                             })
                             .catch((err) => {
                               console.trace(err)
                             })
+                        })
+                        .catch((err) => {
+                          self._logger.error(new Error('unable to complete resync with peer'))
+                          console.trace(err)
                         })
                     }
                   }
