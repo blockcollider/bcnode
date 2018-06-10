@@ -193,6 +193,7 @@ export class PeerNode {
       this._logger.debug(`Sending to peer ${peer}`)
       this.bundle.dialProtocol(peer, url, (err, conn) => {
         if (err) {
+          console.trace(err)
           this._logger.error('Error sending message to peer', peer.id.toB58String(), err)
           return err
         }

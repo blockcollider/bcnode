@@ -225,8 +225,8 @@ export default class Engine {
       self.updateLatestAndStore(msg.data)
         .then((res) => {
           // complete
-          if(self._rawBlocks.has('bc.block.latestchild')){
-             self._emitter.emit('collectBlock', self._rawBlocks.get('bc.block.latestchild'))
+          if (self._rawBlocks.has('bc.block.latestchild')) {
+            self._emitter.emit('collectBlock', self._rawBlocks.get('bc.block.latestchild'))
           }
           self.startMining
         })
@@ -495,12 +495,12 @@ export default class Engine {
                             return self.blockpool.addBlock(block)
                           })
                           Promise.all(tasks)
-                          .then((res) => {
+                            .then((res) => {
 
-                          })
-                          .catch((err) => {
-                            console.trace(err)
-                          })
+                            })
+                            .catch((err) => {
+                              console.trace(err)
+                            })
                         })
                     }
                   }
