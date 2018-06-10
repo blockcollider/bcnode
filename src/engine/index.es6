@@ -898,7 +898,7 @@ export default class Engine {
     return true
   }
 
-  restartMining (rovers: string[] = ROVERS): Promise<boolean> {
+  restartMiner (rovers: string[] = ROVERS): Promise<boolean> {
     debug('Restarting mining', rovers)
 
     this.stopMining()
