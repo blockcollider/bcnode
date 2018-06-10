@@ -60,6 +60,7 @@ export default class Engine {
   _logger: Object; // eslint-disable-line no-undef
   _monitor: Monitor; // eslint-disable-line no-undef
   _knownBlocksCache: LRUCache<string, BcBlock>; // eslint-disable-line no-undef
+  _rawBlocks: LRUCache<number, Block>; // eslint-disable-line no-undef
   _node: Node; // eslint-disable-line no-undef
   _persistence: PersistenceRocksDb; // eslint-disable-line no-undef
   _pubsub: PubSub; //  eslint-disable-line no-undef
@@ -102,6 +103,10 @@ export default class Engine {
 
     this._knownBlocksCache = LRUCache({
       max: 1024
+    })
+
+    this._rawBlocks = LRUCache({
+      max: 5
     })
 
     this._peerIsSyncing = false
@@ -220,6 +225,10 @@ export default class Engine {
       self.updateLatestAndStore(msg.data)
         .then((res) => {
           // complete
+          if(self._rawBlocks.has('bc.block.latestchild')){
+             self._emitter.emit('collectBlock', self._rawBlocks.get('bc.block.latestchild'))
+          }
+          self.startMining
         })
     })
   }
@@ -231,15 +240,11 @@ export default class Engine {
       return
     }
     try {
-      const previousHeight = await self.persistence.get('bc.block.' + (block.getHeight() - 1))
-      if (previousHeight.getHash() === block.getPreviousHash()) {
-        await self.persistence.put('bc.block.' + block.getHeight(), block)
-      } else {
-        self._logger.warn('new purposed latest block does not match the last')
-      }
+      await self.persistence.put('bc.block.' + block.getHeight(), block)
+      return Promise.resolve(block)
     } catch (err) {
-      console.trace(err)
       self._logger.warn('unable to store block ' + block.getHeight() + ' - ' + block.getHash())
+      return Promise.reject(err)
     }
   }
 
@@ -359,11 +364,13 @@ export default class Engine {
     if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) { // --> TESTNET
       this._canMine = true
     }
+
     if (PERSIST_ROVER_DATA === true) {
       this._writeRoverData(block)
     }
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
+      self._rawBlocks.set('bc.block.latestchild', block)
       return this.startMining(rovers, block)
         .catch((err) => {
           self._logger.error(err)
@@ -422,7 +429,6 @@ export default class Engine {
       }
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
-        self.stopMining()
         self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (addedToMultiverse === true) { // !important as update block latest also stored height
         self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
@@ -474,8 +480,8 @@ export default class Engine {
                       self.multiverse._blocks = clone(bestCandidate._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
-                      self.stopMining()
                       self.blockpool._checkpoint = lowCandidateBlock
+                      self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock })
                       // sets multiverse for removal
                       bestCandidate._created = 0
                       bestPeer.query({
@@ -485,7 +491,16 @@ export default class Engine {
                         high: newBlock.getHeight() + 2
                       })
                         .then((blocks) => {
-                          blocks.map((block) => self.blockFromPeer(block))
+                          const tasks = blocks.map((block) => {
+                            return self.blockpool.addBlock(block)
+                          })
+                          Promise.all(tasks)
+                          .then((res) => {
+
+                          })
+                          .catch((err) => {
+                            console.trace(err)
+                          })
                         })
                     }
                   }
@@ -513,6 +528,7 @@ export default class Engine {
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true
                 self.blockpool._checkpoint = lowCandidateBlock
+                self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock })
                 // sets multiverse for removal
               }
             }
