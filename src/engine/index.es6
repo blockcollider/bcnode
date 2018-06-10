@@ -114,6 +114,11 @@ export default class Engine {
     // Start NTP sync
     ts.start()
   }
+
+  get minerKey (): ?string {
+    return this._minerKey
+  }
+
   /**
    * Get multiverse
    * @returns {Multiverse|*}
