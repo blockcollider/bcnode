@@ -58,8 +58,8 @@ export function isValidBlock (newBlock: BcBlock): bool {
     return false
   }
   if (!isDistanceCorrectlyCalculated(newBlock)) {
-   logger.warn('failed: isDistanceCorrectlyCalculated')
-   return false
+    logger.warn('failed: isDistanceCorrectlyCalculated')
+    return false
   }
   return true
 }
