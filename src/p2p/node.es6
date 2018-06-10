@@ -189,7 +189,7 @@ export class PeerNode {
     this._logger.debug(`Broadcasting msg to peers, ${inspect(block.toObject())}`)
 
     const url = `${PROTOCOL_PREFIX}/newblock`
-    this.peerBook.getAllArray().map(peer => {
+    this.manager.peerBookConnected.getAllArray().map(peer => {
       this._logger.debug(`Sending to peer ${peer}`)
       this.bundle.dialProtocol(peer, url, (err, conn) => {
         if (err) {
@@ -210,7 +210,7 @@ export class PeerNode {
     // Notify miner to stop mining
     this.reportSyncPeriod(true)
 
-    this.peerBook.getAllArray().map(peer => {
+    this.manager.peerBookConnected.getAllArray().map(peer => {
       this.manager.createPeer(peer)
         .getMultiverse()
         .then((multiverse) => {
