@@ -77,7 +77,7 @@ export default class Engine {
   _canMine: bool; // eslint-disable-line no-undef
   _workerProcess: ?ChildProcess
   _unfinishedBlock: ?BcBlock
-  _rawBlock: Object[]
+  _rawBlock: Block[]
   _subscribers: Object
   _unfinishedBlockData: ?UnfinishedBlockData
   _peerIsSyncing: boolean
@@ -432,10 +432,8 @@ export default class Engine {
     }
     // start mining only if all known chains are being rovered
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
-      self._rawBlocks.set('bc.block.latestchild', block)
       self._rawBlock.push(block)
       return self.startMining(rovers, block)
-
         .catch((err) => {
           self._logger.error(err)
         })
@@ -690,10 +688,12 @@ export default class Engine {
     this._logger.warn(`Mining worker process errored, reason: ${error.message}`)
     this._cleanUnfinishedBlock()
     // $FlowFixMe - Flow can't properly type subprocess
-    this._workerProcess.kill()
-    // $FlowFixMe - Flow can't properly type subprocess
-    this._workerProcess.disconnect()
-    this._workerProcess = undefined
+    if (this._workerProcess !== undefined && this._workerProcess !== null && this._workerProcess !== false) {
+      this._workerProcess.kill()
+      // $FlowFixMe - Flow can't properly type subprocess
+      this._workerProcess.disconnect()
+      this._workerProcess = undefined
+    }
   }
 
   _handleWorkerExit (code: number, signal: string) {
@@ -945,10 +945,12 @@ export default class Engine {
     }
 
     try {
-      this._workerProcess.disconnect()
-      this._workerProcess.removeAllListeners()
-      this._workerProcess.kill()
-      this._workerProcess = null
+      if (this._workerProcess !== undefined && this._workerProcess !== null && this._workerProcess !== false) {
+        this._workerProcess.disconnect()
+        this._workerProcess.removeAllListeners()
+        this._workerProcess.kill()
+        this._workerProcess = null
+      }
     } catch (err) {
       this._logger.debug(`Stopping mining failed, reason: ${err.message}`)
       return false
