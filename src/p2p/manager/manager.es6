@@ -189,13 +189,13 @@ export class PeerManager {
       this.peerBookConnected.remove(peer)
       this.engine._emitter.emit('peerDisconnected', { peer })
 
-      if (this._peerBookDiscovered.has(peer)) {
-        this._peerBookDiscovered.remove(peer)
-      }
-
       debug(`Peer disconnected '${peerId}', removing from connectedPeerBook, count: ${this.peerBookConnected.getPeersCount()}`)
     } else {
       debug(`Peer '${peerId}', already removed from connectedPeerBook`)
+    }
+
+    if (this._peerBookDiscovered.has(peer)) {
+      this._peerBookDiscovered.remove(peer)
     }
   }
 
