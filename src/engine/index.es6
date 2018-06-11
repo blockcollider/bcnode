@@ -224,18 +224,18 @@ export default class Engine {
     this._logger.debug('Engine initialized')
 
     self.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
-      engineQueue.push(storeHeight(msg), function(err, data) {
-        if(err) {
+      engineQueue.push(self.storeHeight(msg), function (err, data) {
+        if (err) {
           console.trace(err)
         }
       })
       self.storeHeight(msg).then((res) => {
-         if(res === true) {
-           self._logger.info('wrote block ' + msg.data.getHeight()
-         }
+        if (res === true) {
+          self._logger.info('wrote block ' + msg.data.getHeight())
+        }
       }).catch((err) => {
-         console.trace(err)
-         self._logger.error(err)
+        console.trace(err)
+        self._logger.error(err)
       })
     })
 
