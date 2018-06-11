@@ -315,8 +315,10 @@ export default class Engine {
       }
       return Promise.resolve(true)
     } catch (err) {
-      await self.persistence.put('bc.block.latest', block)
-      await self.persistence.put('bc.block.' + block.getHeight(), block)
+      if (block !== undefined) {
+        await self.persistence.put('bc.block.latest', block)
+        await self.persistence.put('bc.block.' + block.getHeight(), block)
+      }
       return Promise.resolve(true)
     }
   }
