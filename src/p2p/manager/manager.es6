@@ -220,6 +220,8 @@ export class PeerManager {
       if (err) {
         debug('Error dialing /status protocol', peerId, err)
         this._logger.error('Error dialing /status protocol', peerId)
+
+        // FIXME: Propagate corectly
         // throw err
 
         return
@@ -231,14 +233,22 @@ export class PeerManager {
         pull.collect((err, wireData) => {
           if (err) {
             debug('Error pulling latest /status', peerId, err)
-            throw err
+
+            // FIXME: Propagate corectly
+            // throw err
+
+            return
           }
 
           debug('Getting latest peer info', peerId)
           conn.getPeerInfo((err, peerInfo) => {
             if (err) {
               debug('Error getting latest peer info', peerId, err)
-              throw err
+
+              // FIXME: Propagate corectly
+              // throw err
+
+              return
             }
 
             if (this.peerBookConnected.has(peer)) {
