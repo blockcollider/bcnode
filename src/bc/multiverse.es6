@@ -249,8 +249,9 @@ export class Multiverse {
       self._blocks[height].push(block)
       if (self._blocks[height].length > 1) {
         self._blocks[height] = self._blocks[height].sort((a, b) => {
-          if (a.getDistance() < b.getDistance()) return 1
-          if (a.getDistance() > b.getDistance()) return -1
+          if (new BN(a.getTotalDistance()).lt(new BN(b.getTotalDistance())) === true) {
+
+          }
           return 0
         })
       }
@@ -356,8 +357,9 @@ export class Multiverse {
     } else {
       const performance = minimumDepthChains.reduce((order, chain) => {
         const distances = chain.map((b) => {
-          return b.getDistance()
-        })
+          all = new BN(b.getTotalDistance()).add(all)
+          all.push(b)
+        }, [])
         const totalDistance = sum(distances)
         if (order.length === 0) {
           order.push([chain, totalDistance])
