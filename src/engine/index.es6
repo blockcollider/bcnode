@@ -535,7 +535,6 @@ export default class Engine {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
                 new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
-        self.stopMiner()
         const newMultiverse = new Multiverse(true)
         newMultiverse.addBlock(newBlock)
         conn.getPeerInfo((err, peerInfo) => {
@@ -850,7 +849,6 @@ export default class Engine {
       return Promise.reject(new Error('cannot broadcast empty block'))
     }
     // if (Object.keys(self.multiverse).length > 6) {
-    //  self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
     // }
     try {
       self.node.broadcastNewBlock(newBlock)
@@ -860,6 +858,7 @@ export default class Engine {
           iterations: solution.iterations,
           timeDiff: solution.timeDiff
         }
+        self.pubsub.publish('update.block.latest', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
         self.pubsub.publish('block.mined', { type: 'block.mined', data: newBlockObj })
       } catch (e) {
         return Promise.reject(e)
