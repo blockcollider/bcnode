@@ -975,13 +975,13 @@ export default class Engine {
     debug('Restarting mining', rovers)
 
     this.stopMining()
-    // if (this._rawBlock.length > 0) {
-    //  return this.startMining(rovers || ROVERS, this._rawBlock.pop())
-    //    .then(res => {
-    //      return Promise.resolve(!res)
-    //    })
-    // } else {
-    return Promise.resolve(true)
-    // }
+    if (this._rawBlock.length > 0) {
+      return this.startMining(rovers || ROVERS, this._rawBlock.pop())
+        .then(res => {
+          return Promise.resolve(!res)
+        })
+    } else {
+      return Promise.resolve(true)
+    }
   }
 }
