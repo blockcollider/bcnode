@@ -7,4 +7,4 @@
  * @flow
  */
 
-export const PEER_QUORUM_SIZE = 1
+export const PEER_QUORUM_SIZE = 16
