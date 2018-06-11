@@ -109,13 +109,15 @@ export default class PersistenceRocksDb {
         return this.get(k)
       })
 
-      console.log('BULK GET')
-      console.trace()
+      // console.log('BULK GET')
+      // console.trace()
+      //
+      // return Promise.all(promises.map((p) => p.catch(e => null)))
+      //   .then((results) => {
+      //     return results.filter(a => a)
+      //   })
 
-      return Promise.all(promises.map((p) => p.catch(e => null)))
-        .then((results) => {
-          return results.filter(a => a)
-        })
+      return Promise.all(promises)
     }
 
     return new Promise((resolve, reject) => {
