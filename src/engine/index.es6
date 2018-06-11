@@ -500,7 +500,7 @@ export default class Engine {
       if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
-                new BN(afterBlockHightest.getTotalDistance()).gt(new BN(newBlock.getTotalDistance())) === true) {
+                new BN(afterBlockHighest.getTotalDistance()).gt(new BN(newBlock.getTotalDistance())) === true) {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
@@ -837,9 +837,6 @@ export default class Engine {
 
       if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-      } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
-                new BN(afterBlockHightest.getTotalDistance()).gt(new BN(newBlock.getTotalDistance())) === true) {
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
       } else if (addedToMultiverse === true) {
         this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       }
