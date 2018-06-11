@@ -220,7 +220,9 @@ export class PeerManager {
       if (err) {
         debug('Error dialing /status protocol', peerId, err)
         this._logger.error('Error dialing /status protocol', peerId)
-        throw err
+        // throw err
+
+        return
       }
 
       debug('Pulling latest /status', peerId)
