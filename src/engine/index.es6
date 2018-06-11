@@ -224,11 +224,18 @@ export default class Engine {
     this._logger.debug('Engine initialized')
 
     self.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
-      self._storageQueue.push(self.storeHeight(msg), function (err, data) {
-        if (err) {
+      engineQueue.push(storeHeight(msg), function(err, data) {
+        if(err) {
           console.trace(err)
-          self._logger.error(err)
         }
+      })
+      self.storeHeight(msg).then((res) => {
+         if(res === true) {
+           self._logger.info('wrote block ' + msg.data.getHeight()
+         }
+      }).catch((err) => {
+         console.trace(err)
+         self._logger.error(err)
       })
     })
 
@@ -476,6 +483,9 @@ export default class Engine {
     if (this._canMine && !this._peerIsSyncing && equals(new Set(this._knownRovers), new Set(rovers))) {
       self._rawBlock.push(block)
       return self.startMining(rovers, block)
+        .then((res) => {
+          self._logger.info('mining cycle initiated')
+        })
         .catch((err) => {
           self._logger.error(err)
         })
@@ -1045,13 +1055,13 @@ export default class Engine {
     debug('Restarting mining', rovers)
 
     this.stopMining()
-    if (this._rawBlock.length > 0) {
-      return this.startMining(rovers || ROVERS, this._rawBlock.pop())
-        .then(res => {
-          return Promise.resolve(!res)
-        })
-    } else {
-      return Promise.resolve(true)
-    }
+    // if (this._rawBlock.length > 0) {
+    //  return this.startMining(rovers || ROVERS, this._rawBlock.pop())
+    //    .then(res => {
+    //      return Promise.resolve(!res)
+    //    })
+    // } else {
+    return Promise.resolve(true)
+    // }
   }
 }
