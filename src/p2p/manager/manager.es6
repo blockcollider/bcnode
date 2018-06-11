@@ -137,10 +137,14 @@ export class PeerManager {
       debug(`Dialing newly discovered peer ${peerId}`)
       return this.bundle.dial(peer, (err) => {
         if (err) {
-          debug(`Error while dialing discovered peer ${peerId}`, err)
-          this._logger.warn(`Error while dialing discovered peer ${peerId}`,
-            err)
-          return err
+          const errMsg = `Dialing discovered peer '${peerId}' failed, reason: '${err.message}' - peer will be redialed`
+          debug(errMsg)
+          this._logger.debug(errMsg)
+
+          // Throwing error is not needed, peer will be dialed once circuit is enabled
+          // this.peerBookDiscovered.remove(peer)
+
+          return
         }
 
         this._logger.info(`Discovered peer successfully dialed ${peerId}`)

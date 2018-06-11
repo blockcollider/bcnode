@@ -100,12 +100,25 @@ export default class Server {
       help: Null
     }
 
-    this._app.get('/balance', (req, res, next) => {
-      const minerKey = this.engine.minerKey
-      if (minerKey) {
-        this._engine.persistence.getBtAddressBalance(minerKey)
+    this._app.get('/balance/:address', (req, res, next) => {
+      const address = req.params.address
+      if (address) {
+        this._engine.persistence.getBtAddressBalance(req.params.address)
           .then((result) => {
-            result.address = minerKey
+            result.address = address
+            res.json(result)
+          })
+      } else {
+        res.json({})
+      }
+    })
+
+    this._app.get('/balance', (req, res, next) => {
+      const address = this.engine.minerKey
+      if (address) {
+        this._engine.persistence.getBtAddressBalance(address)
+          .then((result) => {
+            result.address = address
             res.json(result)
           })
       } else {

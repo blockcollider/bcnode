@@ -944,11 +944,16 @@ export default class Engine {
       return false
     }
 
-    if (this._workerProcess !== undefined && this._workerProcess !== null && this._workerProcess !== false) {
-      this._workerProcess.disconnect()
-      this._workerProcess.removeAllListeners()
-      this._workerProcess.kill()
-      this._workerProcess = null
+    try {
+      if (this._workerProcess !== undefined && this._workerProcess !== null && this._workerProcess !== false) {
+        this._workerProcess.disconnect()
+        this._workerProcess.removeAllListeners()
+        this._workerProcess.kill()
+        this._workerProcess = null
+      }
+    } catch (err) {
+      this._logger.debug(`Stopping mining failed, reason: ${err.message}`)
+      return false
     }
     return true
   }

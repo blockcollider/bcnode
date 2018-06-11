@@ -112,7 +112,7 @@ export default class RoverManager {
 
     const groups = g(files)
     const tmp = Object.keys(groups).map((k) => {
-      return groups[k].slice(-10)
+      return groups[k].slice(-1)
     }) || []
 
     files = flatten(tmp)
