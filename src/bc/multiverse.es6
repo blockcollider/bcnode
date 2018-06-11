@@ -282,13 +282,21 @@ export class Multiverse {
      *    dim([t,d]) . max(t+d*n)
      *
      */
-    if (keys.length === 0) {
-      keys = Object.keys(this._blocks)
-      list = []
-    }
     if (Object.keys(this._blocks).length === 0) {
       this._logger.warn('unable to determine height from incomplete multiverse')
       return false
+    }
+    if (keys.length === 0) {
+      keys = Object.keys(this._blocks).sort((a, b) => {
+        if (a > b) {
+          return 1
+        }
+        if (a < b) {
+          return -1
+        }
+        return 0
+      })
+      list = []
     }
     const currentHeight = keys.pop()
     const currentRow = this._blocks[currentHeight]
