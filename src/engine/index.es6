@@ -343,6 +343,8 @@ export default class Engine {
         }, [])
         await Promise.all(tasks)
         return Promise.resolve(true)
+      } else if (msg.force !== undefined && msg.force === true && msg.purge !== undefined) {
+        return self.blockpool.purgeFrom(block.getHeight(), msg.purge)
       } else {
         return Promise.resolve(true)
       }
@@ -615,7 +617,7 @@ export default class Engine {
               debug('Querying peer for blocks', peerQuery)
 
               console.log('***********************CANDIDATE 1*******************')
-              this.node.manager.createPeer(peerInfo)
+              self.node.manager.createPeer(peerInfo)
                 .query(peerQuery)
                 .then((blocks) => {
                   debug('Got query response', blocks)
@@ -847,9 +849,9 @@ export default class Engine {
     if (newBlock === undefined) {
       return Promise.reject(new Error('cannot broadcast empty block'))
     }
-
-    self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock, force: true })
-
+    // if (Object.keys(self.multiverse).length > 6) {
+    //  self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+    // }
     try {
       self.node.broadcastNewBlock(newBlock)
       try {
@@ -908,6 +910,7 @@ export default class Engine {
         return Promise.resolve(true)
       } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
                 new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
+        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true, purge: (newBlock.getHeight() - 6) })
         return Promise.resolve(true)
       } else {
         return Promise.resolve(false)
