@@ -23,7 +23,7 @@ const BN = require('bn.js')
 const semver = require('semver')
 
 const { config } = require('../config')
-const { debugSaveObject, isDebugEnabled, ensureDebugPath } = require('../debug')
+const { isDebugEnabled, ensureDebugPath } = require('../debug')
 const { Multiverse } = require('../bc/multiverse')
 const logging = require('../logger')
 const { Monitor } = require('../monitor')
@@ -681,7 +681,7 @@ export default class Engine {
     this._processMinedBlock(this._unfinishedBlock, solution)
       .then((res) => {
         // If block was successfully processed then _cleanUnfinishedBlock
-        if (res) {
+        if (res === true) {
           try {
             self._broadcastMinedBlock(self._unfinishedBlock, solution)
               .then((res) => {
@@ -837,18 +837,13 @@ export default class Engine {
 
       if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+        return Promise.resolve(true)
       } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
                 new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
-      } else if (addedToMultiverse === true) {
-        this.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
+        return Promise.resolve(true)
+      } else {
+        return Promise.resolve(false)
       }
-
-      // Store block in _debug folder and return promise indicating success
-      if (newBlock !== undefined) {
-        debugSaveObject(`bc/block/${newBlock.getTimestamp()}-${newBlock.getHash()}.json`, newBlock.toObject())
-      }
-      return Promise.resolve(true)
     } catch (err) {
       this._logger.warn(`failed to process work provided by miner, err: ${errToString(err)}`)
       return Promise.resolve(false)
