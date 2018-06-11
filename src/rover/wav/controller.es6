@@ -119,6 +119,7 @@ export default class Controller {
   _rpc: RpcClient;
   _intervalDescriptor: IntervalID;
   _blockCache: LRUCache<string, bool>;
+  _lastBlockHeight: number;
   /* eslint-enable */
   constructor (config: Object) {
     this._config = config
@@ -126,6 +127,7 @@ export default class Controller {
     this._wavesApi = WavesApi.create(WavesApi.MAINNET_CONFIG)
     this._rpc = new RpcClient()
     this._blockCache = new LRUCache({ max: 500 })
+    this._lastBlockHeight = 0
   }
 
   init () {
@@ -146,7 +148,8 @@ export default class Controller {
       return getLastHeight(this._wavesApi).then(height => {
         this._logger.debug(`Got last height '${height}'`)
         getBlock(this._wavesApi, height - 1).then(lastBlock => {
-          if (!this._blockCache.has(lastBlock.reference)) {
+          const newBlockHeight = parseInt(lastBlock.height, 10)
+          if (!this._blockCache.has(lastBlock.reference) && this._lastBlockHeight <= newBlockHeight) {
             this._logger.debug(`Unseen new block '${lastBlock.reference}', height: ${height}`)
             this._blockCache.set(lastBlock.reference)
 
@@ -157,6 +160,7 @@ export default class Controller {
                 this._logger.error(`Error while collecting block ${inspect(err)}`)
                 return
               }
+              this._lastBlockHeight = newBlockHeight
               this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
             })
           }
