@@ -254,7 +254,7 @@ export default class Engine {
     })
 
     self.pubsub.subscribe('update.block.latest', '<engine>', (msg) => {
-      engineQueue.push(self.updateLatestAndStore(msg.data), function (err, data) {
+      engineQueue.push(self.updateLatestAndStore(msg), function (err, data) {
         if (err) {
           console.trace(err)
           self._logger.error(err)
@@ -286,8 +286,9 @@ export default class Engine {
    * Store a block in persistence unless its Genesis Block
    * @returns Promise
    */
-  async updateLatestAndStore (block: BcBlock) {
+  async updateLatestAndStore (msg: Object) {
     const self = this
+    const block = msg.data
     try {
       const previousLatest = await self.persistence.get('bc.block.latest')
       let persistNewBlock = false
@@ -296,6 +297,10 @@ export default class Engine {
         persistNewBlock = true
       }
       if (previousLatest.getHash() === block.getPreviousHash()) {
+        persistNewBlock = true
+      }
+      if (msg.force !== undefined && msg.force === true) {
+        // TODO: trigger purge
         persistNewBlock = true
       }
       if (persistNewBlock === true &&
@@ -491,7 +496,7 @@ export default class Engine {
       }
 
       if (beforeBlockHighest !== afterBlockHighest) { // TODO @schnorr
-        self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
+        self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: false })
       } else if (addedToMultiverse === true) { // !important as update block latest also stored height
         self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock })
       } else {
@@ -545,7 +550,7 @@ export default class Engine {
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
                       self.blockpool._checkpoint = lowCandidateBlock
-                      self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock })
+                      self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true })
                       // sets multiverse for removal
                       bestCandidate._created = 0
                       bestPeer.query({
@@ -593,7 +598,7 @@ export default class Engine {
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true
                 self.blockpool._checkpoint = lowCandidateBlock
-                self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock })
+                self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true })
                 // sets multiverse for removal
               }
             }
@@ -676,7 +681,14 @@ export default class Engine {
         if (res) {
           try {
             self._broadcastMinedBlock(self._unfinishedBlock, solution)
-            self._cleanUnfinishedBlock()
+              .then((res) => {
+                self._logger.info('block solution has been transmitted to network')
+                self._cleanUnfinishedBlock()
+              })
+              .catch((err) => {
+                self._logger.error(err)
+                self._cleanUnfinishedBlock()
+              })
           } catch (err) {
             self._cleanUnfinishedBlock()
           }
