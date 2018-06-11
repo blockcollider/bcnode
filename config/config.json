@@ -1,4 +1,6 @@
 {
+  "_version": 1,
+
   "grpc": {
     "host": "127.0.0.1",
     "port": 50051
@@ -9,7 +11,18 @@
   },
 
   "p2p": {
-    "rendezvous": "/dns4/54.89.132.121/tcp/9090/ws/p2p-webrtc-star/"
+    "blacklist": {
+      "defaultTtl": 6000,
+      "purgeInterval": 6000
+    },
+    "rendezvous": {
+      "webrtc": "/dns4/dns-r1.blockcollider.org/tcp/9090/ws/p2p-webrtc-star",
+      "websocket": "/dns4/dns-r1.blockcollider.org/tcp/9091/ws/p2p-websocket-star"
+    },
+    "stats": {
+      "enabled": true,
+      "interval": 10
+    }
   },
 
   "rovers": {
@@ -31,7 +44,13 @@
     }
   },
 
+  "sentry": {
+    "enabled": true,
+    "url": "https://8f889605ace248d88784796a32903c9e@sentry.io/1202649"
+  },
+
   "server": {
-    "port": 3000
+    "port": 3000,
+    "logCalls": false
   }
 }

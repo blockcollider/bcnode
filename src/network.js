@@ -2,16 +2,14 @@ const util = require('util')
 const fs = require('fs-extra')
 const portscanner = require('portscanner')
 const kad = require('kad')
-const ee = require('events').EventEmitter
+const EventEmitter = require('events').EventEmitter
 const Gossipmonger = require('./dht.js')
-const TcpTransport = require('gossipmonger-tcp-transport')
 const quasar = require('kad-quasar')
-const { Transform } = require('stream')
 const Discovery = require('./discovery.js')
 const Crypt = require('./crypt.js')
 const string = require('./utils/strings.js')
 const levelup = require('levelup')
-const time = require('./utils/time.js')
+const time = require('./utils/time').default
 
 var crypt = new Crypt()
 
@@ -42,7 +40,7 @@ function Network (opts) {
 
   var config = global._BlockColliderIdentity
 
-  if (opts != undefined) {
+  if (opts !== undefined) {
     Object.keys(opts).map(function (k) {
       self[k] = opts[k]
     })
@@ -60,8 +58,8 @@ function Network (opts) {
 
 var t1, t2
 var g1, g2
-var id1 = 'id1',
-  id2 = 'id2'
+var id1 = 'id1'
+var id2 = 'id2'
 
 Network.prototype = {
   transport: false,
@@ -71,8 +69,8 @@ Network.prototype = {
       if (err) {
         cb(err)
       } else {
-        if (obj.createdDate == undefined) {
-          obj.createdDate = time.now()
+        if (obj.createdDate === undefined) {
+          obj.createdDate = time.iso()
         }
 
         var str = JSON.stringify(obj)
@@ -104,7 +102,7 @@ Network.prototype = {
         process.exit(3)
       }
 
-      if (exists == true) {
+      if (exists === true) {
         fs.readFile(file, 'utf8', function (err, data) {
           if (err) {
             log.error(err)
@@ -120,9 +118,8 @@ Network.prototype = {
           cb(null, d)
         })
       } else {
-        getOpenPort(10066, function (err, port) {
+        getOpenPort(10066, function (_, port) {
           self.gossipTcpPort = port
-
           self.saveToDisk(self, cb)
         })
       }
@@ -141,7 +138,7 @@ Network.prototype = {
 
     fs.ensureDirSync(dbDir)
 
-    var events = new ee()
+    var events = new EventEmitter()
 
     var node = kad({
       identity: string.sha(self.networkKey),
@@ -173,7 +170,7 @@ Network.prototype = {
 
         var type = d[0]
 
-        if (type == 'i') {
+        if (type === 'i') {
           // URGENT: Must include strict typing here
 
           var host = d[1]
@@ -192,10 +189,11 @@ Network.prototype = {
             } else {
             }
           })
-        } else if (type == 'b') {
+        } else if (type === 'b') {
           /* block sync from collider chain */
-          var from = d[1]
-          var to = d[1]
+          // TODO
+          // var from = d[1]
+          // var to = d[1]
         }
       })
     })
@@ -237,15 +235,15 @@ Network.prototype = {
     // });
     //
     node.subscribe = function (type, cb) {
-      if (type != undefined) {
+      if (type !== undefined) {
         node.quasarSubscribe(type, cb)
       }
     }
 
     node.publish = function (type, data) {
-      if (data != undefined && data.constructor == Object) {
+      if (data !== undefined && data.constructor === Object) {
         data.networkKey = self.networkKey
-        data.timestamp = time.unix()
+        data.timestamp = time.now()
         node.quasarPublish(type, data)
       }
     }
@@ -268,7 +266,8 @@ Network.prototype = {
   }
 }
 
-function init () {
+// (used for testing testing)
+function init () { // eslint-disable-line no-unused-vars
   g1 = new Gossipmonger(
     { id: id1, transport: { host: 'localhost', port: 9991 } },
     {

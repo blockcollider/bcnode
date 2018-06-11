@@ -1,0 +1,19 @@
+{
+  "id": "9545237768975583403",
+  "version": 0,
+  "timestamp": 59785630,
+  "height": 5743196,
+  "previousBlock": "4812068630600159331",
+  "numberOfTransactions": 0,
+  "totalAmount": 0,
+  "totalFee": 0,
+  "reward": 400000000,
+  "payloadLength": 0,
+  "payloadHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "generatorPublicKey": "b690204a2a4a39431b8aaa4bb9af4e53aead93d2d46c5042edada9f5d43d6cd3",
+  "generatorId": "3355233929585989338L",
+  "blockSignature": "ebc353841ad05a064c7a3d0c39ec6efe7b4e6d70786d767888c40a1a54c7c3e24e4693530f6404c4853a65cf0e5d68290724542b0fd2436257af75ba88b55102",
+  "confirmations": 1,
+  "totalForged": "400000000",
+  "transactions": []
+}

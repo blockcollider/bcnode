@@ -7,9 +7,11 @@
  * @flow
  */
 
+import type { RpcServer } from '../../server'
+
 const { Stats } = require('../../../protos/core_pb')
 
-export default function stats(context: Object, call: Object, callback: Function) {
+export default function stats (context: RpcServer, call: Object, callback: Function) {
   const reply = new Stats()
   callback(null, reply)
 }

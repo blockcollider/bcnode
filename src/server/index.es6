@@ -9,6 +9,7 @@
 import type { Logger } from 'winston'
 import type { $Request, $Response, NextFunction } from 'express'
 
+const debug = require('debug')('bcnode:server:main')
 const path = require('path')
 const http = require('http')
 const bodyParser = require('body-parser')
@@ -17,13 +18,21 @@ const expressWinston = require('express-winston')
 const responseTime = require('response-time')
 const serveIndex = require('serve-index')
 const WebSocket = require('ws')
+const CircularBuffer = require('circular-buffer')
+const SocketIO = require('socket.io')
 
 const logging = require('../logger')
-const config = require('../../config/config')
-const { Null } = require('../protos/core_pb')
+const { config } = require('../config')
+const { Null, Block } = require('../protos/core_pb')
+const Engine = require('../engine').default
 const { RpcClient, RpcServer } = require('../rpc')
+const { dispatcher: socketDispatcher } = require('./socket')
 
-const assetsDir = path.resolve(__dirname, '..', '..', 'assets', 'dist')
+const assetsDir = path.resolve(__dirname, '..', '..', 'public')
+const docsDir = path.resolve(__dirname, '..', '..', 'docs')
+const logsDir = path.resolve(__dirname, '..', '..', '_logs')
+
+const PORT = (process.env.BC_UI_PORT && parseInt(process.env.BC_UI_PORT, 10)) || config.server.port
 
 type Opts = {|
   ws: bool,
@@ -35,23 +44,31 @@ type Opts = {|
 export default class Server {
   _opts: Opts
   _app: express$Application // eslint-disable-line
-  _wsServer: any
+  _engine: Engine
   _rpcClient: RpcClient
   _rpcServer: RpcServer
   _server: any
   _logger: Logger
+  _roveredBlocksBuffer: CircularBuffer
+  _socket: ?SocketIO
 
-  constructor (rpcServer: RpcServer) {
+  constructor (engine: Engine, rpcServer: RpcServer) {
     // Create express app instance
     this._app = express()
+    this._engine = engine
     this._rpcClient = new RpcClient()
     this._rpcServer = rpcServer
     this._server = null
     this._logger = logging.getLogger(__filename)
+    this._roveredBlocksBuffer = new CircularBuffer(24)
   }
 
   get app (): express$Application { // eslint-disable-line
     return this._app
+  }
+
+  get engine (): Engine {
+    return this._engine
   }
 
   get opts (): Opts {
@@ -66,12 +83,14 @@ export default class Server {
     return this._server
   }
 
-  run (opts: Opts) {
+  run (opts: Opts): Promise<bool> {
     this._opts = opts
 
-    this._logger.info('Starting Server for Web UI')
+    this._logger.debug('Starting Server for Web UI')
 
-    this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
+    if (config.server.logCalls) {
+      this._app.use(expressWinston.logger({ winstonInstance: this._logger }))
+    }
     this._app.use(responseTime())
     this._app.use(bodyParser.json())
 
@@ -81,6 +100,32 @@ export default class Server {
       help: Null
     }
 
+    this._app.get('/balance/:address', (req, res, next) => {
+      const address = req.params.address
+      if (address) {
+        this._engine.persistence.getBtAddressBalance(req.params.address)
+          .then((result) => {
+            result.address = address
+            res.json(result)
+          })
+      } else {
+        res.json({})
+      }
+    })
+
+    this._app.get('/balance', (req, res, next) => {
+      const address = this.engine.minerKey
+      if (address) {
+        this._engine.persistence.getBtAddressBalance(address)
+          .then((result) => {
+            result.address = address
+            res.json(result)
+          })
+      } else {
+        res.json({})
+      }
+    })
+
     this._app.use('/rpc', jsonRpcMiddleware(mapping))
 
     // Create http server
@@ -88,7 +133,7 @@ export default class Server {
     const server = (this._server = http.Server(this.app))
 
     if (this.opts.ws) {
-      this.initWebSocket()
+      this.initWebSocket(server)
     }
 
     if (this.opts.rpc) {
@@ -100,52 +145,53 @@ export default class Server {
     }
 
     // Listen for connections
-    const port = config.server.port
-    server.listen(port, () => {
-      this._logger.info(`Server available at http://0.0.0.0:${port}`)
+    server.listen(PORT, () => {
+      this._logger.info(`Server available at http://0.0.0.0:${PORT}`)
     })
+
+    return Promise.resolve(true)
   }
 
-  initWebSocket () {
-    this._wsServer = new WebSocket.Server({ server: this._server, path: '/ws' })
+  initWebSocket (server) {
+    const serverSocket = SocketIO(server, {
+      path: '/ws',
+      transports: [
+        'websocket',
+        'polling'
+      ]
+    })
+
+    serverSocket.on('connection', (socket) => {
+      const ip = socket.request.connection.remoteAddress
+
+      debug('socket client connected', socket.id, ip)
+
+      socket.on('disconnect', () => {
+        debug('socket client disconnected', socket.id, ip)
+      })
+
+      socket.on('message', (msg) => {
+        debug('socket message received', msg)
+      })
+
+      socket.on('block.get', (msg) => {
+        socketDispatcher(this, socket, { type: 'block.get', data: msg })
+      })
+
+      socket.on('blocks.get', (msg) => {
+        socketDispatcher(this, socket, { type: 'blocks.get', data: msg })
+      })
+
+      this._wsSendInitialState(socket)
+    })
 
     // setup relaying events from rpc server to websockets
     this._rpcServer.emitter.on('collectBlock', ({ block }) => {
-      this._wsServer.clients.forEach(c => {
-        if (c.readyState === WebSocket.OPEN) {
-          this._logger.debug(`Sending message to client `)
-          try {
-            c.send(JSON.stringify({
-              timestamp: Date.now(),
-              name: 'block.latest',
-              data: { blockchain: block.getBlockchain(), hash: block.getHash() }
-            }), e => {
-              if (e) {
-                this._logger.error(`Could not send\n ${e}`)
-                c.terminate()
-              }
-            })
-          } catch (e) {
-            this._logger.error(`Could not send\n ${e.stack}`)
-            c.terminate()
-          }
-        }
-      })
-    })
-    this._wsServer.on('connection', (client, req) => {
-      client.on('close', reason => {
-        this._logger.info('Client connection closed', req.connection.remoteAddress)
-      })
-
-      client.on('error', error => {
-        this._logger.warn(`Client exited with error\n${error.stack}`)
-      })
+      this._roveredBlocksBuffer.enq(block)
+      this._wsBroadcast({ type: 'block.latest', data: this._transformBlockToWire(block) })
     })
 
-    this._wsServer.on('error', (error) => {
-      // TODO restart WS server instead
-      this._logger.warn(`WS server exited (and will not be available until next start) with error ${error}`)
-    })
+    this._socket = serverSocket
   }
 
   initRpc () {
@@ -184,6 +230,15 @@ export default class Server {
   }
 
   initUi () {
+    this.app.use('/doc', express.static(docsDir))
+    this.app.use('/logs',
+      express.static(logsDir),
+      serveIndex(logsDir, {
+        icons: true,
+        view: 'details'
+      })
+    )
+
     // Serve static content
     this.app.use(
       express.static(assetsDir),
@@ -191,6 +246,91 @@ export default class Server {
         icons: true
       })
     )
+
+    // Subscribe for events
+    this.engine.pubsub.subscribe('block.mined', '<server>', (block: Object) => {
+      this._wsBroadcast(block)
+    })
+  }
+
+  _transformBlockToWire (block: Block) {
+    if (block !== undefined && block.getTimestamp !== undefined) {
+      return {
+        timestamp: block.getTimestamp(),
+        blockchain: block.getBlockchain(),
+        hash: block.getHash()
+      }
+    } else {
+      return {}
+    }
+  }
+
+  _transformPeerToWire (peer: Object) {
+    // console.log('peer', peer)
+    return {
+      id: peer.id.toB58String(),
+      meta: peer.meta,
+      addrs: peer.multiaddrs._multiaddrs.map((addr) => addr.toString()),
+      addr: peer._connectedMultiaddr && peer._connectedMultiaddr.toString()
+    }
+  }
+
+  _wsBroadcast (msg: Object) {
+    if (this._socket) {
+      this._socket.emit(msg.type, msg.data)
+    }
+  }
+
+  _wsBroadcastPeerConnected (peer: Object) {
+    this._wsBroadcast({
+      type: 'peer.connected',
+      data: this._transformPeerToWire(peer)
+    })
+  }
+
+  _wsBroadcastPeerDisonnected (peer: Object) {
+    this._wsBroadcast({
+      type: 'peer.disconnected',
+      data: this._transformPeerToWire(peer)
+    })
+  }
+
+  _wsSendInitialState (socket: WebSocket.Client) {
+    let peers = []
+
+    const node = this._engine._node
+    const peerBook = node && node.manager.peerBookConnected
+    if (peerBook) {
+      peers = peerBook.getAllArray().map((peer) => {
+        return this._transformPeerToWire(peer)
+      })
+    }
+
+    let peer = null
+    if (node && node.peer) {
+      peer = this._transformPeerToWire(node.peer)
+    }
+
+    const msgs = [
+      {
+        type: 'block.snapshot',
+        data: this._roveredBlocksBuffer.toarray().map(this._transformBlockToWire)
+      },
+      {
+        type: 'peer.snapshot',
+        data: peers
+      },
+      {
+        type: 'profile.set',
+        data: {
+          peer
+        }
+      }
+    ]
+
+    msgs.forEach((msg) => {
+      socket.emit(msg.type, msg.data)
+    })
   }
 }
 

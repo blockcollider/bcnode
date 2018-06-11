@@ -9,7 +9,10 @@
 const { EventEmitter } = require('events')
 
 const grpc = require('grpc')
-const config = require('../../config/config')
+const { config } = require('../config')
+
+const Engine = require('../engine').default
+const logging = require('../logger')
 
 const { BcService } = require('../protos/bc_grpc_pb')
 const { BcServiceImpl } = require('./service')
@@ -17,18 +20,30 @@ const { BcServiceImpl } = require('./service')
 const { RoverService } = require('../protos/rover_grpc_pb')
 const { RoverServiceImpl } = require('./service')
 
-export default class RpcServer {
-  _engine: Object // eslint-disable-line no-undef
+const { PubSub } = require('../engine/pubsub')
+
+const GRPC_HOST = process.env.BC_GRPC_HOST || config.grpc.host
+const GRPC_PORT = process.env.BC_GRPC_PORT || config.grpc.port
+const GRPC_URL = `${GRPC_HOST}:${GRPC_PORT}`
+
+export class RpcServer {
+  _logger: Object; // eslint-disable-line no-undef
+  _engine: Engine // eslint-disable-line no-undef
   _rpcServer: Object // eslint-disable-line no-undef
 
-  constructor (engine: Object) {
+  constructor (engine: Engine) {
+    this._logger = logging.getLogger(__filename)
     this._engine = engine
 
     this._rpcServer = new grpc.Server()
-    this._rpcServer.bind(`${config.grpc.host}:${config.grpc.port}`, grpc.ServerCredentials.createInsecure())
+    this._rpcServer.bind(GRPC_URL, grpc.ServerCredentials.createInsecure())
 
-    // Register services
+    // Start BcService
+    this._logger.debug(`Starting gRPC BcService - ${GRPC_URL}`)
     this._rpcServer.addService(BcService, new BcServiceImpl(this))
+
+    // Start RoverService
+    this._logger.debug(`Starting gRPC RoverService - ${GRPC_URL}`)
     this._rpcServer.addService(RoverService, new RoverServiceImpl(this, this.emitter))
 
     this._rpcServer.start()
@@ -38,11 +53,22 @@ export default class RpcServer {
     return this._engine._emitter
   }
 
+  get logger (): Object {
+    return this._logger
+  }
+
+  get pubsub (): PubSub {
+    console.log('RPC SERVER', this)
+    return this._engine.pubsub
+  }
+
   get server () : Object {
     return this._rpcServer
   }
 
-  get engine () : Object {
+  get engine () : Engine {
     return this._engine
   }
 }
+
+export default RpcServer

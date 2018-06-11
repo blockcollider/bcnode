@@ -6,19 +6,42 @@
  *
  * @flow-disable
  */
+const { resolve } = require('path')
+const rimraf = require('rimraf')
 
 const { RocksDb } = require('../')
 
-const rimraf = require('rimraf')
-
-const dataDir = '_data_test'
+const TEST_DATA_DIR = resolve(__filename, '..', '..', '..', '_data_test')
 
 describe('RocksDb', () => {
   it('can instantiate self', () => {
     expect(new RocksDb()).toBeInstanceOf(RocksDb)
   })
 
+  test('get (batch)', done => {
+    const dataDir = `${TEST_DATA_DIR}_get`
+    const db = new RocksDb(dataDir)
+
+    const nums = [...Array(100)].map((v, i) => i)
+    db.open()
+      .then(() => {
+        const promises = nums.map((num) => db.put(num, num))
+        return Promise.all(promises)
+      })
+      .then(() => {
+        const promises = nums.map((num) => db.get(num))
+        return Promise.all(promises)
+      })
+      .then((res) => {
+        nums.forEach((val, index) => {
+          expect(val).toEqual(res[index])
+        })
+        done()
+      })
+  })
+
   test('put', done => {
+    const dataDir = `${TEST_DATA_DIR}_put`
     const db = new RocksDb(dataDir)
 
     const key = 'msg'
@@ -44,7 +67,7 @@ describe('RocksDb', () => {
   })
 
   afterAll(done => {
-    rimraf(dataDir, () => {
+    rimraf(`${TEST_DATA_DIR}*`, () => {
       done()
     })
   })

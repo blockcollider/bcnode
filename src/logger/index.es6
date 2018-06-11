@@ -9,16 +9,17 @@
 import type Logger from 'winston'
 const { resolve, sep } = require('path')
 const winston = require('winston')
+const { format } = winston
 const { is, merge } = require('ramda')
 require('winston-daily-rotate-file')
 
-const logDir = resolve(__dirname, '..', '..', 'logs')
-
-const logPath = `${logDir}/bcnode`
-
+const LOG_DIR = resolve(__dirname, '..', '..', '_logs')
+const logPath = `${LOG_DIR}/bcnode`
 const tsFormat = () => new Date().toISOString()
 
-const format = options => {
+const LOG_LEVEL = process.env.BC_LOG || 'info'
+
+const formatTemplate = options => {
   const ts = options.timestamp()
   const level = options.level.toUpperCase()
   const msg = undefined !== options.message ? options.message : ' '
@@ -34,10 +35,11 @@ const logger = new winston.Logger({
   transports: [
     // Console
     new winston.transports.Console({
-      colorize: true,
+      level: LOG_LEVEL,
       timestamp: tsFormat,
-      formatter: format,
-      level: (process.stdout.isTTY || 'DEBUG' in process.env) ? 'debug' : 'info'
+      formatter: formatTemplate,
+      humanReadableUnhandledException: true,
+      colorize: true
     }),
 
     // File
@@ -46,9 +48,36 @@ const logger = new winston.Logger({
       timestamp: tsFormat,
       datePattern: '-yyyyMMddHH.log',
       json: false,
-      formatter: format
+      formatter: format,
+      level: LOG_LEVEL,
+      maxFiles: 10
     })
-  ]
+
+    // // File error
+    // new winston.transports.DailyRotateFile({
+    //   filename: `${logPath}`,
+    //   timestamp: tsFormat,
+    //   datePattern: '-yyyyMMddHH.log',
+    //   json: false,
+    //   formatter: format,
+    //   level: LOG_LEVEL
+    // })
+  ],
+  exceptionHandlers: [
+    new winston.transports.File({
+      filename: `${logPath}-exceptions.log`,
+      json: false,
+      formatter: (options) => {
+        const msg = {
+          msg: options.message,
+          date: options.meta.date,
+          stack: options.meta.stack
+        }
+        return JSON.stringify(msg, null, 2)
+      }
+    })
+  ],
+  exitOnError: false
 })
 
 const pathToLogPrefix = (path, topLevelDir = 'lib') => {
@@ -109,6 +138,6 @@ class LoggingContext {
   }
 }
 
-export const getLogger = (path: string, meta: ?Object) => {
+export const getLogger = (path: string, meta: ?Object): Logger => {
   return new LoggingContext(logger, pathToLogPrefix(path), meta)
 }

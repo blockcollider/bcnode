@@ -11,15 +11,19 @@ const grpc = require('grpc')
 const { BcClient } = require('../protos/bc_grpc_pb')
 const { RoverClient } = require('../protos/rover_grpc_pb')
 
-const config = require('../../config/config')
+const { config } = require('../config')
+
+const GRPC_HOST = process.env.BC_GRPC_HOST || config.grpc.host
+const GRPC_PORT = process.env.BC_GRPC_PORT || config.grpc.port
+const GRPC_URL = `${GRPC_HOST}:${GRPC_PORT}`
 
 export default class RpcClient {
-  _services: Object; // eslint-disable-line no-undef
+  _services: { bc: BcClient, rover: RoverClient}; // eslint-disable-line no-undef
 
   constructor () {
     this._services = {
-      bc: new BcClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure()),
-      rover: new RoverClient(`${config.grpc.host}:${config.grpc.port}`, grpc.credentials.createInsecure())
+      bc: new BcClient(GRPC_URL, grpc.credentials.createInsecure()),
+      rover: new RoverClient(GRPC_URL, grpc.credentials.createInsecure())
     }
   }
 
@@ -27,11 +31,11 @@ export default class RpcClient {
     return this._services[name]
   }
 
-  get bc (): Object {
-    return this.service('bc')
+  get bc (): BcClient {
+    return this._services.bc
   }
 
-  get rover (): Object {
-    return this.service('rover')
+  get rover (): RoverClient {
+    return this._services.rover
   }
 }

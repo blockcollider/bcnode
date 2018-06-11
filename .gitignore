@@ -1,8 +1,15 @@
 # IntelliJ Idea Project
 .idea/
 
-# Temp data
-_data/
+# Downloadedfiles
+protoc-3.5.1-linux-x86_64.zip
+
+/.version.json
+
+# Various data
+_data*/
+_debug/
+_logger/
 
 # Generated doc
 docs/
@@ -90,6 +97,22 @@ dist/
 !assets/dist/
 
 # Block Collider specific data directories
-data
-miner_data
 .wavescache
+
+# Webpack assets
+/public/assets
+
+# Secrets
+.env.sh
+
+# Version file
+# .version.json
+
+# Local snippets
+/snippets/
+
+# Temporary stuff
+tmp/
+
+# Run scripts
+.run.*.sh

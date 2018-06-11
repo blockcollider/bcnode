@@ -1,6 +1,8 @@
 {
   "plugins": [
-    "transform-flow-strip-types"
+    "transform-class-properties",
+    "transform-flow-strip-types",
+    "transform-object-rest-spread"
   ],
   "presets": [
     ["env", {
@@ -12,6 +14,8 @@
         "babel-plugin-transform-regenerator",
         "transform-async-to-generator"
       ]
-    }]
-  ]
+    }],
+    "react"
+  ],
+  "sourceMaps": true
 }
