@@ -129,7 +129,7 @@ const handlers = {
   query: (manager: PeerManager, q: Object = {}) => {
     const id = `bc.block.${q.queryHeight}`
 
-    manager.engine.persistence.get(id)
+    return manager.engine.persistence.get(id)
       .then((b) => {
         if (b.getHash() !== q.queryHash) {
           return []
