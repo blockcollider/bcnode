@@ -919,7 +919,7 @@ export default class Engine {
         return Promise.resolve(true)
       } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
                 new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true, purge: (newBlock.getHeight() - 6) })
+        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock ) })
         return Promise.resolve(true)
       } else {
         return Promise.resolve(false)
