@@ -529,8 +529,8 @@ export default class Engine {
       if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
         this.stopMining()
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-      } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
                 new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
+                  self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
         this.stopMining()
         const newMultiverse = new Multiverse()
         conn.getPeerInfo((err, peerInfo) => {
@@ -561,14 +561,16 @@ export default class Engine {
                 }
                 return 0
               })
-              decOrder.map((block) => newMultiverse.addBlock(block))
+              while (decOrder.length > 0) {
+                newMultiverse.addBlock(block)
+              }
               newMultiverse.addBlock(newBlock)
               if (Object.keys(newMultiverse).length > 6) {
                 const highCandidateBlock = newMultiverse.getHighestBlock()
                 const lowCandidateBlock = newMultiverse.getLowestBlock()
                 if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
                     highCandidateBlock.getHeight() >= afterBlockHighest.getHeight()) {
-                  self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true, multiverse: decOrder })
+                  self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true, multiverse: decOrder })
                   self.multiverse = newMultiverse
                   self._logger.info('applied new multiverse ' + newMultiverse.getHighestBlock().getHash())
                   self.blockpool._checkpoint = lowCandidateBlock

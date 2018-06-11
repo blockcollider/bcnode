@@ -330,9 +330,10 @@ export class Multiverse {
       return true
     } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 0) {
       const performance = list.reduce((order, chain) => {
-        const totalDistance = sum(chain.map((b) => {
-          return b.getDistance()
-        }))
+        const totalDistance = chain.reduce((b) => {
+          all = new BN(b.getTotalDistance()).add(all)
+          return all
+        })
         if (order.length === 0) {
           order.push([chain, totalDistance])
         } else if (order.length > 0 && order[0] !== undefined && order[0][1] < totalDistance) {
