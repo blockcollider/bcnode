@@ -224,9 +224,7 @@ export default class Engine {
     this._logger.debug('Engine initialized')
 
     self.pubsub.subscribe('state.block.height', '<engine>', (msg) => {
-      const block = msg.data
-      self.storeHeight(block)
-      engineQueue.push(self.storeHeight(block), function (err, data) {
+      self._storageQueue.push(self.storeHeight(msg), function (err, data) {
         if (err) {
           console.trace(err)
           self._logger.error(err)
@@ -267,18 +265,36 @@ export default class Engine {
    * Store a block in persistence unless its Genesis Block
    * @returns Promise
    */
-  async storeHeight (block: BcBlock) {
+  async storeHeight (msg: Object) {
     const self = this
+    const block = msg.data
     // Block is genesis block
     if (block.getHeight() < 2) {
       return
     }
-    try {
-      await self.persistence.put('bc.block.' + block.getHeight(), block)
-      return Promise.resolve(block)
-    } catch (err) {
-      self._logger.warn('unable to store block ' + block.getHeight() + ' - ' + block.getHash())
-      return Promise.reject(err)
+    if (msg.force !== undefined && msg.force === true) {
+      try {
+        await self.persistence.put('bc.block.' + block.getHeight(), block)
+        return Promise.resolve(block)
+      } catch (err) {
+        self._logger.warn('unable to store block ' + block.getHeight() + ' - ' + block.getHash())
+        return Promise.reject(err)
+      }
+    } else {
+      try {
+        const prev = await self.persistence.get('bc.block.' + (block.getHeight() - 1))
+        if (prev.getHash() === block.getPreviousHash() &&
+          new BN(prev.getTotalDistance()).lt(new BN(block.getTotalDistance()) === true)) {
+          await self.persistence.put('bc.block.' + block.getHeight(), block)
+          return Promise.resolve(true)
+        } else {
+          return Promise.reject(new Error('block state did not match'))
+        }
+      } catch (err) {
+        await self.persistence.put('bc.block.' + block.getHeight(), block)
+        self._logger.warn(' stored orphan ' + block.getHeight() + ' - ' + block.getHash())
+        return Promise.resolve(true)
+      }
     }
   }
 
@@ -781,6 +797,8 @@ export default class Engine {
     if (newBlock === undefined) {
       return Promise.reject(new Error('cannot broadcast empty block'))
     }
+
+    self.pubsub.publish('state.block.height', { key: 'bc.block.' + newBlock.getHeight(), data: newBlock, force: true })
 
     try {
       self.node.broadcastNewBlock(newBlock)
