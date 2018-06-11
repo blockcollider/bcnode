@@ -168,12 +168,19 @@ export class BlockPool {
       }
     }
   }
-  async purgeFrom (height: number): Promise<*> {
-    if (height < 2) {
+  async purgeFrom (start: number, end: number): Promise<*> {
+    if (end < 1 || start <= 1) {
+      return Promise.reject(new Error('cannot purge below height 2'))
+    }
+    if (start === end) {
       return Promise.resolve(true)
     } else {
-      await this._persistence.del('bc.block.' + (height - 1))
-      return this.purgeFrom(height - 1)
+      try {
+        await this._persistence.del('bc.block.' + start)
+        return this.purgeFrom(start - 1, end)
+      } catch (err) {
+        return this.purgeFrom(start - 1, end)
+      }
     }
   }
   async purge (checkpoint: ?BcBlock): Promise<*> {
@@ -190,7 +197,7 @@ export class BlockPool {
           return Promise.reject(new Error('cannot purge after latest block'))
         }
         self._checkpoint = checkpoint
-        return self.purgeFrom(height)
+        return self.purgeFrom(height, 1)
       } catch (err) {
         return Promise.reject(err)
       }
@@ -200,7 +207,7 @@ export class BlockPool {
       if (height < 2) {
         return Promise.reject(new Error('checkpoint set to genesis height'))
       }
-      return self.purgeFrom(height)
+      return self.purgeFrom(height, 1)
     }
   }
 }

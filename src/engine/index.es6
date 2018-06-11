@@ -329,7 +329,23 @@ export default class Engine {
       } else {
         self._logger.warn('new purposed latest block does not match the last')
       }
-      return Promise.resolve(true)
+      if (msg.force !== undefined && msg.force === true && msg.multiverse !== undefined) {
+        const formatted = msg.multiverse.reduce((all, m) => {
+          all.push({
+            data: m,
+            force: true
+          })
+          return all
+        }, [])
+        const tasks = formatted.reduce((all, t) => {
+          all.push(self.storeHeight(t))
+          return all
+        }, [])
+        await Promise.all(tasks)
+        return Promise.resolve(true)
+      } else {
+        return Promise.resolve(true)
+      }
     } catch (err) {
       self._logger.warn(err)
       if (block !== undefined) {
@@ -517,7 +533,53 @@ export default class Engine {
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
       } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
                 new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
-        this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
+        self.stopMiner()
+        const newMultiverse = new Multiverse(true)
+        newMultiverse.addBlock(newBlock)
+        conn.getPeerInfo((err, peerInfo) => {
+          if (err) {
+            console.trace(err)
+            self._logger.error(err)
+            return false
+          }
+          const peerQuery = {
+            queryHash: newBlock.getHash(),
+            queryHeight: newBlock.getHeight(),
+            low: Math.max(newBlock.getHeight() - 9, 1),
+            high: newBlock.getHeight() + 2
+          }
+          debug('Querying peer for blocks', peerQuery)
+          console.log('***********************CANDIDATE 0*******************')
+          self.node.manager.createPeer(peerInfo)
+            .query(peerQuery)
+            .then((blocks) => {
+              debug('Got query response', blocks)
+              const decOrder = blocks.sort((a, b) => {
+                if (a.getHeight() > b.getHeight()) {
+                  return -1
+                }
+                if (a.getHeight() < b.getHeight()) {
+                  return 1
+                }
+                return 0
+              })
+              decOrder.map((block) => newMultiverse.addBlock(block))
+              if (Object.keys(newMultiverse).length > 6) {
+                const bestCandidate = newMultiverse
+                const highCandidateBlock = bestCandidate.getHighestBlock()
+                const lowCandidateBlock = bestCandidate.getLowestBlock()
+                if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
+                    highCandidateBlock.getHeight() >= afterBlockHighest.getHeight()) {
+                  self.multiverse._blocks = clone(bestCandidate._blocks)
+                  self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
+                  self._peerIsResyncing = true
+                  self.blockpool._checkpoint = lowCandidateBlock
+                  self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true, multiverse: decOrder })
+                  // sets multiverse for removal
+                }
+              }
+            })
+        })
       } else {
         // determine if the block is above the minimum to be considered for an active multiverse
         if (newBlock.getHeight() > 6 &&
@@ -553,44 +615,33 @@ export default class Engine {
               debug('Querying peer for blocks', peerQuery)
 
               console.log('***********************CANDIDATE 1*******************')
-              const bestPeer = this.node.manager.createPeer(peerInfo)
+              this.node.manager.createPeer(peerInfo)
                 .query(peerQuery)
                 .then((blocks) => {
                   debug('Got query response', blocks)
-                  blocks.map((block) => newMultiverse.addBlock(block))
+                  const decOrder = blocks.sort((a, b) => {
+                    if (a.getHeight() > b.getHeight()) {
+                      return -1
+                    }
+                    if (a.getHeight() < b.getHeight()) {
+                      return 1
+                    }
+                    return 0
+                  })
+                  decOrder.map((block) => newMultiverse.addBlock(block))
                   if (Object.keys(newMultiverse).length > 6) {
                     const bestCandidate = newMultiverse
                     const highCandidateBlock = bestCandidate.getHighestBlock()
                     const lowCandidateBlock = bestCandidate.getLowestBlock()
                     if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
-                    highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
-                    new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
+                    highCandidateBlock.getHeight() >= afterBlockHighest.getHeight()) {
                       self.multiverse._blocks = clone(bestCandidate._blocks)
                       self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                       self._peerIsResyncing = true
                       self.blockpool._checkpoint = lowCandidateBlock
-                      self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true })
+                      self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true, multiverse: decOrder })
                       // sets multiverse for removal
                       bestCandidate._created = 0
-                      bestPeer.query({
-                        queryHash: newBlock.getHash(),
-                        queryHeight: newBlock.getHeight(),
-                        low: 1,
-                        high: newBlock.getHeight() + 2
-                      })
-                        .then((blocks) => {
-                          blocks.map((block) => {
-                            self._storageQueue.push(self.blockpool.addBlock(block), function (err, data) {
-                              if (err) {
-                                self._logger.error(err)
-                              }
-                            })
-                          })
-                        })
-                        .catch((err) => {
-                          self._logger.error(new Error('unable to complete resync with peer'))
-                          console.trace(err)
-                        })
                     }
                   }
                 })
@@ -611,13 +662,12 @@ export default class Engine {
               const highCandidateBlock = bestCandidate.getHighestBlock()
               const lowCandidateBlock = bestCandidate.getLowestBlock()
               if (new BN(highCandidateBlock.getTotalDistance()).gt(new BN(afterBlockHighest.getTotalDistance())) &&
-              highCandidateBlock.getHeight() >= afterBlockHighest.getHeight() &&
-              new BN(lowCandidateBlock.getTotalDistance()).gt(new BN(self.multiverse.getLowestBlock().getTotalDistance()))) {
+              highCandidateBlock.getHeight() >= afterBlockHighest.getHeight()) {
                 self.multiverse._blocks = clone(bestCandidate._blocks)
                 self._logger.info('applied new multiverse ' + bestCandidate.getHighestBlock().getHash())
                 self._peerIsResyncing = true
                 self.blockpool._checkpoint = lowCandidateBlock
-                self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true })
+                self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: highCandidateBlock, force: true, multiverse: bestCandidate._blocks })
                 // sets multiverse for removal
               }
             }
