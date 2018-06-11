@@ -8,10 +8,11 @@
  */
 
 import type BcBlock from '../protos/core_pb'
-const { equals, flatten, sum } = require('ramda')
+const { equals, flatten } = require('ramda')
 const { validateBlockSequence } = require('./validation')
 const { standardId } = require('./helper')
 const logging = require('../logger')
+const BN = require('bn.js')
 const COMMIT_MULTIVERSE_DEPTH = 7
 
 export class Multiverse {
@@ -56,7 +57,7 @@ export class Multiverse {
     const height = block.getHeight()
     const hash = block.getHash()
     const previousHash = block.getPreviousHash()
-    const distance = block.getDistance()
+    const distance = block.getTotalDistance()
     const template = {
       queryHash: hash,
       queryHeight: height,
@@ -69,7 +70,7 @@ export class Multiverse {
         template.message = 'blocks are the equal to each-other'
         return template
       } else if (highestBlock.getHeight() === height) {
-        if (highestBlock.getDistance() < distance) {
+        if (new BN(highestBlock.getTotalDistance()).lt(new BN(distance)) === true) {
           this.addBlock(block)
           template.message = 'purposed block will be the current height of the multiverse'
         }
@@ -233,8 +234,8 @@ export class Multiverse {
         }
         if (self._blocks[height].length > 1) {
           self._blocks[height] = self._blocks[height].sort((a, b) => {
-            if (a.getDistance() < b.getDistance()) return 1
-            if (a.getDistance() > b.getDistance()) return -1
+            if (new BN(a.getTotalDistance()).lt(new BN(b.getTotalDistance())) === true) return 1
+            if (new BN(a.getTotalDistance()).gt(new BN(b.getTotalDistance())) === true) return -1
             return 0
           })
         }
@@ -250,7 +251,10 @@ export class Multiverse {
       if (self._blocks[height].length > 1) {
         self._blocks[height] = self._blocks[height].sort((a, b) => {
           if (new BN(a.getTotalDistance()).lt(new BN(b.getTotalDistance())) === true) {
-
+            return 1
+          }
+          if (new BN(a.getTotalDistance()).gt(new BN(b.getTotalDistance())) === true) {
+            return -1
           }
           return 0
         })
@@ -331,10 +335,10 @@ export class Multiverse {
       return true
     } else if (minimumDepthChains !== undefined && minimumDepthChains.length === 0) {
       const performance = list.reduce((order, chain) => {
-        const totalDistance = chain.reduce((b) => {
-          all = new BN(b.getTotalDistance()).add(all)
+        const totalDistance = chain.reduce((all, b) => {
+          all = new BN(b.getTotalDistance()).add(new BN(all))
           return all
-        })
+        }, 1)
         if (order.length === 0) {
           order.push([chain, totalDistance])
         } else if (order.length > 0 && order[0] !== undefined && order[0][1] < totalDistance) {
@@ -356,11 +360,10 @@ export class Multiverse {
       return minimumDepthChains[0][0]
     } else {
       const performance = minimumDepthChains.reduce((order, chain) => {
-        const distances = chain.map((b) => {
+        const totalDistance = chain.reduce((all, b) => {
           all = new BN(b.getTotalDistance()).add(all)
           all.push(b)
-        }, [])
-        const totalDistance = sum(distances)
+        }, 1)
         if (order.length === 0) {
           order.push([chain, totalDistance])
         } else if (order.length > 0 && order[0] !== undefined && order[0][1] < totalDistance) {

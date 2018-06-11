@@ -529,8 +529,9 @@ export default class Engine {
       if (beforeBlockHighest.getHash() !== afterBlockHighest.getHash()) {
         this.stopMining()
         this.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock })
-                new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
-                  self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
+      } else if (afterBlockHighest.getHeight() < newBlock.getHeight() &&
+        new BN(afterBlockHighest.getTotalDistance()).lt(new BN(newBlock.getTotalDistance())) === true) {
+        self.pubsub.publish('update.block.latest', { key: 'bc.block.latest', data: newBlock, force: true })
         this.stopMining()
         const newMultiverse = new Multiverse()
         conn.getPeerInfo((err, peerInfo) => {
@@ -562,7 +563,7 @@ export default class Engine {
                 return 0
               })
               while (decOrder.length > 0) {
-                newMultiverse.addBlock(block)
+                newMultiverse.addBlock(decOrder.pop())
               }
               newMultiverse.addBlock(newBlock)
               if (Object.keys(newMultiverse).length > 6) {
