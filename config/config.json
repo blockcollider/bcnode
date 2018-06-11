@@ -16,8 +16,8 @@
       "purgeInterval": 6000
     },
     "rendezvous": {
-      "webrtc": "/dns4/rendezvous.blockcollider.org/tcp/9090/ws/p2p-webrtc-star",
-      "websocket": "/dns4/167.99.251.14/tcp/9091/ws/p2p-websocket-star"
+      "webrtc": "/dns4/dns-r1.blockcollider.org/tcp/9090/ws/p2p-webrtc-star",
+      "websocket": "/dns4/dns-r1.blockcollider.org/tcp/9091/ws/p2p-websocket-star"
     },
     "stats": {
       "enabled": true,
