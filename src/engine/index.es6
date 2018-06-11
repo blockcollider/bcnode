@@ -663,9 +663,15 @@ export default class Engine {
     this._cleanUnfinishedBlock()
     // $FlowFixMe - Flow can't properly type subprocess
     if (this._workerProcess !== undefined && this._workerProcess !== null && this._workerProcess !== false) {
-      this._workerProcess.kill()
-      // $FlowFixMe - Flow can't properly type subprocess
-      this._workerProcess.disconnect()
+      try {
+        // $FlowFixMe - Flow can't properly type subprocess
+        this._workerProcess.disconnect()
+        // $FlowFixMe - Flow can't properly type subprocess
+        this._workerProcess.kill()
+      } catch (_) {
+        this._logger.warn(`Disconnecting or killing of miner process error - just cleaning up`)
+        this._workerProcess = undefined
+      }
       this._workerProcess = undefined
     }
   }
