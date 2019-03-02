@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link type="text/css" rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <!-- link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous" -->
+    <link rel='icon' type='image/png' href='/icon.png'>
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+
+
+
+
+
+    <link type="text/css" rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <!-- link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous" -->
+    <link rel='icon' type='image/png' href='/icon.png'>
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
+    <style>
+
+
+
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204,169,44, 0.4);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 10px rgba(204,169,44, 0);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(204,169,44, 0.4);
+    box-shadow: 0 0 0 0 rgba(204,169,44, 0.4);
+  }
+  70% {
+      -moz-box-shadow: 0 0 0 10px rgba(204,169,44, 0);
+      box-shadow: 0 0 0 10px rgba(204,169,44, 0);
+  }
+  100% {
+      -moz-box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+      box-shadow: 0 0 0 0 rgba(204,169,44, 0);
+  }
+}
+
+.leaflet-container {
+  opacity: 0.8;
+  position: absolute;
+  top: 61px;
+}
+
+.leaflet-bottom {
+  display:none;
+}
+
+.leaflet-pulsing-icon {
+    border-radius: 100%;
+    box-shadow: 1px 1px 3px 0 rgba(0,0,0,0.75);
+    height: 8px !important;
+    width: 8px !important;
+}
+
+.h6 {
+    height: 6px !important;
+    width: 6px !important;
+}
+
+.h7 {
+    height: 7px !important;
+    width: 7px !important;
+}
+
+.h8 {
+    height: 8px !important;
+    width: 8px !important;
+}
+.h9 {
+    height: 9px !important;
+    width: 9px !important;
+}
+.h10 {
+    height: 10px !important;
+    width: 10px !important;
+}
+.h11 {
+    height: 11px !important;
+    width: 11px !important;
+}
+
+.h12 {
+    height: 12px !important;
+    width: 12px !important;
+}
+
+.lpi{
+    background-color: white;
+}
+
+.lpi{
+  box-shadow: 0 0 6px 2px white;
+  animation: pulse 1s infinite;
+}
+
+
+    .leaflet-container {
+        margin: 0 auto;
+    }
+
+    html {
+      background:none;
+      min-height:100%;
+}
+
+
+pre {
+  color: white
+}
+
+.navbar {
+  background: black !important;
+  color: white !important;
+  border-bottom: 1.2px
+  border-color: white
+}
+
+.nav-item a {
+  color: white !important;
+}
+.navbar-brand a {
+  color: white !important;
+}
+
+h2 {
+  color:white;
+}
+
+.card-text {
+  color:white;
+}
+
+.card-text {
+  color:white;
+}
+.table tr,th,td{
+  background-color: black;
+  color: white;
+}
+#btcList {
+  float: left;
+  border: 1px solid orange;
+  font-style: 'monospace';
+  font-size: 8pt;
+  margin: 2px;
+  text-align: center;
+  width: 23px;
+}
+#ethList {
+  float: left;
+  border: 1px solid #9400D3;
+  font-style: 'monospace';
+  font-size: 8pt;
+  margin: 2px;
+  text-align: center;
+  width: 23px;
+}
+#neoList {
+  float: left;
+  border: 1px solid green;
+  font-size: 8pt;
+  font-style: 'monospace';
+  margin: 2px;
+  text-align: center;
+  width: 23px;
+}
+#lskList {
+  float: left;
+  border: 1px solid blue;
+  font-size: 8pt;
+  font-style: 'monospace';
+  margin: 2px;
+  text-align: center;
+  width: 23px;
+}
+#wavList {
+  float: left;
+  border: 1px solid lightblue;
+  font-size: 8pt;
+  font-style: 'monospace';
+  margin: 2px;
+  text-align: center;
+  width: 23px;
+}
+#glassList {
+  float: left;
+  border: 1px solid white;
+  font-size: 8pt;
+  margin: 2px;
+  text-align: center;
+  width: 23px;
+}
+pre {
+  color: white !important;
+}
+.nav-item a {
+  color: white !important;
+}
+.navbar-brand a {
+  color: white !important;
+}
+td,tr,th a {
+  font-color: white !important;
+}
+a {
+  color: white !important;
+}
+h2 {
+  color:white;
+}
+.card-text {
+  color:white;
+}
+.card-text {
+  color:white;
+}
+a {
+  color: white; !important;
+}
+.bg-light {
+  background : black !important;
+}
+body {
+  min-height:100%;
+  font-family: 'Lato', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-image:linear-gradient(#000, #333);
+  width: 10wh;
+  color: #fff;
+	background: #536976;  /* fallback for old browsers */
+	background: -webkit-linear-gradient(to right, #536976, #fff, #666666);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to right, #000, #536976, #000); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+#content{
+  /* position:absolute; */
+  background-color: transparent;
+  color: white;
+  background-image:       linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 56%, transparent 77%, transparent);
+  min-height:100%;
+  background-size:15px 15px;
+}
+
+.leaflet-container {
+    height: 400px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div id="content">
+    <div id="app" style="min-height:100vh"></div>
+
+    <script type="application/javascript" src="/assets/bundle.js"></script>
+
+    </div>
+    </div>
+
+</body>
+
+</html>

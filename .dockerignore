@@ -1,0 +1,72 @@
+# Link to ~/.bc
+.bc/
+
+# Helper run scripts
+/.run*.sh
+
+# Docker stuff
+#.dockerignore
+Dockerfile
+
+# IntelliJ Idea Project
+.idea/
+
+# Helper scripts
+.scripts/
+
+# Downloadedfiles
+protoc-3.5.1-linux-x86_64.zip
+
+# Git stuff - do not uncomment, needed for version:generate task to work
+# .git
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Docker stuff
+*Dockerfile*
+*docker-compose*
+
+# Internal
+_data/
+_debug/
+_logs/
+
+# Flowtype
+flow-typed/
+
+# Artifacts (root)
+root/.cargo/
+
+# Artifacts
+.cargo/
+coverage/
+doc/
+docs/
+lib/
+# !lib/bc/genesis.raw.json
+
+native/target/
+native/artifacts.json
+native/index.node
+
+node_modules/
+
+public/assets/
+
+src/native/artifacts.json
+src/native/target/
+src/protos/*.js
+
+root/
+rust/bcrust-core/target/
+
+target/
+tmp/
+
+.version.json
+
+/snippets/

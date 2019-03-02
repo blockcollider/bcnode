@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package bc;
+
+message Null {}
+
+message Block {
+    string blockchain = 1;
+    string hash = 2;
+    string previous_hash = 3;
+    uint64 timestamp = 4;
+    uint64 height = 5;
+    string merkle_root = 6;
+    uint64 markedtx_count = 7;
+    repeated MarkedTransaction marked_txs = 8;
+}
+
+message MarkedTransaction {
+    bytes value = 1;
+    string hash = 2; // the unique hash representing this transaction in the bridged chain
+    string id = 3; // TODO: add blockchain / dataset identification field, 'eth', 'btc', ....
+    string token = 4; // chains smart contract address, not BC
+    string addr_from = 5; // bridged chains address, not BC
+    string addr_to = 6; // bridged chains address, not BC
+    uint64 block_height = 7; // the block number in the bridged chain containing this transaction
+    uint64 index = 8; // the position relative to other marked transactions
+}
+
+message BlockchainHeaders {
+    repeated BlockchainHeader btc = 1;
+    repeated BlockchainHeader eth = 2;
+    repeated BlockchainHeader lsk = 3;
+    repeated BlockchainHeader neo = 4;
+    repeated BlockchainHeader wav = 5;
+}
+
+message BcBlock {
+    string hash = 1;
+    string previous_hash = 2;
+    uint64 version = 3;
+    uint64 schema_version = 4;
+    uint64 height = 5;
+    string miner = 6;
+    string difficulty = 7;
+    uint64 timestamp = 8;
+    string merkle_root = 9;
+    string chain_root = 10;
+    string distance = 11;
+    string total_distance = 12;
+    string nonce = 13;
+    uint64 nrg_grant = 14;
+    string target_hash = 15;
+    uint64 target_height = 16;
+    string target_miner = 17;
+    string target_signature = 18;
+    uint64 twn = 19;
+    repeated string tws = 20;
+    uint64 emblem_weight = 21;
+    string emblem_chain_block_hash = 22;
+    string emblem_chain_fingerprint_root = 23;
+    string emblem_chain_address = 24;
+    uint64 tx_count = 25;
+    repeated Transaction txs = 26;
+    uint64 tx_fee_base = 27;
+    uint64 tx_distance_sum_limit = 28;
+    uint64 blockchain_headers_count = 29;
+    BlockchainHeaders blockchain_headers = 30;
+    string blockchain_fingerprints_root = 31;
+}
+
+message OutPoint {
+  bytes value = 1;
+  string hash = 2;
+  uint64 index = 3;
+}
+
+message Transaction {
+  uint64 version = 1;
+  string nonce = 2; // <rnd>+<minerAddess>
+  string hash = 3;
+  string overline = 4;
+  uint64 nin_count = 5;
+  uint64 nout_count = 6;
+  repeated TransactionInput inputs = 7;
+  repeated TransactionOutput outputs = 8;
+  uint32 lock_time = 9;
+}
+
+message TransactionInput {
+  OutPoint out_point = 1;
+  uint32 script_length = 2;
+  bytes input_script = 3;
+}
+
+message TransactionOutput {
+  bytes value = 1;
+  bytes unit = 2;
+  uint32 script_length = 3;
+  bytes output_script = 4;
+}
+
+message BlockchainHeader {
+    string blockchain = 1;
+    string hash = 2;
+    string previous_hash = 3;
+    uint64 timestamp = 4;
+    uint64 height = 5;
+    string merkle_root = 6;
+    uint64 blockchain_confirmations_in_parent_count = 7;
+    repeated MarkedTransaction marked_txs = 8;
+}

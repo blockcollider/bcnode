@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package bc;
+
+import "core.proto";
+
+message BlockFingerprint {
+    string blockchain = 1;
+    string hash = 2;
+    uint64 timestamp = 3;
+    bool is_current = 4;
+}
+
+// Miner block input
+message MinerRequest {
+    string work_id = 1;
+    uint64 current_timestamp = 2;
+    int32 offset = 3;
+    string work = 4;
+    string miner_key = 5;
+    string merkle_root = 6;
+    string difficulty = 7;
+    BcBlock last_previous_block = 8;
+    BlockchainHeaders new_block_headers = 9;
+}
+
+enum MinerResponseResult {
+    Canceled = 0;
+    Ok = 1;
+    Error = 2;
+}
+
+// Miner block output
+message MinerResponse {
+    MinerResponseResult result = 1;
+    string nonce = 2;
+    string difficulty = 3;
+    string distance = 4;
+    uint64 timestamp = 5;
+    uint64 iterations = 6;
+    uint64 time_diff = 7;
+}
+
+service Miner {
+    rpc Mine (MinerRequest) returns (MinerResponse) {}
+}

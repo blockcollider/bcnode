@@ -1,0 +1,94 @@
+{
+    "hash": "d3fd870b9959c662492910b935cd1c204ced0259b5615b47533a76f8ea927688",
+    "previousHash": "d5d51b045422ba64d85130b36050d4a3b9b96bad7856455412c85186ea2fdac1",
+    "version": 1,
+    "schemaVersion": 1,
+    "height": 93699,
+    "miner": "0xc67ae72834e36b52a4b76db6f6a44ae175fb2464",
+    "difficulty": "311513444441702",
+    "timestamp": 1534304275,
+    "merkleRoot": "d67c8ed70cea0ef1e7887df02b2a9cec271e62c31d74c84559d287ff4b5efffb",
+    "chainRoot": "84381028fa7d0f1f577cfa213bf633accc7c98e5197b5ecdbdcd8bfb6b78dfdc",
+    "distance": "312756167622395",
+    "totalDistance": "28675559808772362000",
+    "nonce": "112405323",
+    "nrgGrant": 1600000000,
+    "targetHash": "6f641871680978619176212f0000a40d8d0ae784ad35918ce677a5111a776cf9",
+    "targetHeight": 1800066,
+    "targetMiner": "0x028d3af888e08aa8380e5866b6ed068bd60e7b19",
+    "targetSignature": "",
+    "twn": 0,
+    "emblemWeight": 0,
+    "emblemChainBlockHash": "",
+    "emblemChainFingerprintRoot": "87b2bc3f12e3ded808c6d4b9b528381fa2a7e95ff2368ba93191a9495daa7f50",
+    "emblemChainAddress": "",
+    "txCount": 0,
+    "txFeeBase": 0,
+    "txDistanceSumLimit": 0,
+    "blockchainHeadersCount": 1,
+    "blockchainFingerprintsRoot": "d65ffda8a561b53c09377ef7d3ee9ebbf18a618c603faf2631c1bbb7d66a03a\u0000",
+    "blockchainHeaders": {
+        "wavList": [
+            {
+                "blockchain": "wav",
+                "hash": "2AWhVDsowsgv3aGcxXcV9h3RomdsZnQKVbKivAPrbS62MFWLGzfVod5qoEVxWuRt1uAGdLwuQbnaJaSKpyHoDrqA",
+                "previousHash": "ypngUk1Db2moaB9TgBHiC6Q9HqfQWKLP5t5woFh6WxkRkWUBykG1oDFmcWVLNdP3Zz7D5pkKGfuAePpbx1n69A3",
+                "timestamp": 1534303804823,
+                "height": 1127748,
+                "merkleRoot": "dc2a6af2412f60019860bcbdde1b46bd5cacb6606ad20026fcf57efb572c67393dbee45d2a3b7002114bdbf8798f7bb2a88a14a4c75a7aa68c3a86108d45f015",
+                "blockchainConfirmationsInParentCount": 11,
+                "_id": "5b73a014bc30e80014c5d6c1"
+            }
+        ],
+        "neoList": [
+            {
+                "blockchain": "neo",
+                "hash": "0x15d752d86640b4a1c08d1132f2eab6df3b6e82dcecf09eeec20b359db658410f",
+                "previousHash": "0x8fd2c2347c4690b8cb90738ac36f0a0daa99067aadfd1367ae7a35042ac53c8e",
+                "timestamp": 1534304092000,
+                "height": 2620377,
+                "merkleRoot": "0x46da6b484b4ed8fe409cb3bf27d301fdcc2212daf5966d71188aa0cb5702168f",
+                "blockchainConfirmationsInParentCount": 1,
+                "_id": "5b73a014bc30e80014c5d6c2"
+            }
+        ],
+        "lskList": [
+            {
+                "blockchain": "lsk",
+                "hash": "5966913534974813203",
+                "previousHash": "15049365754103343120",
+                "timestamp": 1534304220000,
+                "height": 6778046,
+                "merkleRoot": "27e5fb4c861f750b1b82d1cb39e8f97cbc7dca2635ce7f68c08396d2af32fbd1a1ff4f9a6964b3b7e2ac3bcad74a028b0f4920002b0dae7698d33ffdd2594f03",
+                "blockchainConfirmationsInParentCount": 2,
+                "_id": "5b73a014bc30e80014c5d6c3"
+            }
+        ],
+        "ethList": [
+            {
+                "blockchain": "eth",
+                "hash": "0x528939da22b1cbbb4d28e3e40b4de5c642cf8ee78477e4c79fd844b88f6750ae",
+                "previousHash": "0xd78a90d5f2c57043b98f5fd54d3fa718ffe32660a00d71964cb0a93eca78424b",
+                "timestamp": 1534304171000,
+                "height": 6149646,
+                "merkleRoot": "0x93ff9d012ec37b3ee5be7928cd59ee4cc381327ec38b49529d86e3fa86759f03",
+                "blockchainConfirmationsInParentCount": 4,
+                "_id": "5b73a014bc30e80014c5d6c4"
+            }
+        ],
+        "btcList": [
+            {
+                "blockchain": "btc",
+                "hash": "00000000000000000005a8722eff1116b46f181aabef3c0476bd589e8dea9f05",
+                "previousHash": "00000000000000000003f8442de7b7d09caef7a397e6492aae1818562cf459eb",
+                "timestamp": 1534303782000,
+                "height": 536819,
+                "merkleRoot": "7bf06e91cd6e72f5d0337c33de680ce6daaf6a17f80d0b6f0f03843f0140f48b",
+                "blockchainConfirmationsInParentCount": 49,
+                "_id": "5b73a014bc30e80014c5d6c5"
+            }
+        ]
+    },
+    "txsList": [],
+    "twsList": []
+}

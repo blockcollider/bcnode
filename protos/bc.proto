@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+package bc;
+
+import "core.proto";
+
+message GetLatestBlocksResponse {
+    repeated Block blocks = 1;
+}
+
+message HelpResponse {
+    string help_text = 1;
+}
+
+message StatsResponse {
+    int64 calls = 1;
+}
+
+message RpcTransaction {
+    string from_addr = 1;
+    string to_addr = 2;
+    bytes amount = 3;
+    bytes tx_fee = 4;
+    string private_key_hex = 5;
+}
+
+enum RpcTransactionResponseStatus {
+    Success = 0;
+    Failure = 1;
+}
+
+message RpcTransactionResponse {
+    RpcTransactionResponseStatus  status    = 1;
+    string  tx_hash   = 2;
+    string  error     = 3;
+}
+
+message GetBalanceRequest {
+    string address = 1;
+}
+
+message GetBalanceResponse {
+    string confirmed = 1;
+    string unconfirmed = 2;
+    string collateralized = 3;
+    string unit = 4;
+}
+
+message MakerOrderInfo {
+    uint64  shift_starts_at = 1;
+    uint64  deposit_ends_at = 2;
+    uint64  settle_ends_at = 3;
+    string  pays_chain_id = 4;
+    string  wants_chain_id = 5;
+    string  wants_address = 6;
+    string  wants_unit = 7;
+    string  pays_unit = 8;
+    string  double_hashed_bc_address = 9;
+    string  collateralized_nrg = 10;
+    string  nrg_unit = 11;
+    string  tx_hash = 12;
+    uint64  tx_output_index = 13;
+    string  block_hash = 14;
+    uint64  block_height = 15;
+    bool    is_settled = 16;
+    uint64  block_height_has_original_maker_tx = 17;
+}
+
+message TakerOrderInfo {
+    string  sends_address = 1;
+    string  wants_address = 2;
+    string  maker_tx_hash = 3;
+    uint32  maker_tx_output_index = 4;
+    string  double_hashed_bc_address = 5;
+    string  collateralized_nrg = 6;
+    string  block_hash = 7;
+    uint64  block_height = 8;
+    bool    is_settled = 9;
+    string  tx_hash = 10;
+}
+
+message MatchedOpenOrder {
+    MakerOrderInfo maker = 1;
+    TakerOrderInfo taker = 2;
+}
+
+message GetOpenOrdersResponse {
+    repeated  MakerOrderInfo open_orders = 1;
+}
+
+message GetMatchedOpenOrdersResponse {
+    repeated MatchedOpenOrder orders = 1;
+}
+
+message PlaceMakerOrderRequest {
+    uint64  shift_starts_at = 1;
+    uint64  deposit_ends_at = 2;
+    uint64  settle_ends_at = 3;
+
+    string  pays_with_chain_id = 4;
+    string  wants_chain_id = 5;
+    string  wants_chain_address = 6;
+    string  wants_unit = 7;
+    string  pays_unit = 8;
+    string  bc_address = 9;
+    string  bc_private_key_hex = 10;
+
+    string  collateralized_nrg = 11;
+    string  nrg_unit = 12;
+}
+
+message PlaceTakerOrderRequest {
+    string  wants_chain_address = 1;
+    string  sends_chain_address = 2;
+    string  maker_tx_hash = 3;
+    uint32  maker_tx_output_index = 4;
+    string  bc_address = 5;
+    string  bc_private_key_hex = 6;
+    string  collateralized_nrg = 7;
+}
+
+message GetBlake2blRequest {
+    string to_be_hashed = 1;
+    uint32 times = 2;
+}
+
+message GetBlake2blResponse {
+    string hash = 1;
+}
+
+message VanityConvertRequest {
+    string vanity = 1;
+}
+
+message VanityConvertResponse {
+    string bc_address= 1;
+    string error = 2;
+}
+
+service Bc {
+    rpc GetLatestBlocks(Null) returns (GetLatestBlocksResponse) {}
+    rpc Help (Null) returns (HelpResponse) {}
+    rpc Stats (Null) returns (StatsResponse) {}
+    rpc NewTx (RpcTransaction) returns (RpcTransactionResponse) {}
+    rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {}
+    rpc PlaceMakerOrder (PlaceMakerOrderRequest) returns (RpcTransactionResponse) {}
+    rpc PlaceTakerOrder (PlaceTakerOrderRequest) returns (RpcTransactionResponse) {}
+    rpc GetOpenOrders (Null) returns (GetOpenOrdersResponse) {}
+    rpc GetMatchedOpenOrders (Null) returns (GetMatchedOpenOrdersResponse) {}
+    rpc GetBlake2bl (GetBlake2blRequest) returns (GetBlake2blResponse) {}
+    rpc GetBcAddressViaVanity (VanityConvertRequest) returns (VanityConvertResponse) {}
+}

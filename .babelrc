@@ -1,0 +1,21 @@
+{
+  "plugins": [
+    "transform-class-properties",
+    "transform-flow-strip-types",
+    "transform-object-rest-spread"
+  ],
+  "presets": [
+    ["env", {
+      "targets": {
+        "node": "8"
+      },
+      "useBuiltIns": true,
+      "exclude": [
+        "babel-plugin-transform-regenerator",
+        "transform-async-to-generator"
+      ]
+    }],
+    "react"
+  ],
+  "sourceMaps": true
+}

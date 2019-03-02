@@ -1,0 +1,19 @@
+[Unit]
+Description=bcnode-miner
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull blockcollider/bcnode:latest
+ExecStart=/usr/bin/docker run --name %n -v /data/_logs:/src/_logs -v /data/_data:/src/_data -p=3000:3000 blockcollider/bcnode:latest start --ws --ui --node --rovers --miner-key=YOUR_MINER_KEY
+ExecStop=/usr/bin/docker stop %n
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bcnode-miner
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+[
+	"udp://tds-r1.blockcollider.org:16060/announce",
+	"udp://tds-r2.blockcollider.org:16060/announce",
+	"udp://tds-r3.blockcollider.org:16060/announce",
+	"udp://18.210.15.44:16060/announce",
+	"udp://149.28.156.108:16060/announce"
+]

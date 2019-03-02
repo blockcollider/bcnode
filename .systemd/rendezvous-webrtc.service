@@ -1,0 +1,19 @@
+[Unit]
+Description=BlockCollider Rendezvous WebRTC
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull blockcollider/rendezvous-webrtc:0.1.0
+ExecStart=/usr/bin/docker run -p 9090:9090 --rm --name %n blockcollider/rendezvous-webrtc:0.1.0 --port=9090 --host=0.0.0.0
+ExecStop=/usr/bin/docker stop %n
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=rendezvous-webrtc
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+[package]
+name = "bcnode-native"
+version = "0.1.0"
+authors = ["Tomas Korcak <korczis@gmail.com>"]
+license = "MIT"
+build = "build.rs"
+
+[lib]
+name = "bcnode_native"
+crate-type = ["dylib"]
+
+[build-dependencies]
+# has to stay 0.1.x until https://github.com/neon-bindings/neon/issues/337 is solved
+neon-build = "0.1.23"
+
+[dependencies]
+bcrust-core = { path = "../rust/bcrust-core"}
+env_logger = "0.5"
+log = "0.4"
+neon = "0.2"
+protobuf = "1.7"
