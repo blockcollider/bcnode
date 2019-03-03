@@ -1040,7 +1040,7 @@ export class Engine {
                       const blockTxs = txs.slice(1)
                       const txFeesBN = blockTxs.map(tx => calcTxFee(tx)).reduce((fee, sum) => sum.add(fee), new BN(0))
                       const mintedNrg = parseInt(internalToHuman(minerRewardBN.sub(txFeesBN), NRG))
-                      this._logger.info(`Mint ${mintedNrg} NRG in block height: ${newBlock.getHeightz()}, hash: ${newBlock.getHash()}`)
+                      this._logger.info(`Mint ${mintedNrg} NRG in block height: ${newBlock.getHeight()}, hash: ${newBlock.getHash()}`)
                       await this.persistence.setNrgMintedSoFar(mintedNrg + mintedNrgTotal)
                     }
 
