@@ -16,7 +16,7 @@ const LRUCache = require('lru-cache')
 const { blake2bl } = require('../utils/crypto')
 const { networks } = require('../config/networks')
 const { flatten, max, equals, is, toPairs } = require('ramda')
-const { BcBlock, Block, BlockchainHeaders, BlockchainHeader, Transaction, MarkedTransaction, TransactionInput, TransactionOutput, OutPoint } = require('../protos/core_pb')
+const { BcBlock, Block, BlockchainHeaders, BlockchainHeader, Transaction, MarkedTransaction, TransactionInput, TransactionOutput } = require('../protos/core_pb')
 const { serialize, deserialize } = require('./codec')
 const { getLogger } = require('../logger')
 const { blockchainMapToList } = require('../mining/primitives')
@@ -783,7 +783,7 @@ export default class PersistenceRocksDb {
   }
 
   async getNrgMintedSoFar (): number|null {
-    return await this.get(NRG_MINTED_PERISTENCE_KEY)
+    return this.get(NRG_MINTED_PERISTENCE_KEY)
   }
 
   async setNrgMintedSoFar (nrg: number) {
@@ -959,10 +959,10 @@ export default class PersistenceRocksDb {
         }, [])
 
         debug(`putBlock(): storing ${key} as BC`)
-        await this.updateMarkedBalances(block, blockchain), // update the marked address balances
-        await this.put(key, block),
-        await this.put(`${blockchain}.block.${block.getHeight()}`, block),
-        await this.putBlockHashAtHeight(block.getHash(), block.getHeight(), blockchain),
+        await this.updateMarkedBalances(block, blockchain) // update the marked address balances
+        await this.put(key, block)
+        await this.put(`${blockchain}.block.${block.getHeight()}`, block)
+        await this.putBlockHashAtHeight(block.getHash(), block.getHeight(), blockchain)
         await this.put(`${blockchain}.txs.${block.getHash()}`, txs) // bulk updates the txs of this block hash
         await Promise.all([].concat(
           block.getTxsList().map(tx => this.putTransaction(tx, block.getHash()))
@@ -977,8 +977,8 @@ export default class PersistenceRocksDb {
       } else {
         // the block is a child block not of type BcBlock
         const txs = block.getMarkedTxsList().map((tx) => { return tx.getHash() })
-        await this.putBlockHashAtHeight(block.getHash(), block.getHeight(), blockchain),
-        await this.put(`${blockchain}.txs.${block.getHash()}`, txs), // bulk updates the txs of this block hash
+        await this.putBlockHashAtHeight(block.getHash(), block.getHeight(), blockchain)
+        await this.put(`${blockchain}.txs.${block.getHash()}`, txs) // bulk updates the txs of this block hash
         await this.put(key, block)
         return Promise.all([].concat(
           block.getMarkedTxsList().reduce((all, tx) => {

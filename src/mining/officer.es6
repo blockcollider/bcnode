@@ -32,7 +32,8 @@ const { getBlockchainsBlocksCount } = require('../bc/helper')
 const { WorkerPool } = require('./pool')
 const ts = require('../utils/time').default // ES6 default export
 const { parseBoolean } = require('../utils/config')
-const { txCreateCoinbase, getMaxBlockSize, COINBASE_TX_ESTIMATE_SIZE } = require('../core/txUtils')
+// const { txCreateCoinbase, getMaxBlockSize, COINBASE_TX_ESTIMATE_SIZE } = require('../core/txUtils')
+const { txCreateCoinbase, COINBASE_TX_ESTIMATE_SIZE } = require('../core/txUtils')
 
 const MIN_HEALTH_NET = process.env.MIN_HEALTH_NET === 'true'
 const DISABLE_IPH_TEST = parseBoolean(process.env.DISABLE_IPH_TEST)
@@ -126,10 +127,10 @@ export class MiningOfficer {
     this._collectedBlocks[block.getBlockchain()] += 1
     this._logger.info('[] <- [] ' + 'rovered ' + block.getBlockchain() + ' block ' + block.getHeight() + ' ' + block.getHash())
     // TODO: Adjust minimum count of collected blocks needed to trigger mining
-    this._canMine = true
-    // if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) {
-    //   this._canMine = true
-    // }
+    // this._canMine = true
+    if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) {
+      this._canMine = true
+    }
 
     if (this._canMine === true && MIN_HEALTH_NET === false) {
       try {
@@ -303,9 +304,9 @@ export class MiningOfficer {
         from = latestBlockHeadersHeights[chain]// TODO check, seems correct
         to = from
       } else {
-        if (!lastHeaderInPreviousBlock) {
-          throw new Error(`previous NRG block ${lastPreviousBlock.getHeight()} failed minimum "${chain}" state changes`)
-        }
+        // if (!lastHeaderInPreviousBlock) {
+        //   throw new Error(`previous NRG block ${lastPreviousBlock.getHeight()} failed minimum "${chain}" state changes`)
+        // }
         from = lastHeaderInPreviousBlock.getHeight() + 1
         to = latestBlockHeadersHeights[chain]
       }
@@ -344,7 +345,8 @@ export class MiningOfficer {
       if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
         this._cleanUnfinishedBlock()
       }
-      const maxBlockSize = 1000000000 //await getMaxBlockSize(this._minerKey, this.persistence) - COINBASE_TX_ESTIMATE_SIZE
+      // TODO: After executive branches switch this
+      const maxBlockSize = 10000000 // await getMaxBlockSize(this._minerKey, this.persistence) - COINBASE_TX_ESTIMATE_SIZE
       const maxNumberOfTx = Math.floor(maxBlockSize / COINBASE_TX_ESTIMATE_SIZE)
 
       const candidateTxs = await this._txPendingPool.loadBestPendingTxs(maxNumberOfTx)
