@@ -16,7 +16,7 @@ Mining node with Borderless SAFE MODE OFF. Trades can be executed between all fi
 ### Disabling SAFE MODE and entering UNSTOPPABLE DEVELOPER MODE.
 
 1. Check behind you for validators.
-2. Download and run BORDERLESS [install instructions](https://blog.blockcollider.org/welcome-to-block-colliders-borderless-aff2ea5edffc) you will need a BSEC wallet [https://portal.blockcollider.org]()
+2. Download and run BORDERLESS (http://borderless.blockcollider.org)[http://borderless.blockcollider.org] [install instructions](https://blog.blockcollider.org/welcome-to-block-colliders-borderless-aff2ea5edffc) you will need a BSEC wallet [https://portal.blockcollider.org]()
 3. Once you have uploaded your wallet, in the upper right hand side select Settings. The following fields will be available:  hostname, port, and secure cookie.
 4. Edit the secure cookie field with a secret value.
 5. Once you have done so start up your miner and append '--scookie={YOUR SECRET VALUE}',
