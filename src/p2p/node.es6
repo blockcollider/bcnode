@@ -1409,15 +1409,18 @@ export class PeerNode {
           const nextHeight = min(currentHeight + MAX_DATA_RANGE, currentHeight + parseInt(latestBlock.getHeight(), 10))
           const nextHighestBlock = await this._engine.persistence.getBlockByHeight(nextHeight)
           debug(`highestBlock: ${highestBlock.getHeight()} nextHighestBlock: ${nextHighestBlock}`)
-          this._engine._emitter.emit('getdata', {
-            data: [highestBlock.getHeight(), nextHighestBlock.getHeight()],
-            connection: conn
-          })
+          const data = [ highestBlock.getHeight(), nextHighestBlock.getHeight() ]
+          const payload = encodeTypeAndData(MESSAGES.GET_DATA, data)
+          const sent = await this.qsend(conn, payload)
+          if (sent !== undefined) {
+            debug(`GET_DATA sent: ${sent}`)
+          }
           // FIX: here we should likely keep requesting blocks
         } else if (syncComplete === true) {
           // TODO: Node can start mining now
           // START MINER HERE
           debug('if rovers are done syncing the miner can now be initiated')
+          await this._engine.persistence.put('bc.sync.initialpeerheader', 'complete')
           await this._engine.persistence.put('bc.sync.initialpeerdata', 'complete')
         } else {
           // TODO: request more blocks from the highest
@@ -1427,10 +1430,13 @@ export class PeerNode {
           const nextHeight = min(currentHeight + MAX_DATA_RANGE, currentHeight + parseInt(latestBlock.getHeight(), 10))
           const nextHighestBlock = await this._engine.persistence.getBlockByHeight(nextHeight)
           debug(`highestBlock: ${highestBlock.getHeight()} nextHighestBlock: ${nextHighestBlock}`)
-          this._engine._emitter.emit('getdata', {
-            data: [highestBlock.getHeight(), nextHighestBlock.getHeight()],
-            connection: conn
-          })
+
+          const data = [ highestBlock.getHeight(), nextHighestBlock.getHeight() ]
+          const payload = encodeTypeAndData(MESSAGES.GET_DATA, data)
+          const sent = await this.qsend(conn, payload)
+          if (sent !== undefined) {
+            debug(`GET_DATA sent: ${sent}`)
+          }
         }
         // Peer Sends Block List 0007 // Peer Sends Multiverse 001
       } else if (type === MESSAGES.BLOCKS || type === MESSAGES.MULTIVERSE) {
