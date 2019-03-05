@@ -124,6 +124,7 @@ export class MiningOfficer {
       this._logger.warn('SECURITY ALERT: IPH test is has been overridden by DISABLE_IPH_TEST')
       iph = 'complete'
     }
+
     this._collectedBlocks[block.getBlockchain()] += 1
     this._logger.info('[] <- [] ' + 'rovered ' + block.getBlockchain() + ' block ' + block.getHeight() + ' ' + block.getHash())
     // TODO: Adjust minimum count of collected blocks needed to trigger mining
@@ -176,11 +177,9 @@ export class MiningOfficer {
     }
 
     // Check if _canMine
-    iph = 'complete'
-    if (!this._canMine || iph !== 'complete') {
-      if (iph !== 'complete') {
-        debug('holding for iph "all clear" status before mining')
-      }
+    // if iph is complete or pending mining can start
+    // if iph is running mining can start
+    if (!this._canMine || iph === 'running') {
       const keys = Object.keys(this._collectedBlocks)
       const values = '[' + keys.reduce((all, a, i) => {
         const val = this._collectedBlocks[a]
