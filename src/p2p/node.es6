@@ -678,7 +678,7 @@ export class PeerNode {
 
         // greeting reponse to connection with provided host information and connection ID
         const address = conn.remoteAddress + ':' + conn.remotePort
-        const iph = 'complete' // await this._engine._persistence.get('bc.sync.initialpeerheader')
+        const iph = await this._engine._persistence.get('bc.sync.initialpeerheader')
         // if the initial peer num has not been set we need to set it
         // this could have happened if the local node crashed on startup
         if (iph === null) {

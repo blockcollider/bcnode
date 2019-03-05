@@ -31,7 +31,6 @@ function loadATMinerGrantsTx (ATBalanceDigest: string, genesisMinerKey: string):
   })
 
   const tx = new Transaction()
-
   const txOutputs = minerBalance.map((pair) => {
     const [minerAddress, nrgs] = pair
 
