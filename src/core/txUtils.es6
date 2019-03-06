@@ -280,7 +280,7 @@ export class ScriptTemplates {
 
 export const extractInfoFromCrossChainTxTakerOutputScript = (script: string): {
   makerTxHash: string,
-  makerTxOutputIndex: string|number,
+  makerTxOutputIndex: number,
   doubleHashedBcAddress: string
 } => {
   if (script.indexOf('OP_CALLBACK') === -1) {

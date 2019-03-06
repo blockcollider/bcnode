@@ -482,7 +482,7 @@ export class DexLib {
                 }
                 if (oringalMakerInfo.hash !== tx.getHash()) {
                   // update wantsUnit and paysUnit
-                  const remainingRatio = parseInt(internalToHuman(output.getValue(), NRG)) / parseInt(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
+                  const remainingRatio = parseFloat(internalToHuman(output.getValue(), NRG)) / parseFloat(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
                   tradeInfo['wantsUnit'] = (parseFloat(tradeInfo['wantsUnit']) * remainingRatio).toString()
                   tradeInfo['paysUnit'] = (parseFloat(tradeInfo['paysUnit']) * remainingRatio).toString()
                 }
@@ -594,7 +594,7 @@ export class DexLib {
             }
             if (oringalMakerInfo.hash !== outPointTxHash) {
               // update wantsUnit and paysUnit
-              const remainingRatio = parseInt(internalToHuman(referencedTxOutput.getValue(), NRG)) / parseInt(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
+              const remainingRatio = parseFloat(internalToHuman(referencedTxOutput.getValue(), NRG)) / parseFloat(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
               makerTradeInfo['wantsUnit'] = (parseFloat(makerTradeInfo['wantsUnit']) * remainingRatio).toString()
               makerTradeInfo['paysUnit'] = (parseFloat(makerTradeInfo['paysUnit']) * remainingRatio).toString()
             }

@@ -11,7 +11,12 @@ import type { BcBlock } from '../protos/core_pb'
 const PersistenceRocksDb = require('../persistence').RocksDb
 const { blake2bl } = require('../utils/crypto')
 const { values } = require('ramda')
-const { extractInfoFromCrossChainTxMakerOutputScript } = require('../core/txUtils')
+const {
+  extractInfoFromCrossChainTxMakerOutputScript,
+  extractInfoFromCrossChainTxTakerInputScript,
+  extractInfoFromCrossChainTxTakerOutputScript
+} = require('../core/txUtils')
+const { internalToHuman, COIN_FRACS: { NRG } } = require('../core/coin')
 
 class UnsettledTxManager {
   _persistence: PersistenceRocksDb
@@ -39,12 +44,14 @@ class UnsettledTxManager {
     key: ${side}.wants.${chainId}.${address}
     var makerToWatch = {
       settleEndsAt: 1221111,
-      takers: [ // should not be an array
+      monoidCollateralizedNrg: "12",
+      takers: [
         {
           settled: false,
           // makerTx: { hash: 'i am maker tx hash', outputIndex: 0}, // to settle this trade
           tx: { hash: 'i am taker bc tx hash', outputIndex: 0, collateralizedNrg: 60 }, // this indicates taker settles the trade
           sendsAddress: 'xxx' // taker promises to sends
+          paysUnit: ''
         }
       ]
     }
@@ -60,40 +67,100 @@ class UnsettledTxManager {
       ]
     }
   */
-  async setMakerTxSettleEndsAtHeight (makerWantsChainId: string, makerWantsAddress: string, settleEndsAt: number) {
+  async setMakerTxSettleEndsAtHeight (makerWantsChainId: string, makerWantsAddress: string, settleEndsAt: number, collateralizedNrg: string) {
     const key = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.maker, makerWantsChainId, makerWantsAddress)
-    this._persistence.put(key, { settleEndsAt: settleEndsAt })
+    this._persistence.put(key, JSON.stringify({ settleEndsAt: settleEndsAt, monoidCollateralizedNrg: collateralizedNrg }))
   }
 
   // called when a block that has maker tx is added to the bc chain
-  async setMakerTxSettleEndsAtHeightIfNeeded (newBcBlock: BcBlock) {
+  async watchCrossChainTx (newBcBlock: BcBlock) {
     const txs = newBcBlock.getTxsList()
     for (let i = 0; i < txs.length; i++) {
       const tx = txs[i]
       const outputs = tx.getOutputsList()
-      for (let output of outputs) {
+      for (let outIdx = 0; outIdx < outputs.length; outIdx++) {
+        const output = outputs[outIdx]
         const outputScript = Buffer.from(output.getOutputScript()).toString('ascii')
+        const collateralizedNrg = internalToHuman(output.getValue(), NRG)
+        // only set the settle ends at for the OP_MONIOD
         if (outputScript.indexOf('OP_MONOID') > -1) {
           const makerInfo = extractInfoFromCrossChainTxMakerOutputScript(outputScript)
           await this.setMakerTxSettleEndsAtHeight(
-            makerInfo.wantsChainId, makerInfo.wantsAddress, newBcBlock.getHeight() + makerInfo.shiftStartsAt + makerInfo.settleEndsAt
+            makerInfo.wantsChainId, makerInfo.wantsAddress, newBcBlock.getHeight() + makerInfo.shiftStartsAt + makerInfo.settleEndsAt,
+            collateralizedNrg
           )
+        } else if (outputScript.indexOf('OP_CALLBACK') > -1 && outputScript.indexOf('OP_MONAD') > -1) {
+          // taker
+          const takerInfoFromOutputScript = extractInfoFromCrossChainTxTakerOutputScript(outputScript)
+          const makerTxHash = takerInfoFromOutputScript.makerTxHash
+          const makerTxOutputIndex = takerInfoFromOutputScript.makerTxOutputIndex
+          const makerTx = await this._persistence.getTransactionByHash(makerTxHash, 'bc')
+          const makerTxOutput = makerTx.getOutputsList()[makerTxOutputIndex]
+
+          const txInputs = tx.getInputsList()
+          let txInputForTaker = null
+          for (let txInput of txInputs) {
+            const outPoint = txInput.getOutPoint()
+            if (outPoint.getHash() === makerTxHash && outPoint.getIndex() === makerTxOutputIndex) {
+              txInputForTaker = txInput
+              break
+            }
+          }
+
+          if (!txInputForTaker) {
+            throw new Error(`Invalid tx, no taker input for the output`)
+          }
+          const takerInputScript = Buffer.from(txInputForTaker.getInputScript(), 'ascii').toString('ascii')
+          const takerInputInfo = extractInfoFromCrossChainTxTakerInputScript(takerInputScript)
+
+          let monoidMakerOutputLockScript = Buffer.from(makerTxOutput.getOutputScript()).toString('ascii')
+          const monoidCollateralizedNrg = internalToHuman(makerTxOutput.getValue(), NRG)
+          let monoidHash = makerTxHash
+          let monoidTxOutputIndex = makerTxOutputIndex
+          while (monoidMakerOutputLockScript.endsWith('OP_CALLBACK')) {
+            const [parentTxHash, parentOutputIndex, _] = monoidMakerOutputLockScript.split(' ')
+            const _makerTx = await this._persistence.getTransactionByHash(parentTxHash, 'bc')
+            const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
+
+            monoidMakerOutputLockScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
+            monoidHash = parentTxHash
+            monoidTxOutputIndex = parentOutputIndex
+          }
+          const monoidMakerInfo = extractInfoFromCrossChainTxMakerOutputScript(monoidMakerOutputLockScript)
+
+          const makerWatchInfo = {
+            tx: {
+              hash: makerTxHash,
+              outputIndex: makerTxOutputIndex,
+              monoidCollateralizedNrg: monoidCollateralizedNrg,
+              monoidHash: monoidHash,
+              monoidTxOutputIndex: monoidTxOutputIndex
+            },
+            wantsAddress: monoidMakerInfo.wantsAddress,
+            wantsChainId: monoidMakerInfo.wantsChainId
+          }
+          const takerWatchInfo = {
+            tx: { hash: tx.getHash(), outputIndex: outIdx, collateralizedNrg: collateralizedNrg },
+            wantsAddress: takerInputInfo.takerWantsAddress,
+            sendsAddress: takerInputInfo.takerSendsAddress,
+            wantsChainId: monoidMakerInfo.paysChainId
+          }
+          await this.watchSettleMarkedTxs(makerWatchInfo, takerWatchInfo)
         }
       }
     }
   }
 
-  // invoke this func, when a taker's tx is included to a bc block
   async watchSettleMarkedTxs (
-    chainId: string,
-    makerTxInfo: {tx: {hash: string, outputIndex: number, collateralizedNrg: number}, wantsAddress: string},
-    takerTxInfo: {tx: {hash: string, outputIndex: number, collateralizedNrg: number}, wantsAddress: string, sendsAddress: string}
+    makerTxInfo: {tx: {hash: string, outputIndex: number, monoidCollateralizedNrg: string, monoidHash: string, monoidTxOutputIndex: number}, wantsAddress: string, wantsChainId: string},
+    takerTxInfo: {tx: {hash: string, outputIndex: number, collateralizedNrg: string}, wantsAddress: string, sendsAddress: string, wantsChainId: string}
   ) {
-    const makerKey = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.maker, chainId, makerTxInfo.wantsAddress)
-    const makerToWatchInfo = await this._persistence.get(makerKey)
+    const makerKey = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.maker, makerTxInfo.wantsChainId, makerTxInfo.wantsAddress)
+    let makerToWatchInfo = await this._persistence.get(makerKey)
     if (!makerToWatchInfo) {
       throw Error(`${makerKey} not found`)
     }
+    makerToWatchInfo = JSON.parse(makerToWatchInfo)
     let found = false
     if (makerToWatchInfo.takers) {
       for (let taker of makerToWatchInfo.takers) {
@@ -115,8 +182,9 @@ class UnsettledTxManager {
         sendsAddress: takerTxInfo.sendsAddress
       })
     }
+    await this._persistence.put(makerKey, JSON.stringify(makerToWatchInfo))
 
-    const takerKey = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.taker, chainId, takerTxInfo.wantsAddress)
+    const takerKey = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.taker, takerTxInfo.wantsChainId, takerTxInfo.wantsAddress)
     const takerToWatchInfo = {
       settleEndsAt: makerToWatchInfo.settleEndsAt,
       makers: [{
@@ -125,7 +193,7 @@ class UnsettledTxManager {
         tx: makerTxInfo.tx
       }]
     }
-    this._persistence.put(takerKey, takerToWatchInfo)
+    await this._persistence.put(takerKey, JSON.stringify(takerToWatchInfo))
   }
 
   /*
@@ -251,13 +319,14 @@ class UnsettledTxManager {
 
   async markTxAsSettled (addrFrom: string, addrTo: string, bridgedChain: string) {
     const makerKey = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.maker, bridgedChain, addrTo)
-    const makerToWatchInfo = await this._persistence.get(makerKey)
+    let makerToWatchInfo = await this._persistence.get(makerKey)
     if (makerToWatchInfo) { // to settle a maker tx
+      makerToWatchInfo = JSON.stringify(makerToWatchInfo)
       for (var i = 0; i < makerToWatchInfo.takers.length; i++) {
         const taker = makerToWatchInfo.takers[i]
         if (taker.sendsAddress === addrFrom) {
           taker.settled = true
-          await this._persistence.put(makerKey, makerToWatchInfo)
+          await this._persistence.put(makerKey, JSON.stringify(makerToWatchInfo))
           // taker settles the trade, mark getSettledTxKeyByTxHashAndOutputIdx as true, so that taker can spend its collateralized nrg
           await this._persistence.put(UnsettledTxManager.getSettledTxKeyByTxHashAndOutputIdx(taker.tx.hash, taker.tx.outputIndex), true)
           return
@@ -265,15 +334,15 @@ class UnsettledTxManager {
       }
     } else {
       const takerKey = UnsettledTxManager.generateSettleInfoKey(UnsettledTxManager.taker, bridgedChain, addrTo)
-      const takerToWatchInfo = await this._persistence.get(takerKey)
+      let takerToWatchInfo = await this._persistence.get(takerKey)
       if (takerToWatchInfo) {
+        takerToWatchInfo = JSON.parse(takerToWatchInfo)
         takerToWatchInfo.makers[0].settled = true
-        await this._persistence.put(takerKey, takerToWatchInfo)
-        // maker settles the trade, mark getSettledTxKeyByTxHashAndOutputIdx as true,
-        // so that maker can spend its collateralized nrg, which is the same as the taker's collateralized nrg
+        await this._persistence.put(takerKey, JSON.stringify(takerToWatchInfo))
+        // maker settles the trade, mark getSettledTxKeyByTxHashAndOutputIdx as true, so that maker can spend its collateralized nrg
         await this._persistence.put(
           UnsettledTxManager.getSettledTxKeyByTxHashAndOutputIdx(takerToWatchInfo.makers[0].tx.hash, takerToWatchInfo.makers[0].tx.outputIndex),
-          takerToWatchInfo.makers[0].takerTx
+          true
         )
       }
     }
@@ -303,6 +372,7 @@ class UnsettledTxManager {
     }
 
     if (res) {
+      res = JSON.parse(res)
       return currentBcHeight <= res.settleEndsAt
     } else {
       return false
