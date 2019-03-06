@@ -7,7 +7,7 @@ const pRetry = require('p-retry')
 const { sites } = require('../rover/neo/mesh.json')
 
 process.on('unhandledRejection', (e) => {
-  console.error(e.toString())
+  process.stdout.write(`\nERROR: ${e.toString()}`)
 })
 
 const localMesh = sites.reduce((all, site) => {
@@ -62,10 +62,10 @@ for (let h of heights) {
   pRetry(() => {
     return neoMesh.getRandomNode().rpc.getBlock(h)
   }, { onFailedAttempt: error => {
-    console.log(`Block ${h} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
+    process.stdout.write(`\nBlock ${h} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
   },
   retries: 50,
   factor: 1.1,
   randomize: true,
-  maxTimeout: 2e3 }).then(b => console.log(`Got block ${b.index}, remaining ${--count}`)).catch(e => e)
+  maxTimeout: 2e3 }).then(b => process.stdout.write(`\nGot block ${b.index}, remaining ${--count}`)).catch(e => e)
 }

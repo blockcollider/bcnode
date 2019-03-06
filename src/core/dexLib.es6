@@ -124,7 +124,7 @@ export class DexLib {
 
     // check collateralizedBN is a multiply of unitBN
     if (!(collateralizedBN.div(unitBN).mul(unitBN).eq(collateralizedBN))) {
-      throw new Error(`Invalid nrgUnit - collateralizedNrg: ${collateralizedNrg} is not disivible by nrgUnit: ${nrgUnit}`);
+      throw new Error(`Invalid nrgUnit - collateralizedNrg: ${collateralizedNrg} is not disivible by nrgUnit: ${nrgUnit}`)
     }
 
     const latestBlock = await this.persistence.get('bc.block.latest')
@@ -237,7 +237,7 @@ export class DexLib {
     if (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
       // partial order
       while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
-        const [parentTxHash, parentOutputIndex, _] = makerTxOutputScript.split(' ')
+        const [parentTxHash, parentOutputIndex] = makerTxOutputScript.split(' ')
         const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
         const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
         originalMakerTxHash = _makerTx.getHash()
@@ -250,9 +250,7 @@ export class DexLib {
       throw new Error(`hash: ${makerTxHash}, outputIndex: ${makerTxOutputIndex} not a valid maker tx`)
     }
 
-
-
-    console.log('xxxxxxxxxxxxxxxxxx', collateralizedNrg);
+    this._logger.info(`\nxxxxxxxxxxxxxx collateralizedNrg: ${collateralizedNrg}`)
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const makerUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
     // check collateralizedBN is a multiply of maker unit
@@ -269,7 +267,7 @@ export class DexLib {
     const latestBlockHeight = latestBlock.getHeight()
     const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
     const upperBCHeightBound = latestBlockHeight - makerTxInfo.shiftStartsAt
-    const lowerBCHeightBound = latestBlockHeight - makerTxInfo.depositEndsAt > 0 ? latestBlockHeight - makerTxInfo.depositEndsAt : 1;
+    const lowerBCHeightBound = latestBlockHeight - makerTxInfo.depositEndsAt > 0 ? latestBlockHeight - makerTxInfo.depositEndsAt : 1
     let foundBlock = false
 
     for (let i = lowerBCHeightBound; i <= upperBCHeightBound; i++) {
@@ -447,7 +445,7 @@ export class DexLib {
 
             let oringalMakerInfo = { hash: tx.getHash(), output: output }
             while (outputLockScript.endsWith('OP_CALLBACK')) {
-              const [parentTxHash, parentOutputIndex, _] = outputLockScript.split(' ')
+              const [parentTxHash, parentOutputIndex] = outputLockScript.split(' ')
               const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
               const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
               outputLockScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
@@ -569,7 +567,7 @@ export class DexLib {
             let outputLockScript = Buffer.from(referencedTxOutput.getOutputScript()).toString('ascii')
             let oringalMakerInfo = { hash: outPointTxHash, output: referencedTxOutput }
             while (outputLockScript.endsWith('OP_CALLBACK')) {
-              const [parentTxHash, parentOutputIndex, _] = outputLockScript.split(' ')
+              const [parentTxHash, parentOutputIndex] = outputLockScript.split(' ')
               const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
               const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
               oringalMakerInfo.hash = _makerTx.getHash()
