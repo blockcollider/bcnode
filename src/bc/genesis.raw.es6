@@ -39,5 +39,5 @@ module.exports = {
   "blockchainHeadersMap": {},
 
   "blockchainFingerprintsRoot": "d65ffda8a561b53c09377ef7d3ee9ebbf18a618c603faf2631c1bbb7d66a03ac",
-  "ATBalanceDigest": "32221da05457af84e7807c8c1a684a4a70efbad1cc2eac499ac7e87e0de4a7520c4b6b38f50f48ff015bc70f0036722c3d206ee4b1ac8230740f0bf6bc337b21"
+  "ATBalanceDigest": "6833dcb4693a2d08fa3e2348f169da41d6c1b77ac8bdc3a2e72eb36f438dc01a92615f57220bbf07ec747a68ebce6582a2b5bc7cf1415bb354aaddb8a5ecb292"
 }
