@@ -107,6 +107,7 @@ message PlaceMakerOrderRequest {
 
     string  collateralized_nrg = 11;
     string  nrg_unit = 12;
+    string  tx_fee = 13;
 }
 
 message PlaceTakerOrderRequest {
@@ -117,6 +118,7 @@ message PlaceTakerOrderRequest {
     string  bc_address = 5;
     string  bc_private_key_hex = 6;
     string  collateralized_nrg = 7;
+    string  tx_fee = 8;
 }
 
 message GetBlake2blRequest {
