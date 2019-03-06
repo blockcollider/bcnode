@@ -2,9 +2,11 @@
 
 In order to begin calling the BC RPC Interface, make sure to run your miner using the `--rpc` and `--scookie=testCookie123` flags. You can replace `testCookie123` with any string. Each of the calls will be sent using the following method.
 ```javascript
+// npm i node-fetch is you have not installed node-fetch
 const fetch = require('node-fetch');
 
 var url = 'https://localhost:3000/rpc'; //-replace 3000 with the port you are running the miner on
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 let auth = 'Basic ' + btoa(':testCookie123');
 
