@@ -37,30 +37,34 @@ export class BlockContainer extends Component<*> {
       block = this.props.block
 
       let formattedTxs = []
-      for (let tx of block.txsList) {
-        let formattedOutputs = []
-        let formattedInputs = []
-        for (let output of tx.outputsList) {
-          formattedOutputs.push(evolve({
-            value: v => internalToHuman(Buffer.from(v, 'base64'), COIN_FRACS.NRG),
-            unit: u => parseInt(Buffer.from(u, 'base64').toString('hex'), 16),
-            outputScript: s => Buffer.from(s, 'base64').toString('ascii')
-          }, output))
-        }
+      if (block !== undefined && block.txsList !== undefined && block.txsList.length > 0) {
+        for (let tx of block.txsList) {
+          let formattedOutputs = []
+          let formattedInputs = []
+          for (let output of tx.outputsList) {
+            formattedOutputs.push(evolve({
+              value: v => internalToHuman(Buffer.from(v, 'base64'), COIN_FRACS.NRG),
+              unit: u => parseInt(Buffer.from(u, 'base64').toString('hex'), 16),
+              outputScript: s => Buffer.from(s, 'base64').toString('ascii')
+            }, output))
+          }
 
-        for (let input of tx.inputsList) {
-          formattedInputs.push(evolve({
-            outPoint: {
-              value: v => internalToHuman(Buffer.from(v, 'base64'), COIN_FRACS.NRG)
-            },
-            inputScript: s => Buffer.from(s, 'base64').toString('ascii')
-          }, input))
+          for (let input of tx.inputsList) {
+            formattedInputs.push(evolve({
+              outPoint: {
+                value: v => internalToHuman(Buffer.from(v, 'base64'), COIN_FRACS.NRG)
+              },
+              inputScript: s => Buffer.from(s, 'base64').toString('ascii')
+            }, input))
+          }
+          tx.inputs = formattedInputs
+          tx.outputs = formattedOutputs
+          delete tx.outputsList
+          delete tx.inputsList
+          formattedTxs.push(tx)
         }
-        tx.inputs = formattedInputs
-        tx.outputs = formattedOutputs
-        delete tx.outputsList
-        delete tx.inputsList
-        formattedTxs.push(tx)
+      } else {
+        window.location.reload()
       }
       delete block.txsList
       block.txs = formattedTxs
