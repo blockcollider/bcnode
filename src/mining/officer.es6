@@ -179,7 +179,7 @@ export class MiningOfficer {
     // Check if _canMine
     // if iph is complete or pending mining can start
     // if iph is running mining can start
-    if (!this._canMine && iph === 'complete') {
+    if (!this._canMine && iph !== 'complete') {
       const keys = Object.keys(this._collectedBlocks)
       const values = '[' + keys.reduce((all, a, i) => {
         const val = this._collectedBlocks[a]
@@ -215,8 +215,12 @@ export class MiningOfficer {
     // $FlowFixMe
     return this.startMining(rovers, block, blockCache)
       .then((res) => {
-        this._logger.info('mining cycle initiated')
-        return Promise.resolve(res)
+        if (res) {
+          this._logger.info('mining cycle initiated')
+          return Promise.resolve(res)
+        } else {
+          return Promise.resolve(false)
+        }
       })
       .catch((err) => {
         this._logger.error(err)
@@ -272,8 +276,12 @@ export class MiningOfficer {
     const latestRoveredHeadersKeys: string[] = this._knownRovers.map(chain => `${chain}.block.latest`)
     const latestBlockHeaders = await this.persistence.getBulk(latestRoveredHeadersKeys)
     // { eth: 200303, btc:2389, neo:933 }
+    if (latestBlockHeaders.length < this._knownRovers.length) {
+      this._logger.info(`${latestBlockHeaders.length}/${this._knownRovers.length} ready for mining`)
+      return Promise.resolve(false)
+    }
     const latestBlockHeadersHeights = fromPairs(latestBlockHeaders.map(header => [header.getBlockchain(), header.getHeight()]))
-    this._logger.debug(`latestBlockHeadersHeights: ${inspect(latestBlockHeadersHeights)}`)
+    this._logger.info(`latestBlockHeadersHeights: ${inspect(latestBlockHeadersHeights)}`)
 
     // collider is starting up
     // if (lastPreviousBlock.getHeight() === 1 && blockCache.length > 0) {

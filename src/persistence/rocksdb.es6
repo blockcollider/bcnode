@@ -959,9 +959,10 @@ export default class PersistenceRocksDb {
         }, [])
 
         debug(`putBlock(): storing ${key} as BC`)
-        await this.updateMarkedBalances(block, blockchain) // update the marked address balances
         await this.put(key, block)
         await this.put(`${blockchain}.block.${block.getHeight()}`, block)
+        await this.put(`${blockchain}.block.${block.getHash()}`, block)
+        await this.updateMarkedBalances(block, blockchain) // update the marked address balances
         await this.putBlockHashAtHeight(block.getHash(), block.getHeight(), blockchain)
         await this.put(`${blockchain}.txs.${block.getHash()}`, txs) // bulk updates the txs of this block hash
         await Promise.all([].concat(
@@ -1165,48 +1166,48 @@ export default class PersistenceRocksDb {
           }
         }
       }
-    }
 
-    for (let i = currentBlockIndex; i <= providedBlockHeight; i++) {
-      try {
-        const blockFrame: Block|BcBlock = await this.get(`${blockchain}.block.${i}`)
-        const frameHeaders = blockFrame.getBlockchainHeaders()
-        Object.keys(frameHeaders.toObject()).map(listName => {
-          const method = `get${listName[0].toUpperCase()}${listName.slice(1)}`
-          const connectedBlockHeaders = frameHeaders[method]()
-          const chain = listName.slice(0, 3)
-          const txs = [].concat(...connectedBlockHeaders.map(header => header.getMarkedTxsList()))
-          for (let tx of txs) {
-            // The default token address is EMB
-            if (balances[chain] === undefined) {
-              balances[chain] = {}
-            }
-            if (balances[chain][tx.getToken()] === undefined) {
-              balances[chain][tx.getToken()] = {}
-            }
-            // if it is from address SUBTRACT the total balance
-            if (balances[chain][tx.getToken()][tx.getAddrFrom()] === undefined) {
-              balances[chain][tx.getToken()][tx.getAddrFrom()] = '0'
-            }
+      for (let i = currentBlockIndex; i <= providedBlockHeight; i++) {
+        try {
+          const blockFrame: Block|BcBlock = await this.get(`${blockchain}.block.${i}`)
+          const frameHeaders = blockFrame.getBlockchainHeaders()
+          Object.keys(frameHeaders.toObject()).map(listName => {
+            const method = `get${listName[0].toUpperCase()}${listName.slice(1)}`
+            const connectedBlockHeaders = frameHeaders[method]()
+            const chain = listName.slice(0, 3)
+            const txs = [].concat(...connectedBlockHeaders.map(header => header.getMarkedTxsList()))
+            for (let tx of txs) {
+              // The default token address is EMB
+              if (balances[chain] === undefined) {
+                balances[chain] = {}
+              }
+              if (balances[chain][tx.getToken()] === undefined) {
+                balances[chain][tx.getToken()] = {}
+              }
+              // if it is from address SUBTRACT the total balance
+              if (balances[chain][tx.getToken()][tx.getAddrFrom()] === undefined) {
+                balances[chain][tx.getToken()][tx.getAddrFrom()] = '0'
+              }
 
-            if (balances[chain][tx.getToken()][tx.getAddrTo()] === undefined) {
-              balances[chain][tx.getToken()][tx.getAddrTo()] = '0'
+              if (balances[chain][tx.getToken()][tx.getAddrTo()] === undefined) {
+                balances[chain][tx.getToken()][tx.getAddrTo()] = '0'
+              }
+              balances[chain][tx.getToken()][tx.getAddrFrom()] = new BN(balances[chain][tx.getToken()][tx.getAddrFrom()]).sub(new BN(tx.getValue())).toString()
+              balances[chain][tx.getToken()][tx.getAddrTo()] = new BN(balances[chain][tx.getToken()][tx.getAddrTo()]).add(new BN(tx.getValue())).toString()
             }
-            balances[chain][tx.getToken()][tx.getAddrFrom()] = new BN(balances[chain][tx.getToken()][tx.getAddrFrom()]).sub(new BN(tx.getValue())).toString()
-            balances[chain][tx.getToken()][tx.getAddrTo()] = new BN(balances[chain][tx.getToken()][tx.getAddrTo()]).add(new BN(tx.getValue())).toString()
+          })
+          // assign the latest marked transaction height
+          await this.put(`${blockchain}.marked.latest`, block)
+          // update the balances stored on disk
+          await this.put(`${blockchain}.marked.balances`, JSON.stringify(balances))
+          // store a snapshot every 3000 blocks
+          if (new BN(block.getHeight()).mod(new BN(3000)).eq(new BN(0)) === true) {
+            await this.put(`${blockchain}.marked.latest.snapshot`, block)
+            await this.put(`${blockchain}.marked.balances.snapshot`, JSON.stringify(balances))
           }
-        })
-        // assign the latest marked transaction height
-        await this.put(`${blockchain}.marked.latest`, block)
-        // update the balances stored on disk
-        await this.put(`${blockchain}.marked.balances`, JSON.stringify(balances))
-        // store a snapshot every 3000 blocks
-        if (new BN(block.getHeight()).mod(new BN(3000)).eq(new BN(0)) === true) {
-          await this.put(`${blockchain}.marked.latest.snapshot`, block)
-          await this.put(`${blockchain}.marked.balances.snapshot`, JSON.stringify(balances))
+        } catch (err) {
+          return Promise.reject(err)
         }
-      } catch (err) {
-        return Promise.reject(err)
       }
     }
     return true

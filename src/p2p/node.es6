@@ -343,47 +343,7 @@ export class PeerNode {
         await this.resetBlocksFrom(latestHeight)
         // if there are not enough peers left reset headers and try again
       } else if (ipd === 'running') {
-        //
-        // let latestHeightRaw = await this._engine.persistence.get('bc.data.latest')
-        // if (latestHeightRaw === null) {
-        //  await this._engine.persistence.put('bc.data.latest', 2)
-        //  latestHeightRaw = 2
-        // }
-        // const latestHeight = parseInt(latestHeightRaw, 10)
-        // const latestBlock = await this._engine.persistence.get('bc.block.latest')
-        // if (!latestBlock) {
-        //  this._logger.warn(`Couldn't get 'bc.block.latest' in processPeerEvaluations`)
-        //  return
-        // }
-        // const from = latestHeight
-        // const to = min(latestHeight + 500, latestHeight + parseInt(latestBlock.getHeight(), 10))
-        // debug(`ipd: ${ipd} with latest height from: ${from} to: ${to}`)
-        // const fromBlock = await this._engine.persistence.get(`bc.block.${from}`)
-        // const toBlock = await this._engine.persistence.get(`bc.block.${to}`)
-        // const payload = encodeTypeAndData(MESSAGES.GET_DATA, [fromBlock.getHash(), toBlock.getHash()])
-        // const conn = find(
-        //  ({ remoteAddress, remotePort }) => `${remoteAddress}:${remotePort}` === initialPeer.getAddress(),
-        //  this._discovery.connections
-        // )
-        // if (!conn) {
-        //  // unable to locate active connection
-        //  this._logger.warn(`unable to find given connection ${initialPeer.getAddress()}`)
-        //  // expire the peer and rerun processPeerEvaluations
-        //  initialPeer.setExpires(1)
-        //  await this._engine.persistence.put('bc.sync.initialpeer', initialPeer)
-        //  debug('unable to find connection -> requesting peer evaluations')
-        //  return this.processPeerEvaluations()
-        // } else {
-        //  // connection exists
-        //  debug('sending GET_DATA request to peer')
-        //  const result = await this.qsend(conn, payload)
-        //  if (result.success) {
-        //    this._logger.info('successful update sent to peer')
-        //  }
-        // }
-        // do not continue and evaluate the peer events -> return
-        // this assumes ipd is 'running'
-        // this assumes iph is 'complete'
+        debug('peer sync evalution stopped while ipd === running')
         return Promise.resolve(true)
       }
       // if there are less than 2 event pairs trigger resync

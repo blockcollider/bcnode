@@ -14,7 +14,7 @@ import type PersistenceRocksDb from '../persistence/rocksdb'
 const { inspect } = require('util')
 
 const BN = require('bn.js')
-const { all, flatten, identity, values } = require('ramda')
+const { flatten, values } = require('ramda')
 const uuid = require('uuid')
 const debug = require('debug')('bcnode:multiverse')
 
@@ -266,14 +266,14 @@ export class Multiverse {
       // 1. block further extends the main branch
       if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
         debug(`addBlock(): put newBlock hash: ${newBlock.getHash()}`)
-        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock) // TODO remove after tx data migrats to only data
         await this.persistence.putBlock(newBlock)
         const putResults = await Promise.all([
           this.persistence.put(`${blockchain}.block.latest`, newBlock), // TODO: should happen here?
           this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
         ])
+        debug('put results')
         debug(putResults)
-        let stored = all(identity, flatten(putResults))
+        let stored = putResults.every((r) => { return r !== null })
         debug('addBlock(): block extends main branch ' + latestBlock.getHash())
         // FIX: says it extends main branch but stored = false
         return { stored, needsResync: false }
@@ -297,25 +297,22 @@ export class Multiverse {
           return { stored: false, needsResync: true }
         }
         debug(`addBlock(): local latestBlock height: ${latestBlock.getHeight()} grandparentBlock height: ${grandparentBlock.getHeight()}`)
-        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
         await this.persistence.putBlock(newBlock)
         const putResults = await Promise.all([
           this.persistence.put(`${blockchain}.block.latest`, newBlock),
-          this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock),
           this.persistence.put(`${blockchain}.block.${originBlock.getHeight()}`, originBlock),
           this.persistence.put(`${blockchain}.block.${grandparentBlock.getHeight()}`, grandparentBlock) // likely needs to reset farther
         ])
         debug(`addBlock(): block extends side branch: ${newBlock.getHash()}`)
+        debug('put results')
         debug(putResults)
-        const stored = all(identity, flatten(putResults))
+        let stored = putResults.every((r) => { return r !== null })
         return { stored, needsResync: false }
       } else {
         // TODO: remove this once tx data sync
-        // const stored = await this.persistence.putBlock(newBlock, 1, blockchain) // TODO: this stores the block regardless
-        debug('addBlock(): unable to classify block')
-        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
-        const stored = await this.persistence.putBlock(newBlock, 0, blockchain)
-        return { stored: !!stored, needsResync: false }
+        const stored = await this.persistence.putBlock(newBlock) // TODO: this stores the block regardless
+        this._logger.info('addBlock(): unable to classify block')
+        return { stored: stored, needsResync: false }
       }
     } catch (err) {
       return Promise.reject(err)

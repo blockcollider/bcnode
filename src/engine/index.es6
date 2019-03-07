@@ -983,7 +983,7 @@ export class Engine {
 
     let boundariesToFetchPromise = Promise.resolve(false)
     if (BC_FETCH_MISSING_BLOCKS) {
-      debug(`getting missing blocks enabled ${BC_FETCH_MISSING_BLOCKS}`)
+      this._logger.info(`getting missing blocks enabled ${BC_FETCH_MISSING_BLOCKS}`)
       const headers = newBlock.getBlockchainHeaders()
       boundariesToFetchPromise = this.persistence.getBlockBoundariesToFetch(headers)
     }
