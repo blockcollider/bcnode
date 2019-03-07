@@ -179,7 +179,7 @@ export class MiningOfficer {
     // Check if _canMine
     // if iph is complete or pending mining can start
     // if iph is running mining can start
-    if (!this._canMine || iph === 'running') {
+    if (!this._canMine && iph === 'complete') {
       const keys = Object.keys(this._collectedBlocks)
       const values = '[' + keys.reduce((all, a, i) => {
         const val = this._collectedBlocks[a]
@@ -370,7 +370,7 @@ export class MiningOfficer {
       const allTxs = [coinbaseTx].concat(txsToMine)
 
       this._logger.info(
-        `rx/txs unclaimed, length: ${allTxs.length}, size: ${txsSizeSoFar + coinbaseTx.serializeBinary().length}, maxBlockSize: ${maxBlockSize}`
+        `txs unclaimed, length: ${allTxs.length}, size: ${txsSizeSoFar + coinbaseTx.serializeBinary().length}, maxBlockSize: ${maxBlockSize}`
       )
 
       const [newBlock, finalTimestamp] = prepareNewBlock(

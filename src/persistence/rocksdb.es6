@@ -1142,26 +1142,27 @@ export default class PersistenceRocksDb {
     // checks bc.marked.latest and bc.marked.balances keys in rocksdb
     // look up the last block indexed with  marked transactions in context of given blockchain
     const latestMarkedBlock = await this.get(`${blockchain}.marked.latest`)
-    const headersMap = block.getBlockchainHeaders()
-
-    if (!latestMarkedBlock) {
-      // if no marked transaction scan has been run set height to the provided block
-      for (let listName of Object.keys(headersMap.toObject())) {
-        balances[listName.slice(0, 3)] = {}
-      }
-    } else if (new BN(providedBlockHeight).eq(latestMarkedBlock.getHeight())) {
-      // already added marked balances for this block
-      balances = await this.get(`${blockchain}.marked.balances`)
-      return JSON.parse(balances) // FIXME introduce new protobuf message for this
-    } else {
-      currentBlockIndex = latestMarkedBlock.getHeight()
-      balances = JSON.parse(await this.get(`${blockchain}.marked.balances`))
-      if (!balances) {
-        balances = {}
-        // if this occurs marked database is corrupt reset
-        currentBlockIndex = 1
+    if (block !== null && block.getBlockchainHeaders !== undefined) {
+      const headersMap = block.getBlockchainHeaders()
+      if (!latestMarkedBlock) {
+        // if no marked transaction scan has been run set height to the provided block
         for (let listName of Object.keys(headersMap.toObject())) {
           balances[listName.slice(0, 3)] = {}
+        }
+      } else if (new BN(providedBlockHeight).eq(latestMarkedBlock.getHeight())) {
+        // already added marked balances for this block
+        balances = await this.get(`${blockchain}.marked.balances`)
+        return JSON.parse(balances) // FIXME introduce new protobuf message for this
+      } else {
+        currentBlockIndex = latestMarkedBlock.getHeight()
+        balances = JSON.parse(await this.get(`${blockchain}.marked.balances`))
+        if (!balances) {
+          balances = {}
+          // if this occurs marked database is corrupt reset
+          currentBlockIndex = 1
+          for (let listName of Object.keys(headersMap.toObject())) {
+            balances[listName.slice(0, 3)] = {}
+          }
         }
       }
     }
