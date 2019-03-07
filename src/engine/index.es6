@@ -292,11 +292,11 @@ export class Engine {
       }
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
-        this._logger.info('stored rovers to persistence')
+        this._logger.debug('stored rovers to persistence')
       }
       res = await this.persistence.put('appversion', versionData)
       if (res) {
-        this._logger.info('stored appversion to persistence')
+        this._logger.debug('stored appversion to persistence')
       }
 
       if (BC_REMOVE_BTC === true) {
@@ -325,7 +325,7 @@ export class Engine {
       try {
         const latestBlock = await this.persistence.get('bc.block.latest')
         if (!latestBlock) {
-          this._logger.info(`Genesis block not found - assuming fresh DB and storing it`)
+          this._logger.warn(`Genesis block not found - assuming fresh DB and storing it`)
           throw new Error('Genesis not found - fallback to store it')
         }
         await this.multiverse.addNextBlock(latestBlock)
@@ -345,7 +345,7 @@ export class Engine {
           for (let output of txOutputs) {
             sumSoFar += parseInt(internalToHuman(output.getValue(), NRG))
           }
-          this._logger.info(`Set minted nrg: ${sumSoFar} in genesis block`)
+          this._logger.info(`set minted nrg: ${sumSoFar} in genesis block`)
           this.persistence.setNrgMintedSoFar(sumSoFar)
 
           await this.persistence.put('bc.block.latest', newGenesisBlock)
@@ -355,7 +355,7 @@ export class Engine {
           await this.persistence.put('bc.dht.quorum', 0)
           await this.persistence.put('bc.depth', 2)
           await this.multiverse.addNextBlock(newGenesisBlock)
-          this._logger.info('genesis block saved to disk ' + newGenesisBlock.getHash())
+          this._logger.debug('genesis block saved to disk ' + newGenesisBlock.getHash())
         } catch (e) {
           this._logger.error(`error while creating genesis block ${e.message}`)
           process.exit(1)
@@ -395,7 +395,7 @@ export class Engine {
           this.updateLatestAndStore(msg)
             .then((previousBlock) => {
               if (msg.mined === true) {
-                this._logger.info(`latest block ${msg.data.getHeight()} has been updated`)
+                this._logger.debug(`latest block ${msg.data.getHeight()} has been updated`)
               } else {
                 // this.miningOfficer.rebaseMiner()
                 // .then((state) => {
@@ -1031,6 +1031,7 @@ export class Engine {
                       await this._txPendingPool.markTxsAsMined(txs, 'bc')
                       await this._unsettledTxManager.setMakerTxSettleEndsAtHeightIfNeeded(newBlock)
                       await this._unsettledTxManager.markTxAsSettledViaNewBlock(newBlock)
+
                       // update coinbase tx grant
                       let mintedNrgTotal = await this.persistence.getNrgMintedSoFar()
                       if (!mintedNrgTotal) {
@@ -1077,7 +1078,7 @@ export class Engine {
             const request = { dimension: 'hash', id: newBlock.getHash(), connection: conn }
             this._emitter.emit('getTxs', request)
             this.multiverse.addBlock(newBlock)
-              .then(({ stored, needsResync }) => {
+              .then(async ({ stored, needsResync }) => {
                 this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
                 // make sure IPH and IPD are complete before asking for sets to catch up
                 if (needsResync && iph === 'complete' && ipd === 'complete') {

@@ -242,78 +242,83 @@ export class Multiverse {
     // 1. block further extends the main branch
     // 2. block extends a side branch but does not add enough difficulty to make it become the new main branch
     // 3. block extends a side branch and makes it the new main branch
-    if (!newBlock) {
-      this._logger.warn('no block was given to evaluate')
-      return { stored: false, needsResync: false }
-    }
+    try {
+      if (!newBlock) {
+        this._logger.warn('no block was given to evaluate')
+        return { stored: false, needsResync: false }
+      }
 
-    if (newBlock.getHeight() === 1) {
-      this._logger.warn('genesis block came in')
-      return { stored: false, needsResync: false }
-    }
+      if (newBlock.getHeight() === 1) {
+        this._logger.warn('genesis block came in')
+        return { stored: false, needsResync: false }
+      }
 
-    let blockchain = 'bc'
-    if (newBlock.getBlockchain !== undefined) {
-      blockchain = newBlock.getBlockchain()
-    }
-    const latestBlock = await this.persistence.get(`${blockchain}.block.latest`)
-    if (latestBlock !== null) {
-      debug(`local latestBlock height: ${latestBlock.getHeight()} newBlock height: ${newBlock.getHeight()}`)
-    }
+      let blockchain = 'bc'
+      if (newBlock.getBlockchain !== undefined) {
+        blockchain = newBlock.getBlockchain()
+      }
+      const latestBlock = await this.persistence.get(`${blockchain}.block.latest`)
+      if (latestBlock !== null) {
+        debug(`local latestBlock height: ${latestBlock.getHeight()} newBlock height: ${newBlock.getHeight()}`)
+      }
 
-    /// ////////////////////////////////////////////////////
-    // 1. block further extends the main branch
-    if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
-      debug(`addBlock(): put newBlock hash: ${newBlock.getHash()}`)
-      await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock) // TODO remove after tx data migrats to only data
-      const putResults = await Promise.all([
-        this.persistence.put(`${blockchain}.block.latest`, newBlock), // TODO: should happen here?
-        this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock),
-        this.persistence.putBlock(newBlock, 0, blockchain)
-      ])
-      debug(putResults)
-      let stored = all(identity, flatten(putResults))
-      debug('addBlock(): block extends main branch ' + latestBlock.getHash())
-      // FIX: says it extends main branch but stored = false
-      return { stored, needsResync: false }
-    }
+      /// ////////////////////////////////////////////////////
+      // 1. block further extends the main branch
+      if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
+        debug(`addBlock(): put newBlock hash: ${newBlock.getHash()}`)
+        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock) // TODO remove after tx data migrats to only data
+        await this.persistence.putBlock(newBlock)
+        const putResults = await Promise.all([
+          this.persistence.put(`${blockchain}.block.latest`, newBlock), // TODO: should happen here?
+          this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
+        ])
+        debug(putResults)
+        let stored = all(identity, flatten(putResults))
+        debug('addBlock(): block extends main branch ' + latestBlock.getHash())
+        // FIX: says it extends main branch but stored = false
+        return { stored, needsResync: false }
+      }
 
-    /// ////////////////////////////////////////////////////
-    // 2. check if block extends a block already on disk, if not request a block set
-    const originBlock = await this.persistence.getBlockByHash(newBlock.getPreviousHash(), blockchain)
-    if (originBlock === null || originBlock === false) {
-      debug(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
-      return { stored: false, needsResync: true }
-    }
-
-    /// ////////////////////////////////////////////////////
-    // 3. block extends a side branch and makes it the new main branch
-    // TODO: notify miner to switch branch to new latest block
-    if (latestBlock && new BN(originBlock.getHeight()).gte(new BN(latestBlock.getHeight()))) {
-      const grandparentBlock = await this.persistence.getBlockByHash(originBlock.getPreviousHash(), blockchain)
-      if (!grandparentBlock) {
+      /// ////////////////////////////////////////////////////
+      // 2. check if block extends a block already on disk, if not request a block set
+      const originBlock = await this.persistence.getBlockByHash(newBlock.getPreviousHash(), blockchain)
+      if (originBlock === null || originBlock === false) {
+        debug(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
         return { stored: false, needsResync: true }
       }
-      debug(`addBlock(): local latestBlock height: ${latestBlock.getHeight()} grandparentBlock height: ${grandparentBlock.getHeight()}`)
-      await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
-      const putResults = await Promise.all([
-        this.persistence.putBlock(newBlock, 0, blockchain),
-        this.persistence.put(`${blockchain}.block.latest`, newBlock),
-        this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock),
-        this.persistence.put(`${blockchain}.block.${originBlock.getHeight()}`, originBlock),
-        this.persistence.put(`${blockchain}.block.${grandparentBlock.getHeight()}`, grandparentBlock) // likely needs to reset farther
-      ])
-      debug(`addBlock(): block extends side branch: ${newBlock.getHash()}`)
-      debug(putResults)
-      const stored = all(identity, flatten(putResults))
-      return { stored, needsResync: false }
-    } else {
-      // TODO: remove this once tx data sync
-      // const stored = await this.persistence.putBlock(newBlock, 1, blockchain) // TODO: this stores the block regardless
-      debug('addBlock(): unable to classify block')
-      await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
-      const stored = await this.persistence.putBlock(newBlock, 0, blockchain)
-      return { stored: !!stored, needsResync: false }
+
+      /// ////////////////////////////////////////////////////
+      // 3. block extends a side branch and makes it the new main branch
+      // TODO: notify miner to switch branch to new latest block
+      if (latestBlock && new BN(originBlock.getHeight()).gte(new BN(latestBlock.getHeight()))) {
+        const grandparentBlock = await this.persistence.getBlockByHash(originBlock.getPreviousHash(), blockchain)
+        if (!grandparentBlock) {
+          debug(`addBlock(): no grandparentBlock for purposed newBlock edge <- needsResync: true`)
+          return { stored: false, needsResync: true }
+        }
+        debug(`addBlock(): local latestBlock height: ${latestBlock.getHeight()} grandparentBlock height: ${grandparentBlock.getHeight()}`)
+        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
+        await this.persistence.putBlock(newBlock)
+        const putResults = await Promise.all([
+          this.persistence.put(`${blockchain}.block.latest`, newBlock),
+          this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock),
+          this.persistence.put(`${blockchain}.block.${originBlock.getHeight()}`, originBlock),
+          this.persistence.put(`${blockchain}.block.${grandparentBlock.getHeight()}`, grandparentBlock) // likely needs to reset farther
+        ])
+        debug(`addBlock(): block extends side branch: ${newBlock.getHash()}`)
+        debug(putResults)
+        const stored = all(identity, flatten(putResults))
+        return { stored, needsResync: false }
+      } else {
+        // TODO: remove this once tx data sync
+        // const stored = await this.persistence.putBlock(newBlock, 1, blockchain) // TODO: this stores the block regardless
+        debug('addBlock(): unable to classify block')
+        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
+        const stored = await this.persistence.putBlock(newBlock, 0, blockchain)
+        return { stored: !!stored, needsResync: false }
+      }
+    } catch (err) {
+      return Promise.reject(err)
     }
   }
 
