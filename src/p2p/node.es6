@@ -746,7 +746,8 @@ export class PeerNode {
       this._engine._emitter.on('getblocklist', (request) => {
         const { low, high } = request.data
         const payload = encodeTypeAndData(MESSAGES.GET_BLOCKS, [low, high])
-        this.qsend(request.connection, payload)
+        const c = request.connection || request.conn
+        this.qsend(c, payload)
       })
 
       // local <---- peer sent blocks
@@ -982,7 +983,7 @@ export class PeerNode {
         }
       // Peer Requests Block Range
       } else if (type === MESSAGES.GET_BLOCKS || type === MESSAGES.GET_MULTIVERSE) {
-        const latestBlock = this._engine.persistence.get('bc.block.latest')
+        const latestBlock = await this._engine.persistence.get('bc.block.latest')
         const parts = bufferSplit(str, Buffer.from(MSG_SEPARATOR[type]))
         const low = parseInt(parts[1])
         const from = max(2, parseInt(low, 10))

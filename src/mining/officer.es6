@@ -177,9 +177,9 @@ export class MiningOfficer {
     }
 
     // Check if _canMine
-    // if iph is complete or pending mining can start
+    // if iph is pending mining can start
     // if iph is running mining can start
-    if (!this._canMine && iph !== 'complete') {
+    if (!this._canMine || iph !== 'complete') {
       const keys = Object.keys(this._collectedBlocks)
       const values = '[' + keys.reduce((all, a, i) => {
         const val = this._collectedBlocks[a]

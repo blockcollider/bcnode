@@ -864,7 +864,7 @@ export class Engine {
           this.miningOfficer.newRoveredBlock(rovers, block, this._blockCache)
             .then((pid: number | false) => {
               if (pid !== false) {
-                this._logger.info(`collectBlock handler: sent to miner`)
+                debug(`collectBlock handler: sent to miner`)
               }
             })
             .catch(err => {
@@ -1006,7 +1006,7 @@ export class Engine {
           }
           // Add block to LRU cache to avoid processing the same block twice
           this._logger.info(`Adding received ${fullBlock ? 'full ' : ''}block into cache of known blocks - ${newBlock.getHash()}`)
-          cache.set(newBlock.getHash(), true)
+          // cache.set(newBlock.getHash(), true)
           this._logger.info(`received new ${fullBlock ? 'full ' : ''}block from peer, height ${newBlock.getHeight()}`)
 
           if (fullBlock) {
@@ -1085,13 +1085,16 @@ export class Engine {
                 if (needsResync && iph === 'complete' && ipd === 'complete') {
                   this.persistence.get('bc.block.latest').then((latestBlock) => {
                     if (latestBlock !== null) {
+                      const diff = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(parseInt(latestBlock.getHeight(), 10)).sub(new BN(1))).toNumber()
                       const getBlockListMessage = {
                         data: {
-                          high: newBlock.getHeight(),
-                          low: new BN(latestBlock.getHeight()).sub(new BN(12)).toNumber()
+                          high: parseInt(newBlock.getHeight(), 10),
+                          low: new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(diff)).toNumber()
                         },
                         connection: conn
                       }
+                      debug('get block list message')
+                      debug(getBlockListMessage)
                       this._emitter.emit('getblocklist', getBlockListMessage)
                     } else {
                       this._logger.error(new Error('critical error: unable to get bc.block.latest <- all super collider nodes will be vulnerable'))

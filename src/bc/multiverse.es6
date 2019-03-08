@@ -245,12 +245,12 @@ export class Multiverse {
     try {
       if (!newBlock) {
         this._logger.warn('no block was given to evaluate')
-        return { stored: false, needsResync: false }
+        return Promise.resolve({ stored: false, needsResync: false })
       }
 
       if (newBlock.getHeight() === 1) {
         this._logger.warn('genesis block came in')
-        return { stored: false, needsResync: false }
+        return Promise.resolve({ stored: false, needsResync: false })
       }
 
       let blockchain = 'bc'
@@ -259,60 +259,62 @@ export class Multiverse {
       }
       const latestBlock = await this.persistence.get(`${blockchain}.block.latest`)
       if (latestBlock !== null) {
-        debug(`local latestBlock height: ${latestBlock.getHeight()} newBlock height: ${newBlock.getHeight()}`)
+        this._logger.info(`local latestBlock height: ${latestBlock.getHeight()} newBlock height: ${newBlock.getHeight()}`)
       }
 
       /// ////////////////////////////////////////////////////
       // 1. block further extends the main branch
       if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
         debug(`addBlock(): put newBlock hash: ${newBlock.getHash()}`)
+        await this.persistence.put(`${blockchain}.block.latest`, newBlock)
+        await this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
+        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
         await this.persistence.putBlock(newBlock)
-        const putResults = await Promise.all([
-          this.persistence.put(`${blockchain}.block.latest`, newBlock), // TODO: should happen here?
-          this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
-        ])
-        debug('put results')
-        debug(putResults)
-        let stored = putResults.every((r) => { return r !== null })
-        debug('addBlock(): block extends main branch ' + latestBlock.getHash())
+        this._logger.info('addBlock(): block extends main branch ' + latestBlock.getHash())
         // FIX: says it extends main branch but stored = false
-        return { stored, needsResync: false }
+        return Promise.resolve({ stored: true, needsResync: false })
       }
 
       /// ////////////////////////////////////////////////////
       // 2. check if block extends a block already on disk, if not request a block set
-      const originBlock = await this.persistence.getBlockByHash(newBlock.getPreviousHash(), blockchain)
+      const previousHeight = parseInt(latestBlock.getHeight(), 10) - 1
+      const originBlock = await this.persistence.get(`${blockchain}.block.${previousHeight}`)
       if (originBlock === null || originBlock === false) {
-        debug(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
-        return { stored: false, needsResync: true }
+        this._logger.info(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
+        return Promise.resolve({ stored: false, needsResync: true })
+      }
+
+      if (originBlock.getHash() === newBlock.getPreviousHash()) {
+        this._logger.info(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
+        if (parseInt(newBlock.getHeight(), 10) > parseInt(latestBlock.getHeight(), 10)) {
+          await this.persistence.put('bc.block.latest', newBlock)
+        }
+        await this.persistence.putBlock(newBlock)
+        return Promise.resolve({ stored: false, needsResync: true })
       }
 
       /// ////////////////////////////////////////////////////
       // 3. block extends a side branch and makes it the new main branch
       // TODO: notify miner to switch branch to new latest block
-      if (latestBlock && new BN(originBlock.getHeight()).gte(new BN(latestBlock.getHeight()))) {
-        const grandparentBlock = await this.persistence.getBlockByHash(originBlock.getPreviousHash(), blockchain)
-        if (!grandparentBlock) {
-          debug(`addBlock(): no grandparentBlock for purposed newBlock edge <- needsResync: true`)
-          return { stored: false, needsResync: true }
+      if (latestBlock && parseInt(originBlock.getHeight(), 10) >= parseInt(latestBlock.getHeight(), 10)) {
+        const grandfatherHeight = parseInt(latestBlock.getHeight(), 10) - 2
+        const grandparentBlock = await this.persistence.get(`${blockchain}.block.${grandfatherHeight}`)
+        if (!grandparentBlock || grandparentBlock === null) {
+          this._logger.info(`addBlock(): no grandparentBlock for purposed newBlock edge <- needsResync: true`)
+          return Promise.resolve({ stored: false, needsResync: true })
         }
         debug(`addBlock(): local latestBlock height: ${latestBlock.getHeight()} grandparentBlock height: ${grandparentBlock.getHeight()}`)
+        await this.persistence.put(`${blockchain}.block.latest`, newBlock)
         await this.persistence.putBlock(newBlock)
-        const putResults = await Promise.all([
-          this.persistence.put(`${blockchain}.block.latest`, newBlock),
-          this.persistence.put(`${blockchain}.block.${originBlock.getHeight()}`, originBlock),
-          this.persistence.put(`${blockchain}.block.${grandparentBlock.getHeight()}`, grandparentBlock) // likely needs to reset farther
-        ])
-        debug(`addBlock(): block extends side branch: ${newBlock.getHash()}`)
-        debug('put results')
-        debug(putResults)
-        let stored = putResults.every((r) => { return r !== null })
-        return { stored, needsResync: false }
+        await this.persistence.put(`${blockchain}.block.${originBlock.getHeight()}`, originBlock)
+        await this.persistence.put(`${blockchain}.block.${grandparentBlock.getHeight()}`, grandparentBlock)
+        this._logger.info(`addBlock(): block extends side branch: ${newBlock.getHash()}`)
+        return Promise.resolve({ stored: true, needsResync: false })
       } else {
         // TODO: remove this once tx data sync
         const stored = await this.persistence.putBlock(newBlock) // TODO: this stores the block regardless
         this._logger.info('addBlock(): unable to classify block')
-        return { stored: stored, needsResync: false }
+        return Promise.resolve({ stored: stored, needsResync: true })
       }
     } catch (err) {
       return Promise.reject(err)
