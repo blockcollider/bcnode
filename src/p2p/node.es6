@@ -1230,7 +1230,7 @@ export class PeerNode {
       } else if (type === MESSAGES.GET_DATA) {
         const address = conn.remoteAddress + ':' + conn.remotePort
         debug(`M.GET_DATA received GET_DATA request from peer ${address}`)
-        const latestBlock = await this._engine.persistence('bc.block.latest')
+        const latestBlock = await this._engine.persistence.get('bc.block.latest')
         const parts = bufferSplit(str, Buffer.from(MSG_SEPARATOR[type]))
         const [, ...rawHeights] = parts
         const low = rawHeights[0]

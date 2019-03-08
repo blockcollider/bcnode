@@ -1024,6 +1024,7 @@ export class Engine {
                 this._logger.info(`passing block to multiverse.AddBlock ${newBlock.getHeight()} : ${newBlock.getHash()} iph: ${iph} ipd: ${ipd}`)
                 this.multiverse.addBlock(newBlock)
                   .then(async ({ stored, needsResync }) => {
+                    this._logger.info(`stored: ${stored} ${newBlock.getHeight()}`)
                     this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
                     if (stored) {
                       const txs = newBlock.getTxsList()
