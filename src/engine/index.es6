@@ -1027,7 +1027,7 @@ export class Engine {
                       const txs = newBlock.getTxsList()
                       this._logger.info(`Mark ${txs.length} txs from newBlock: ${newBlock.getHeight()} as mined`)
                       await this._txPendingPool.markTxsAsMined(txs, 'bc')
-                      await this._unsettledTxManager.setMakerTxSettleEndsAtHeightIfNeeded(newBlock)
+                      await this._unsettledTxManager.watchCrossChainTx(newBlock)
                       await this._unsettledTxManager.markTxAsSettledViaNewBlock(newBlock)
                       // update coinbase tx grant
                       let mintedNrgTotal = await this.persistence.getNrgMintedSoFar()
