@@ -93,6 +93,7 @@ export class DexLib {
     payWithChainId: string, wantChainId: string, receiveAddress: string, makerWantsUnit: string, makerPaysUnit: string,
     makerBCAddress: string, makerBCPrivateKeyHex: string,
     collateralizedNrg: string, nrgUnit: string,
+    additionalTxFee: string,
     minerKey: string
   ): Promise<Transaction|Error> {
     this._logger.info(`placeMakerOrder`)
@@ -130,7 +131,9 @@ export class DexLib {
     const latestBlock = await this.persistence.get('bc.block.latest')
 
     const blockWindow = new BN(parseInt(settle, 10) - parseInt(shift, 10))
-    const txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
+    let txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
+    const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
+    txFeeBN = txFeeBN.add(additionalTxFeeBN)
     this._logger.info(`Tx Fee: ${internalToHuman(txFeeBN, NRG)} NRG`)
     if ((collateralizedBN.add(txFeeBN)).gt(balanceData.confirmed)) { // TODO: make sure confirmed is in humanToBN format
       this._logger.error(`${makerBCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, collateralized: ${internalToHuman(collateralizedBN, NRG)}`)
@@ -212,6 +215,7 @@ export class DexLib {
     makerTxHash: string, makerTxOutputIndex: number,
     takerBCAddress: string, takerBCPrivateKeyHex: string,
     collateralizedNrg: string,
+    additionalTxFee: string,
     minerKey: string
   ): Promise<Transaction|Error> {
     this._logger.info(`placeTakerOrder`)
@@ -250,7 +254,6 @@ export class DexLib {
       throw new Error(`hash: ${makerTxHash}, outputIndex: ${makerTxOutputIndex} not a valid maker tx`)
     }
 
-    this._logger.info(`\nxxxxxxxxxxxxxx collateralizedNrg: ${collateralizedNrg}`)
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const makerUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
     // check collateralizedBN is a multiply of maker unit
@@ -315,7 +318,9 @@ export class DexLib {
 
     const settledAtBCHeight = (new BN(foundBlock.getHeight())).add(new BN(makerTxInfo.shiftStartsAt + makerTxInfo.settleEndsAt))
     const blockWindow = settledAtBCHeight.sub(new BN(latestBlockHeight))
-    const txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlockHeight), 'taker')
+    let txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlockHeight), 'taker')
+    const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
+    txFeeBN = txFeeBN.add(additionalTxFeeBN)
     this._logger.info(`Tx fee for taker: ${internalToHuman(txFeeBN, NRG)} NRG`)
     if ((collateralizedBN.add(txFeeBN)).gt(balanceData.confirmed)) {
       this._logger.error(`${takerBCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, collateralized: ${internalToHuman(collateralizedBN, NRG)}`)

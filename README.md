@@ -7,9 +7,9 @@ Mining node with Borderless SAFE MODE OFF. Trades can be executed between all fi
 !!! IMPORTANT !!!
 
 - This is real Bitcoin, Ethereum, NEO, Waves. Lost coins cannot be recovered, redacted, or reset. It is both the point and the consequence of a truly decentralized marketplace.
-- This could be called the 'nightly' build in that it versions very quickly until April 21st 2019.  
+- This could be called the 'nightly' build in that it versions very quickly until April 21st 2019.
 - If you are running this there is a private group on embnation.com (think Bitcoin Phantom IRC in the old days). It is invite only.
-- Running this node assumes you are a programmer, better yet you are an Evangelist or member of Block Collider Advanced.  
+- Running this node assumes you are a programmer, better yet you are an Evangelist or member of Block Collider Advanced.
 - Everything is open source in this repo except for the final NRG regard algorithm and the move from the 32 bit to 64 PoD to prevent ASIC fabrication.
 
 
@@ -38,7 +38,7 @@ Unique to an ARC Block Node you can join hidden executive branches (get it?) whi
 - kennedy
 - coolidge
 
-To specify an executive branch add the environment variable 'export BC_NETWORK="EXECUTIVE BRANCH NAME}"' 
+To specify an executive branch add the environment variable 'export BC_NETWORK="EXECUTIVE BRANCH NAME}"'
 
 ### Where is my NRG from Before Target
 If you were a miner lucky enough to participate in Before Target your NRG balance in the arc block. We won't release it until after the community vote on April 21st. No Bitcoin Gold double-spend foolery!
@@ -208,4 +208,4 @@ Helpful community tools will be added: [https://github.com/blockcollider/awesome
 * hello [at] blockcollider.org
 
 ## Forge
-Rumor the forger has fired up the kiln again and the mysterious forged Emblems, founders hoodies, and other gear will appear and disappear through the month on EMB Nation, the code base, and the Executive Branches. We will also be hiding private keys around filled with DOGE because who can haz fun big no DOGE. We will never give away EMB. 
+Rumor the forger has fired up the kiln again and the mysterious forged Emblems, founders hoodies, and other gear will appear and disappear through the month on EMB Nation, the code base, and the Executive Branches. We will also be hiding private keys around filled with DOGE because who can haz fun big no DOGE. We will never give away EMB.

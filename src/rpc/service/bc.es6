@@ -17,6 +17,7 @@ const RpcServer = require('../server').default
 const {
   GetBlake2blRequest, GetBlake2blResponse,
   RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest,
+  RpcTransactionResponseStatus,
   GetOpenOrdersResponse, MakerOrderInfo,
   GetMatchedOpenOrdersResponse, MatchedOpenOrder, TakerOrderInfo,
   VanityConvertResponse, VanityConvertRequest
@@ -110,17 +111,29 @@ export default class BcServiceImpl {
 
     const collateralizedNrg = placeMakerOrderReq.getCollateralizedNrg()
     const nrgUnit = placeMakerOrderReq.getNrgUnit()
+    let additionalTxFee = placeMakerOrderReq.getTxFee()
+    if (additionalTxFee === '') {
+      additionalTxFee = '0'
+    }
+    const response = new RpcTransactionResponse()
+
+    if (isNaN(parseFloat(additionalTxFee))) {
+      response.setStatus(RpcTransactionResponseStatus.FAILURE)
+      response.setError(`Invalid tx_fee: ${additionalTxFee}`)
+      callback(null, response)
+      return
+    }
+
 
     this._server.engine.createCrossChainMakerTx(
       shift, deposit, settle,
       payWithChainId, wantChainId, receiveAddress, makerWantsUnit, makerPaysUnit,
       makerBCAddress, makerBCPrivateKeyHex,
-      collateralizedNrg, nrgUnit
+      collateralizedNrg, nrgUnit, additionalTxFee
     ).then(res => {
-      const response = new RpcTransactionResponse()
       response.setStatus(res.status)
       response.setTxHash(res.txHash)
-      if (res.status !== 0) {
+      if (res.status !== 0 && res.error) {
         response.setError(res.error.toString())
       }
       callback(null, response)
@@ -142,17 +155,28 @@ export default class BcServiceImpl {
     const bCPrivateKeyHex = placeTakerOrderReq.getBcPrivateKeyHex()
 
     const collateralizedNrg = placeTakerOrderReq.getCollateralizedNrg()
+    let additionalTxFee = placeTakerOrderReq.getTxFee()
+    if (additionalTxFee === '') {
+      additionalTxFee = '0'
+    }
+    const response = new RpcTransactionResponse()
+
+    if (isNaN(parseFloat(additionalTxFee))) {
+      response.setStatus(RpcTransactionResponseStatus.FAILURE)
+      response.setError(`Invalid tx_fee: ${additionalTxFee}`)
+      callback(null, response)
+      return
+    }
 
     this._server.engine.createCrossChainTakerTx(
       wantsAddress, sendsAddress,
       makerTxHash, makerTxOutputIndex,
       bCAddress, bCPrivateKeyHex,
-      collateralizedNrg
+      collateralizedNrg, additionalTxFee
     ).then(res => {
-      const response = new RpcTransactionResponse()
       response.setStatus(res.status)
       response.setTxHash(res.txHash)
-      if (res.status !== 0) {
+      if (res.status !== 0 && res.error) {
         response.setError(res.error.toString())
       }
       callback(null, response)
