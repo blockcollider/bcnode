@@ -897,7 +897,7 @@ export class PeerNode {
             // type !== MESSAGES.TXS &&
             // type !== MESSAGES.DATA &&
             type !== MESSAGES.BLOCK &&
-            // type !== MESSAGES.BLOCKS &&
+            type !== MESSAGES.BLOCKS &&
             type !== MESSAGES.HEADER &&
             type !== MESSAGES.HEADERS) {
           debug(`ignoring type: ${type} message from peer`)
@@ -988,7 +988,7 @@ export class PeerNode {
         const low = parseInt(parts[1])
         const from = max(2, parseInt(low, 10))
         const to = min(parseInt(low, 10) + MAX_DATA_RANGE, parseInt(latestBlock.getHeight(), 10))
-        debug(`M.GET_BLOCKS: getting blocks from range from: ${from} -> ${to}`)
+        this._logger.info(`GET_BLOCKS: getting blocks from range from: ${from} -> ${to}`)
         const blockList = await this._engine.persistence.getBlocksByRange(from, to, 'bc', { asBuffer: true })
         if (!blockList || !Array.isArray(blockList)) {
           this._logger.warn(`could not getBlocksByRange(${from}, ${to}) while handling GET_DATA message`)
@@ -1405,26 +1405,14 @@ export class PeerNode {
         // Peer Sends Block List 0007 // Peer Sends Multiverse 001
       } else if (type === MESSAGES.BLOCKS) {
         const address = conn.remoteAddress + ':' + conn.remotePort
-        debug(`received BLOCKS from peer ${address}`)
+        this._logger.info(`received BLOCKS from peer ${address}`)
         // TODO: blacklist functionality should go here to prevent peers from requesting large bandwidth multiple times
         const parts = bufferSplit(str, Buffer.from(MSG_SEPARATOR[type]))
         const [, ...blocks] = parts
         const latestBlock = await this._engine.persistence.get('bc.block.latest')
         const ipd = await this._engine.persistence.get('bc.sync.initialpeerdata')
-        currentPeer = await this._engine.persistence.get('bc.sync.initialpeer')
-        if (ipd !== 'running') {
+        if (ipd !== 'complete') {
           this._logger.warn(`peer transmitted data running !== ${String(ipd)}`)
-          this._logger.warn(`peer transmitted data running !== ${String(ipd)}`)
-          this._logger.warn(`peer transmitted data running !== ${String(ipd)}`)
-          this._logger.warn(`peer transmitted data running !== ${String(ipd)}`)
-          return
-        }
-        if (!currentPeer) {
-          this._logger.warn(`cannot fetch currentPeer while handling DATA message`)
-          return false
-          // confirm peer is approved to be delivering data
-        } else if (currentPeer !== null && address !== currentPeer.getAddress()) {
-          this._logger.warn(`unapproved peer ${address} attempted data delivery`)
           return
         }
         if (!latestBlock) {
@@ -1472,7 +1460,7 @@ export class PeerNode {
       } else if (type === MESSAGES.BLOCKS || type === MESSAGES.MULTIVERSE) {
         const ipd = await this._engine.persistence.get('bc.sync.initialpeerdata')
         const address = conn.remoteAddress + ':' + conn.remotePort
-        debug(`received BLOCKS|MULTIVERSE data from peer ${address}`)
+        this._logger.info(`received BLOCKS|MULTIVERSE data from peer ${address}`)
         const parts = bufferSplit(str, Buffer.from(MSG_SEPARATOR[type]))
         try {
           parts.shift() // dicard type from the array

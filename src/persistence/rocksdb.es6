@@ -1170,6 +1170,9 @@ export default class PersistenceRocksDb {
       for (let i = currentBlockIndex; i <= providedBlockHeight; i++) {
         try {
           const blockFrame: Block|BcBlock = await this.get(`${blockchain}.block.${i}`)
+          if (blockFrame === null || blockFrame.getBlockchainHeaders === undefined) {
+            continue
+          }
           const frameHeaders = blockFrame.getBlockchainHeaders()
           Object.keys(frameHeaders.toObject()).map(listName => {
             const method = `get${listName[0].toUpperCase()}${listName.slice(1)}`
