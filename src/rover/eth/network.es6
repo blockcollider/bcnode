@@ -365,7 +365,6 @@ export default class Network extends EventEmitter {
       isValidBlock(block).then(isValid => {
         const blockNumber = new BN(header.number).toNumber()
         if (isValid) {
-          this._logger.info(`handleMessageBlockBodies,  ${peerAddr}, ${Object.keys(this._forkVerifiedForPeer).join(';')}`)
           this.onNewBlock(block, peer)
 
           this._logger.debug(`BLOCK_BODIES_valid: ${peerAddr} ${inspect(header.hash().toString('hex'))}`)
