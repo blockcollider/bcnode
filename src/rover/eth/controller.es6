@@ -143,7 +143,17 @@ export default class Controller {
       const difficultyValid = block.header.validateDifficulty(this._parentBlock)
       if (!difficultyValid) {
         this._invalidDifficultyCount++
-        this._logger.warn(`Incoming block has invalid difficulty - rejecting the block`)
+        const blockInfo = {
+          parentBlock: {
+            'height': (new BN(this._parentBlock.header.number)).toString(),
+            'difficulty': (new BN(this._parentBlock.header.difficulty)).toString(),
+          },
+          newBlock: {
+            'height': (new BN(block.header.number)).toString(),
+            'difficulty': (new BN(block.header.difficulty)).toString(),
+          }
+        }
+        this._logger.warn(`Incoming block has invalid difficulty - rejecting the block, info: ${JSON.stringify(blockInfo)}`)
         if (this._invalidDifficultyCount > MAX_INVALID_COUNT) {
           this._logger.warn(`Maximum amount of invalid ETH blocks reached - restarting rover to try to connect to valid peers`)
           process.exit(1)

@@ -341,7 +341,7 @@ export default class Network extends EventEmitter {
 
   handleMessageBlockBodies (payload: Object, peer: Object) {
     const peerAddr = getPeerAddr(peer)
-    if (DAO_FORK_SUPPORT !== null && !this._forkVerifiedForPeer[peerAddr]) {
+    if (DAO_FORK_SUPPORT && !this._forkVerifiedForPeer[peerAddr]) {
       return
     }
 
@@ -365,6 +365,7 @@ export default class Network extends EventEmitter {
       isValidBlock(block).then(isValid => {
         const blockNumber = new BN(header.number).toNumber()
         if (isValid) {
+          this._logger.info(`handleMessageBlockBodies,  ${peerAddr}, ${Object.keys(this._forkVerifiedForPeer).join(';')}`)
           this.onNewBlock(block, peer)
 
           this._logger.debug(`BLOCK_BODIES_valid: ${peerAddr} ${inspect(header.hash().toString('hex'))}`)
@@ -396,15 +397,13 @@ export default class Network extends EventEmitter {
 
     // this branch handles receive of DAO fork block and thus should check
     // if there is exactly one block in this reply
-    if (DAO_FORK_SUPPORT !== null && this._forkVerifiedForPeer[peerAddr] === undefined) {
+    if (DAO_FORK_SUPPORT && !this._forkVerifiedForPeer[peerAddr]) {
       if (payload.length !== 1) {
         this._logger.debug(`${peerAddr} expected one header for DAO fork verify (received: ${payload.length})`)
         return
       }
 
-      const expectedHash = DAO_FORK_SUPPORT
-        ? ETH_1920000
-        : ETC_1920000
+      const expectedHash = DAO_FORK_SUPPORT ? ETH_1920000 : ETC_1920000
       if (header.hash().toString('hex') === expectedHash) {
         this._logger.debug(`${peerAddr} verified to be on the same side of the DAO fork`)
         const timeout = this._forkDrops[peerAddr]
@@ -503,7 +502,7 @@ export default class Network extends EventEmitter {
   }
 
   handleMessageNewBlock (payload: Object, peer: Object) {
-    if (DAO_FORK_SUPPORT !== null && !this._forkVerifiedForPeer[getPeerAddr(peer)]) {
+    if (DAO_FORK_SUPPORT && !this._forkVerifiedForPeer[getPeerAddr(peer)]) {
       return
     }
 
@@ -517,7 +516,7 @@ export default class Network extends EventEmitter {
   }
 
   handleMessageNewBlockHashes (payload: Object, peer: Object) {
-    if (DAO_FORK_SUPPORT !== null && !this._forkVerifiedForPeer[getPeerAddr(peer)]) {
+    if (DAO_FORK_SUPPORT && !this._forkVerifiedForPeer[getPeerAddr(peer)]) {
       return
     }
 
@@ -540,7 +539,7 @@ export default class Network extends EventEmitter {
   }
 
   handleMessageTx (payload: Object, peer: Object) {
-    if (DAO_FORK_SUPPORT !== null && !this._forkVerifiedForPeer[getPeerAddr(peer)]) {
+    if (DAO_FORK_SUPPORT && !this._forkVerifiedForPeer[getPeerAddr(peer)]) {
       return
     }
 
@@ -603,13 +602,6 @@ export default class Network extends EventEmitter {
     // check DAO if on mainnet
     eth.once('status', () => {
       if (DAO_FORK_SUPPORT === null) {
-        return
-      }
-
-      // if not on mainnet (so eth rover is watching ropsten) do not check for DAO
-      if (false || BC_NETWORK !== 'main') { // eslint-disable-line
-        this._logger.debug(`Running on ${BC_NETWORK}net, not verifying ${peerAddr}'s side of the DAO fork`)
-        this._forkVerifiedForPeer[peerAddr] = peer
         return
       }
 
