@@ -74,7 +74,7 @@ export class Wallet {
       if (callbackScript.startsWith('OP_MONOID') || callbackScript.endsWith('OP_CALLBACK')) {
         let outputScript = callbackScript
         while (outputScript.endsWith('OP_CALLBACK')) {
-          const [parentTxHash, parentOutputIndex, _] = outputScript.split(' ')
+          const [parentTxHash, parentOutputIndex] = outputScript.split(' ')
           const _makerTx = await this._persistence.getTransactionByHash(parentTxHash, 'bc')
           const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
 
@@ -101,7 +101,7 @@ export class Wallet {
         const makerTxOutput = makerTx.getOutputsList()[takerTradeInfo.makerTxOutputIndex]
         let monoidScript = Buffer.from(makerTxOutput.getOutputScript()).toString('ascii')
         while (monoidScript.endsWith('OP_CALLBACK')) {
-          const [parentTxHash, parentOutputIndex, _] = monoidScript.split(' ')
+          const [parentTxHash, parentOutputIndex] = monoidScript.split(' ')
           const _makerTx = await this._persistence.getTransactionByHash(parentTxHash, 'bc')
           const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
 

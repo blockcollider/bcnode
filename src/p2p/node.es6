@@ -25,7 +25,6 @@ const LRUCache = require('lru-cache')
 const BN = require('bn.js')
 const debug = require('debug')('bcnode:p2p:node')
 const framer = require('frame-stream')
-const inspectStream = require('inspect-stream')
 const backpressureWriteStream = require('stream-write')
 const logging = require('../logger')
 const { BcBlock, Transaction } = require('../protos/core_pb')
@@ -36,7 +35,6 @@ const { Multiverse } = require('../bc/multiverse')
 const { BlockPool } = require('../bc/blockpool')
 // const { validateBlockSequence } = require('../bc/validation')
 const { networks } = require('../config/networks')
-const { isDebugEnabled } = require('../debug')
 
 export const MAX_HEADER_RANGE = Number(process.env.MAX_HEADER_RANGE) || 1000
 export const MAX_DATA_RANGE = Number(process.env.MAX_DATA_RANGE) || 200
@@ -58,7 +56,7 @@ const FRAMING_OPTS = {
   maxSize: _MAX_FRAME_SIZE
 }
 
-const { contains, find, isEmpty, max, min, merge, range, values, splitEvery } = require('ramda')
+const { contains, find, isEmpty, max, min, merge, range, values } = require('ramda')
 const { MESSAGES, MSG_SEPARATOR } = require('./protocol')
 const { encodeTypeAndData, encodeMessageToWire } = require('./codec')
 
@@ -680,7 +678,7 @@ export class PeerNode {
 
         // greeting reponse to connection with provided host information and connection ID
         const address = conn.remoteAddress + ':' + conn.remotePort
-        const iph = 'complete' // await this._engine._persistence.get('bc.sync.initialpeerheader')
+        const iph = await this._engine._persistence.get('bc.sync.initialpeerheader')
         // if the initial peer num has not been set we need to set it
         // this could have happened if the local node crashed on startup
         if (iph === null) {
@@ -822,7 +820,7 @@ export class PeerNode {
       // local <---- peer sent full block
       this._engine._emitter.on('putfullblock', (msg) => {
         const { connection, data } = msg
-        const options = { fullBlock: true, sendOnFail: false }
+        let options = { fullBlock: true, sendOnFail: false }
         if (msg.options) { options = merge(options, msg.options) }
         this._logger.debug('Received full block with TXs from peer')
         debug('event->putblock tracing ipd and iph')
@@ -1301,10 +1299,10 @@ export class PeerNode {
         if (!lowHashBlock || !highHashBlock) {
           debug(`M.GET_DATA unable to find blocks matching those hashes`)
           if (!lowHashBlock) {
-            this._logger.error(`low hash for block height not found: ${lowHash}`)
+            this._logger.error(`low hash for block height not found: ${low}`)
           }
           if (!highHashBlock) {
-            this._logger.error(`high hash for block height not found: ${highHash}`)
+            this._logger.error(`high hash for block height not found: ${high}`)
           }
           return Promise.resolve(false)
         }
@@ -1369,7 +1367,7 @@ export class PeerNode {
           // if the block is not defined or corrupt reject the transmission
           debug(`loading newBlock: ${blockHeight}`)
           const block = await this._engine.persistence.get(`bc.block.${blockHeight}`)
-          if (block === null || newBlock.getHash() != block.getHash()) {
+          if (block === null || newBlock.getHash() !== block.getHash()) {
             // check if the peer simply sent more blocks
             if (newBlock.getHeight() < latestBlock.getHeight()) {
               debug(`newBlock ${newBlock.getHeight()} does not exist latestBlock ${latestBlock.getHeight()}`)
@@ -1379,7 +1377,7 @@ export class PeerNode {
           }
           // FIX: add block valid test
           if (validDataUpdate === true) {
-            const stored = await this._engine.persistence.putBlock(newBlock, 0)
+            await this._engine.persistence.putBlock(newBlock, 0)
             if (newBlock.getHash() === latestBlock.getHash() || newBlock.getHeight() > latestBlock.getHeight()) {
               debug(`the sync is considered complete`)
               syncComplete = true

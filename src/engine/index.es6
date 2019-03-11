@@ -1027,7 +1027,7 @@ export class Engine {
                       const txs = newBlock.getTxsList()
                       this._logger.info(`Mark ${txs.length} txs from newBlock: ${newBlock.getHeight()} as mined`)
                       await this._txPendingPool.markTxsAsMined(txs, 'bc')
-                      await this._unsettledTxManager.setMakerTxSettleEndsAtHeightIfNeeded(newBlock)
+                      await this._unsettledTxManager.watchCrossChainTx(newBlock)
                       await this._unsettledTxManager.markTxAsSettledViaNewBlock(newBlock)
                       // update coinbase tx grant
                       let mintedNrgTotal = await this.persistence.getNrgMintedSoFar()
@@ -1281,7 +1281,7 @@ export class Engine {
     takerWantsAddress: string, takerSendsAddress: string,
     makerTxHash: string, makerTxOutputIndex: number,
     takerBCAddress: string, takerBCPrivateKeyHex: string,
-    collateralizedNrg: string
+    collateralizedNrg: string, additionalTxFee: string
   ): Promise<{ status: number, txHash?: string, error?: Error}> {
     this._logger.info(`Trying to create createCrossChainTakerTx: ${arguments}`)
 
@@ -1290,7 +1290,7 @@ export class Engine {
         takerWantsAddress, takerSendsAddress,
         makerTxHash, makerTxOutputIndex,
         takerBCAddress, takerBCPrivateKeyHex,
-        collateralizedNrg,
+        collateralizedNrg, additionalTxFee,
         this._minerKey
       )
       this._logger.info(`adding crosschain taker tx to the pending pool: ${txTemplate.getHash()}`)
@@ -1311,7 +1311,7 @@ export class Engine {
     shift: string, deposit: string, settle: string,
     payWithChainId: string, wantChainId: string, receiveAddress: string, makerWantsUnit: string, makerPaysUnit: string,
     makerBCAddress: string, makerBCPrivateKeyHex: string,
-    collateralizedNrg: string, nrgUnit: string
+    collateralizedNrg: string, nrgUnit: string, additionalTxFee: string
   ): Promise<{ status: number, txHash?: string, error?: Error}> {
     this._logger.info(`Trying to create createCrossChainMakerTx: ${arguments}`)
 
@@ -1321,6 +1321,7 @@ export class Engine {
         payWithChainId, wantChainId, receiveAddress, makerWantsUnit, makerPaysUnit,
         makerBCAddress, makerBCPrivateKeyHex,
         collateralizedNrg, nrgUnit,
+        additionalTxFee,
         this._minerKey
       )
 

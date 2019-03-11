@@ -93,6 +93,7 @@ export class DexLib {
     payWithChainId: string, wantChainId: string, receiveAddress: string, makerWantsUnit: string, makerPaysUnit: string,
     makerBCAddress: string, makerBCPrivateKeyHex: string,
     collateralizedNrg: string, nrgUnit: string,
+    additionalTxFee: string,
     minerKey: string
   ): Promise<Transaction|Error> {
     this._logger.info(`placeMakerOrder`)
@@ -124,13 +125,15 @@ export class DexLib {
 
     // check collateralizedBN is a multiply of unitBN
     if (!(collateralizedBN.div(unitBN).mul(unitBN).eq(collateralizedBN))) {
-      throw new Error(`Invalid nrgUnit - collateralizedNrg: ${collateralizedNrg} is not disivible by nrgUnit: ${nrgUnit}`);
+      throw new Error(`Invalid nrgUnit - collateralizedNrg: ${collateralizedNrg} is not disivible by nrgUnit: ${nrgUnit}`)
     }
 
     const latestBlock = await this.persistence.get('bc.block.latest')
 
     const blockWindow = new BN(parseInt(settle, 10) - parseInt(shift, 10))
-    const txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
+    let txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
+    const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
+    txFeeBN = txFeeBN.add(additionalTxFeeBN)
     this._logger.info(`Tx Fee: ${internalToHuman(txFeeBN, NRG)} NRG`)
     if ((collateralizedBN.add(txFeeBN)).gt(balanceData.confirmed)) { // TODO: make sure confirmed is in humanToBN format
       this._logger.error(`${makerBCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, collateralized: ${internalToHuman(collateralizedBN, NRG)}`)
@@ -212,6 +215,7 @@ export class DexLib {
     makerTxHash: string, makerTxOutputIndex: number,
     takerBCAddress: string, takerBCPrivateKeyHex: string,
     collateralizedNrg: string,
+    additionalTxFee: string,
     minerKey: string
   ): Promise<Transaction|Error> {
     this._logger.info(`placeTakerOrder`)
@@ -237,7 +241,7 @@ export class DexLib {
     if (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
       // partial order
       while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
-        const [parentTxHash, parentOutputIndex, _] = makerTxOutputScript.split(' ')
+        const [parentTxHash, parentOutputIndex] = makerTxOutputScript.split(' ')
         const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
         const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
         originalMakerTxHash = _makerTx.getHash()
@@ -250,9 +254,6 @@ export class DexLib {
       throw new Error(`hash: ${makerTxHash}, outputIndex: ${makerTxOutputIndex} not a valid maker tx`)
     }
 
-
-
-    console.log('xxxxxxxxxxxxxxxxxx', collateralizedNrg);
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const makerUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
     // check collateralizedBN is a multiply of maker unit
@@ -269,7 +270,7 @@ export class DexLib {
     const latestBlockHeight = latestBlock.getHeight()
     const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
     const upperBCHeightBound = latestBlockHeight - makerTxInfo.shiftStartsAt
-    const lowerBCHeightBound = latestBlockHeight - makerTxInfo.depositEndsAt > 0 ? latestBlockHeight - makerTxInfo.depositEndsAt : 1;
+    const lowerBCHeightBound = latestBlockHeight - makerTxInfo.depositEndsAt > 0 ? latestBlockHeight - makerTxInfo.depositEndsAt : 1
     let foundBlock = false
 
     for (let i = lowerBCHeightBound; i <= upperBCHeightBound; i++) {
@@ -317,7 +318,9 @@ export class DexLib {
 
     const settledAtBCHeight = (new BN(foundBlock.getHeight())).add(new BN(makerTxInfo.shiftStartsAt + makerTxInfo.settleEndsAt))
     const blockWindow = settledAtBCHeight.sub(new BN(latestBlockHeight))
-    const txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlockHeight), 'taker')
+    let txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlockHeight), 'taker')
+    const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
+    txFeeBN = txFeeBN.add(additionalTxFeeBN)
     this._logger.info(`Tx fee for taker: ${internalToHuman(txFeeBN, NRG)} NRG`)
     if ((collateralizedBN.add(txFeeBN)).gt(balanceData.confirmed)) {
       this._logger.error(`${takerBCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, collateralized: ${internalToHuman(collateralizedBN, NRG)}`)
@@ -447,7 +450,7 @@ export class DexLib {
 
             let oringalMakerInfo = { hash: tx.getHash(), output: output }
             while (outputLockScript.endsWith('OP_CALLBACK')) {
-              const [parentTxHash, parentOutputIndex, _] = outputLockScript.split(' ')
+              const [parentTxHash, parentOutputIndex] = outputLockScript.split(' ')
               const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
               const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
               outputLockScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
@@ -479,7 +482,7 @@ export class DexLib {
                 }
                 if (oringalMakerInfo.hash !== tx.getHash()) {
                   // update wantsUnit and paysUnit
-                  const remainingRatio = parseInt(internalToHuman(output.getValue(), NRG)) / parseInt(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
+                  const remainingRatio = parseFloat(internalToHuman(output.getValue(), NRG)) / parseFloat(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
                   tradeInfo['wantsUnit'] = (parseFloat(tradeInfo['wantsUnit']) * remainingRatio).toString()
                   tradeInfo['paysUnit'] = (parseFloat(tradeInfo['paysUnit']) * remainingRatio).toString()
                 }
@@ -569,7 +572,7 @@ export class DexLib {
             let outputLockScript = Buffer.from(referencedTxOutput.getOutputScript()).toString('ascii')
             let oringalMakerInfo = { hash: outPointTxHash, output: referencedTxOutput }
             while (outputLockScript.endsWith('OP_CALLBACK')) {
-              const [parentTxHash, parentOutputIndex, _] = outputLockScript.split(' ')
+              const [parentTxHash, parentOutputIndex] = outputLockScript.split(' ')
               const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
               const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
               oringalMakerInfo.hash = _makerTx.getHash()
@@ -591,7 +594,7 @@ export class DexLib {
             }
             if (oringalMakerInfo.hash !== outPointTxHash) {
               // update wantsUnit and paysUnit
-              const remainingRatio = parseInt(internalToHuman(referencedTxOutput.getValue(), NRG)) / parseInt(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
+              const remainingRatio = parseFloat(internalToHuman(referencedTxOutput.getValue(), NRG)) / parseFloat(internalToHuman(oringalMakerInfo.output.getValue(), NRG))
               makerTradeInfo['wantsUnit'] = (parseFloat(makerTradeInfo['wantsUnit']) * remainingRatio).toString()
               makerTradeInfo['paysUnit'] = (parseFloat(makerTradeInfo['paysUnit']) * remainingRatio).toString()
             }
