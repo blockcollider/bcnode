@@ -167,6 +167,7 @@
     "gossipmonger-peer": "^0.1.0",
     "gossipmonger-tcp-transport": "^0.1.6",
     "gpu.js": "^1.2.0",
+    "graphviz": "0.0.8",
     "grpc": "^1.16.1",
     "heap": "^0.2.6",
     "history": "^4.7.2",
