@@ -36,6 +36,8 @@ const { Multiverse } = require('../bc/multiverse')
 const { getLogger } = require('../logger')
 const { Monitor } = require('../monitor')
 const { Node } = require('../p2p')
+const { encodeTypeAndData } = require('../p2p/codec')
+const { MESSAGES } = require('../p2p/protocol')
 const { RoverManager } = require('../rover/manager')
 const rovers = require('../rover/manager').rovers
 const { Server } = require('../server/index')
@@ -292,11 +294,11 @@ export class Engine {
       }
       let res = await this.persistence.put('rovers', roverNames)
       if (res) {
-        this._logger.info('stored rovers to persistence')
+        this._logger.debug('stored rovers to persistence')
       }
       res = await this.persistence.put('appversion', versionData)
       if (res) {
-        this._logger.info('stored appversion to persistence')
+        this._logger.debug('stored appversion to persistence')
       }
 
       if (BC_REMOVE_BTC === true) {
@@ -325,7 +327,7 @@ export class Engine {
       try {
         const latestBlock = await this.persistence.get('bc.block.latest')
         if (!latestBlock) {
-          this._logger.info(`Genesis block not found - assuming fresh DB and storing it`)
+          this._logger.warn(`Genesis block not found - assuming fresh DB and storing it`)
           throw new Error('Genesis not found - fallback to store it')
         }
         await this.multiverse.addNextBlock(latestBlock)
@@ -345,7 +347,7 @@ export class Engine {
           for (let output of txOutputs) {
             sumSoFar += parseInt(internalToHuman(output.getValue(), NRG))
           }
-          this._logger.info(`Set minted nrg: ${sumSoFar} in genesis block`)
+          this._logger.info(`set minted nrg: ${sumSoFar} in genesis block`)
           this.persistence.setNrgMintedSoFar(sumSoFar)
 
           await this.persistence.put('bc.block.latest', newGenesisBlock)
@@ -355,7 +357,7 @@ export class Engine {
           await this.persistence.put('bc.dht.quorum', 0)
           await this.persistence.put('bc.depth', 2)
           await this.multiverse.addNextBlock(newGenesisBlock)
-          this._logger.info('genesis block saved to disk ' + newGenesisBlock.getHash())
+          this._logger.debug('genesis block saved to disk ' + newGenesisBlock.getHash())
         } catch (e) {
           this._logger.error(`error while creating genesis block ${e.message}`)
           process.exit(1)
@@ -395,7 +397,7 @@ export class Engine {
           this.updateLatestAndStore(msg)
             .then((previousBlock) => {
               if (msg.mined === true) {
-                this._logger.info(`latest block ${msg.data.getHeight()} has been updated`)
+                this._logger.debug(`latest block ${msg.data.getHeight()} has been updated`)
               } else {
                 // this.miningOfficer.rebaseMiner()
                 // .then((state) => {
@@ -864,7 +866,7 @@ export class Engine {
           this.miningOfficer.newRoveredBlock(rovers, block, this._blockCache)
             .then((pid: number | false) => {
               if (pid !== false) {
-                this._logger.info(`collectBlock handler: sent to miner`)
+                debug(`collectBlock handler: sent to miner`)
               }
             })
             .catch(err => {
@@ -974,19 +976,20 @@ export class Engine {
     newBlock: BcBlock,
     options: { ipd: string, iph: string, fullBlock: bool, sendOnFail: bool } = { ipd: 'pending', iph: 'pending', fullBlock: false, sendOnFail: true }
   ): void {
-    //
-    // if block extends child chains branch
-    //
-    debug(options)
-    const { fullBlock, ipd, iph } = options
+    (async () => {
+      this._logger.info('this is the blockFromPeer')
+      this._logger.info(options)
+      const { fullBlock, ipd, iph } = options
+      let boundariesToFetchPromise = false
+      if (BC_FETCH_MISSING_BLOCKS) {
+        this._logger.info(`getting missing blocks enabled ${BC_FETCH_MISSING_BLOCKS}`)
+        const headers = newBlock.getBlockchainHeaders()
+        boundariesToFetchPromise = this.persistence.getBlockBoundariesToFetch(headers)
+      }
 
-    let boundariesToFetchPromise = Promise.resolve(false)
-    if (BC_FETCH_MISSING_BLOCKS) {
-      const headers = newBlock.getBlockchainHeaders()
-      boundariesToFetchPromise = this.persistence.getBlockBoundariesToFetch(headers)
-    }
-    boundariesToFetchPromise.then(boundaries => {
-      // boundaries returned will be false if block does not have headers, else its and array
+      // if there are boundaries load them
+      const boundaries = boundariesToFetchPromise ? await boundariesToFetchPromise() : false
+
       if (is(Array, boundaries)) {
         // send fetch_block messages to rovers
         boundaries.forEach(([chain, [from, to]]) => {
@@ -995,23 +998,88 @@ export class Engine {
       }
 
       const cache = (fullBlock) ? this._knownFullBlocksCache : this._knownBlocksCache
-
+      this._logger.info(`following boundaries newBlock: ${newBlock.getHeight()}:${newBlock.getHash()}`)
       if (newBlock && !cache.get(newBlock.getHash())) {
-        this.persistence.isValidBlockCached(newBlock, { fullBlock }).then(isValid => {
-          if (!isValid) {
-            this._logger.info(`Block ${newBlock.getHash()} is not valid`)
+        const isValid = await this.persistence.isValidBlockCached(newBlock, { fullBlock })
+        if (!isValid) {
+          this._logger.info(`Block ${newBlock.getHash()} is not valid`)
+          return
+        }
+        // Add block to LRU cache to avoid processing the same block twice
+        this._logger.info(`Adding received ${fullBlock ? 'full ' : ''}block into cache of known blocks - ${newBlock.getHash()}`)
+        cache.set(newBlock.getHash(), true)
+        this._logger.info(`received new ${fullBlock ? 'full ' : ''}block from peer, height ${newBlock.getHeight()}`)
+        const latestBlock = await this.persistence.get('bc.block.latest')
+        if (fullBlock) {
+          this._logger.info('fullBlock to be expanded')
+          if (!latestBlock) {
+            this._logger.warn(`blockFromPeer() could not find latest BC block - cannot validate transactions`)
             return
           }
-          // Add block to LRU cache to avoid processing the same block twice
-          debug(`Adding received ${fullBlock ? 'full ' : ''}block into cache of known blocks - ${newBlock.getHash()}`)
-          cache.set(newBlock.getHash(), true)
-          this._logger.info(`received new ${fullBlock ? 'full ' : ''}block from peer, height ${newBlock.getHeight()}`)
+          this._logger.info(`evaluating txs from block ${newBlock.getHeight()}:${newBlock.getHash()}`)
+          const validationResult = await this._txHandler.validateTxs(newBlock.getTxsList(), newBlock.getHeight(), latestBlock.getHeight())
+          if (validationResult !== true) {
+            this._logger.info(`Full block ${newBlock.getHash()} has invalid txs: ${validationResult} --> not a candidate for a new best block`)
+          }
+          this._logger.info(`passing block to multiverse.AddBlock ${newBlock.getHeight()} : ${newBlock.getHash()} iph: ${iph} ipd: ${ipd}`)
+          const { stored, needsResync } = await this.multiverse.addBlock(newBlock)
+          this._logger.info(`stored: ${stored} ${newBlock.getHeight()}`)
+          this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
+          if (stored) {
+            const txs = newBlock.getTxsList()
+            this._logger.info(`Mark ${txs.length} txs from newBlock: ${newBlock.getHeight()} as mined`)
+            await this._txPendingPool.markTxsAsMined(txs, 'bc')
+            await this._unsettledTxManager.setMakerTxSettleEndsAtHeightIfNeeded(newBlock)
+            await this._unsettledTxManager.markTxAsSettledViaNewBlock(newBlock)
 
-          if (fullBlock) {
-            this.persistence.get('bc.block.latest').then(latestBlock => {
-              if (!latestBlock) {
-                this._logger.warn(`blockFromPeer() could not find latest BC block - cannot validate transactions`)
-                return
+            // update coinbase tx grant
+            let mintedNrgTotal = await this.persistence.getNrgMintedSoFar()
+            if (!mintedNrgTotal) {
+              mintedNrgTotal = 0
+            }
+            const coinbaseTx = txs[0]
+            const minerRewardBN = internalToBN(coinbaseTx.getOutputsList()[0].getValue(), BOSON)
+
+            const blockTxs = txs.slice(1)
+            const txFeesBN = blockTxs.map(tx => calcTxFee(tx)).reduce((fee, sum) => sum.add(fee), new BN(0))
+            const mintedNrg = parseInt(internalToHuman(minerRewardBN.sub(txFeesBN), NRG))
+            this._logger.info(`Mint ${mintedNrg} NRG in block height: ${newBlock.getHeight()}, hash: ${newBlock.getHash()}`)
+            await this.persistence.setNrgMintedSoFar(mintedNrg + mintedNrgTotal)
+          }
+          this._logger.info(`blockFromPeer() iph: ${iph} ipd: ${ipd}`)
+          // TODO: Dibsaled if (needsResync && iph === 'complete' && ipd === 'complete') {
+          if (needsResync && iph === 'complete' && ipd === 'complete') {
+            this._logger.info('requesting block list message')
+            const diff = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(parseInt(latestBlock.getHeight(), 10)).sub(new BN(1))).toNumber()
+            const high = parseInt(newBlock.getHeight(), 10)
+            const low = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(diff)).toNumber()
+            this._logger.info(`requesting GET_BLOCKS from peer low: ${low} high: ${high} diff: ${diff}`)
+            const payload = encodeTypeAndData(MESSAGES.GET_BLOCKS, [low, high])
+            const result = await this._node.qsend(conn, payload)
+            if (result.success === true) {
+              this._logger.info('successful update sent to peer')
+            }
+          } else if (needsResync) {
+            this._logger.info(`ignored resync from multiverse IPH: ${iph} IPD: ${ipd}`)
+          }
+        } else {
+          // get a full block
+          this._logger.info('no full block found')
+          const { stored, needsResync } = await this.multiverse.addBlock(newBlock)
+          const request = { dimension: 'hash', id: newBlock.getHash(), connection: conn }
+          this._emitter.emit('getTxs', request)
+          this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
+          // make sure IPH and IPD are complete before asking for sets to catch up
+          if (needsResync && iph === 'complete' && ipd === 'complete') {
+            if (latestBlock !== null) {
+              const diff = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(parseInt(latestBlock.getHeight(), 10)).sub(new BN(1))).toNumber()
+              const high = parseInt(newBlock.getHeight(), 10)
+              const low = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(diff)).toNumber()
+              this._logger.info(`requesting GET_BLOCKS from peer low: ${low} high: ${high} diff: ${diff}`)
+              const payload = encodeTypeAndData(MESSAGES.GET_BLOCKS, [low, high])
+              const result = await this._node.qsend(conn, payload)
+              if (result.success === true) {
+                this._logger.info('successful update sent to peer')
               }
               this._txHandler.validateTxs(newBlock.getTxsList(), newBlock.getHeight(), latestBlock.getHeight()).then(validationResult => {
                 if (validationResult !== true) {
@@ -1022,7 +1090,6 @@ export class Engine {
                   .then(async ({ stored, needsResync }) => {
                     this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
 
-                    // TODO: Enabled if (stored && iph === 'complete' && ipd === 'complete') {
                     if (stored) {
                       const txs = newBlock.getTxsList()
                       this._logger.info(`Mark ${txs.length} txs from newBlock: ${newBlock.getHeight()} as mined`)
@@ -1064,7 +1131,11 @@ export class Engine {
                     throw new Error(err)
                   })
               })
-            })
+                .catch((err) => {
+                  this._logger.error(err)
+                  throw new Error(err)
+                })
+            }
           } else {
             // get a full block
             const request = { dimension: 'hash', id: newBlock.getHash(), connection: conn }
@@ -1097,10 +1168,12 @@ export class Engine {
                 throw new Error(err)
               })
           }
-        })
+        }
+      } else {
+        this._logger.info(`newBlock already in cache ${newBlock.getHash()}`)
       }
-    }).catch(err => {
-      this._logger.error(`Error while checking presence of rovered blocks (err: ${errToString(err)})`)
+    })().catch(err => {
+      this._logger.error(err)
     })
   }
 

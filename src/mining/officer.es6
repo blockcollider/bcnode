@@ -177,9 +177,9 @@ export class MiningOfficer {
     }
 
     // Check if _canMine
-    // if iph is complete or pending mining can start
+    // if iph is pending mining can start
     // if iph is running mining can start
-    if (!this._canMine || iph === 'running') {
+    if (!this._canMine || iph !== 'complete') {
       const keys = Object.keys(this._collectedBlocks)
       const values = '[' + keys.reduce((all, a, i) => {
         const val = this._collectedBlocks[a]
@@ -215,8 +215,12 @@ export class MiningOfficer {
     // $FlowFixMe
     return this.startMining(rovers, block, blockCache)
       .then((res) => {
-        this._logger.info('mining cycle initiated')
-        return Promise.resolve(res)
+        if (res) {
+          this._logger.info('mining cycle initiated')
+          return Promise.resolve(res)
+        } else {
+          return Promise.resolve(false)
+        }
       })
       .catch((err) => {
         this._logger.error(err)
@@ -272,8 +276,12 @@ export class MiningOfficer {
     const latestRoveredHeadersKeys: string[] = this._knownRovers.map(chain => `${chain}.block.latest`)
     const latestBlockHeaders = await this.persistence.getBulk(latestRoveredHeadersKeys)
     // { eth: 200303, btc:2389, neo:933 }
+    if (latestBlockHeaders.length < this._knownRovers.length) {
+      this._logger.info(`${latestBlockHeaders.length}/${this._knownRovers.length} ready for mining`)
+      return Promise.resolve(false)
+    }
     const latestBlockHeadersHeights = fromPairs(latestBlockHeaders.map(header => [header.getBlockchain(), header.getHeight()]))
-    this._logger.debug(`latestBlockHeadersHeights: ${inspect(latestBlockHeadersHeights)}`)
+    this._logger.info(`latestBlockHeadersHeights: ${inspect(latestBlockHeadersHeights)}`)
 
     // collider is starting up
     // if (lastPreviousBlock.getHeight() === 1 && blockCache.length > 0) {
@@ -310,7 +318,7 @@ export class MiningOfficer {
         to = latestBlockHeadersHeights[chain]
       }
 
-      this._logger.info(`newBlockHeadersKeys, heights nrg: ${lastPreviousBlock.getHeight()}, ${chain} ln: ${from}, ${to}`)
+      this._logger.debug(`newBlockHeadersKeys, heights nrg: ${lastPreviousBlock.getHeight()}, ${chain} ln: ${from}, ${to}`)
 
       if (from === to) {
         return [`${chain}.block.${from}`]
@@ -339,7 +347,7 @@ export class MiningOfficer {
       if (!currentBlocks) {
         throw new Error(`Could not fetch current rovered block headers: ${newBlockHeadersKeys}`)
       }
-      this._logger.info(`preparing new block`)
+      this._logger.debug(`preparing new block`)
       const currentTimestamp = ts.nowSeconds()
       if (this._unfinishedBlock !== undefined && getBlockchainsBlocksCount(this._unfinishedBlock) >= 6) {
         this._cleanUnfinishedBlock()
@@ -353,7 +361,7 @@ export class MiningOfficer {
       const txsToMine = []
       for (let tx of candidateTxs) {
         const thisTxSize = tx.serializeBinary().length
-        this._logger.info(`tx size for hash: ${tx.getHash()}, size: ${thisTxSize}`)
+        this._logger.debug(`tx size for hash: ${tx.getHash()}, size: ${thisTxSize}`)
         if (txsSizeSoFar + thisTxSize > maxBlockSize) {
           break
         }
@@ -370,7 +378,7 @@ export class MiningOfficer {
       const allTxs = [coinbaseTx].concat(txsToMine)
 
       this._logger.info(
-        `Txs to mine, length: ${allTxs.length}, size: ${txsSizeSoFar + coinbaseTx.serializeBinary().length}, maxBlockSize: ${maxBlockSize}`
+        `txs unclaimed, length: ${allTxs.length}, size: ${txsSizeSoFar + coinbaseTx.serializeBinary().length}, maxBlockSize: ${maxBlockSize}`
       )
 
       const [newBlock, finalTimestamp] = prepareNewBlock(
@@ -456,11 +464,11 @@ export class MiningOfficer {
           }
 
           if (response.getResult() === MinerResponseResult.CANCELED) {
-            this._logger.info('Mining restarted because of new work')
+            this._logger.debug('mining restarted because of new work')
             return
           }
 
-          this._logger.info('Got response from rust miner', response.toObject())
+          this._logger.debug('got response from rust miner', response.toObject())
 
           const transformed = {
             ...response.toObject(),
@@ -538,16 +546,16 @@ export class MiningOfficer {
   async rebaseMiner (): Promise<bool|number> {
     // if (this._canMine !== true) return Promise.resolve(false)
 
-    this._logger.info('rebase miner request')
+    this._logger.debug('rebase miner request')
     try {
       const stopped = this.stopMining()
-      this._logger.info(`miner rebased, result: ${inspect(stopped)}`)
+      this._logger.debug(`miner rebased, result: ${inspect(stopped)}`)
       const latestRoveredHeadersKeys: string[] = this._knownRovers.map(chain => `${chain}.block.latest`)
-      this._logger.info(latestRoveredHeadersKeys)
+      this._logger.debug(latestRoveredHeadersKeys)
       const currentRoveredBlocks = await this.persistence.getBulk(latestRoveredHeadersKeys)
       const lastPreviousBlock = await this.persistence.get('bc.block.latest')
       const previousHeaders = lastPreviousBlock.getBlockchainHeaders()
-      this._logger.info(currentRoveredBlocks)
+      this._logger.debug(currentRoveredBlocks)
       if (lastPreviousBlock === null) {
         return Promise.resolve(false)
       }
@@ -568,7 +576,7 @@ export class MiningOfficer {
         return 0
       })
 
-      this._logger.info('stale branch blocks: ' + uniqueBlocks.length)
+      this._logger.debug('stale branch blocks: ' + uniqueBlocks.length)
 
       if (uniqueBlocks.length < 1) {
         this._logger.info(uniqueBlocks.length + ' state changes ')

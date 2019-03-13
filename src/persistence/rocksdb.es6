@@ -959,9 +959,10 @@ export default class PersistenceRocksDb {
         }, [])
 
         debug(`putBlock(): storing ${key} as BC`)
-        await this.updateMarkedBalances(block, blockchain) // update the marked address balances
         await this.put(key, block)
         await this.put(`${blockchain}.block.${block.getHeight()}`, block)
+        await this.put(`${blockchain}.block.${block.getHash()}`, block)
+        await this.updateMarkedBalances(block, blockchain) // update the marked address balances
         await this.putBlockHashAtHeight(block.getHash(), block.getHeight(), blockchain)
         await this.put(`${blockchain}.txs.${block.getHash()}`, txs) // bulk updates the txs of this block hash
         await Promise.all([].concat(
@@ -1142,70 +1143,74 @@ export default class PersistenceRocksDb {
     // checks bc.marked.latest and bc.marked.balances keys in rocksdb
     // look up the last block indexed with  marked transactions in context of given blockchain
     const latestMarkedBlock = await this.get(`${blockchain}.marked.latest`)
-    const headersMap = block.getBlockchainHeaders()
-
-    if (!latestMarkedBlock) {
-      // if no marked transaction scan has been run set height to the provided block
-      for (let listName of Object.keys(headersMap.toObject())) {
-        balances[listName.slice(0, 3)] = {}
-      }
-    } else if (new BN(providedBlockHeight).eq(latestMarkedBlock.getHeight())) {
-      // already added marked balances for this block
-      balances = await this.get(`${blockchain}.marked.balances`)
-      return JSON.parse(balances) // FIXME introduce new protobuf message for this
-    } else {
-      currentBlockIndex = latestMarkedBlock.getHeight()
-      balances = JSON.parse(await this.get(`${blockchain}.marked.balances`))
-      if (!balances) {
-        balances = {}
-        // if this occurs marked database is corrupt reset
-        currentBlockIndex = 1
+    if (block !== null && block.getBlockchainHeaders !== undefined) {
+      const headersMap = block.getBlockchainHeaders()
+      if (!latestMarkedBlock) {
+        // if no marked transaction scan has been run set height to the provided block
         for (let listName of Object.keys(headersMap.toObject())) {
           balances[listName.slice(0, 3)] = {}
         }
-      }
-    }
-
-    for (let i = currentBlockIndex; i <= providedBlockHeight; i++) {
-      try {
-        const blockFrame: Block|BcBlock = await this.get(`${blockchain}.block.${i}`)
-        const frameHeaders = blockFrame.getBlockchainHeaders()
-        Object.keys(frameHeaders.toObject()).map(listName => {
-          const method = `get${listName[0].toUpperCase()}${listName.slice(1)}`
-          const connectedBlockHeaders = frameHeaders[method]()
-          const chain = listName.slice(0, 3)
-          const txs = [].concat(...connectedBlockHeaders.map(header => header.getMarkedTxsList()))
-          for (let tx of txs) {
-            // The default token address is EMB
-            if (balances[chain] === undefined) {
-              balances[chain] = {}
-            }
-            if (balances[chain][tx.getToken()] === undefined) {
-              balances[chain][tx.getToken()] = {}
-            }
-            // if it is from address SUBTRACT the total balance
-            if (balances[chain][tx.getToken()][tx.getAddrFrom()] === undefined) {
-              balances[chain][tx.getToken()][tx.getAddrFrom()] = '0'
-            }
-
-            if (balances[chain][tx.getToken()][tx.getAddrTo()] === undefined) {
-              balances[chain][tx.getToken()][tx.getAddrTo()] = '0'
-            }
-            balances[chain][tx.getToken()][tx.getAddrFrom()] = new BN(balances[chain][tx.getToken()][tx.getAddrFrom()]).sub(new BN(tx.getValue())).toString()
-            balances[chain][tx.getToken()][tx.getAddrTo()] = new BN(balances[chain][tx.getToken()][tx.getAddrTo()]).add(new BN(tx.getValue())).toString()
+      } else if (new BN(providedBlockHeight).eq(latestMarkedBlock.getHeight())) {
+        // already added marked balances for this block
+        balances = await this.get(`${blockchain}.marked.balances`)
+        return JSON.parse(balances) // FIXME introduce new protobuf message for this
+      } else {
+        currentBlockIndex = latestMarkedBlock.getHeight()
+        balances = JSON.parse(await this.get(`${blockchain}.marked.balances`))
+        if (!balances) {
+          balances = {}
+          // if this occurs marked database is corrupt reset
+          currentBlockIndex = 1
+          for (let listName of Object.keys(headersMap.toObject())) {
+            balances[listName.slice(0, 3)] = {}
           }
-        })
-        // assign the latest marked transaction height
-        await this.put(`${blockchain}.marked.latest`, block)
-        // update the balances stored on disk
-        await this.put(`${blockchain}.marked.balances`, JSON.stringify(balances))
-        // store a snapshot every 3000 blocks
-        if (new BN(block.getHeight()).mod(new BN(3000)).eq(new BN(0)) === true) {
-          await this.put(`${blockchain}.marked.latest.snapshot`, block)
-          await this.put(`${blockchain}.marked.balances.snapshot`, JSON.stringify(balances))
         }
-      } catch (err) {
-        return Promise.reject(err)
+      }
+
+      for (let i = currentBlockIndex; i <= providedBlockHeight; i++) {
+        try {
+          const blockFrame: Block|BcBlock = await this.get(`${blockchain}.block.${i}`)
+          if (blockFrame === null || blockFrame.getBlockchainHeaders === undefined) {
+            continue
+          }
+          const frameHeaders = blockFrame.getBlockchainHeaders()
+          Object.keys(frameHeaders.toObject()).map(listName => {
+            const method = `get${listName[0].toUpperCase()}${listName.slice(1)}`
+            const connectedBlockHeaders = frameHeaders[method]()
+            const chain = listName.slice(0, 3)
+            const txs = [].concat(...connectedBlockHeaders.map(header => header.getMarkedTxsList()))
+            for (let tx of txs) {
+              // The default token address is EMB
+              if (balances[chain] === undefined) {
+                balances[chain] = {}
+              }
+              if (balances[chain][tx.getToken()] === undefined) {
+                balances[chain][tx.getToken()] = {}
+              }
+              // if it is from address SUBTRACT the total balance
+              if (balances[chain][tx.getToken()][tx.getAddrFrom()] === undefined) {
+                balances[chain][tx.getToken()][tx.getAddrFrom()] = '0'
+              }
+
+              if (balances[chain][tx.getToken()][tx.getAddrTo()] === undefined) {
+                balances[chain][tx.getToken()][tx.getAddrTo()] = '0'
+              }
+              balances[chain][tx.getToken()][tx.getAddrFrom()] = new BN(balances[chain][tx.getToken()][tx.getAddrFrom()]).sub(new BN(tx.getValue())).toString()
+              balances[chain][tx.getToken()][tx.getAddrTo()] = new BN(balances[chain][tx.getToken()][tx.getAddrTo()]).add(new BN(tx.getValue())).toString()
+            }
+          })
+          // assign the latest marked transaction height
+          await this.put(`${blockchain}.marked.latest`, block)
+          // update the balances stored on disk
+          await this.put(`${blockchain}.marked.balances`, JSON.stringify(balances))
+          // store a snapshot every 3000 blocks
+          if (new BN(block.getHeight()).mod(new BN(3000)).eq(new BN(0)) === true) {
+            await this.put(`${blockchain}.marked.latest.snapshot`, block)
+            await this.put(`${blockchain}.marked.balances.snapshot`, JSON.stringify(balances))
+          }
+        } catch (err) {
+          return Promise.reject(err)
+        }
       }
     }
     return true
