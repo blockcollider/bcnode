@@ -118,7 +118,7 @@ class UnsettledTxManager {
           let monoidHash = makerTxHash
           let monoidTxOutputIndex = makerTxOutputIndex
           while (monoidMakerOutputLockScript.endsWith('OP_CALLBACK')) {
-            const [parentTxHash, parentOutputIndex, _] = monoidMakerOutputLockScript.split(' ')
+            const [parentTxHash, parentOutputIndex] = monoidMakerOutputLockScript.split(' ')
             const _makerTx = await this._persistence.getTransactionByHash(parentTxHash, 'bc')
             const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
 
