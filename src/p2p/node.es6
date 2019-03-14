@@ -38,7 +38,7 @@ const { networks } = require('../config/networks')
 
 export const MAX_HEADER_RANGE = Number(process.env.MAX_HEADER_RANGE) || 1000
 export const MAX_DATA_RANGE = Number(process.env.MAX_DATA_RANGE) || 200
-const BC_NETWORK: 'main'|'test'|'carter'|'mckinley'|'garfield'|'lincoln'|'kennedy'|'coolidge' = process.env.BC_NETWORK || 'main'
+const BC_NETWORK: 'main'|'test'|'carter'|'mckinley'|'garfield'|'lincoln'|'harding'|'kennedy'|'coolidge' = process.env.BC_NETWORK || 'main'
 const { quorum, maximumWaypoints } = networks[BC_NETWORK]
 const MIN_HEALTH_NET = process.env.MIN_HEALTH_NET === 'true'
 const USER_QUORUM = parseInt(process.env.USER_QUORUM, 10) || quorum
