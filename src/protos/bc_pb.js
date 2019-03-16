@@ -532,8 +532,8 @@ proto.bc.RpcTransaction.toObject = function(includeInstance, msg) {
   var f, obj = {
     fromAddr: jspb.Message.getFieldWithDefault(msg, 1, ""),
     toAddr: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    amount: msg.getAmount_asB64(),
-    txFee: msg.getTxFee_asB64(),
+    amount: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    txFee: jspb.Message.getFieldWithDefault(msg, 4, ""),
     privateKeyHex: jspb.Message.getFieldWithDefault(msg, 5, "")
   };
 
@@ -580,11 +580,11 @@ proto.bc.RpcTransaction.deserializeBinaryFromReader = function(msg, reader) {
       msg.setToAddr(value);
       break;
     case 3:
-      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      var value = /** @type {string} */ (reader.readString());
       msg.setAmount(value);
       break;
     case 4:
-      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      var value = /** @type {string} */ (reader.readString());
       msg.setTxFee(value);
       break;
     case 5:
@@ -634,16 +634,16 @@ proto.bc.RpcTransaction.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getAmount_asU8();
+  f = message.getAmount();
   if (f.length > 0) {
-    writer.writeBytes(
+    writer.writeString(
       3,
       f
     );
   }
-  f = message.getTxFee_asU8();
+  f = message.getTxFee();
   if (f.length > 0) {
-    writer.writeBytes(
+    writer.writeString(
       4,
       f
     );
@@ -689,78 +689,30 @@ proto.bc.RpcTransaction.prototype.setToAddr = function(value) {
 
 
 /**
- * optional bytes amount = 3;
- * @return {!(string|Uint8Array)}
- */
-proto.bc.RpcTransaction.prototype.getAmount = function() {
-  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * optional bytes amount = 3;
- * This is a type-conversion wrapper around `getAmount()`
+ * optional string amount = 3;
  * @return {string}
  */
-proto.bc.RpcTransaction.prototype.getAmount_asB64 = function() {
-  return /** @type {string} */ (jspb.Message.bytesAsB64(
-      this.getAmount()));
+proto.bc.RpcTransaction.prototype.getAmount = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
-/**
- * optional bytes amount = 3;
- * Note that Uint8Array is not supported on all browsers.
- * @see http://caniuse.com/Uint8Array
- * This is a type-conversion wrapper around `getAmount()`
- * @return {!Uint8Array}
- */
-proto.bc.RpcTransaction.prototype.getAmount_asU8 = function() {
-  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
-      this.getAmount()));
-};
-
-
-/** @param {!(string|Uint8Array)} value */
+/** @param {string} value */
 proto.bc.RpcTransaction.prototype.setAmount = function(value) {
   jspb.Message.setField(this, 3, value);
 };
 
 
 /**
- * optional bytes tx_fee = 4;
- * @return {!(string|Uint8Array)}
- */
-proto.bc.RpcTransaction.prototype.getTxFee = function() {
-  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
-};
-
-
-/**
- * optional bytes tx_fee = 4;
- * This is a type-conversion wrapper around `getTxFee()`
+ * optional string tx_fee = 4;
  * @return {string}
  */
-proto.bc.RpcTransaction.prototype.getTxFee_asB64 = function() {
-  return /** @type {string} */ (jspb.Message.bytesAsB64(
-      this.getTxFee()));
+proto.bc.RpcTransaction.prototype.getTxFee = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
 
-/**
- * optional bytes tx_fee = 4;
- * Note that Uint8Array is not supported on all browsers.
- * @see http://caniuse.com/Uint8Array
- * This is a type-conversion wrapper around `getTxFee()`
- * @return {!Uint8Array}
- */
-proto.bc.RpcTransaction.prototype.getTxFee_asU8 = function() {
-  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
-      this.getTxFee()));
-};
-
-
-/** @param {!(string|Uint8Array)} value */
+/** @param {string} value */
 proto.bc.RpcTransaction.prototype.setTxFee = function(value) {
   jspb.Message.setField(this, 4, value);
 };

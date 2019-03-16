@@ -62,8 +62,9 @@ const { DexLib } = require('../core/dexLib')
 const { TxHandler } = require('../primitives/txHandler')
 const TxPendingPool = require('../bc/txPendingPool')
 const { UnsettledTxManager } = require('../bc/unsettledTxManager')
+const { Wallet } = require('../bc/wallet')
 const { blake2bl } = require('../utils/crypto')
-const { internalToHuman, internalToBN, COIN_FRACS: { NRG, BOSON } } = require('../core/coin')
+const { internalToHuman, internalToBN, humanToBN, COIN_FRACS: { NRG, BOSON } } = require('../core/coin')
 
 const GEO_DB_PATH = resolve(__dirname, '..', '..', 'data', 'GeoLite2-City.mmdb')
 
@@ -118,6 +119,7 @@ export class Engine {
   _txPendingPool: TxPendingPool
   _unsettledTxManager: UnsettledTxManager
   _dexLib: DexLib
+  _wallet: Wallet
 
   constructor (opts: {
     rovers: string[],
@@ -178,6 +180,8 @@ export class Engine {
     this._txHandler = new TxHandler(this._persistence)
     this._txPendingPool = new TxPendingPool(this._persistence)
     this._unsettledTxManager = new UnsettledTxManager(this._persistence)
+
+    this._wallet = new Wallet(this._persistence, this._unsettledTxManager)
 
     // Start NTP sync
     ts.start()
@@ -1419,16 +1423,17 @@ export class Engine {
 
     let balanceData
     try {
-      balanceData = await this.persistence.getBalanceData(newTx.getFromAddr().toLowerCase())
+      balanceData = await this._wallet.getBalanceData(newTx.getFromAddr().toLowerCase())
     } catch (e) {
-      const msg = `Could not find balance for given from address: ${newTx.getFromAddr()}`
+      const msg = `Could not find balance for given from address: ${newTx.getFromAddr()}, ${e}`
       this._logger.warn(msg)
       throw new Error(msg)
     }
 
     this._logger.info(`NRG managed by address confirmed: ${balanceData.confirmedUnspentOutPoints.length} unconfirmed: ${balanceData.unconfirmedUnspentOutPoints.length}`)
-    const transferAmountBN = new BN(newTx.getAmount())
-    const txFeeBN = new BN(newTx.getTxFee())
+
+    const transferAmountBN = humanToBN(newTx.getAmount(), NRG)
+    const txFeeBN = humanToBN(newTx.getTxFee(), NRG)
     this._logger.info(`has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN, NRG)}`)
     if ((transferAmountBN.add(txFeeBN)).gt(balanceData.confirmed)) {
       this._logger.error(`${newTx.getFromAddr()} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN.toBuffer(), NRG)}`)
