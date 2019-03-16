@@ -19,8 +19,6 @@ const { Command } = require('commander')
 export const cmd = (program: typeof Command, from: string, to: string, amount: string, txFee: string, privateKey: string) => {
   const rpcClient = new RpcClient()
   const log = getLogger(__filename)
-  const amt = humanToInternal(amount, NRG)
-  const fee = humanToInternal(txFee, NRG)
   if (privateKey.startsWith('0x')) {
     privateKey = privateKey.substr(2)
   }
@@ -33,8 +31,8 @@ export const cmd = (program: typeof Command, from: string, to: string, amount: s
   const req = new RpcTransaction()
   req.setFromAddr(from)
   req.setToAddr(to)
-  req.setAmount(amt)
-  req.setTxFee(fee)
+  req.setAmount(amount)
+  req.setTxFee(txFee)
   req.setPrivateKeyHex(privateKey)
 
   log.info(`Sending ${inspect(req.toObject())}`)

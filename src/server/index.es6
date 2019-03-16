@@ -34,7 +34,8 @@ const {
   GetBlake2blRequest,
   PlaceMakerOrderRequest,
   PlaceTakerOrderRequest,
-  VanityConvertRequest
+  VanityConvertRequest,
+  RpcTransaction
 } = require('../protos/bc_pb')
 const { Engine } = require('../engine')
 const { RpcClient, RpcServer } = require('../rpc')
@@ -127,7 +128,8 @@ export class Server {
       getOpenOrders: Null,
       getBlake2bl: GetBlake2blRequest,
       getMatchedOpenOrders: Null,
-      getBcAddressViaVanity: VanityConvertRequest
+      getBcAddressViaVanity: VanityConvertRequest,
+      newTx: RpcTransaction
     }
     // console.log(this._engine.node.p2p)
     // this._logger.info('!!! SERVER START', this._engine._node)
