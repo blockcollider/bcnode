@@ -141,7 +141,7 @@ export default class Network extends EventEmitter {
     this._config = config
     this._maximumPeers = this._config.maximumPeers + (Math.floor(Math.random() * 18) - 9) // add variability to peer pool on boot
     this._requestedBlocks = []
-    this._initialResync = false
+    this._initialResync = true
   }
 
   get peers (): string[] {
@@ -204,7 +204,7 @@ export default class Network extends EventEmitter {
     // this._logger.debug(`new tx: ${txHashHex} (from ${getPeerAddr(peer)})`)
   }
 
-  onNewBlock (block: EthereumBlock, peer: Object) {
+  onNewBlock (block: EthereumBlock, peer: Object, isBlockFromInitialSync: boolean) {
     const blockHashHex = block.hash().toString('hex')
     if (this._blocksCache.has(blockHashHex)) {
       return
@@ -218,7 +218,7 @@ export default class Network extends EventEmitter {
 
     const blockNumber = new BN(block.header.number).toNumber()
     this._logger.info(`Transmitting new block ${blockHashHex} with height: ${blockNumber} from peer "${getPeerAddr(peer)}"`)
-    this.emit('newBlock', block)
+    this.emit('newBlock', { block, isBlockFromInitialSync })
   }
 
   requestBlock (fromBlock: { height: number }, toBlock: { height: number }) {
@@ -259,6 +259,14 @@ export default class Network extends EventEmitter {
 
   requestBlockRange (from: number) {
     const peers = [].concat(Object.values(this._forkVerifiedForPeer))
+
+    if (peers.length < 8) {
+      this._logger.info(`Peer count ${peers.length} < 8 - postponing inital resync by 10s.`) // FIXME down to debug
+      setTimeout(() => {
+        this.requestBlockRange(from)
+      }, 10000)
+      return
+    }
 
     // select random floor(maximumPeers / 3)
     const askPeers = []
@@ -365,19 +373,21 @@ export default class Network extends EventEmitter {
       isValidBlock(block).then(isValid => {
         const blockNumber = new BN(header.number).toNumber()
         if (isValid) {
-          this.onNewBlock(block, peer)
-
+          let isBlockFromInitialSync = false
           this._logger.debug(`BLOCK_BODIES_valid: ${peerAddr} ${inspect(header.hash().toString('hex'))}`)
           if (contains(blockNumber, this._requestedBlocks)) {
             this._logger.debug(`Requested block number ${blockNumber} fetched`)
             this._requestedBlocks = without([blockNumber], this._requestedBlocks)
+            isBlockFromInitialSync = true
           }
+          this._logger.info(`Requested blocks to fetch: ${inspect(this._requestedBlocks)}`)
+          this.onNewBlock(block, peer, isBlockFromInitialSync)
         } else {
           this._logger.info(`Disconnecting ${peerAddr} for invalid block body`)
           if (ws) {
             ws.write(peerAddr + '\n')
           }
-          peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
+          peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
           if (peerAddr in this._forkVerifiedForPeer) {
             delete this._forkVerifiedForPeer[peerAddr]
           }
@@ -414,7 +424,7 @@ export default class Network extends EventEmitter {
           const peer = this._forkVerifiedForPeer[peerAddr]
           delete this._forkVerifiedForPeer[peerAddr]
           // disconnect the peer to refresh the connection
-          peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.DISCONNECT_REQUESTED)
+          peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.DISCONNECT_REQUESTED)
         }, 10 * 60 * 1000)
       } else {
         this._logger.debug(`disconnecting non ETH peers: ${peerAddr} `)
@@ -422,7 +432,7 @@ export default class Network extends EventEmitter {
         if (timeout) {
           clearTimeout(timeout)
         }
-        peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
+        peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
       }
     } else {
       this._logger.debug(`Requesting whole block`)
@@ -431,10 +441,10 @@ export default class Network extends EventEmitter {
         const header = new EthereumBlock.Header(msg)
         // TODO use _util.buffer2int
         const blockNumber = new BN(header.number).toNumber()
-        this._logger.debug(`Requesting whole block number ${blockNumber}`)
+        this._logger.info(`Requesting whole block number ${blockNumber}`) // FIXME down to debug
         const eth = peer.getProtocols()[0]
         if (contains(blockNumber, this._requestedBlocks)) {
-          this._logger.debug(`Sending request for block ${blockNumber}, h: ${header.hash().toString('hex')} to peer ${peerAddr}`)
+          this._logger.info(`Sending request for block ${blockNumber}, h: ${header.hash().toString('hex')} to peer ${peerAddr}`) // FIXME down to debug
           setTimeout(() => {
             eth.sendMessage(
               ETH.MESSAGE_CODES.GET_BLOCK_BODIES,
@@ -509,7 +519,7 @@ export default class Network extends EventEmitter {
 
     isValidBlock(newBlock).then(isValid => {
       if (isValid) {
-        this.onNewBlock(newBlock, peer)
+        this.onNewBlock(newBlock, peer, false)
       }
     })
   }
@@ -612,7 +622,7 @@ export default class Network extends EventEmitter {
       ])
 
       this._forkDrops[peerAddr] = setTimeout(() => {
-        peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
+        peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
       }, 15000 /* 15 sec */)
 
       peer.once('close', () => {

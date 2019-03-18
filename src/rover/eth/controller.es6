@@ -138,19 +138,22 @@ export default class Controller {
     return this._network
   }
 
-  async transmitNewBlock (block: EthereumBlock) {
+  async transmitNewBlock (block: EthereumBlock, isBlockFromInitialSync: boolean = false) {
+    this._logger.info(`transmitNewBlock(), ${parseInt(block.header.number.toString('hex'), 16)}, isBlockFromInitialSync: ${isBlockFromInitialSync}`)
     if (this._parentBlock) {
       const difficultyValid = block.header.validateDifficulty(this._parentBlock)
       if (!difficultyValid) {
-        this._invalidDifficultyCount++
+        if (!isBlockFromInitialSync) {
+          this._invalidDifficultyCount++
+        }
         const blockInfo = {
           parentBlock: {
             'height': (new BN(this._parentBlock.header.number)).toString(),
-            'difficulty': (new BN(this._parentBlock.header.difficulty)).toString(),
+            'difficulty': (new BN(this._parentBlock.header.difficulty)).toString()
           },
           newBlock: {
             'height': (new BN(block.header.number)).toString(),
-            'difficulty': (new BN(block.header.difficulty)).toString(),
+            'difficulty': (new BN(block.header.difficulty)).toString()
           }
         }
         this._logger.warn(`Incoming block has invalid difficulty - rejecting the block, info: ${JSON.stringify(blockInfo)}`)
@@ -180,7 +183,7 @@ export default class Controller {
 
   start (config: { maximumPeers: number }) {
     var network = new Network(config)
-    network.on('newBlock', block => this.transmitNewBlock(block))
+    network.on('newBlock', ({ block, isBlockFromInitialSync }) => this.transmitNewBlock(block, isBlockFromInitialSync))
     network.connect()
 
     this._network = network
