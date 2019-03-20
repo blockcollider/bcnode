@@ -352,7 +352,7 @@ export class Engine {
             sumSoFar += parseInt(internalToHuman(output.getValue(), NRG))
           }
           this._logger.info(`set minted nrg: ${sumSoFar} in genesis block`)
-          this.persistence.setNrgMintedSoFar(sumSoFar)
+          await this.persistence.setNrgMintedSoFar(sumSoFar)
 
           await this.persistence.put('bc.block.latest', newGenesisBlock)
           await this.persistence.put('bc.block.parent', newGenesisBlock)

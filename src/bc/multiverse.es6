@@ -162,8 +162,8 @@ export class Multiverse {
    * Check if immmediate height is better
    * @param newBlock
    * @returns {boolean}
+   * TODO: Merge necessary logic with with addBlock
    */
-  // TODO: PING, after the best block is added, add the maker's askAddress to the pool, offerAddress, askAddress
   async addBestBlock (newBlock: BcBlock): Promise<?boolean> {
     const currentHighestBlock = this.getHighestBlock()
     const currentParentHighestBlock = await this.getParentHighestBlock()
@@ -322,12 +322,14 @@ export class Multiverse {
   }
 
   /**
-   * DEPRICATED! Eval and update multiverse with next block
+   * Eval and update multiverse with next block
    * @param block New block
    * @returns {boolean}
+   * TODO: SAVE and merge necessary logic into one method
    */
   async addNextBlock (newBlock: BcBlock, type: number = 0): Promise<?boolean> {
     // return false for empty block
+    // TODO: Merge necessary logic with with addBlock
     if (!newBlock) {
       this._logger.warn('no block was given to evaluate')
       return Promise.resolve(false)
