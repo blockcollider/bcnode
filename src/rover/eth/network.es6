@@ -109,18 +109,25 @@ const randomChoiceMut = (arr: Array<any>) => {
   return ret
 }
 
+type PeerRequests = {
+  [address: string]: {
+    headers: string[],
+    bodies: EthereumBlock.Header[]
+  }
+}
+
 export default class Network extends EventEmitter {
-  _key: Buffer; // eslint-disable-line no-undef
-  _logger: Object; // eslint-disable-line no-undef
-  _minimumPeers: number; // eslint-disable-line no-undef
-  _peers: string[]; // eslint-disable-line no-undef
-  _dpt: ?DPT; // eslint-disable-line no-undef
-  _rlpx: ?RLPx; // eslint-disable-line no-undef
-  _txCache: LRUCache<string, bool>; // eslint-disable-line no-undef
-  _blocksCache: LRUCache<string, bool>; // eslint-disable-line no-undef
-  _forkDrops: {[string]: ?TimeoutID}; // eslint-disable-line no-undef
-  _forkVerifiedForPeer: Object; // eslint-disable-line no-undef
-  _peerRequests: Object; // eslint-disable-line no-undef
+  _key: Buffer
+  _logger: Object
+  _minimumPeers: number
+  _peers: string[]
+  _dpt: ?DPT
+  _rlpx: ?RLPx
+  _txCache: LRUCache<string, bool>
+  _blocksCache: LRUCache<string, bool>
+  _forkDrops: {[string]: ?TimeoutID}
+  _forkVerifiedForPeer: Object
+  _peerRequests: PeerRequests
   _config: { maximumPeers: number }
   _maximumPeers: number
   _requestedBlocks: number[]
@@ -361,12 +368,12 @@ export default class Network extends EventEmitter {
       return
     }
 
-    while (this._peerRequests[peerAddr].bodies.length > 0) {
+    for (const rawBody of payload) {
       const header = this._peerRequests[peerAddr].bodies.shift()
       const block = new EthereumBlock([
         header.raw,
-        payload[0][0],
-        payload[0][1]
+        rawBody[0],
+        rawBody[1]
       ])
 
       this._logger.debug(`BLOCK_BODIES: ${peerAddr} ${inspect(header.hash().toString('hex'))} waiting for: ${inspect(this._peerRequests[peerAddr].bodies.map(h => h.hash().toString('hex')))}`)
@@ -437,10 +444,13 @@ export default class Network extends EventEmitter {
     } else {
       this._logger.debug(`Requesting whole block`)
       // if header which was requested from rover came, request whole block body
-      for (const msg of payload) {
-        const header = new EthereumBlock.Header(msg)
-        // TODO use _util.buffer2int
+      for (const rawHeader of payload) {
+        const header = new EthereumBlock.Header(rawHeader)
         const blockNumber = new BN(header.number).toNumber()
+        if (this._blocksCache.has(header.hash().toString('hex'))) {
+          this._logger.info(`Not requesting whole block ${blockNumber}, we've already seen it`)
+          continue
+        }
         this._logger.info(`Requesting whole block number ${blockNumber}`) // FIXME down to debug
         const eth = peer.getProtocols()[0]
         if (contains(blockNumber, this._requestedBlocks)) {
