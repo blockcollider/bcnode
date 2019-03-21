@@ -111,8 +111,8 @@ const randomChoiceMut = (arr: Array<any>) => {
 
 type PeerRequests = {
   [address: string]: {
-    headers: string[],
-    bodies: EthereumBlock.Header[]
+    hashes: string[],
+    headers: EthereumBlock.Header[]
   }
 }
 
@@ -369,14 +369,14 @@ export default class Network extends EventEmitter {
     }
 
     for (const rawBody of payload) {
-      const header = this._peerRequests[peerAddr].bodies.shift()
+      const header = this._peerRequests[peerAddr].headers.shift()
       const block = new EthereumBlock([
         header.raw,
         rawBody[0],
         rawBody[1]
       ])
 
-      this._logger.debug(`BLOCK_BODIES: ${peerAddr} ${inspect(header.hash().toString('hex'))} waiting for: ${inspect(this._peerRequests[peerAddr].bodies.map(h => h.hash().toString('hex')))}`)
+      this._logger.debug(`BLOCK_BODIES: ${peerAddr} ${inspect(header.hash().toString('hex'))} waiting for: ${inspect(this._peerRequests[peerAddr].headers.map(h => h.hash().toString('hex')))}`)
       isValidBlock(block).then(isValid => {
         const blockNumber = new BN(header.number).toNumber()
         if (isValid) {
@@ -460,13 +460,13 @@ export default class Network extends EventEmitter {
               ETH.MESSAGE_CODES.GET_BLOCK_BODIES,
               [header.hash()]
             )
-            this._peerRequests[peerAddr].bodies.push(header)
+            this._peerRequests[peerAddr].headers.push(header)
           }, 100) // 0.1 sec
         } else {
           this._logger.debug(`Sending normal request with unrequested header`)
           let isValidPayload = false
-          while (this._peerRequests[peerAddr].headers.length > 0) {
-            const blockHash = this._peerRequests[peerAddr].headers.shift()
+          while (this._peerRequests[peerAddr].hashes.length > 0) {
+            const blockHash = this._peerRequests[peerAddr].hashes.shift()
             if (header.hash().equals(blockHash)) {
               isValidPayload = true
               setTimeout(() => {
@@ -474,7 +474,7 @@ export default class Network extends EventEmitter {
                   ETH.MESSAGE_CODES.GET_BLOCK_BODIES,
                   [blockHash]
                 )
-                this._peerRequests[peerAddr].bodies.push(header)
+                this._peerRequests[peerAddr].headers.push(header)
               }, 100) // 0.1 sec
               break
             }
@@ -552,7 +552,7 @@ export default class Network extends EventEmitter {
           [blockHash, 1, 0, 0]
         )
 
-        this._peerRequests[getPeerAddr(peer)].headers.push(blockHash)
+        this._peerRequests[getPeerAddr(peer)].hashes.push(blockHash)
       }, 100) // 0.1 sec
     }
   }
@@ -575,8 +575,8 @@ export default class Network extends EventEmitter {
 
     const eth = peer.getProtocols()[0]
     this._peerRequests[peerAddr] = {
-      headers: [],
-      bodies: []
+      hashes: [],
+      headers: []
     }
 
     const clientId = peer.getHelloMessage().clientId
