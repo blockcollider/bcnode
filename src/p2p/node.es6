@@ -1189,7 +1189,6 @@ export class PeerNode {
             // update the ipd status to running
             await this._engine.persistence.put('bc.sync.initialpeernum', 0)
             // reprocess peer evaluations with peer data sync equal to 'running'
-            debug('IPH test complete requesting peer evaluations for beginning of IPD tests')
             let latestHeightRaw = await this._engine.persistence.get('bc.data.latest')
             if (latestHeightRaw === null) {
               await this._engine.persistence.put('bc.data.latest', 2)
@@ -1203,7 +1202,7 @@ export class PeerNode {
             }
             const from = latestHeight
             const to = min(latestHeight + 500, parseInt(latestBlock.getHeight(), 10))
-            debug(`ipd: ${ipd} with latest height from: ${from} to: ${to}`)
+            debug(`IPD status: ${ipd} requesting heights from: ${from} to: ${to}`)
             const fromBlock = await this._engine.persistence.get(`bc.block.${from}`)
             const toBlock = await this._engine.persistence.get(`bc.block.${to}`)
             debug(`fromBlock: ${fromBlock.getHeight()}`)

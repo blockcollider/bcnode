@@ -76,7 +76,7 @@ export class BlockPool {
 
   _hasParent (block: BcBlock): boolean {
     const previousHash = block.getPreviousHash()
-    const parentHeight = block.getHeight() - 1
+    const parentHeight = parseInt(block.getHeight(), 10) - 1
 
     if (this._blockchain[parentHeight] === undefined) {
       return false

@@ -249,7 +249,7 @@ export class Multiverse {
       }
 
       if (newBlock.getHeight() === 1) {
-        this._logger.warn('genesis block came in')
+        this._logger.warn('genesis block from peer rejected')
         return Promise.resolve({ stored: false, needsResync: false })
       }
 
@@ -290,7 +290,7 @@ export class Multiverse {
           await this.persistence.put('bc.block.latest', newBlock)
         }
         await this.persistence.putBlock(newBlock)
-        return Promise.resolve({ stored: false, needsResync: true })
+        return Promise.resolve({ stored: true, needsResync: false })
       }
 
       /// ////////////////////////////////////////////////////
@@ -312,9 +312,8 @@ export class Multiverse {
         return Promise.resolve({ stored: true, needsResync: false })
       } else {
         // TODO: remove this once tx data sync
-        const stored = await this.persistence.putBlock(newBlock) // TODO: this stores the block regardless
-        this._logger.info('addBlock(): unable to classify block')
-        return Promise.resolve({ stored: stored, needsResync: true })
+        this._logger.warn('multiverse unable store block <- requesting resync')
+        return Promise.resolve({ stored: false, needsResync: true })
       }
     } catch (err) {
       return Promise.reject(err)

@@ -1565,23 +1565,18 @@ export class Engine {
     }
 
     try {
+      const newBlockObj = {
+        ...newBlock.toObject(),
+        iterations: solution.iterations,
+        timeDiff: solution.timeDiff
+      }
+      this.pubsub.publish('block.mined', {
+        type: 'block.mined',
+        data: newBlockObj
+      })
       this._logger.info('broadcasting block challenge ' + newBlock.getHeight() + ' -> considered next block in current multiverse')
       this.node.broadcastNewBlock(newBlock)
-
       // NOTE: Do we really need nested try-catch ?
-      try {
-        const newBlockObj = {
-          ...newBlock.toObject(),
-          iterations: solution.iterations,
-          timeDiff: solution.timeDiff
-        }
-        this.pubsub.publish('block.mined', {
-          type: 'block.mined',
-          data: newBlockObj
-        })
-      } catch (e) {
-        return Promise.reject(e)
-      }
     } catch (err) {
       return Promise.reject(err)
     }
