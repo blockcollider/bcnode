@@ -43,7 +43,7 @@ const {
   toPairs,
   zip
 } = require('ramda')
-const debug = require('debug')('bcnode:primitives')
+const debug = require('debug')('bcnode:mining:primitives')
 
 const { blake2bl } = require('../utils/crypto')
 const { concatAll } = require('../utils/ramda')
@@ -750,8 +750,8 @@ export function prepareNewBlock (currentTimestamp: number, lastPreviousBlock: Bc
   newBlock.setTargetHeight(GENESIS_DATA.targetHeight)
   newBlock.setTargetMiner(GENESIS_DATA.targetMiner)
   newBlock.setTargetSignature(GENESIS_DATA.targetSignature)
-  newBlock.setTwn(GENESIS_DATA.twn) 
-  newBlock.setTwsList(GENESIS_DATA.twsList) 
+  newBlock.setTwn(GENESIS_DATA.twn)
+  newBlock.setTwsList(GENESIS_DATA.twsList)
   newBlock.setEmblemWeight(GENESIS_DATA.emblemWeight)
   newBlock.setEmblemChainBlockHash(GENESIS_DATA.emblemChainBlockHash)
   newBlock.setEmblemChainFingerprintRoot(GENESIS_DATA.emblemChainFingerprintRoot)

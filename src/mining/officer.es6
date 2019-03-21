@@ -131,6 +131,8 @@ export class MiningOfficer {
     // this._canMine = true
     if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) {
       this._canMine = true
+    } else {
+      return Promise.resolve(false)
     }
 
     if (this._canMine === true && MIN_HEALTH_NET === false) {
