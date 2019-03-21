@@ -140,12 +140,10 @@ export default class Controller {
 
   async transmitNewBlock (block: EthereumBlock, isBlockFromInitialSync: boolean = false) {
     this._logger.info(`transmitNewBlock(), ${parseInt(block.header.number.toString('hex'), 16)}, isBlockFromInitialSync: ${isBlockFromInitialSync}`)
-    if (this._parentBlock) {
+    if (this._parentBlock && !isBlockFromInitialSync) {
       const difficultyValid = block.header.validateDifficulty(this._parentBlock)
       if (!difficultyValid) {
-        if (!isBlockFromInitialSync) {
-          this._invalidDifficultyCount++
-        }
+        this._invalidDifficultyCount++
         const blockInfo = {
           parentBlock: {
             'height': (new BN(this._parentBlock.header.number)).toString(),
@@ -166,7 +164,9 @@ export default class Controller {
       this._invalidDifficultyCount = 0
       this._logger.debug(`Block's ${parseInt(block.header.number.toString('hex'), 16)} difficulty is valid -> creating unified block from it`)
     }
-    this._parentBlock = block
+    if (!isBlockFromInitialSync) {
+      this._parentBlock = block
+    }
     const unifiedBlock = await createUnifiedBlock(this._isStandalone, block, this._rpc.rover, _createUnifiedBlock)
     if (!this._isStandalone) {
       this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
