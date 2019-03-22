@@ -3,10 +3,9 @@ process.on('uncaughtError', (err) => {
   console.trace(err)
 })
 
-const { config } = require('../../config')
-const PersistenceRocksDb = require('../../persistence').RocksDb
-// const BC_NETWORK: 'main'|'test' = process.env.BC_NETWORK || 'main'
-const BC_NETWORK = 'lincoln'
+const { config } = require('../config')
+const PersistenceRocksDb = require('../persistence').RocksDb
+const BC_NETWORK: 'main'|'test' = process.env.BC_NETWORK || 'main'
 const dataDirSuffix = (BC_NETWORK === 'main') ? '' : `_${BC_NETWORK}net`
 console.log('set BC_NETWORK ' + BC_NETWORK)
 const DATA_DIR = `${process.env.BC_DATA_DIR || config.persistence.path}${dataDirSuffix}`
