@@ -80,6 +80,13 @@ const scan = async () => {
       console.log(`${header.getBlockchain()} height: ${header.getHeight()}`)
       const pairs = createPairKeys(header.getBlockchain(), header)
       const c = clusters[header.getBlockchain()]
+      c.addNode(pairs[0], {
+        color: colors[header.getBlockchain()],
+        shape: 'box3d',
+        label: header.getBlockchain().toUpperCase() + '-' + header.getHeight() + '-' + header.getHash().slice(0, 4),
+        fontcolor: 'white'
+        // fontsize: 8
+      })
       c.addNode(pairs[1], {
         color: colors[header.getBlockchain()],
         shape: 'box3d',
@@ -89,7 +96,7 @@ const scan = async () => {
         // fontsize: 8
       })
       seen[pairs[0] + pairs[1]] = 1
-      c.addEdge(pairs[0], pairs[1], { fontsize: 8, color: 'blue' })
+      c.addEdge(pairs[0], pairs[1], { fontsize: 8, color: 'blue', fontcolor: 'white' })
       // seen[pairs[1] + pairs[2]] = 1
       // c.addEdge(pairs[1], pairs[2], { fontsize: 8 })
       seen['BC' + '-' + b.getHeight() + pairs[1]] = 1
