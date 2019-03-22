@@ -16,10 +16,11 @@ const fs = require('fs')
 const graphviz = require('graphviz')
 
 const USE = 'dot'
+console.log('set GRAPH ' + USE)
 const bcg = graphviz.graph('G')
-bcg.set('bgcolor', 'darkgrey')
+bcg.set('bgcolor', 'black')
+bcg.set('overlap', false)
 bcg.set('rankdir', 'TB')
-bcg.set('overlap', 'scale')
 
 const primary = [
   'checkpoint',
@@ -29,29 +30,29 @@ const primary = [
 ]
 
 const colors = {
-  'btc': 'orange:white',
-  'eth': 'purple:white',
-  'neo': 'green:white',
-  'lsk': 'blue:white',
-  'wav': 'grey:white'
+  'btc': 'orange',
+  'eth': 'purple',
+  'neo': 'green',
+  'lsk': 'blue',
+  'wav': 'cyan'
 }
 
 const clusters = {
-  'bc': bcg.addCluster('bc'),
-  'btc': bcg.addCluster('btc'),
-  'eth': bcg.addCluster('eth'),
-  'neo': bcg.addCluster('neo'),
-  'lsk': bcg.addCluster('lsk'),
-  'wav': bcg.addCluster('wav')
+  'bc': bcg.addCluster('multichain'),
+  'btc': bcg,
+  'eth': bcg,
+  'neo': bcg,
+  'lsk': bcg,
+  'wav': bcg
 }
 
 const weights = {
-  'bc': 1,
-  'btc': 0,
-  'eth': 0.4,
-  'neo': 0.3,
-  'lsk': 0.2,
-  'wav': 0.1
+  'bc': 0,
+  'btc': 1,
+  'eth': 1,
+  'neo': 1,
+  'lsk': 1,
+  'wav': 1
 }
 const createPairKeys = (blockchain, d) => {
   blockchain = blockchain.toUpperCase()
@@ -82,24 +83,17 @@ const scan = async () => {
       c.addNode(pairs[1], {
         color: colors[header.getBlockchain()],
         shape: 'box3d',
+        style: 'filled',
         label: header.getBlockchain().toUpperCase() + '-' + header.getHeight() + '-' + header.getHash().slice(0, 4),
-        fixedsize: true,
-        fontcolor: 'white',
-        fontsize: 8
+        fontcolor: 'black'
+        // fontsize: 8
       })
-      if (seen[pairs[0] + pairs[1]] === undefined) {
-        seen[pairs[0] + pairs[1]] = 1
-        c.addEdge(pairs[0], pairs[1], { fontsize: 8 })
-      }
-      // if (seen[pairs[1] + pairs[2]] === undefined) {
-      //  seen[pairs[1] + pairs[2]] = 1
-      //	c.addEdge(pairs[1], pairs[2], { fontsize: 8 })
-      // }
-      if (seen['BC' + '-' + b.getHeight() + pairs[1]] === undefined) {
-        seen['BC' + '-' + b.getHeight() + pairs[1]] = 1
-      	// c.addEdge('BC' + '-' + b.getHeight(), pairs[1], { color: 'white', weight: weights[header.getBlockchain()] })
-      	c.addEdge('BC' + '-' + b.getHeight(), pairs[1], { color: 'white' })
-      }
+      seen[pairs[0] + pairs[1]] = 1
+      c.addEdge(pairs[0], pairs[1], { fontsize: 8, color: 'blue' })
+      // seen[pairs[1] + pairs[2]] = 1
+      // c.addEdge(pairs[1], pairs[2], { fontsize: 8 })
+      seen['BC' + '-' + b.getHeight() + pairs[1]] = 1
+      c.addEdge('BC' + '-' + b.getHeight(), pairs[1], { color: 'grey', weight: weights[header.getBlockchain()] })
     })
   }
   const findEdges = async (blocks) => {
@@ -109,19 +103,12 @@ const scan = async () => {
       const c = clusters['bc']
 		  c.addNode(keys[1], {
         label: 'BC-' + b.getHeight() + '-' + b.getHash().slice(0, 4),
-        shape: 'box3d',
+        shape: 'square',
         color: 'white',
-        fontsize: 12,
-        fontcolor: 'white'
+        style: 'filled',
+        // fontsize: 16,
+        fontcolor: 'black'
       })
-      // if (seen[keys[0] + keys[1]] === undefined) {
-      //  seen[keys[0] + keys[1]] = 1
-      //	bcg.addEdge(keys[0], keys[1])
-      // }
-      if (seen[keys[1] + keys[2]] === undefined) {
-        seen[keys[1] + keys[2]] = 1
-      	c.addEdge(keys[1], keys[2], { color: 'white' })
-      }
 
       const btc = b.getBlockchainHeaders().getBtcList()
       const eth = b.getBlockchainHeaders().getEthList()
@@ -134,9 +121,19 @@ const scan = async () => {
       await processHeaderList(wav, b)
       await processHeaderList(neo, b)
       await processHeaderList(lsk, b)
+      if (seen[keys[0] + keys[1]] === undefined) {
+        seen[keys[0] + keys[1]] = 1
+        bcg.addEdge(keys[0], keys[1])
+      }
+      if (seen[keys[1] + keys[2]] === undefined) {
+        seen[keys[1] + keys[2]] = 1
+      	c.addEdge(keys[1], keys[2], { color: 'white' })
+      }
       if (i + 1 === blocks.length) {
+        console.log('traversing graph (1 mins)...')
         bcg.use = USE
         bcg.output('png', 'mem.png')
+        console.log('rendering (5-9 mins)...')
       }
     })
     return Promise.resolve(true)
@@ -155,8 +152,7 @@ const scan = async () => {
       if (err) {
         console.trace('error')
         return Promise.reject(err)
-      // } else if (key === undefined || bcBlocks.length > 50) {
-      } else if (key === undefined || bcBlocks.length > 120) {
+      } else if (key === undefined || bcBlocks.length > 200) {
   			iter.end(function () {
 
         })
