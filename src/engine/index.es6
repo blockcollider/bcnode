@@ -1026,7 +1026,7 @@ export class Engine {
             this._logger.info(`Full block ${newBlock.getHash()} has invalid txs: ${validationResult} --> not a candidate for a new best block`)
           }
           this._logger.info(`passing block to multiverse.AddBlock ${newBlock.getHeight()} : ${newBlock.getHash()} iph: ${iph} ipd: ${ipd}`)
-          const { stored, needsResync } = await this.multiverse.addBlock(newBlock)
+          const { stored, needsResync } = await this.multiverse.addBlock(newBlock, 'peer')
           this._logger.info(`stored: ${stored} ${newBlock.getHeight()}`)
           this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
           if (stored) {
@@ -1054,7 +1054,7 @@ export class Engine {
           // TODO: Dibsaled if (needsResync && iph === 'complete' && ipd === 'complete') {
           if (needsResync && iph === 'complete' && ipd === 'complete') {
             this._logger.info('requesting block list message')
-            const diff = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(parseInt(latestBlock.getHeight(), 10)).sub(new BN(1))).toNumber()
+            const diff = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(parseInt(latestBlock.getHeight(), 10)).sub(new BN(4))).toNumber()
             const high = parseInt(newBlock.getHeight(), 10)
             const low = new BN(parseInt(newBlock.getHeight(), 10)).sub(new BN(diff)).toNumber()
             this._logger.info(`requesting GET_BLOCKS from peer low: ${low} high: ${high} diff: ${diff}`)

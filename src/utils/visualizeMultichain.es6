@@ -159,7 +159,7 @@ const scan = async () => {
       if (err) {
         console.trace('error')
         return Promise.reject(err)
-      } else if (key === undefined || bcBlocks.length > 200) {
+      } else if (key === undefined || bcBlocks.length > 100) {
   			iter.end(function () {
 
         })

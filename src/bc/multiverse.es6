@@ -238,18 +238,18 @@ export class Multiverse {
    * @param block New block
    * @returns {boolean}
    */
-  async addBlock (newBlock: BcBlock|Block): Promise<{ stored: boolean, needsResync: boolean }> {
+  async addBlock (newBlock: BcBlock|Block, source: string = 'local'): Promise<{ stored: boolean, needsResync: boolean }> {
     // 1. block further extends the main branch
     // 2. block extends a side branch but does not add enough difficulty to make it become the new main branch
     // 3. block extends a side branch and makes it the new main branch
     try {
       if (!newBlock) {
-        this._logger.warn('no block was given to evaluate')
+        this._logger.warn(source + ' addBlock() no block was given to evaluate')
         return Promise.resolve({ stored: false, needsResync: false })
       }
 
       if (newBlock.getHeight() === 1) {
-        this._logger.warn('genesis block from peer rejected')
+        this._logger.warn(source + ' addBlock() genesis block from peer rejected')
         return Promise.resolve({ stored: false, needsResync: false })
       }
 
@@ -259,13 +259,13 @@ export class Multiverse {
       }
       const latestBlock = await this.persistence.get(`${blockchain}.block.latest`)
       if (latestBlock !== null) {
-        this._logger.info(`local latestBlock height: ${latestBlock.getHeight()} newBlock height: ${newBlock.getHeight()}`)
+        this._logger.info(`${source} addBlock() local latestBlock height: ${latestBlock.getHeight()} newBlock height: ${newBlock.getHeight()}`)
       }
 
       /// ////////////////////////////////////////////////////
       // 1. block further extends the main branch
       if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
-        debug(`addBlock(): put newBlock hash: ${newBlock.getHash()}`)
+        debug(`${source} addBlock() put newBlock hash: ${newBlock.getHash()}`)
         await this.persistence.put(`${blockchain}.block.latest`, newBlock)
         await this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
         await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
@@ -280,17 +280,17 @@ export class Multiverse {
       const previousHeight = parseInt(latestBlock.getHeight(), 10) - 1
       const originBlock = await this.persistence.get(`${blockchain}.block.${previousHeight}`)
       if (originBlock === null || originBlock === false) {
-        this._logger.info(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
+        this._logger.info(`${source} addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
         return Promise.resolve({ stored: false, needsResync: true })
       }
 
       if (originBlock.getHash() === newBlock.getPreviousHash()) {
-        this._logger.info(`addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
+        this._logger.info(`${source} addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
         if (parseInt(newBlock.getHeight(), 10) > parseInt(latestBlock.getHeight(), 10)) {
           await this.persistence.put('bc.block.latest', newBlock)
         }
         await this.persistence.putBlock(newBlock)
-        return Promise.resolve({ stored: true, needsResync: false })
+        return Promise.resolve({ stored: true, needsResync: true })
       }
 
       /// ////////////////////////////////////////////////////
@@ -300,19 +300,19 @@ export class Multiverse {
         const grandfatherHeight = parseInt(latestBlock.getHeight(), 10) - 2
         const grandparentBlock = await this.persistence.get(`${blockchain}.block.${grandfatherHeight}`)
         if (!grandparentBlock || grandparentBlock === null) {
-          this._logger.info(`addBlock(): no grandparentBlock for purposed newBlock edge <- needsResync: true`)
+          this._logger.info(`${source} addBlock(): no grandparentBlock for purposed newBlock edge <- needsResync: true`)
           return Promise.resolve({ stored: false, needsResync: true })
         }
-        debug(`addBlock(): local latestBlock height: ${latestBlock.getHeight()} grandparentBlock height: ${grandparentBlock.getHeight()}`)
+        debug(`${source} addBlock(): local latestBlock height: ${latestBlock.getHeight()} grandparentBlock height: ${grandparentBlock.getHeight()}`)
         await this.persistence.put(`${blockchain}.block.latest`, newBlock)
         await this.persistence.putBlock(newBlock)
         await this.persistence.put(`${blockchain}.block.${originBlock.getHeight()}`, originBlock)
         await this.persistence.put(`${blockchain}.block.${grandparentBlock.getHeight()}`, grandparentBlock)
-        this._logger.info(`addBlock(): block extends side branch: ${newBlock.getHash()}`)
+        this._logger.info(`${source} addBlock(): block extends side branch: ${newBlock.getHash()}`)
         return Promise.resolve({ stored: true, needsResync: false })
       } else {
         // TODO: remove this once tx data sync
-        this._logger.warn('multiverse unable store block <- requesting resync')
+        this._logger.warn(`${source} addBlock() multiverse unable store block <- requesting resync`)
         return Promise.resolve({ stored: false, needsResync: true })
       }
     } catch (err) {

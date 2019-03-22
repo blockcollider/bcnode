@@ -1418,8 +1418,28 @@ export class PeerNode {
           this._logger.warn(`cannot find 'bc.block.latest' while handling DATA message`)
           return false
         }
+        if (blocks.length > MAX_DATA_RANGE) {
+          this._logger.warn(`peer sending more blocks beyond MAX_DATA_RANGE`)
+          return false
+        }
         let validDataUpdate = true
         let currentHeight = 2
+
+        const peerBlocksSorted = blocks.sort((a, b) => {
+          if (parseInt(a.getHeight(), 10) > parseInt(b.getHeight(), 10)) {
+            return -1
+          }
+          if (parseInt(a.getHeight(), 10) < parseInt(b.getHeight(), 10)) {
+            return 1
+          }
+          return 0
+        })
+
+        this._logger.info(`peer blocks low: ${peerBlocksSorted[0]} high: ${peerBlocksSorted[peerBlocksSorted.length - 1]}`)
+        const newBlocksRange = await this._engine.persistence.getBlocksByRangeCached(parseInt(peerBlocksSorted[0].getHeight(), 10),
+          parseInt(peerBlocksSorted[peerBlocksSorted.length - 1]))
+
+        // TODO: compare the submitted blocks with the new blocks range in the multiverse pass to engine first (blockRangeFromPeer)
 
         for (let i = 0; i < blocks.length; i++) {
           const newBlock = BcBlock.deserializeBinary(blocks[i])
