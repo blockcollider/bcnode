@@ -969,6 +969,35 @@ export class Engine {
       this._emitter.emit('getblocklist', getBlockListMessage)
     }
   }
+  /**
+   * New block range received from peer handler
+   * @param conn Connection the block was received from
+   * @param newBlock Block itself
+   */
+  blockRangeFromPeer (
+    conn: Object,
+    blocks: BcBlock[]
+  ): void {
+    async () => {
+      const peerBlocksSorted = blocks.sort((a, b) => {
+        if (parseInt(a.getHeight(), 10) > parseInt(b.getHeight(), 10)) {
+          return -1
+        }
+        if (parseInt(a.getHeight(), 10) < parseInt(b.getHeight(), 10)) {
+          return 1
+        }
+        return 0
+      })
+
+      this._logger.info(`peer blocks low: ${peerBlocksSorted[0]} high: ${peerBlocksSorted[peerBlocksSorted.length - 1]}`)
+      const newBlocksRange = await this._engine.persistence.getBlocksByRangeCached(parseInt(peerBlocksSorted[0].getHeight(), 10),
+        parseInt(peerBlocksSorted[peerBlocksSorted.length - 1]))
+
+      this._logger.info(`${blocks.length} blocks sent from peer`)
+      this._logger.info(`${newBlocksRange.length} blocks from local`)
+      return Promise.resolve(true)
+    }
+  }
 
   /**
    * New block received from peer handler

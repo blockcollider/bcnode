@@ -771,6 +771,16 @@ export class PeerNode {
         this._engine.blockFromPeer(msg.connection, msg.data, options)
       })
 
+      // local <---- peer sent range of blocks to be compared with local
+      this._engine._emitter.on('putblockranges', (msg) => {
+        this._logger.debug('candidate block ' + msg.data.getHeight() + ' received')
+        let options = { fullBlock: false, sendOnFail: false }
+        if (msg.options) { options = merge(options, msg.options) }
+        debug('event->putblock tracing ipd and iph')
+        debug(msg.options)
+        this._engine.blockFromPeer(msg.connection, msg.data, options)
+      })
+
       // local <---- peer sent tx
       this._engine._emitter.on('puttx', (msg) => {
         const { connection, data } = msg
@@ -1410,6 +1420,7 @@ export class PeerNode {
         const [, ...blocks] = parts
         const latestBlock = await this._engine.persistence.get('bc.block.latest')
         const ipd = await this._engine.persistence.get('bc.sync.initialpeerdata')
+
         if (ipd !== 'complete') {
           this._logger.warn(`peer transmitted data running !== ${String(ipd)}`)
           return
@@ -1422,57 +1433,48 @@ export class PeerNode {
           this._logger.warn(`peer sending more blocks beyond MAX_DATA_RANGE`)
           return false
         }
+
         let validDataUpdate = true
         let currentHeight = 2
 
-        const peerBlocksSorted = blocks.sort((a, b) => {
-          if (parseInt(a.getHeight(), 10) > parseInt(b.getHeight(), 10)) {
-            return -1
-          }
-          if (parseInt(a.getHeight(), 10) < parseInt(b.getHeight(), 10)) {
-            return 1
-          }
-          return 0
-        })
-
-        this._logger.info(`peer blocks low: ${peerBlocksSorted[0]} high: ${peerBlocksSorted[peerBlocksSorted.length - 1]}`)
-        const newBlocksRange = await this._engine.persistence.getBlocksByRangeCached(parseInt(peerBlocksSorted[0].getHeight(), 10),
-          parseInt(peerBlocksSorted[peerBlocksSorted.length - 1]))
+        const isBestBlockRange = await this._engine.blockRangeFromPeer(conn, blocks)
 
         // TODO: compare the submitted blocks with the new blocks range in the multiverse pass to engine first (blockRangeFromPeer)
 
-        for (let i = 0; i < blocks.length; i++) {
-          const newBlock = BcBlock.deserializeBinary(blocks[i])
-          const blockHeight = newBlock.getHeight()
-          // if the block is not defined or corrupt reject the transmission
-          debug(`loading newBlock: ${blockHeight}`)
-          const block = await this._engine.persistence.get(`bc.block.${blockHeight}`)
-          if (block === null || newBlock.getHash() !== block.getHash()) {
-            // check if the peer simply sent more blocks
-            if (block !== null && block !== undefined) {
-              debug(`newBlock ${newBlock.getHeight()}:${newBlock.getHash()} vs loaded block ${block.getHeight()}:${block.getHash()}`)
-            } else {
-              debug(`new block ${newBlock.getHeight()} is an update from peer`)
-              // validDateUpdate = false
-              continue
+        if (isBestBlockRange) {
+          for (let i = 0; i < blocks.length; i++) {
+            const newBlock = BcBlock.deserializeBinary(blocks[i])
+            const blockHeight = newBlock.getHeight()
+            // if the block is not defined or corrupt reject the transmission
+            debug(`loading newBlock: ${blockHeight}`)
+            const block = await this._engine.persistence.get(`bc.block.${blockHeight}`)
+            if (block === null || newBlock.getHash() !== block.getHash()) {
+              // check if the peer simply sent more blocks
+              if (block !== null && block !== undefined) {
+                debug(`newBlock ${newBlock.getHeight()}:${newBlock.getHash()} vs loaded block ${block.getHeight()}:${block.getHash()}`)
+              } else {
+                debug(`new block ${newBlock.getHeight()} is an update from peer`)
+                // validDateUpdate = false
+                continue
+              }
+              // TODO add peer to deconnect list
+              // if (newBlock.getHeight() < latestBlock.getHeight()) {
+              //  debug(`newBlock ${newBlock.getHeight()} does not exist latestBlock ${latestBlock.getHeight()}`)
+              //  validDataUpdate = false
+              //  continue
+              // }
             }
-            // TODO add peer to deconnect list
-            // if (newBlock.getHeight() < latestBlock.getHeight()) {
-            //  debug(`newBlock ${newBlock.getHeight()} does not exist latestBlock ${latestBlock.getHeight()}`)
-            //  validDataUpdate = false
-            //  continue
-            // }
-          }
-          // FIX: add block valid test
-          if (validDataUpdate === true && newBlock !== undefined && newBlock !== null) {
-            const storedBlock = await this._engine.persistence.putBlock(newBlock)
-            debug(`storedBlock: ${storedBlock}`)
-            if (parseInt(newBlock.getHeight(), 10) >= parseInt(latestBlock.getHeight(), 10) && parseInt(latestBlock.getHeight(), 10) > currentHeight) {
-              await this._engine.persistence.put('bc.block.latest', newBlock)
-            }
-            // if valid set the new height
-            if (currentHeight < newBlock.getHeight()) {
-              currentHeight = parseInt(newBlock.getHeight(), 10)
+            // FIX: add block valid test
+            if (validDataUpdate === true && newBlock !== undefined && newBlock !== null) {
+              const storedBlock = await this._engine.persistence.putBlock(newBlock)
+              debug(`storedBlock: ${storedBlock}`)
+              if (parseInt(newBlock.getHeight(), 10) >= parseInt(latestBlock.getHeight(), 10) && parseInt(latestBlock.getHeight(), 10) > currentHeight) {
+                await this._engine.persistence.put('bc.block.latest', newBlock)
+              }
+              // if valid set the new height
+              if (currentHeight < newBlock.getHeight()) {
+                currentHeight = parseInt(newBlock.getHeight(), 10)
+              }
             }
           }
         }
