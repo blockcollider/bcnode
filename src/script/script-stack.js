@@ -774,7 +774,7 @@ class ScriptStack {
         this.OP_0()
       }
     } else if (version.eq(new BN(6)) === true) {
-      // darkSchnorr disabled 
+      // darkSchnorr disabled
       this.OP_0()
     } else {
       this.OP_0()
