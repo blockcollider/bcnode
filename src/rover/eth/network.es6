@@ -19,7 +19,7 @@ const { promisify } = require('util')
 const rlp = require('rlp-encoding')
 const fs = require('fs')
 const BN = require('bn.js')
-const { range, contains, without } = require('ramda')
+const { isEmpty, drop, take, range, contains, without } = require('ramda')
 
 const logging = require('../../logger')
 const { getPrivateKey } = require('../utils')
@@ -32,7 +32,7 @@ const chainName = (true || BC_NETWORK === 'main') // eslint-disable-line
   : 'ropsten'
 const ec = new EthereumCommon(chainName)
 
-const ETH_MAX_FETCH_BLOCKS = 30
+const ETH_MAX_FETCH_BLOCKS = 128
 const BOOTNODES = ec.bootstrapNodes().map(node => {
   return {
     address: node.ip,
@@ -131,6 +131,7 @@ export default class Network extends EventEmitter {
   _config: { maximumPeers: number }
   _maximumPeers: number
   _requestedBlocks: number[]
+  _initialSyncBlocksToFetch: number[]
   _initialResync: boolean
 
   constructor (config: { maximumPeers: number }) {
@@ -148,6 +149,7 @@ export default class Network extends EventEmitter {
     this._config = config
     this._maximumPeers = this._config.maximumPeers + (Math.floor(Math.random() * 18) - 9) // add variability to peer pool on boot
     this._requestedBlocks = []
+    this._initialSyncBlocksToFetch = []
     this._initialResync = true
   }
 
@@ -264,16 +266,34 @@ export default class Network extends EventEmitter {
     }
   }
 
-  requestBlockRange (from: number) {
-    const peers = [].concat(Object.values(this._forkVerifiedForPeer))
+  scheduleInitialSync (knownBlock: number) {
+    const count = (72 * 60 * 60) / ROVER_SECONDS_PER_BLOCK['eth']
+    const from = knownBlock - count + 1
+    const to = knownBlock
+    const blockNumbersToRequest = range(from, to)
+    this._logger.info(`blockNumbersToRequest: ${from} - ${to}`)
+    this._initialSyncBlocksToFetch = take(blockNumbersToRequest.length - ETH_MAX_FETCH_BLOCKS, blockNumbersToRequest)
+    const firstBatch = drop(blockNumbersToRequest.length - ETH_MAX_FETCH_BLOCKS, blockNumbersToRequest)
 
-    if (peers.length < 8) {
-      this._logger.info(`Peer count ${peers.length} < 8 - postponing inital resync by 10s.`) // FIXME down to debug
+    this.requestBlockRange(firstBatch)
+  }
+
+  requestBlockRange (batch: number[]) {
+    const from = batch[0]
+    const to = batch[batch.length - 1] || batch[0]
+    const peers = [].concat(Object.values(this._forkVerifiedForPeer))
+    const WAIT_FOR_PEERS = 4
+    const WAIT_FOR_PEERS_TIMEOUT = 10000
+
+    if (peers.length < WAIT_FOR_PEERS) {
+      this._logger.info(`Peer count ${peers.length} < ${WAIT_FOR_PEERS} - postponing inital resync by ${WAIT_FOR_PEERS_TIMEOUT / 1000}s.`) // FIXME down to debug
       setTimeout(() => {
-        this.requestBlockRange(from)
-      }, 10000)
+        this.requestBlockRange(batch)
+      }, WAIT_FOR_PEERS_TIMEOUT)
       return
     }
+
+    this._requestedBlocks = this._requestedBlocks.concat(batch)
 
     // select random floor(maximumPeers / 3)
     const askPeers = []
@@ -282,25 +302,17 @@ export default class Network extends EventEmitter {
       askPeers.push(randomChoiceMut(peers))
     }
 
-    const count = (72 * 60 * 60) / ROVER_SECONDS_PER_BLOCK['eth']
-    const to = from - count
-    const blockNumbersToRequest = range(from, to)
-    this._logger.info(`blockNumbersToRequest: ${to} - ${from} from ${askPeers.length} peers`)
-    this._requestedBlocks = this._requestedBlocks.concat(blockNumbersToRequest)
+    const count = to - from + 1
+    this._logger.info(`requesting ${count} blocks (${from} - ${to}) from ${askPeers.length} peers`)
 
-    if (askPeers.length >= 2) {
-      for (const peer of askPeers) {
-        this._logger.debug(`Requested blocks ${blockNumbersToRequest} to be fetched from ${getPeerAddr(peer)}`)
-        const eth = peer.getProtocols()[0]
-        eth.sendMessage(ETH.MESSAGE_CODES.GET_BLOCK_HEADERS, [
-          to, // block number of first block requested
-          count, // count of blocks we want to get
-          0,
-          0
-        ])
-      }
-    } else {
-      this._logger.debug(`Could not request blocks ${blockNumbersToRequest}, waiting for peers (have ${askPeers.length} currently)`)
+    for (const peer of askPeers) {
+      const eth = peer.getProtocols()[0]
+      eth.sendMessage(ETH.MESSAGE_CODES.GET_BLOCK_HEADERS, [
+        from, // block number of last block requested
+        count, // count of blocks we want to get
+        0,
+        0
+      ])
     }
   }
 
@@ -401,6 +413,12 @@ export default class Network extends EventEmitter {
         }
       })
     }
+
+    if (isEmpty(this._requestedBlocks) && !isEmpty(this._initialSyncBlocksToFetch)) {
+      const batch = drop(this._initialSyncBlocksToFetch.length - ETH_MAX_FETCH_BLOCKS, this._initialSyncBlocksToFetch)
+      this._initialSyncBlocksToFetch = take(this._initialSyncBlocksToFetch.length - ETH_MAX_FETCH_BLOCKS, this._initialSyncBlocksToFetch)
+      this.requestBlockRange(batch)
+    }
   }
 
   handleMessageBlockHeaders (payload: Object, peer: Object) {
@@ -482,7 +500,7 @@ export default class Network extends EventEmitter {
 
           if (this.initialResync) {
             this._logger.info('Requesting initial resync')
-            this.requestBlockRange(blockNumber)
+            this.scheduleInitialSync(blockNumber)
             this.initialResync = false
           }
 
