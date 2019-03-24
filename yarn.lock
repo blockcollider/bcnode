@@ -209,6 +209,58 @@
     semver "^5.5.0"
     wif "^2.0.6"
 
+"@liskhq/lisk-api-client@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@liskhq/lisk-api-client/-/lisk-api-client-2.0.0.tgz#02caadd720365fb3974de3e67137561ac73a2021"
+  integrity sha512-HmIaV6tsEsedHGrgrn9vU6rTZ6pwpE5XylxkUPPRkeNVV3/vTfPWEzoKcyp9TrWBnsnpebmn56GsGzxQ8EA0EQ==
+  dependencies:
+    "@types/node" "10.10.1"
+    "@types/verror" "1.10.3"
+    axios "0.18.0"
+    verror "1.10.0"
+
+"@liskhq/lisk-constants@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@liskhq/lisk-constants/-/lisk-constants-1.2.0.tgz#90f072764d170d790dff9d7dd7665d108389101b"
+  integrity sha512-B/1Si1eT4wOe7AaInklfT2SLenLm7U9CyfNnjaZs423Hi5Vw5xjP7KkM2nJTkqd6EUF/SJARKU/eK1R/qq0uDw==
+  dependencies:
+    "@types/node" "10.10.1"
+
+"@liskhq/lisk-cryptography@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@liskhq/lisk-cryptography/-/lisk-cryptography-2.0.0.tgz#eadbb343e2d2a5001125b358ea68790a9f678db9"
+  integrity sha512-ytW7dLebHjnOr3jsCe8asoTGencsRVPncwh+JTn+rrEl3k0UVEx3WrPdKnAfU0mHnWc3CWBf9kh2huyYnHlcdw==
+  dependencies:
+    "@types/ed2curve" "0.2.2"
+    "@types/node" "10.12.0"
+    browserify-bignum "1.3.0-2"
+    buffer-reverse "1.0.1"
+    ed2curve "0.2.1"
+    tweetnacl "1.0.0"
+    varuint-bitcoin "1.1.0"
+  optionalDependencies:
+    sodium-native "2.2.1"
+
+"@liskhq/lisk-passphrase@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@liskhq/lisk-passphrase/-/lisk-passphrase-2.0.0.tgz#e847459d68c35038803a0390409c3825480f150f"
+  integrity sha512-2PKboQPq75fuP/9jlAU4GJFfbz4hD9vkwqmZfScMCu7mUdaTcLF77J+nvFkf5T/CApQZU125oCGY+9loo5FqLw==
+  dependencies:
+    "@types/bip39" "2.4.0"
+    "@types/node" "10.10.1"
+    bip39 "2.5.0"
+
+"@liskhq/lisk-transactions@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@liskhq/lisk-transactions/-/lisk-transactions-2.0.0.tgz#661ef1fe88fb5b3e58fd3a00caed0c2f9b4ea43c"
+  integrity sha512-usUn3PbDN9R8FjhAmhl8ZKX72vGYzurmXYn5Qa4ekH2QKlgIhysPDs4yFuvcPR8BwqRNeYR1zOwPFzaWeXH8Bg==
+  dependencies:
+    "@liskhq/lisk-cryptography" "2.0.0"
+    "@types/node" "10.10.1"
+    ajv "6.5.3"
+    ajv-merge-patch "4.1.0"
+    browserify-bignum "1.3.0-2"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -234,19 +286,48 @@
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
 
+"@types/bip39@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@types/bip39/-/bip39-2.4.0.tgz#eee31a14abc8ebbb41a1ff14575c447b18346cbc"
+  integrity sha512-qxJBGh55SPbSGv+91D6H3WOR8vKdA/p8Oc58oK/DTbORgjO6Ebuo8MRzdy2OWi+dw/lxtX4VWJkkCUTSQvhAnw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/commander@^2.11.0":
   version "2.12.2"
   resolved "https://registry.yarnpkg.com/@types/commander/-/commander-2.12.2.tgz#183041a23842d4281478fa5d23c5ca78e6fd08ae"
   dependencies:
     commander "*"
 
+"@types/ed2curve@0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@types/ed2curve/-/ed2curve-0.2.2.tgz#8f8bc7e2c9a5895a941c63a4f7acd7a6a62a5b15"
+  integrity sha512-G1sTX5xo91ydevQPINbL2nfgVAj/s1ZiqZxC8OCWduwu+edoNGUm5JXtTkg9F3LsBZbRI46/0HES4CPUE2wc9g==
+  dependencies:
+    tweetnacl "^1.0.0"
+
 "@types/node@*":
   version "10.9.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.9.2.tgz#f0ab8dced5cd6c56b26765e1c0d9e4fdcc9f2a00"
 
+"@types/node@10.10.1":
+  version "10.10.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.1.tgz#d5c96ca246a418404914d180b7fdd625ad18eca6"
+  integrity sha512-nzsx28VwfaIykfzMAG9TB3jxF5Nn+1/WMKnmVZc8TsB+LMIVvwUscVn7PAq+LFaY5ng5u4jp5mRROSswo76PPA==
+
+"@types/node@10.12.0":
+  version "10.12.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.0.tgz#ea6dcbddbc5b584c83f06c60e82736d8fbb0c235"
+  integrity sha512-3TUHC3jsBAB7qVRGxT6lWyYo2v96BMmD2PTcl47H25Lu7UXtFH/2qqmKiVrnel6Ne//0TFYf6uvNX+HW2FRkLQ==
+
 "@types/semver@^5.4.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
+
+"@types/verror@1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@types/verror/-/verror-1.10.3.tgz#8be16b0e750018fd4e2e4a766b8f2351d8b5df6a"
+  integrity sha512-7Jz0MPsW2pWg5dJfEp9nJYI0RDCYfgjg2wIo5HfQ8vOJvUq0/BxT7Mv2wNQvkKBmV9uT++6KF3reMnLmh/0HrA==
 
 "@webassemblyjs/ast@1.5.13":
   version "1.5.13"
@@ -504,6 +585,23 @@ ajv-keywords@^3.1.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.2.0.tgz#e86b819c602cf8821ad637413698f1dec021847a"
 
+ajv-merge-patch@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/ajv-merge-patch/-/ajv-merge-patch-4.1.0.tgz#cd580e5860ac53431d6aa901fa3d5e2eb2b74a6c"
+  integrity sha512-0mAYXMSauA8RZ7r+B4+EAOYcZEcO9OK5EiQCR7W7Cv4E44pJj56ZnkKLJ9/PAcOc0dT+LlV9fdDcq2TxVJfOYw==
+  dependencies:
+    fast-json-patch "^2.0.6"
+    json-merge-patch "^0.2.3"
+
+ajv@6.5.3, ajv@^6.1.0, ajv@^6.2.1:
+  version "6.5.3"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.5.3.tgz#71a569d189ecf4f4f321224fecb166f071dd90f9"
+  dependencies:
+    fast-deep-equal "^2.0.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
+
 ajv@^4.9.1:
   version "4.11.8"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
@@ -519,15 +617,6 @@ ajv@^5.2.3, ajv@^5.3.0:
     fast-deep-equal "^1.0.0"
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.3.0"
-
-ajv@^6.1.0, ajv@^6.2.1:
-  version "6.5.3"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.5.3.tgz#71a569d189ecf4f4f321224fecb166f071dd90f9"
-  dependencies:
-    fast-deep-equal "^2.0.1"
-    fast-json-stable-stringify "^2.0.0"
-    json-schema-traverse "^0.4.1"
-    uri-js "^4.2.2"
 
 align-text@^0.1.1, align-text@^0.1.3:
   version "0.1.4"
@@ -871,7 +960,7 @@ aws4@^1.2.1, aws4@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.8.0.tgz#f0e003d9ca9e7f59c7a508945d7b2ef9a04a542f"
 
-axios@=0.18.0, axios@^0.18.0:
+axios@0.18.0, axios@^0.18.0:
   version "0.18.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.18.0.tgz#32d53e4851efdc0a11993b6cd000789d70c05102"
   dependencies:
@@ -1610,7 +1699,7 @@ babel-register@^6.26.0, babel-register@^6.9.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@=6.26.0, babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0, babel-runtime@^6.9.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0, babel-runtime@^6.9.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   dependencies:
@@ -1925,19 +2014,10 @@ binstring@0.2.x, binstring@^0.2.1, binstring@~0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/binstring/-/binstring-0.2.1.tgz#8a174d301f6d54efda550dd98bb4cb524eacd75d"
 
-bip39@=2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/bip39/-/bip39-2.4.0.tgz#a0b8adbf163f53495f00f05d9ede7c25369ccf13"
-  dependencies:
-    create-hash "^1.1.0"
-    pbkdf2 "^3.0.9"
-    randombytes "^2.0.1"
-    safe-buffer "^5.0.1"
-    unorm "^1.3.3"
-
-bip39@^2.3.1:
+bip39@2.5.0, bip39@^2.3.1:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/bip39/-/bip39-2.5.0.tgz#51cbd5179460504a63ea3c000db3f787ca051235"
+  integrity sha512-xwIx/8JKoT2+IPJpFEfXoWdYwP7UVAoUxxLNfGCfVowaJE7yg1Y5B1BVPqlUNsBq5/nGwmFkwRJ8xDW4sX8OdA==
   dependencies:
     create-hash "^1.1.0"
     pbkdf2 "^3.0.9"
@@ -2356,9 +2436,10 @@ browserify-aes@^1.0.0, browserify-aes@^1.0.4, browserify-aes@^1.0.6:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-browserify-bignum@=1.3.0-2:
+browserify-bignum@1.3.0-2, browserify-bignum@=1.3.0-2:
   version "1.3.0-2"
   resolved "https://registry.yarnpkg.com/browserify-bignum/-/browserify-bignum-1.3.0-2.tgz#ddc3b6ed607fd6c960966950e2b35a2b0c6fb9bf"
+  integrity sha1-3cO27WB/1slglmlQ4rNaKwxvub8=
 
 browserify-cipher@^1.0.0:
   version "1.0.1"
@@ -2601,7 +2682,7 @@ buffer-indexof@~0.0.0:
   resolved "https://registry.yarnpkg.com/buffer-indexof/-/buffer-indexof-0.0.2.tgz#ed0f36b7ae166a66a7cd174c0467ae8dedf008f5"
   integrity sha1-7Q82t64WamanzRdMBGeuje3wCPU=
 
-buffer-reverse@=1.0.1, buffer-reverse@^1.0.0, buffer-reverse@^1.0.1:
+buffer-reverse@1.0.1, buffer-reverse@^1.0.0, buffer-reverse@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/buffer-reverse/-/buffer-reverse-1.0.1.tgz#49283c8efa6f901bc01fa3304d06027971ae2f60"
 
@@ -3861,7 +3942,7 @@ decompress@^4.0.0:
     pify "^2.3.0"
     strip-dirs "^2.0.0"
 
-deep-equal@^1.0.1, deep-equal@~1.0.1:
+deep-equal@^1.0.0, deep-equal@^1.0.1, deep-equal@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.0.1.tgz#f5d260292b660e084eff4cdbc9f08ad3247448b5"
 
@@ -4309,9 +4390,10 @@ ed25519@0.0.4:
     bindings "^1.2.1"
     nan "^2.0.9"
 
-ed2curve@=0.2.1:
+ed2curve@0.2.1, ed2curve@=0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/ed2curve/-/ed2curve-0.2.1.tgz#22e6aaa3569e3c4dbf4eefa29612ec329e58190c"
+  integrity sha1-Iuaqo1aePE2/Tu+ilhLsMp5YGQw=
   dependencies:
     tweetnacl "0.x.x"
 
@@ -5473,6 +5555,13 @@ fast-glob@^2.0.2:
     is-glob "^4.0.0"
     merge2 "^1.2.1"
     micromatch "^3.1.10"
+
+fast-json-patch@^2.0.6:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/fast-json-patch/-/fast-json-patch-2.0.7.tgz#55864b08b1e50381d2f37fd472bb2e18fe54a733"
+  integrity sha512-DQeoEyPYxdTtfmB3yDlxkLyKTdbJ6ABfFGcMynDqjvGhPYLto/pZyb/dG2Nyd/n9CArjEWN9ZST++AFmgzgbGw==
+  dependencies:
+    deep-equal "^1.0.1"
 
 fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
@@ -6677,7 +6766,7 @@ inherits@Ivshti/inherits:
   version "2.0.2"
   resolved "https://codeload.github.com/Ivshti/inherits/tar.gz/0c5b02ddc4172bf2e55460916401ac37cfe6f9d3"
 
-ini@^1.3.4, ini@~1.3.0:
+ini@^1.3.4, ini@^1.3.5, ini@~1.3.0:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
 
@@ -7704,6 +7793,13 @@ json-buffer@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/json-buffer/-/json-buffer-3.0.0.tgz#5b1f397afc75d677bde8bcfc0e47e1f9a3d9a898"
 
+json-merge-patch@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/json-merge-patch/-/json-merge-patch-0.2.3.tgz#fa2c6b5af87da77bae2966a589d52e23ed81fe40"
+  integrity sha1-+ixrWvh9p3uuKWalidUuI+2B/kA=
+  dependencies:
+    deep-equal "^1.0.0"
+
 json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
@@ -8097,18 +8193,17 @@ linvodb3@^3.25.1:
     underscore "1.8.x"
     util Ivshti/node-util
 
-lisk-elements@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/lisk-elements/-/lisk-elements-1.0.0.tgz#907c7fafe043d9f0afcb563da39b022d18df4bce"
+lisk-elements@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/lisk-elements/-/lisk-elements-2.0.0.tgz#3f21c6216471d41c8f8d48e12da1963d9715e2de"
+  integrity sha512-a66BEomSpL+Z/SxZZ42aR2gzNRSYaIo/xK/S4pve2dK5evsxpLVy4DUtD2tgGyB1hxZdCp5Ej0ch/hYNdogo/w==
   dependencies:
-    axios "=0.18.0"
-    babel-runtime "=6.26.0"
-    bip39 "=2.4.0"
-    browserify-bignum "=1.3.0-2"
-    buffer-reverse "=1.0.1"
-    ed2curve "=0.2.1"
-    tweetnacl "=1.0.0"
-    varuint-bitcoin "=1.1.0"
+    "@liskhq/lisk-api-client" "2.0.0"
+    "@liskhq/lisk-constants" "1.2.0"
+    "@liskhq/lisk-cryptography" "2.0.0"
+    "@liskhq/lisk-passphrase" "2.0.0"
+    "@liskhq/lisk-transactions" "2.0.0"
+    "@types/node" "10.10.1"
 
 lisk-js@^0.5.2:
   version "0.5.2"
@@ -8992,6 +9087,11 @@ nan@*, nan@^2.0.0, nan@^2.0.5, nan@^2.0.8, nan@^2.0.9, nan@^2.2.1, nan@^2.3.2, n
 nan@2.10.0, nan@2.10.x, nan@~2.10.0:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
+
+nan@^2.4.0:
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.13.1.tgz#a15bee3790bde247e8f38f1d446edcdaeb05f2dd"
+  integrity sha512-I6YB/YEuDeUZMmhscXKxGgZlFnhsn5y0hgOZBadkzfTRrZBtJDZeg6eQf7PYMIEclwmorTKK8GztsyOUSVBREA==
 
 nan@~2.8.0:
   version "2.8.0"
@@ -11764,6 +11864,15 @@ socks5-client@^0.3.6:
     ipv6 "~3.1.1"
     network-byte-order "~0.2.0"
 
+sodium-native@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-2.2.1.tgz#5bed5f908dc9264c9cb4e0183652ad7a64ff084b"
+  integrity sha512-3CfftYV2ATXQFMIkLOvcNUk/Ma+lran0855j5Z/HEjUkSTzjLZi16CK362udOoNVrwn/TwGV8bKEt5OylsFrQA==
+  dependencies:
+    ini "^1.3.5"
+    nan "^2.4.0"
+    node-gyp-build "^3.0.0"
+
 sort-keys@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/sort-keys/-/sort-keys-2.0.0.tgz#658535584861ec97d730d6cf41822e1f56684128"
@@ -12631,9 +12740,15 @@ tweetnacl@0.x.x, tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
-tweetnacl@=1.0.0:
+tweetnacl@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.0.tgz#713d8b818da42068740bf68386d0479e66fc8a7b"
+  integrity sha1-cT2LgY2kIGh0C/aDhtBHnmb8ins=
+
+tweetnacl@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.1.tgz#2594d42da73cd036bd0d2a54683dd35a6b55ca17"
+  integrity sha512-kcoMoKTPYnoeS50tzoqjPY3Uv9axeuuFAZY9M/9zFnhoVvRfxz9K29IMPD7jGmt2c8SW7i3gT9WqDl2+nV7p4A==
 
 tx-builder@^0.13.1:
   version "0.13.1"
@@ -13052,7 +13167,7 @@ varstruct@^5.2.0:
   dependencies:
     int53 "^0.2.4"
 
-varuint-bitcoin@=1.1.0, varuint-bitcoin@^1.0.1, varuint-bitcoin@^1.0.4:
+varuint-bitcoin@1.1.0, varuint-bitcoin@^1.0.1, varuint-bitcoin@^1.0.4:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/varuint-bitcoin/-/varuint-bitcoin-1.1.0.tgz#7a343f50537607af6a3059312b9782a170894540"
   dependencies:

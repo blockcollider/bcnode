@@ -161,10 +161,10 @@ export default class Controller {
     })
     this._otherCache = new LRUCache({ max: 50 })
     // TODO pull this to networks config
-    const networkConfig = merge(config, { testnet: BC_NETWORK !== 'main' })
-    this._liskApi = (BC_NETWORK === 'main')
-      ? lisk.APIClient.createMainnetAPIClient(networkConfig)
-      : lisk.APIClient.createTestnetAPIClient(networkConfig)
+    const networkConfig = merge(config, { testnet: BC_NETWORK === 'test' })
+    this._liskApi = (BC_NETWORK === 'test')
+      ? lisk.APIClient.createTestnetAPIClient(networkConfig)
+      : lisk.APIClient.createMainnetAPIClient(networkConfig)
     this._rpc = new RpcClient()
   }
 
@@ -200,7 +200,7 @@ export default class Controller {
               this._blockCache.set(lastBlock.id, true)
               this._logger.debug(`unseen block with id: ${inspect(lastBlock.id)} => using for BC chain`)
 
-              return this._liskApi.transactions.get({blockId: lastBlock.id}).then(async ({ data }) => {
+              return this._liskApi.transactions.get({ blockId: lastBlock.id }).then(async ({ data }) => {
                 lastBlock.transactions = data
                 this._logger.debug(`Got txs for block ${lastBlock.id}, ${inspect(data)}`)
 

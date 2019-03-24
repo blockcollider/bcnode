@@ -187,7 +187,7 @@
     "levelup": "^3.1.1",
     "libp2p-spdy": "^0.12.1",
     "linvodb3": "^3.25.1",
-    "lisk-elements": "^1.0.0",
+    "lisk-elements": "2.0.0",
     "lisk-js": "^0.5.2",
     "lowdb": "^1.0.0",
     "lru-cache": "^4.1.1",

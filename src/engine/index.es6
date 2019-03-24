@@ -1010,9 +1010,9 @@ export class Engine {
     options: { ipd: string, iph: string, fullBlock: bool, sendOnFail: bool } = { ipd: 'pending', iph: 'pending', fullBlock: false, sendOnFail: true }
   ): void {
     (async () => {
-      this._logger.info('this is the blockFromPeer')
       this._logger.info(options)
       const { fullBlock, ipd, iph } = options
+      this._logger.info(`block recieved from peer IPH: ${iph} IPD: ${ipd}`)
       let boundariesToFetchPromise = false
       if (BC_FETCH_MISSING_BLOCKS) {
         this._logger.info(`getting missing blocks enabled ${BC_FETCH_MISSING_BLOCKS}`)

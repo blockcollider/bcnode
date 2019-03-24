@@ -131,25 +131,6 @@ export class MiningOfficer {
     // this._canMine = true
     if (!this._canMine && all((numCollected: number) => numCollected >= 1, values(this._collectedBlocks))) {
       this._canMine = true
-    } else if (!this._canMine || iph !== 'complete') {
-      const keys = Object.keys(this._collectedBlocks)
-      const values = '[' + keys.reduce((all, a, i) => {
-        const val = this._collectedBlocks[a]
-        if (i === (keys.length - 1)) {
-          all = all + a + ':' + val
-        } else {
-          all = all + a + ':' + val + ' '
-        }
-        return all
-      }, '') + ']'
-
-      const totalBlocks = keys.reduce((all, key) => {
-        return all + this._collectedBlocks[key]
-      }, 0)
-
-      this._logger.info('constructing multiverse with blockchains ' + values)
-      this._logger.info('multiverse depth ' + totalBlocks)
-      return Promise.resolve(false)
     }
 
     if (this._canMine === true && MIN_HEALTH_NET === false) {

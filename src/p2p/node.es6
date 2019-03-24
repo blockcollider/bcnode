@@ -913,6 +913,12 @@ export class PeerNode {
           debug(`ignoring type: ${type} message from peer`)
           // check if current peer has expired
           return
+        } else if (iph === 'complete' && type === MESSAGES.BLOCK) {
+          const ipd = await this._engine.persistence.get('bc.sync.initialpeerdata')
+          if (ipd !== 'complete') {
+            debug(`ignoring type: ${type} from block submitted by peer while IPD is ${ipd}`)
+            return
+          }
         }
       }
       // check if the submission of the current peer was late
