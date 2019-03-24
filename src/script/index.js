@@ -272,7 +272,7 @@ class Interpreter {
               all.forceFail = true
             } else {
               const refop = optx.getOutputsList()[op.getIndex()]
-              const s = refop.getOutputScript().toString('hex')
+              const s = refop.getOutputScript().toString('ascii')
               if (s.indexOf('OP_MONOID') > -1) {
                 all.spendMonoidInputs.push(input)
               }
@@ -395,7 +395,7 @@ class Interpreter {
 
     // if no async op codes are includes, return sync parse
     if (!Validator.includesAsyncOpcode(script)) {
-      return Promise.resolve(this.parse(dataToSign, script))
+      return Promise.resolve(this.parse(dataToSign, script, allowDisabled))
     }
 
     try {
@@ -413,7 +413,7 @@ class Interpreter {
     }
   }
 
-  parse (dataToSign: string, wholeScript: string, allowDisabled: boolean): { value: boolean, code: string, error?: Error } {
+  parse (dataToSign: string, wholeScript: string, allowDisabled?: boolean): { value: boolean, code: string, error?: Error } {
     if (!allowDisabled && Validator.includesDisabledOpcode(wholeScript)) {
       throw new Validator.DisabledOpcodeException(wholeScript)
     }
