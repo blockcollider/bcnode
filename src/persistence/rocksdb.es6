@@ -777,8 +777,8 @@ export default class PersistenceRocksDb {
     }
   }
 
-  async getNrgMintedSoFar (): number|null {
-    return this.get(NRG_MINTED_PERISTENCE_KEY)
+  async getNrgMintedSoFar (): Promise<number|null> {
+    await this.get(NRG_MINTED_PERISTENCE_KEY)
   }
 
   async setNrgMintedSoFar (nrg: number) {
