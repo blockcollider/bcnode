@@ -17,6 +17,7 @@ const debug = require('debug')('bcnode:rover:manager')
 const logging = require('../logger')
 const { errToString } = require('../helper/error')
 const { Block } = require('../protos/core_pb')
+const { RoverMessage, RoverMessageType } = require('../protos/rover_pb')
 const { RpcClient } = require('../rpc')
 
 const BC_NETWORK: 'main'|'test' = process.env.BC_NETWORK || 'main'
@@ -113,12 +114,45 @@ export class RoverManager {
   }
 
   messageRover (roverName: string, message: string, payload: any): ?Error {
-    const rover = this._rovers[roverName]
-    if (!rover) {
-      throw new Error(`Rover ${roverName} is not running`)
+    const roverRpc = this._roverConnections[roverName]
+    if (!roverRpc) {
+      // This is necessary to prevent fail while rovers are starting - once we
+      // try to resend message after 10s, if it fails for the second time, bail
+      // with error as usual
+      if (!this._roverBootstrap[roverName]) {
+        this._logger.debug(`Retrying messageRover() after 10s - rover not booted yet`)
+        this._roverBootstrap[roverName] = true
+        setTimeout(() => {
+          this.messageRover(roverName, message, payload)
+        }, 10000)
+        return
+      }
+      throw new Error(`${roverName} rover's gRPC not running`)
     }
 
-    rover.send({ message, payload: JSON.stringify(payload) })
+    const msg = new RoverMessage()
+    switch (message) {
+      case 'needs_resync':
+        const resyncPayload = new RoverMessage.Resync()
+        // resyncData.setFromBlock()
+        // resyncData.setToBlock()
+        msg.setType(RoverMessageType.REQUESTRESYNC)
+        msg.setResync(resyncPayload)
+        roverRpc.write(msg)
+        break
+
+      case 'fetch_block':
+        const fetchBlockPayload = new RoverMessage.FetchBlock()
+        // resyncData.setFromBlock()
+        // resyncData.setToBlock()
+        msg.setType(RoverMessageType.FETCHBLOCK)
+        msg.setResync(fetchBlockPayload)
+        roverRpc.write(msg)
+        break
+
+      default:
+        throw new Error(`Unknown message ${message}`)
+    }
   }
 
   /**
