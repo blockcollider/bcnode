@@ -587,7 +587,7 @@ impl ::protobuf::reflect::ProtobufValue for Block {
 #[derive(PartialEq,Clone,Default)]
 pub struct MarkedTransaction {
     // message fields
-    pub value: u32,
+    pub value: ::std::vec::Vec<u8>,
     pub hash: ::std::string::String,
     pub id: ::std::string::String,
     pub token: ::std::string::String,
@@ -605,19 +605,30 @@ impl MarkedTransaction {
         ::std::default::Default::default()
     }
 
-    // uint32 value = 1;
+    // bytes value = 1;
 
     pub fn clear_value(&mut self) {
-        self.value = 0;
+        self.value.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_value(&mut self, v: u32) {
+    pub fn set_value(&mut self, v: ::std::vec::Vec<u8>) {
         self.value = v;
     }
 
-    pub fn get_value(&self) -> u32 {
-        self.value
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_value(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.value
+    }
+
+    // Take field
+    pub fn take_value(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.value, ::std::vec::Vec::new())
+    }
+
+    pub fn get_value(&self) -> &[u8] {
+        &self.value
     }
 
     // string hash = 2;
@@ -791,11 +802,7 @@ impl ::protobuf::Message for MarkedTransaction {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
                 1 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_uint32()?;
-                    self.value = tmp;
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.value)?;
                 },
                 2 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
@@ -838,8 +845,8 @@ impl ::protobuf::Message for MarkedTransaction {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if self.value != 0 {
-            my_size += ::protobuf::rt::value_size(1, self.value, ::protobuf::wire_format::WireTypeVarint);
+        if !self.value.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.value);
         }
         if !self.hash.is_empty() {
             my_size += ::protobuf::rt::string_size(2, &self.hash);
@@ -868,8 +875,8 @@ impl ::protobuf::Message for MarkedTransaction {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
-        if self.value != 0 {
-            os.write_uint32(1, self.value)?;
+        if !self.value.is_empty() {
+            os.write_bytes(1, &self.value)?;
         }
         if !self.hash.is_empty() {
             os.write_string(2, &self.hash)?;
@@ -934,7 +941,7 @@ impl ::protobuf::Message for MarkedTransaction {
         unsafe {
             descriptor.get(|| {
                 let mut fields = ::std::vec::Vec::new();
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                     "value",
                     |m: &MarkedTransaction| { &m.value },
                     |m: &mut MarkedTransaction| { &mut m.value },
@@ -4460,68 +4467,68 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x06\x20\x01(\tR\nmerkleRoot\x12%\n\x0emarkedtx_count\x18\x07\x20\x01(\
     \x04R\rmarkedtxCount\x124\n\nmarked_txs\x18\x08\x20\x03(\x0b2\x15.bc.Mar\
     kedTransactionR\tmarkedTxs\"\xd2\x01\n\x11MarkedTransaction\x12\x14\n\
-    \x05value\x18\x01\x20\x01(\rR\x05value\x12\x12\n\x04hash\x18\x02\x20\x01\
-    (\tR\x04hash\x12\x0e\n\x02id\x18\x03\x20\x01(\tR\x02id\x12\x14\n\x05toke\
-    n\x18\x04\x20\x01(\tR\x05token\x12\x1b\n\taddr_from\x18\x05\x20\x01(\tR\
-    \x08addrFrom\x12\x17\n\x07addr_to\x18\x06\x20\x01(\tR\x06addrTo\x12!\n\
-    \x0cblock_height\x18\x07\x20\x01(\x04R\x0bblockHeight\x12\x14\n\x05index\
-    \x18\x08\x20\x01(\x04R\x05index\"\xdb\x01\n\x11BlockchainHeaders\x12&\n\
-    \x03btc\x18\x01\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03btc\x12&\n\x03\
-    eth\x18\x02\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03eth\x12&\n\x03lsk\
-    \x18\x03\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03lsk\x12&\n\x03neo\x18\
-    \x04\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03neo\x12&\n\x03wav\x18\x05\
-    \x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03wav\"\x81\t\n\x07BcBlock\x12\
-    \x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\x02\
-    \x20\x01(\tR\x0cpreviousHash\x12\x18\n\x07version\x18\x03\x20\x01(\x04R\
-    \x07version\x12%\n\x0eschema_version\x18\x04\x20\x01(\x04R\rschemaVersio\
-    n\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x14\n\x05miner\
-    \x18\x06\x20\x01(\tR\x05miner\x12\x1e\n\ndifficulty\x18\x07\x20\x01(\tR\
-    \ndifficulty\x12\x1c\n\ttimestamp\x18\x08\x20\x01(\x04R\ttimestamp\x12\
-    \x1f\n\x0bmerkle_root\x18\t\x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain_roo\
-    t\x18\n\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x0b\x20\x01(\tR\
-    \x08distance\x12%\n\x0etotal_distance\x18\x0c\x20\x01(\tR\rtotalDistance\
-    \x12\x14\n\x05nonce\x18\r\x20\x01(\tR\x05nonce\x12\x1b\n\tnrg_grant\x18\
-    \x0e\x20\x01(\x04R\x08nrgGrant\x12\x1f\n\x0btarget_hash\x18\x0f\x20\x01(\
-    \tR\ntargetHash\x12#\n\rtarget_height\x18\x10\x20\x01(\x04R\x0ctargetHei\
-    ght\x12!\n\x0ctarget_miner\x18\x11\x20\x01(\tR\x0btargetMiner\x12)\n\x10\
-    target_signature\x18\x12\x20\x01(\tR\x0ftargetSignature\x12\x10\n\x03twn\
-    \x18\x13\x20\x01(\x04R\x03twn\x12\x10\n\x03tws\x18\x14\x20\x03(\tR\x03tw\
-    s\x12#\n\remblem_weight\x18\x15\x20\x01(\x04R\x0cemblemWeight\x125\n\x17\
-    emblem_chain_block_hash\x18\x16\x20\x01(\tR\x14emblemChainBlockHash\x12A\
-    \n\x1demblem_chain_fingerprint_root\x18\x17\x20\x01(\tR\x1aemblemChainFi\
-    ngerprintRoot\x120\n\x14emblem_chain_address\x18\x18\x20\x01(\tR\x12embl\
-    emChainAddress\x12\x19\n\x08tx_count\x18\x19\x20\x01(\x04R\x07txCount\
-    \x12!\n\x03txs\x18\x1a\x20\x03(\x0b2\x0f.bc.TransactionR\x03txs\x12\x1e\
-    \n\x0btx_fee_base\x18\x1b\x20\x01(\x04R\ttxFeeBase\x121\n\x15tx_distance\
-    _sum_limit\x18\x1c\x20\x01(\x04R\x12txDistanceSumLimit\x128\n\x18blockch\
-    ain_headers_count\x18\x1d\x20\x01(\x04R\x16blockchainHeadersCount\x12D\n\
-    \x12blockchain_headers\x18\x1e\x20\x01(\x0b2\x15.bc.BlockchainHeadersR\
-    \x11blockchainHeaders\x12@\n\x1cblockchain_fingerprints_root\x18\x1f\x20\
-    \x01(\tR\x1ablockchainFingerprintsRoot\"J\n\x08OutPoint\x12\x14\n\x05val\
-    ue\x18\x01\x20\x01(\x0cR\x05value\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\
-    \x04hash\x12\x14\n\x05index\x18\x03\x20\x01(\x04R\x05index\"\xa5\x02\n\
-    \x0bTransaction\x12\x18\n\x07version\x18\x01\x20\x01(\x04R\x07version\
-    \x12\x14\n\x05nonce\x18\x02\x20\x01(\tR\x05nonce\x12\x12\n\x04hash\x18\
-    \x03\x20\x01(\tR\x04hash\x12\x1a\n\x08overline\x18\x04\x20\x01(\tR\x08ov\
-    erline\x12\x1b\n\tnin_count\x18\x05\x20\x01(\x04R\x08ninCount\x12\x1d\n\
-    \nnout_count\x18\x06\x20\x01(\x04R\tnoutCount\x12,\n\x06inputs\x18\x07\
-    \x20\x03(\x0b2\x14.bc.TransactionInputR\x06inputs\x12/\n\x07outputs\x18\
-    \x08\x20\x03(\x0b2\x15.bc.TransactionOutputR\x07outputs\x12\x1b\n\tlock_\
-    time\x18\t\x20\x01(\rR\x08lockTime\"\x85\x01\n\x10TransactionInput\x12)\
-    \n\tout_point\x18\x01\x20\x01(\x0b2\x0c.bc.OutPointR\x08outPoint\x12#\n\
-    \rscript_length\x18\x02\x20\x01(\rR\x0cscriptLength\x12!\n\x0cinput_scri\
-    pt\x18\x03\x20\x01(\x0cR\x0binputScript\"\x87\x01\n\x11TransactionOutput\
-    \x12\x14\n\x05value\x18\x01\x20\x01(\x0cR\x05value\x12\x12\n\x04unit\x18\
-    \x02\x20\x01(\x0cR\x04unit\x12#\n\rscript_length\x18\x03\x20\x01(\rR\x0c\
-    scriptLength\x12#\n\routput_script\x18\x04\x20\x01(\x0cR\x0coutputScript\
-    \"\xd0\x02\n\x10BlockchainHeader\x12\x1e\n\nblockchain\x18\x01\x20\x01(\
-    \tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\x04hash\x12#\n\rpr\
-    evious_hash\x18\x03\x20\x01(\tR\x0cpreviousHash\x12\x1c\n\ttimestamp\x18\
-    \x04\x20\x01(\x04R\ttimestamp\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\
-    \x06height\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\nmerkleRoot\x12V\
-    \n(blockchain_confirmations_in_parent_count\x18\x07\x20\x01(\x04R$blockc\
-    hainConfirmationsInParentCount\x124\n\nmarked_txs\x18\x08\x20\x03(\x0b2\
-    \x15.bc.MarkedTransactionR\tmarkedTxsb\x06proto3\
+    \x05value\x18\x01\x20\x01(\x0cR\x05value\x12\x12\n\x04hash\x18\x02\x20\
+    \x01(\tR\x04hash\x12\x0e\n\x02id\x18\x03\x20\x01(\tR\x02id\x12\x14\n\x05\
+    token\x18\x04\x20\x01(\tR\x05token\x12\x1b\n\taddr_from\x18\x05\x20\x01(\
+    \tR\x08addrFrom\x12\x17\n\x07addr_to\x18\x06\x20\x01(\tR\x06addrTo\x12!\
+    \n\x0cblock_height\x18\x07\x20\x01(\x04R\x0bblockHeight\x12\x14\n\x05ind\
+    ex\x18\x08\x20\x01(\x04R\x05index\"\xdb\x01\n\x11BlockchainHeaders\x12&\
+    \n\x03btc\x18\x01\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03btc\x12&\n\
+    \x03eth\x18\x02\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03eth\x12&\n\x03\
+    lsk\x18\x03\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03lsk\x12&\n\x03neo\
+    \x18\x04\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03neo\x12&\n\x03wav\x18\
+    \x05\x20\x03(\x0b2\x14.bc.BlockchainHeaderR\x03wav\"\x81\t\n\x07BcBlock\
+    \x12\x12\n\x04hash\x18\x01\x20\x01(\tR\x04hash\x12#\n\rprevious_hash\x18\
+    \x02\x20\x01(\tR\x0cpreviousHash\x12\x18\n\x07version\x18\x03\x20\x01(\
+    \x04R\x07version\x12%\n\x0eschema_version\x18\x04\x20\x01(\x04R\rschemaV\
+    ersion\x12\x16\n\x06height\x18\x05\x20\x01(\x04R\x06height\x12\x14\n\x05\
+    miner\x18\x06\x20\x01(\tR\x05miner\x12\x1e\n\ndifficulty\x18\x07\x20\x01\
+    (\tR\ndifficulty\x12\x1c\n\ttimestamp\x18\x08\x20\x01(\x04R\ttimestamp\
+    \x12\x1f\n\x0bmerkle_root\x18\t\x20\x01(\tR\nmerkleRoot\x12\x1d\n\nchain\
+    _root\x18\n\x20\x01(\tR\tchainRoot\x12\x1a\n\x08distance\x18\x0b\x20\x01\
+    (\tR\x08distance\x12%\n\x0etotal_distance\x18\x0c\x20\x01(\tR\rtotalDist\
+    ance\x12\x14\n\x05nonce\x18\r\x20\x01(\tR\x05nonce\x12\x1b\n\tnrg_grant\
+    \x18\x0e\x20\x01(\x04R\x08nrgGrant\x12\x1f\n\x0btarget_hash\x18\x0f\x20\
+    \x01(\tR\ntargetHash\x12#\n\rtarget_height\x18\x10\x20\x01(\x04R\x0ctarg\
+    etHeight\x12!\n\x0ctarget_miner\x18\x11\x20\x01(\tR\x0btargetMiner\x12)\
+    \n\x10target_signature\x18\x12\x20\x01(\tR\x0ftargetSignature\x12\x10\n\
+    \x03twn\x18\x13\x20\x01(\x04R\x03twn\x12\x10\n\x03tws\x18\x14\x20\x03(\t\
+    R\x03tws\x12#\n\remblem_weight\x18\x15\x20\x01(\x04R\x0cemblemWeight\x12\
+    5\n\x17emblem_chain_block_hash\x18\x16\x20\x01(\tR\x14emblemChainBlockHa\
+    sh\x12A\n\x1demblem_chain_fingerprint_root\x18\x17\x20\x01(\tR\x1aemblem\
+    ChainFingerprintRoot\x120\n\x14emblem_chain_address\x18\x18\x20\x01(\tR\
+    \x12emblemChainAddress\x12\x19\n\x08tx_count\x18\x19\x20\x01(\x04R\x07tx\
+    Count\x12!\n\x03txs\x18\x1a\x20\x03(\x0b2\x0f.bc.TransactionR\x03txs\x12\
+    \x1e\n\x0btx_fee_base\x18\x1b\x20\x01(\x04R\ttxFeeBase\x121\n\x15tx_dist\
+    ance_sum_limit\x18\x1c\x20\x01(\x04R\x12txDistanceSumLimit\x128\n\x18blo\
+    ckchain_headers_count\x18\x1d\x20\x01(\x04R\x16blockchainHeadersCount\
+    \x12D\n\x12blockchain_headers\x18\x1e\x20\x01(\x0b2\x15.bc.BlockchainHea\
+    dersR\x11blockchainHeaders\x12@\n\x1cblockchain_fingerprints_root\x18\
+    \x1f\x20\x01(\tR\x1ablockchainFingerprintsRoot\"J\n\x08OutPoint\x12\x14\
+    \n\x05value\x18\x01\x20\x01(\x0cR\x05value\x12\x12\n\x04hash\x18\x02\x20\
+    \x01(\tR\x04hash\x12\x14\n\x05index\x18\x03\x20\x01(\x04R\x05index\"\xa5\
+    \x02\n\x0bTransaction\x12\x18\n\x07version\x18\x01\x20\x01(\x04R\x07vers\
+    ion\x12\x14\n\x05nonce\x18\x02\x20\x01(\tR\x05nonce\x12\x12\n\x04hash\
+    \x18\x03\x20\x01(\tR\x04hash\x12\x1a\n\x08overline\x18\x04\x20\x01(\tR\
+    \x08overline\x12\x1b\n\tnin_count\x18\x05\x20\x01(\x04R\x08ninCount\x12\
+    \x1d\n\nnout_count\x18\x06\x20\x01(\x04R\tnoutCount\x12,\n\x06inputs\x18\
+    \x07\x20\x03(\x0b2\x14.bc.TransactionInputR\x06inputs\x12/\n\x07outputs\
+    \x18\x08\x20\x03(\x0b2\x15.bc.TransactionOutputR\x07outputs\x12\x1b\n\tl\
+    ock_time\x18\t\x20\x01(\rR\x08lockTime\"\x85\x01\n\x10TransactionInput\
+    \x12)\n\tout_point\x18\x01\x20\x01(\x0b2\x0c.bc.OutPointR\x08outPoint\
+    \x12#\n\rscript_length\x18\x02\x20\x01(\rR\x0cscriptLength\x12!\n\x0cinp\
+    ut_script\x18\x03\x20\x01(\x0cR\x0binputScript\"\x87\x01\n\x11Transactio\
+    nOutput\x12\x14\n\x05value\x18\x01\x20\x01(\x0cR\x05value\x12\x12\n\x04u\
+    nit\x18\x02\x20\x01(\x0cR\x04unit\x12#\n\rscript_length\x18\x03\x20\x01(\
+    \rR\x0cscriptLength\x12#\n\routput_script\x18\x04\x20\x01(\x0cR\x0coutpu\
+    tScript\"\xd0\x02\n\x10BlockchainHeader\x12\x1e\n\nblockchain\x18\x01\
+    \x20\x01(\tR\nblockchain\x12\x12\n\x04hash\x18\x02\x20\x01(\tR\x04hash\
+    \x12#\n\rprevious_hash\x18\x03\x20\x01(\tR\x0cpreviousHash\x12\x1c\n\tti\
+    mestamp\x18\x04\x20\x01(\x04R\ttimestamp\x12\x16\n\x06height\x18\x05\x20\
+    \x01(\x04R\x06height\x12\x1f\n\x0bmerkle_root\x18\x06\x20\x01(\tR\nmerkl\
+    eRoot\x12V\n(blockchain_confirmations_in_parent_count\x18\x07\x20\x01(\
+    \x04R$blockchainConfirmationsInParentCount\x124\n\nmarked_txs\x18\x08\
+    \x20\x03(\x0b2\x15.bc.MarkedTransactionR\tmarkedTxsb\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

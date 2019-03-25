@@ -39,6 +39,10 @@ pub trait Bc {
     fn get_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetOpenOrdersResponse>;
 
     fn get_matched_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetMatchedOpenOrdersResponse>;
+
+    fn get_blake2bl(&self, o: ::grpc::RequestOptions, p: super::bc::GetBlake2blRequest) -> ::grpc::SingleResponse<super::bc::GetBlake2blResponse>;
+
+    fn get_bc_address_via_vanity(&self, o: ::grpc::RequestOptions, p: super::bc::VanityConvertRequest) -> ::grpc::SingleResponse<super::bc::VanityConvertResponse>;
 }
 
 // client
@@ -54,6 +58,8 @@ pub struct BcClient {
     method_PlaceTakerOrder: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::PlaceTakerOrderRequest, super::bc::RpcTransactionResponse>>,
     method_GetOpenOrders: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::core::Null, super::bc::GetOpenOrdersResponse>>,
     method_GetMatchedOpenOrders: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::core::Null, super::bc::GetMatchedOpenOrdersResponse>>,
+    method_GetBlake2bl: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::GetBlake2blRequest, super::bc::GetBlake2blResponse>>,
+    method_GetBcAddressViaVanity: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::VanityConvertRequest, super::bc::VanityConvertResponse>>,
 }
 
 impl BcClient {
@@ -114,6 +120,18 @@ impl BcClient {
                 req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                 resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
             }),
+            method_GetBlake2bl: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Bc/GetBlake2bl".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
+            method_GetBcAddressViaVanity: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Bc/GetBcAddressViaVanity".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
         }
     }
 
@@ -164,6 +182,14 @@ impl Bc for BcClient {
 
     fn get_matched_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetMatchedOpenOrdersResponse> {
         self.grpc_client.call_unary(o, p, self.method_GetMatchedOpenOrders.clone())
+    }
+
+    fn get_blake2bl(&self, o: ::grpc::RequestOptions, p: super::bc::GetBlake2blRequest) -> ::grpc::SingleResponse<super::bc::GetBlake2blResponse> {
+        self.grpc_client.call_unary(o, p, self.method_GetBlake2bl.clone())
+    }
+
+    fn get_bc_address_via_vanity(&self, o: ::grpc::RequestOptions, p: super::bc::VanityConvertRequest) -> ::grpc::SingleResponse<super::bc::VanityConvertResponse> {
+        self.grpc_client.call_unary(o, p, self.method_GetBcAddressViaVanity.clone())
     }
 }
 
@@ -283,6 +309,30 @@ impl BcServer {
                     {
                         let handler_copy = handler_arc.clone();
                         ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.get_matched_open_orders(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Bc/GetBlake2bl".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Unary,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.get_blake2bl(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Bc/GetBcAddressViaVanity".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Unary,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.get_bc_address_via_vanity(o, p))
                     },
                 ),
             ],

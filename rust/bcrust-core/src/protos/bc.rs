@@ -515,8 +515,8 @@ pub struct RpcTransaction {
     // message fields
     pub from_addr: ::std::string::String,
     pub to_addr: ::std::string::String,
-    pub amount: ::std::vec::Vec<u8>,
-    pub tx_fee: ::std::vec::Vec<u8>,
+    pub amount: ::std::string::String,
+    pub tx_fee: ::std::string::String,
     pub private_key_hex: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
@@ -580,55 +580,55 @@ impl RpcTransaction {
         &self.to_addr
     }
 
-    // bytes amount = 3;
+    // string amount = 3;
 
     pub fn clear_amount(&mut self) {
         self.amount.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_amount(&mut self, v: ::std::vec::Vec<u8>) {
+    pub fn set_amount(&mut self, v: ::std::string::String) {
         self.amount = v;
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_amount(&mut self) -> &mut ::std::vec::Vec<u8> {
+    pub fn mut_amount(&mut self) -> &mut ::std::string::String {
         &mut self.amount
     }
 
     // Take field
-    pub fn take_amount(&mut self) -> ::std::vec::Vec<u8> {
-        ::std::mem::replace(&mut self.amount, ::std::vec::Vec::new())
+    pub fn take_amount(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.amount, ::std::string::String::new())
     }
 
-    pub fn get_amount(&self) -> &[u8] {
+    pub fn get_amount(&self) -> &str {
         &self.amount
     }
 
-    // bytes tx_fee = 4;
+    // string tx_fee = 4;
 
     pub fn clear_tx_fee(&mut self) {
         self.tx_fee.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_tx_fee(&mut self, v: ::std::vec::Vec<u8>) {
+    pub fn set_tx_fee(&mut self, v: ::std::string::String) {
         self.tx_fee = v;
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_tx_fee(&mut self) -> &mut ::std::vec::Vec<u8> {
+    pub fn mut_tx_fee(&mut self) -> &mut ::std::string::String {
         &mut self.tx_fee
     }
 
     // Take field
-    pub fn take_tx_fee(&mut self) -> ::std::vec::Vec<u8> {
-        ::std::mem::replace(&mut self.tx_fee, ::std::vec::Vec::new())
+    pub fn take_tx_fee(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.tx_fee, ::std::string::String::new())
     }
 
-    pub fn get_tx_fee(&self) -> &[u8] {
+    pub fn get_tx_fee(&self) -> &str {
         &self.tx_fee
     }
 
@@ -675,10 +675,10 @@ impl ::protobuf::Message for RpcTransaction {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.to_addr)?;
                 },
                 3 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.amount)?;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.amount)?;
                 },
                 4 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.tx_fee)?;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.tx_fee)?;
                 },
                 5 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.private_key_hex)?;
@@ -702,10 +702,10 @@ impl ::protobuf::Message for RpcTransaction {
             my_size += ::protobuf::rt::string_size(2, &self.to_addr);
         }
         if !self.amount.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(3, &self.amount);
+            my_size += ::protobuf::rt::string_size(3, &self.amount);
         }
         if !self.tx_fee.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(4, &self.tx_fee);
+            my_size += ::protobuf::rt::string_size(4, &self.tx_fee);
         }
         if !self.private_key_hex.is_empty() {
             my_size += ::protobuf::rt::string_size(5, &self.private_key_hex);
@@ -723,10 +723,10 @@ impl ::protobuf::Message for RpcTransaction {
             os.write_string(2, &self.to_addr)?;
         }
         if !self.amount.is_empty() {
-            os.write_bytes(3, &self.amount)?;
+            os.write_string(3, &self.amount)?;
         }
         if !self.tx_fee.is_empty() {
-            os.write_bytes(4, &self.tx_fee)?;
+            os.write_string(4, &self.tx_fee)?;
         }
         if !self.private_key_hex.is_empty() {
             os.write_string(5, &self.private_key_hex)?;
@@ -783,12 +783,12 @@ impl ::protobuf::Message for RpcTransaction {
                     |m: &RpcTransaction| { &m.to_addr },
                     |m: &mut RpcTransaction| { &mut m.to_addr },
                 ));
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "amount",
                     |m: &RpcTransaction| { &m.amount },
                     |m: &mut RpcTransaction| { &mut m.amount },
                 ));
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "tx_fee",
                     |m: &RpcTransaction| { &m.tx_fee },
                     |m: &mut RpcTransaction| { &mut m.tx_fee },
@@ -1245,6 +1245,7 @@ pub struct GetBalanceResponse {
     // message fields
     pub confirmed: ::std::string::String,
     pub unconfirmed: ::std::string::String,
+    pub collateralized: ::std::string::String,
     pub unit: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
@@ -1308,7 +1309,33 @@ impl GetBalanceResponse {
         &self.unconfirmed
     }
 
-    // string unit = 3;
+    // string collateralized = 3;
+
+    pub fn clear_collateralized(&mut self) {
+        self.collateralized.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_collateralized(&mut self, v: ::std::string::String) {
+        self.collateralized = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_collateralized(&mut self) -> &mut ::std::string::String {
+        &mut self.collateralized
+    }
+
+    // Take field
+    pub fn take_collateralized(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.collateralized, ::std::string::String::new())
+    }
+
+    pub fn get_collateralized(&self) -> &str {
+        &self.collateralized
+    }
+
+    // string unit = 4;
 
     pub fn clear_unit(&mut self) {
         self.unit.clear();
@@ -1351,6 +1378,9 @@ impl ::protobuf::Message for GetBalanceResponse {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.unconfirmed)?;
                 },
                 3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized)?;
+                },
+                4 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.unit)?;
                 },
                 _ => {
@@ -1371,8 +1401,11 @@ impl ::protobuf::Message for GetBalanceResponse {
         if !self.unconfirmed.is_empty() {
             my_size += ::protobuf::rt::string_size(2, &self.unconfirmed);
         }
+        if !self.collateralized.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.collateralized);
+        }
         if !self.unit.is_empty() {
-            my_size += ::protobuf::rt::string_size(3, &self.unit);
+            my_size += ::protobuf::rt::string_size(4, &self.unit);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -1386,8 +1419,11 @@ impl ::protobuf::Message for GetBalanceResponse {
         if !self.unconfirmed.is_empty() {
             os.write_string(2, &self.unconfirmed)?;
         }
+        if !self.collateralized.is_empty() {
+            os.write_string(3, &self.collateralized)?;
+        }
         if !self.unit.is_empty() {
-            os.write_string(3, &self.unit)?;
+            os.write_string(4, &self.unit)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -1442,6 +1478,11 @@ impl ::protobuf::Message for GetBalanceResponse {
                     |m: &mut GetBalanceResponse| { &mut m.unconfirmed },
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "collateralized",
+                    |m: &GetBalanceResponse| { &m.collateralized },
+                    |m: &mut GetBalanceResponse| { &mut m.collateralized },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "unit",
                     |m: &GetBalanceResponse| { &m.unit },
                     |m: &mut GetBalanceResponse| { &mut m.unit },
@@ -1470,6 +1511,7 @@ impl ::protobuf::Clear for GetBalanceResponse {
     fn clear(&mut self) {
         self.clear_confirmed();
         self.clear_unconfirmed();
+        self.clear_collateralized();
         self.clear_unit();
         self.unknown_fields.clear();
     }
@@ -1498,13 +1540,15 @@ pub struct MakerOrderInfo {
     pub wants_address: ::std::string::String,
     pub wants_unit: ::std::string::String,
     pub pays_unit: ::std::string::String,
-    pub bc_address: ::std::string::String,
+    pub double_hashed_bc_address: ::std::string::String,
     pub collateralized_nrg: ::std::string::String,
     pub nrg_unit: ::std::string::String,
     pub tx_hash: ::std::string::String,
     pub tx_output_index: u64,
     pub block_hash: ::std::string::String,
     pub block_height: u64,
+    pub is_settled: bool,
+    pub block_height_has_original_maker_tx: u64,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -1690,30 +1734,30 @@ impl MakerOrderInfo {
         &self.pays_unit
     }
 
-    // string bc_address = 9;
+    // string double_hashed_bc_address = 9;
 
-    pub fn clear_bc_address(&mut self) {
-        self.bc_address.clear();
+    pub fn clear_double_hashed_bc_address(&mut self) {
+        self.double_hashed_bc_address.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_bc_address(&mut self, v: ::std::string::String) {
-        self.bc_address = v;
+    pub fn set_double_hashed_bc_address(&mut self, v: ::std::string::String) {
+        self.double_hashed_bc_address = v;
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_bc_address(&mut self) -> &mut ::std::string::String {
-        &mut self.bc_address
+    pub fn mut_double_hashed_bc_address(&mut self) -> &mut ::std::string::String {
+        &mut self.double_hashed_bc_address
     }
 
     // Take field
-    pub fn take_bc_address(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.bc_address, ::std::string::String::new())
+    pub fn take_double_hashed_bc_address(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.double_hashed_bc_address, ::std::string::String::new())
     }
 
-    pub fn get_bc_address(&self) -> &str {
-        &self.bc_address
+    pub fn get_double_hashed_bc_address(&self) -> &str {
+        &self.double_hashed_bc_address
     }
 
     // string collateralized_nrg = 10;
@@ -1849,6 +1893,36 @@ impl MakerOrderInfo {
     pub fn get_block_height(&self) -> u64 {
         self.block_height
     }
+
+    // bool is_settled = 16;
+
+    pub fn clear_is_settled(&mut self) {
+        self.is_settled = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_is_settled(&mut self, v: bool) {
+        self.is_settled = v;
+    }
+
+    pub fn get_is_settled(&self) -> bool {
+        self.is_settled
+    }
+
+    // uint64 block_height_has_original_maker_tx = 17;
+
+    pub fn clear_block_height_has_original_maker_tx(&mut self) {
+        self.block_height_has_original_maker_tx = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_block_height_has_original_maker_tx(&mut self, v: u64) {
+        self.block_height_has_original_maker_tx = v;
+    }
+
+    pub fn get_block_height_has_original_maker_tx(&self) -> u64 {
+        self.block_height_has_original_maker_tx
+    }
 }
 
 impl ::protobuf::Message for MakerOrderInfo {
@@ -1897,7 +1971,7 @@ impl ::protobuf::Message for MakerOrderInfo {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.pays_unit)?;
                 },
                 9 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.bc_address)?;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.double_hashed_bc_address)?;
                 },
                 10 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized_nrg)?;
@@ -1924,6 +1998,20 @@ impl ::protobuf::Message for MakerOrderInfo {
                     }
                     let tmp = is.read_uint64()?;
                     self.block_height = tmp;
+                },
+                16 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.is_settled = tmp;
+                },
+                17 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.block_height_has_original_maker_tx = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1961,8 +2049,8 @@ impl ::protobuf::Message for MakerOrderInfo {
         if !self.pays_unit.is_empty() {
             my_size += ::protobuf::rt::string_size(8, &self.pays_unit);
         }
-        if !self.bc_address.is_empty() {
-            my_size += ::protobuf::rt::string_size(9, &self.bc_address);
+        if !self.double_hashed_bc_address.is_empty() {
+            my_size += ::protobuf::rt::string_size(9, &self.double_hashed_bc_address);
         }
         if !self.collateralized_nrg.is_empty() {
             my_size += ::protobuf::rt::string_size(10, &self.collateralized_nrg);
@@ -1981,6 +2069,12 @@ impl ::protobuf::Message for MakerOrderInfo {
         }
         if self.block_height != 0 {
             my_size += ::protobuf::rt::value_size(15, self.block_height, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.is_settled != false {
+            my_size += 3;
+        }
+        if self.block_height_has_original_maker_tx != 0 {
+            my_size += ::protobuf::rt::value_size(17, self.block_height_has_original_maker_tx, ::protobuf::wire_format::WireTypeVarint);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -2012,8 +2106,8 @@ impl ::protobuf::Message for MakerOrderInfo {
         if !self.pays_unit.is_empty() {
             os.write_string(8, &self.pays_unit)?;
         }
-        if !self.bc_address.is_empty() {
-            os.write_string(9, &self.bc_address)?;
+        if !self.double_hashed_bc_address.is_empty() {
+            os.write_string(9, &self.double_hashed_bc_address)?;
         }
         if !self.collateralized_nrg.is_empty() {
             os.write_string(10, &self.collateralized_nrg)?;
@@ -2032,6 +2126,12 @@ impl ::protobuf::Message for MakerOrderInfo {
         }
         if self.block_height != 0 {
             os.write_uint64(15, self.block_height)?;
+        }
+        if self.is_settled != false {
+            os.write_bool(16, self.is_settled)?;
+        }
+        if self.block_height_has_original_maker_tx != 0 {
+            os.write_uint64(17, self.block_height_has_original_maker_tx)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -2116,9 +2216,9 @@ impl ::protobuf::Message for MakerOrderInfo {
                     |m: &mut MakerOrderInfo| { &mut m.pays_unit },
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                    "bc_address",
-                    |m: &MakerOrderInfo| { &m.bc_address },
-                    |m: &mut MakerOrderInfo| { &mut m.bc_address },
+                    "double_hashed_bc_address",
+                    |m: &MakerOrderInfo| { &m.double_hashed_bc_address },
+                    |m: &mut MakerOrderInfo| { &mut m.double_hashed_bc_address },
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "collateralized_nrg",
@@ -2150,6 +2250,16 @@ impl ::protobuf::Message for MakerOrderInfo {
                     |m: &MakerOrderInfo| { &m.block_height },
                     |m: &mut MakerOrderInfo| { &mut m.block_height },
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "is_settled",
+                    |m: &MakerOrderInfo| { &m.is_settled },
+                    |m: &mut MakerOrderInfo| { &mut m.is_settled },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "block_height_has_original_maker_tx",
+                    |m: &MakerOrderInfo| { &m.block_height_has_original_maker_tx },
+                    |m: &mut MakerOrderInfo| { &mut m.block_height_has_original_maker_tx },
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<MakerOrderInfo>(
                     "MakerOrderInfo",
                     fields,
@@ -2180,13 +2290,15 @@ impl ::protobuf::Clear for MakerOrderInfo {
         self.clear_wants_address();
         self.clear_wants_unit();
         self.clear_pays_unit();
-        self.clear_bc_address();
+        self.clear_double_hashed_bc_address();
         self.clear_collateralized_nrg();
         self.clear_nrg_unit();
         self.clear_tx_hash();
         self.clear_tx_output_index();
         self.clear_block_hash();
         self.clear_block_height();
+        self.clear_is_settled();
+        self.clear_block_height_has_original_maker_tx();
         self.unknown_fields.clear();
     }
 }
@@ -2210,10 +2322,12 @@ pub struct TakerOrderInfo {
     pub wants_address: ::std::string::String,
     pub maker_tx_hash: ::std::string::String,
     pub maker_tx_output_index: u32,
-    pub bc_address: ::std::string::String,
+    pub double_hashed_bc_address: ::std::string::String,
     pub collateralized_nrg: ::std::string::String,
     pub block_hash: ::std::string::String,
     pub block_height: u64,
+    pub is_settled: bool,
+    pub tx_hash: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -2317,30 +2431,30 @@ impl TakerOrderInfo {
         self.maker_tx_output_index
     }
 
-    // string bc_address = 5;
+    // string double_hashed_bc_address = 5;
 
-    pub fn clear_bc_address(&mut self) {
-        self.bc_address.clear();
+    pub fn clear_double_hashed_bc_address(&mut self) {
+        self.double_hashed_bc_address.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_bc_address(&mut self, v: ::std::string::String) {
-        self.bc_address = v;
+    pub fn set_double_hashed_bc_address(&mut self, v: ::std::string::String) {
+        self.double_hashed_bc_address = v;
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_bc_address(&mut self) -> &mut ::std::string::String {
-        &mut self.bc_address
+    pub fn mut_double_hashed_bc_address(&mut self) -> &mut ::std::string::String {
+        &mut self.double_hashed_bc_address
     }
 
     // Take field
-    pub fn take_bc_address(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.bc_address, ::std::string::String::new())
+    pub fn take_double_hashed_bc_address(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.double_hashed_bc_address, ::std::string::String::new())
     }
 
-    pub fn get_bc_address(&self) -> &str {
-        &self.bc_address
+    pub fn get_double_hashed_bc_address(&self) -> &str {
+        &self.double_hashed_bc_address
     }
 
     // string collateralized_nrg = 6;
@@ -2409,6 +2523,47 @@ impl TakerOrderInfo {
     pub fn get_block_height(&self) -> u64 {
         self.block_height
     }
+
+    // bool is_settled = 9;
+
+    pub fn clear_is_settled(&mut self) {
+        self.is_settled = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_is_settled(&mut self, v: bool) {
+        self.is_settled = v;
+    }
+
+    pub fn get_is_settled(&self) -> bool {
+        self.is_settled
+    }
+
+    // string tx_hash = 10;
+
+    pub fn clear_tx_hash(&mut self) {
+        self.tx_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_tx_hash(&mut self, v: ::std::string::String) {
+        self.tx_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_tx_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.tx_hash
+    }
+
+    // Take field
+    pub fn take_tx_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.tx_hash, ::std::string::String::new())
+    }
+
+    pub fn get_tx_hash(&self) -> &str {
+        &self.tx_hash
+    }
 }
 
 impl ::protobuf::Message for TakerOrderInfo {
@@ -2437,7 +2592,7 @@ impl ::protobuf::Message for TakerOrderInfo {
                     self.maker_tx_output_index = tmp;
                 },
                 5 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.bc_address)?;
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.double_hashed_bc_address)?;
                 },
                 6 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized_nrg)?;
@@ -2451,6 +2606,16 @@ impl ::protobuf::Message for TakerOrderInfo {
                     }
                     let tmp = is.read_uint64()?;
                     self.block_height = tmp;
+                },
+                9 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.is_settled = tmp;
+                },
+                10 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.tx_hash)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -2476,8 +2641,8 @@ impl ::protobuf::Message for TakerOrderInfo {
         if self.maker_tx_output_index != 0 {
             my_size += ::protobuf::rt::value_size(4, self.maker_tx_output_index, ::protobuf::wire_format::WireTypeVarint);
         }
-        if !self.bc_address.is_empty() {
-            my_size += ::protobuf::rt::string_size(5, &self.bc_address);
+        if !self.double_hashed_bc_address.is_empty() {
+            my_size += ::protobuf::rt::string_size(5, &self.double_hashed_bc_address);
         }
         if !self.collateralized_nrg.is_empty() {
             my_size += ::protobuf::rt::string_size(6, &self.collateralized_nrg);
@@ -2487,6 +2652,12 @@ impl ::protobuf::Message for TakerOrderInfo {
         }
         if self.block_height != 0 {
             my_size += ::protobuf::rt::value_size(8, self.block_height, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.is_settled != false {
+            my_size += 2;
+        }
+        if !self.tx_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(10, &self.tx_hash);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -2506,8 +2677,8 @@ impl ::protobuf::Message for TakerOrderInfo {
         if self.maker_tx_output_index != 0 {
             os.write_uint32(4, self.maker_tx_output_index)?;
         }
-        if !self.bc_address.is_empty() {
-            os.write_string(5, &self.bc_address)?;
+        if !self.double_hashed_bc_address.is_empty() {
+            os.write_string(5, &self.double_hashed_bc_address)?;
         }
         if !self.collateralized_nrg.is_empty() {
             os.write_string(6, &self.collateralized_nrg)?;
@@ -2517,6 +2688,12 @@ impl ::protobuf::Message for TakerOrderInfo {
         }
         if self.block_height != 0 {
             os.write_uint64(8, self.block_height)?;
+        }
+        if self.is_settled != false {
+            os.write_bool(9, self.is_settled)?;
+        }
+        if !self.tx_hash.is_empty() {
+            os.write_string(10, &self.tx_hash)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -2581,9 +2758,9 @@ impl ::protobuf::Message for TakerOrderInfo {
                     |m: &mut TakerOrderInfo| { &mut m.maker_tx_output_index },
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                    "bc_address",
-                    |m: &TakerOrderInfo| { &m.bc_address },
-                    |m: &mut TakerOrderInfo| { &mut m.bc_address },
+                    "double_hashed_bc_address",
+                    |m: &TakerOrderInfo| { &m.double_hashed_bc_address },
+                    |m: &mut TakerOrderInfo| { &mut m.double_hashed_bc_address },
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "collateralized_nrg",
@@ -2599,6 +2776,16 @@ impl ::protobuf::Message for TakerOrderInfo {
                     "block_height",
                     |m: &TakerOrderInfo| { &m.block_height },
                     |m: &mut TakerOrderInfo| { &mut m.block_height },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "is_settled",
+                    |m: &TakerOrderInfo| { &m.is_settled },
+                    |m: &mut TakerOrderInfo| { &mut m.is_settled },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "tx_hash",
+                    |m: &TakerOrderInfo| { &m.tx_hash },
+                    |m: &mut TakerOrderInfo| { &mut m.tx_hash },
                 ));
                 ::protobuf::reflect::MessageDescriptor::new::<TakerOrderInfo>(
                     "TakerOrderInfo",
@@ -2626,10 +2813,12 @@ impl ::protobuf::Clear for TakerOrderInfo {
         self.clear_wants_address();
         self.clear_maker_tx_hash();
         self.clear_maker_tx_output_index();
-        self.clear_bc_address();
+        self.clear_double_hashed_bc_address();
         self.clear_collateralized_nrg();
         self.clear_block_hash();
         self.clear_block_height();
+        self.clear_is_settled();
+        self.clear_tx_hash();
         self.unknown_fields.clear();
     }
 }
@@ -3236,6 +3425,7 @@ pub struct PlaceMakerOrderRequest {
     pub bc_private_key_hex: ::std::string::String,
     pub collateralized_nrg: ::std::string::String,
     pub nrg_unit: ::std::string::String,
+    pub tx_fee: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -3524,6 +3714,32 @@ impl PlaceMakerOrderRequest {
     pub fn get_nrg_unit(&self) -> &str {
         &self.nrg_unit
     }
+
+    // string tx_fee = 13;
+
+    pub fn clear_tx_fee(&mut self) {
+        self.tx_fee.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_tx_fee(&mut self, v: ::std::string::String) {
+        self.tx_fee = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_tx_fee(&mut self) -> &mut ::std::string::String {
+        &mut self.tx_fee
+    }
+
+    // Take field
+    pub fn take_tx_fee(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.tx_fee, ::std::string::String::new())
+    }
+
+    pub fn get_tx_fee(&self) -> &str {
+        &self.tx_fee
+    }
 }
 
 impl ::protobuf::Message for PlaceMakerOrderRequest {
@@ -3583,6 +3799,9 @@ impl ::protobuf::Message for PlaceMakerOrderRequest {
                 12 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nrg_unit)?;
                 },
+                13 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.tx_fee)?;
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -3631,6 +3850,9 @@ impl ::protobuf::Message for PlaceMakerOrderRequest {
         if !self.nrg_unit.is_empty() {
             my_size += ::protobuf::rt::string_size(12, &self.nrg_unit);
         }
+        if !self.tx_fee.is_empty() {
+            my_size += ::protobuf::rt::string_size(13, &self.tx_fee);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -3672,6 +3894,9 @@ impl ::protobuf::Message for PlaceMakerOrderRequest {
         }
         if !self.nrg_unit.is_empty() {
             os.write_string(12, &self.nrg_unit)?;
+        }
+        if !self.tx_fee.is_empty() {
+            os.write_string(13, &self.tx_fee)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -3775,6 +4000,11 @@ impl ::protobuf::Message for PlaceMakerOrderRequest {
                     |m: &PlaceMakerOrderRequest| { &m.nrg_unit },
                     |m: &mut PlaceMakerOrderRequest| { &mut m.nrg_unit },
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "tx_fee",
+                    |m: &PlaceMakerOrderRequest| { &m.tx_fee },
+                    |m: &mut PlaceMakerOrderRequest| { &mut m.tx_fee },
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<PlaceMakerOrderRequest>(
                     "PlaceMakerOrderRequest",
                     fields,
@@ -3809,6 +4039,7 @@ impl ::protobuf::Clear for PlaceMakerOrderRequest {
         self.clear_bc_private_key_hex();
         self.clear_collateralized_nrg();
         self.clear_nrg_unit();
+        self.clear_tx_fee();
         self.unknown_fields.clear();
     }
 }
@@ -3835,6 +4066,7 @@ pub struct PlaceTakerOrderRequest {
     pub bc_address: ::std::string::String,
     pub bc_private_key_hex: ::std::string::String,
     pub collateralized_nrg: ::std::string::String,
+    pub tx_fee: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -4015,6 +4247,32 @@ impl PlaceTakerOrderRequest {
     pub fn get_collateralized_nrg(&self) -> &str {
         &self.collateralized_nrg
     }
+
+    // string tx_fee = 8;
+
+    pub fn clear_tx_fee(&mut self) {
+        self.tx_fee.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_tx_fee(&mut self, v: ::std::string::String) {
+        self.tx_fee = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_tx_fee(&mut self) -> &mut ::std::string::String {
+        &mut self.tx_fee
+    }
+
+    // Take field
+    pub fn take_tx_fee(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.tx_fee, ::std::string::String::new())
+    }
+
+    pub fn get_tx_fee(&self) -> &str {
+        &self.tx_fee
+    }
 }
 
 impl ::protobuf::Message for PlaceTakerOrderRequest {
@@ -4051,6 +4309,9 @@ impl ::protobuf::Message for PlaceTakerOrderRequest {
                 7 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized_nrg)?;
                 },
+                8 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.tx_fee)?;
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -4084,6 +4345,9 @@ impl ::protobuf::Message for PlaceTakerOrderRequest {
         if !self.collateralized_nrg.is_empty() {
             my_size += ::protobuf::rt::string_size(7, &self.collateralized_nrg);
         }
+        if !self.tx_fee.is_empty() {
+            my_size += ::protobuf::rt::string_size(8, &self.tx_fee);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -4110,6 +4374,9 @@ impl ::protobuf::Message for PlaceTakerOrderRequest {
         }
         if !self.collateralized_nrg.is_empty() {
             os.write_string(7, &self.collateralized_nrg)?;
+        }
+        if !self.tx_fee.is_empty() {
+            os.write_string(8, &self.tx_fee)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -4188,6 +4455,11 @@ impl ::protobuf::Message for PlaceTakerOrderRequest {
                     |m: &PlaceTakerOrderRequest| { &m.collateralized_nrg },
                     |m: &mut PlaceTakerOrderRequest| { &mut m.collateralized_nrg },
                 ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "tx_fee",
+                    |m: &PlaceTakerOrderRequest| { &m.tx_fee },
+                    |m: &mut PlaceTakerOrderRequest| { &mut m.tx_fee },
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<PlaceTakerOrderRequest>(
                     "PlaceTakerOrderRequest",
                     fields,
@@ -4217,6 +4489,7 @@ impl ::protobuf::Clear for PlaceTakerOrderRequest {
         self.clear_bc_address();
         self.clear_bc_private_key_hex();
         self.clear_collateralized_nrg();
+        self.clear_tx_fee();
         self.unknown_fields.clear();
     }
 }
@@ -4228,6 +4501,735 @@ impl ::std::fmt::Debug for PlaceTakerOrderRequest {
 }
 
 impl ::protobuf::reflect::ProtobufValue for PlaceTakerOrderRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct GetBlake2blRequest {
+    // message fields
+    pub to_be_hashed: ::std::string::String,
+    pub times: u32,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl GetBlake2blRequest {
+    pub fn new() -> GetBlake2blRequest {
+        ::std::default::Default::default()
+    }
+
+    // string to_be_hashed = 1;
+
+    pub fn clear_to_be_hashed(&mut self) {
+        self.to_be_hashed.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_to_be_hashed(&mut self, v: ::std::string::String) {
+        self.to_be_hashed = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_to_be_hashed(&mut self) -> &mut ::std::string::String {
+        &mut self.to_be_hashed
+    }
+
+    // Take field
+    pub fn take_to_be_hashed(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.to_be_hashed, ::std::string::String::new())
+    }
+
+    pub fn get_to_be_hashed(&self) -> &str {
+        &self.to_be_hashed
+    }
+
+    // uint32 times = 2;
+
+    pub fn clear_times(&mut self) {
+        self.times = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_times(&mut self, v: u32) {
+        self.times = v;
+    }
+
+    pub fn get_times(&self) -> u32 {
+        self.times
+    }
+}
+
+impl ::protobuf::Message for GetBlake2blRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.to_be_hashed)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.times = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.to_be_hashed.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.to_be_hashed);
+        }
+        if self.times != 0 {
+            my_size += ::protobuf::rt::value_size(2, self.times, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.to_be_hashed.is_empty() {
+            os.write_string(1, &self.to_be_hashed)?;
+        }
+        if self.times != 0 {
+            os.write_uint32(2, self.times)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> GetBlake2blRequest {
+        GetBlake2blRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "to_be_hashed",
+                    |m: &GetBlake2blRequest| { &m.to_be_hashed },
+                    |m: &mut GetBlake2blRequest| { &mut m.to_be_hashed },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "times",
+                    |m: &GetBlake2blRequest| { &m.times },
+                    |m: &mut GetBlake2blRequest| { &mut m.times },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<GetBlake2blRequest>(
+                    "GetBlake2blRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static GetBlake2blRequest {
+        static mut instance: ::protobuf::lazy::Lazy<GetBlake2blRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const GetBlake2blRequest,
+        };
+        unsafe {
+            instance.get(GetBlake2blRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for GetBlake2blRequest {
+    fn clear(&mut self) {
+        self.clear_to_be_hashed();
+        self.clear_times();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for GetBlake2blRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for GetBlake2blRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct GetBlake2blResponse {
+    // message fields
+    pub hash: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl GetBlake2blResponse {
+    pub fn new() -> GetBlake2blResponse {
+        ::std::default::Default::default()
+    }
+
+    // string hash = 1;
+
+    pub fn clear_hash(&mut self) {
+        self.hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_hash(&mut self, v: ::std::string::String) {
+        self.hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.hash
+    }
+
+    // Take field
+    pub fn take_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.hash, ::std::string::String::new())
+    }
+
+    pub fn get_hash(&self) -> &str {
+        &self.hash
+    }
+}
+
+impl ::protobuf::Message for GetBlake2blResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hash)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.hash);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.hash.is_empty() {
+            os.write_string(1, &self.hash)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> GetBlake2blResponse {
+        GetBlake2blResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "hash",
+                    |m: &GetBlake2blResponse| { &m.hash },
+                    |m: &mut GetBlake2blResponse| { &mut m.hash },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<GetBlake2blResponse>(
+                    "GetBlake2blResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static GetBlake2blResponse {
+        static mut instance: ::protobuf::lazy::Lazy<GetBlake2blResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const GetBlake2blResponse,
+        };
+        unsafe {
+            instance.get(GetBlake2blResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for GetBlake2blResponse {
+    fn clear(&mut self) {
+        self.clear_hash();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for GetBlake2blResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for GetBlake2blResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct VanityConvertRequest {
+    // message fields
+    pub vanity: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl VanityConvertRequest {
+    pub fn new() -> VanityConvertRequest {
+        ::std::default::Default::default()
+    }
+
+    // string vanity = 1;
+
+    pub fn clear_vanity(&mut self) {
+        self.vanity.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_vanity(&mut self, v: ::std::string::String) {
+        self.vanity = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_vanity(&mut self) -> &mut ::std::string::String {
+        &mut self.vanity
+    }
+
+    // Take field
+    pub fn take_vanity(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.vanity, ::std::string::String::new())
+    }
+
+    pub fn get_vanity(&self) -> &str {
+        &self.vanity
+    }
+}
+
+impl ::protobuf::Message for VanityConvertRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.vanity)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.vanity.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.vanity);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.vanity.is_empty() {
+            os.write_string(1, &self.vanity)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> VanityConvertRequest {
+        VanityConvertRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "vanity",
+                    |m: &VanityConvertRequest| { &m.vanity },
+                    |m: &mut VanityConvertRequest| { &mut m.vanity },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<VanityConvertRequest>(
+                    "VanityConvertRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static VanityConvertRequest {
+        static mut instance: ::protobuf::lazy::Lazy<VanityConvertRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const VanityConvertRequest,
+        };
+        unsafe {
+            instance.get(VanityConvertRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for VanityConvertRequest {
+    fn clear(&mut self) {
+        self.clear_vanity();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for VanityConvertRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for VanityConvertRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct VanityConvertResponse {
+    // message fields
+    pub bc_address: ::std::string::String,
+    pub error: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl VanityConvertResponse {
+    pub fn new() -> VanityConvertResponse {
+        ::std::default::Default::default()
+    }
+
+    // string bc_address = 1;
+
+    pub fn clear_bc_address(&mut self) {
+        self.bc_address.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_bc_address(&mut self, v: ::std::string::String) {
+        self.bc_address = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_bc_address(&mut self) -> &mut ::std::string::String {
+        &mut self.bc_address
+    }
+
+    // Take field
+    pub fn take_bc_address(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.bc_address, ::std::string::String::new())
+    }
+
+    pub fn get_bc_address(&self) -> &str {
+        &self.bc_address
+    }
+
+    // string error = 2;
+
+    pub fn clear_error(&mut self) {
+        self.error.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_error(&mut self, v: ::std::string::String) {
+        self.error = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_error(&mut self) -> &mut ::std::string::String {
+        &mut self.error
+    }
+
+    // Take field
+    pub fn take_error(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.error, ::std::string::String::new())
+    }
+
+    pub fn get_error(&self) -> &str {
+        &self.error
+    }
+}
+
+impl ::protobuf::Message for VanityConvertResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.bc_address)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.error)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.bc_address.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.bc_address);
+        }
+        if !self.error.is_empty() {
+            my_size += ::protobuf::rt::string_size(2, &self.error);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.bc_address.is_empty() {
+            os.write_string(1, &self.bc_address)?;
+        }
+        if !self.error.is_empty() {
+            os.write_string(2, &self.error)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> VanityConvertResponse {
+        VanityConvertResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "bc_address",
+                    |m: &VanityConvertResponse| { &m.bc_address },
+                    |m: &mut VanityConvertResponse| { &mut m.bc_address },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "error",
+                    |m: &VanityConvertResponse| { &m.error },
+                    |m: &mut VanityConvertResponse| { &mut m.error },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<VanityConvertResponse>(
+                    "VanityConvertResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static VanityConvertResponse {
+        static mut instance: ::protobuf::lazy::Lazy<VanityConvertResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const VanityConvertResponse,
+        };
+        unsafe {
+            instance.get(VanityConvertResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for VanityConvertResponse {
+    fn clear(&mut self) {
+        self.clear_bc_address();
+        self.clear_error();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for VanityConvertResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for VanityConvertResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -4295,70 +5297,85 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     atsResponse\x12\x14\n\x05calls\x18\x01\x20\x01(\x03R\x05calls\"\x9d\x01\
     \n\x0eRpcTransaction\x12\x1b\n\tfrom_addr\x18\x01\x20\x01(\tR\x08fromAdd\
     r\x12\x17\n\x07to_addr\x18\x02\x20\x01(\tR\x06toAddr\x12\x16\n\x06amount\
-    \x18\x03\x20\x01(\x0cR\x06amount\x12\x15\n\x06tx_fee\x18\x04\x20\x01(\
-    \x0cR\x05txFee\x12&\n\x0fprivate_key_hex\x18\x05\x20\x01(\tR\rprivateKey\
-    Hex\"\x81\x01\n\x16RpcTransactionResponse\x128\n\x06status\x18\x01\x20\
-    \x01(\x0e2\x20.bc.RpcTransactionResponseStatusR\x06status\x12\x17\n\x07t\
-    x_hash\x18\x02\x20\x01(\tR\x06txHash\x12\x14\n\x05error\x18\x03\x20\x01(\
-    \tR\x05error\"-\n\x11GetBalanceRequest\x12\x18\n\x07address\x18\x01\x20\
-    \x01(\tR\x07address\"h\n\x12GetBalanceResponse\x12\x1c\n\tconfirmed\x18\
-    \x01\x20\x01(\tR\tconfirmed\x12\x20\n\x0bunconfirmed\x18\x02\x20\x01(\tR\
-    \x0bunconfirmed\x12\x12\n\x04unit\x18\x03\x20\x01(\tR\x04unit\"\x9d\x04\
-    \n\x0eMakerOrderInfo\x12&\n\x0fshift_starts_at\x18\x01\x20\x01(\x04R\rsh\
-    iftStartsAt\x12&\n\x0fdeposit_ends_at\x18\x02\x20\x01(\x04R\rdepositEnds\
-    At\x12$\n\x0esettle_ends_at\x18\x03\x20\x01(\x04R\x0csettleEndsAt\x12\"\
-    \n\rpays_chain_id\x18\x04\x20\x01(\tR\x0bpaysChainId\x12$\n\x0ewants_cha\
-    in_id\x18\x05\x20\x01(\tR\x0cwantsChainId\x12#\n\rwants_address\x18\x06\
-    \x20\x01(\tR\x0cwantsAddress\x12\x1d\n\nwants_unit\x18\x07\x20\x01(\tR\t\
-    wantsUnit\x12\x1b\n\tpays_unit\x18\x08\x20\x01(\tR\x08paysUnit\x12\x1d\n\
-    \nbc_address\x18\t\x20\x01(\tR\tbcAddress\x12-\n\x12collateralized_nrg\
-    \x18\n\x20\x01(\tR\x11collateralizedNrg\x12\x19\n\x08nrg_unit\x18\x0b\
-    \x20\x01(\tR\x07nrgUnit\x12\x17\n\x07tx_hash\x18\x0c\x20\x01(\tR\x06txHa\
-    sh\x12&\n\x0ftx_output_index\x18\r\x20\x01(\x04R\rtxOutputIndex\x12\x1d\
-    \n\nblock_hash\x18\x0e\x20\x01(\tR\tblockHash\x12!\n\x0cblock_height\x18\
-    \x0f\x20\x01(\x04R\x0bblockHeight\"\xc1\x02\n\x0eTakerOrderInfo\x12#\n\r\
-    sends_address\x18\x01\x20\x01(\tR\x0csendsAddress\x12#\n\rwants_address\
-    \x18\x02\x20\x01(\tR\x0cwantsAddress\x12\"\n\rmaker_tx_hash\x18\x03\x20\
-    \x01(\tR\x0bmakerTxHash\x121\n\x15maker_tx_output_index\x18\x04\x20\x01(\
-    \rR\x12makerTxOutputIndex\x12\x1d\n\nbc_address\x18\x05\x20\x01(\tR\tbcA\
-    ddress\x12-\n\x12collateralized_nrg\x18\x06\x20\x01(\tR\x11collateralize\
-    dNrg\x12\x1d\n\nblock_hash\x18\x07\x20\x01(\tR\tblockHash\x12!\n\x0cbloc\
-    k_height\x18\x08\x20\x01(\x04R\x0bblockHeight\"f\n\x10MatchedOpenOrder\
-    \x12(\n\x05maker\x18\x01\x20\x01(\x0b2\x12.bc.MakerOrderInfoR\x05maker\
-    \x12(\n\x05taker\x18\x02\x20\x01(\x0b2\x12.bc.TakerOrderInfoR\x05taker\"\
-    L\n\x15GetOpenOrdersResponse\x123\n\x0bopen_orders\x18\x01\x20\x03(\x0b2\
-    \x12.bc.MakerOrderInfoR\nopenOrders\"L\n\x1cGetMatchedOpenOrdersResponse\
-    \x12,\n\x06orders\x18\x01\x20\x03(\x0b2\x14.bc.MatchedOpenOrderR\x06orde\
-    rs\"\xe3\x03\n\x16PlaceMakerOrderRequest\x12&\n\x0fshift_starts_at\x18\
-    \x01\x20\x01(\x04R\rshiftStartsAt\x12&\n\x0fdeposit_ends_at\x18\x02\x20\
-    \x01(\x04R\rdepositEndsAt\x12$\n\x0esettle_ends_at\x18\x03\x20\x01(\x04R\
-    \x0csettleEndsAt\x12+\n\x12pays_with_chain_id\x18\x04\x20\x01(\tR\x0fpay\
-    sWithChainId\x12$\n\x0ewants_chain_id\x18\x05\x20\x01(\tR\x0cwantsChainI\
-    d\x12.\n\x13wants_chain_address\x18\x06\x20\x01(\tR\x11wantsChainAddress\
-    \x12\x1d\n\nwants_unit\x18\x07\x20\x01(\tR\twantsUnit\x12\x1b\n\tpays_un\
-    it\x18\x08\x20\x01(\tR\x08paysUnit\x12\x1d\n\nbc_address\x18\t\x20\x01(\
-    \tR\tbcAddress\x12+\n\x12bc_private_key_hex\x18\n\x20\x01(\tR\x0fbcPriva\
-    teKeyHex\x12-\n\x12collateralized_nrg\x18\x0b\x20\x01(\tR\x11collaterali\
-    zedNrg\x12\x19\n\x08nrg_unit\x18\x0c\x20\x01(\tR\x07nrgUnit\"\xca\x02\n\
-    \x16PlaceTakerOrderRequest\x12.\n\x13wants_chain_address\x18\x01\x20\x01\
-    (\tR\x11wantsChainAddress\x12.\n\x13sends_chain_address\x18\x02\x20\x01(\
-    \tR\x11sendsChainAddress\x12\"\n\rmaker_tx_hash\x18\x03\x20\x01(\tR\x0bm\
-    akerTxHash\x121\n\x15maker_tx_output_index\x18\x04\x20\x01(\rR\x12makerT\
-    xOutputIndex\x12\x1d\n\nbc_address\x18\x05\x20\x01(\tR\tbcAddress\x12+\n\
-    \x12bc_private_key_hex\x18\x06\x20\x01(\tR\x0fbcPrivateKeyHex\x12-\n\x12\
-    collateralized_nrg\x18\x07\x20\x01(\tR\x11collateralizedNrg*8\n\x1cRpcTr\
-    ansactionResponseStatus\x12\x0b\n\x07Success\x10\0\x12\x0b\n\x07Failure\
-    \x10\x012\xa0\x04\n\x02Bc\x12:\n\x0fGetLatestBlocks\x12\x08.bc.Null\x1a\
-    \x1b.bc.GetLatestBlocksResponse\"\0\x12$\n\x04Help\x12\x08.bc.Null\x1a\
-    \x10.bc.HelpResponse\"\0\x12&\n\x05Stats\x12\x08.bc.Null\x1a\x11.bc.Stat\
-    sResponse\"\0\x129\n\x05NewTx\x12\x12.bc.RpcTransaction\x1a\x1a.bc.RpcTr\
-    ansactionResponse\"\0\x12=\n\nGetBalance\x12\x15.bc.GetBalanceRequest\
-    \x1a\x16.bc.GetBalanceResponse\"\0\x12K\n\x0fPlaceMakerOrder\x12\x1a.bc.\
-    PlaceMakerOrderRequest\x1a\x1a.bc.RpcTransactionResponse\"\0\x12K\n\x0fP\
-    laceTakerOrder\x12\x1a.bc.PlaceTakerOrderRequest\x1a\x1a.bc.RpcTransacti\
-    onResponse\"\0\x126\n\rGetOpenOrders\x12\x08.bc.Null\x1a\x19.bc.GetOpenO\
-    rdersResponse\"\0\x12D\n\x14GetMatchedOpenOrders\x12\x08.bc.Null\x1a\x20\
-    .bc.GetMatchedOpenOrdersResponse\"\0b\x06proto3\
+    \x18\x03\x20\x01(\tR\x06amount\x12\x15\n\x06tx_fee\x18\x04\x20\x01(\tR\
+    \x05txFee\x12&\n\x0fprivate_key_hex\x18\x05\x20\x01(\tR\rprivateKeyHex\"\
+    \x81\x01\n\x16RpcTransactionResponse\x128\n\x06status\x18\x01\x20\x01(\
+    \x0e2\x20.bc.RpcTransactionResponseStatusR\x06status\x12\x17\n\x07tx_has\
+    h\x18\x02\x20\x01(\tR\x06txHash\x12\x14\n\x05error\x18\x03\x20\x01(\tR\
+    \x05error\"-\n\x11GetBalanceRequest\x12\x18\n\x07address\x18\x01\x20\x01\
+    (\tR\x07address\"\x90\x01\n\x12GetBalanceResponse\x12\x1c\n\tconfirmed\
+    \x18\x01\x20\x01(\tR\tconfirmed\x12\x20\n\x0bunconfirmed\x18\x02\x20\x01\
+    (\tR\x0bunconfirmed\x12&\n\x0ecollateralized\x18\x03\x20\x01(\tR\x0ecoll\
+    ateralized\x12\x12\n\x04unit\x18\x04\x20\x01(\tR\x04unit\"\xa1\x05\n\x0e\
+    MakerOrderInfo\x12&\n\x0fshift_starts_at\x18\x01\x20\x01(\x04R\rshiftSta\
+    rtsAt\x12&\n\x0fdeposit_ends_at\x18\x02\x20\x01(\x04R\rdepositEndsAt\x12\
+    $\n\x0esettle_ends_at\x18\x03\x20\x01(\x04R\x0csettleEndsAt\x12\"\n\rpay\
+    s_chain_id\x18\x04\x20\x01(\tR\x0bpaysChainId\x12$\n\x0ewants_chain_id\
+    \x18\x05\x20\x01(\tR\x0cwantsChainId\x12#\n\rwants_address\x18\x06\x20\
+    \x01(\tR\x0cwantsAddress\x12\x1d\n\nwants_unit\x18\x07\x20\x01(\tR\twant\
+    sUnit\x12\x1b\n\tpays_unit\x18\x08\x20\x01(\tR\x08paysUnit\x127\n\x18dou\
+    ble_hashed_bc_address\x18\t\x20\x01(\tR\x15doubleHashedBcAddress\x12-\n\
+    \x12collateralized_nrg\x18\n\x20\x01(\tR\x11collateralizedNrg\x12\x19\n\
+    \x08nrg_unit\x18\x0b\x20\x01(\tR\x07nrgUnit\x12\x17\n\x07tx_hash\x18\x0c\
+    \x20\x01(\tR\x06txHash\x12&\n\x0ftx_output_index\x18\r\x20\x01(\x04R\rtx\
+    OutputIndex\x12\x1d\n\nblock_hash\x18\x0e\x20\x01(\tR\tblockHash\x12!\n\
+    \x0cblock_height\x18\x0f\x20\x01(\x04R\x0bblockHeight\x12\x1d\n\nis_sett\
+    led\x18\x10\x20\x01(\x08R\tisSettled\x12I\n\"block_height_has_original_m\
+    aker_tx\x18\x11\x20\x01(\x04R\x1dblockHeightHasOriginalMakerTx\"\x93\x03\
+    \n\x0eTakerOrderInfo\x12#\n\rsends_address\x18\x01\x20\x01(\tR\x0csendsA\
+    ddress\x12#\n\rwants_address\x18\x02\x20\x01(\tR\x0cwantsAddress\x12\"\n\
+    \rmaker_tx_hash\x18\x03\x20\x01(\tR\x0bmakerTxHash\x121\n\x15maker_tx_ou\
+    tput_index\x18\x04\x20\x01(\rR\x12makerTxOutputIndex\x127\n\x18double_ha\
+    shed_bc_address\x18\x05\x20\x01(\tR\x15doubleHashedBcAddress\x12-\n\x12c\
+    ollateralized_nrg\x18\x06\x20\x01(\tR\x11collateralizedNrg\x12\x1d\n\nbl\
+    ock_hash\x18\x07\x20\x01(\tR\tblockHash\x12!\n\x0cblock_height\x18\x08\
+    \x20\x01(\x04R\x0bblockHeight\x12\x1d\n\nis_settled\x18\t\x20\x01(\x08R\
+    \tisSettled\x12\x17\n\x07tx_hash\x18\n\x20\x01(\tR\x06txHash\"f\n\x10Mat\
+    chedOpenOrder\x12(\n\x05maker\x18\x01\x20\x01(\x0b2\x12.bc.MakerOrderInf\
+    oR\x05maker\x12(\n\x05taker\x18\x02\x20\x01(\x0b2\x12.bc.TakerOrderInfoR\
+    \x05taker\"L\n\x15GetOpenOrdersResponse\x123\n\x0bopen_orders\x18\x01\
+    \x20\x03(\x0b2\x12.bc.MakerOrderInfoR\nopenOrders\"L\n\x1cGetMatchedOpen\
+    OrdersResponse\x12,\n\x06orders\x18\x01\x20\x03(\x0b2\x14.bc.MatchedOpen\
+    OrderR\x06orders\"\xfa\x03\n\x16PlaceMakerOrderRequest\x12&\n\x0fshift_s\
+    tarts_at\x18\x01\x20\x01(\x04R\rshiftStartsAt\x12&\n\x0fdeposit_ends_at\
+    \x18\x02\x20\x01(\x04R\rdepositEndsAt\x12$\n\x0esettle_ends_at\x18\x03\
+    \x20\x01(\x04R\x0csettleEndsAt\x12+\n\x12pays_with_chain_id\x18\x04\x20\
+    \x01(\tR\x0fpaysWithChainId\x12$\n\x0ewants_chain_id\x18\x05\x20\x01(\tR\
+    \x0cwantsChainId\x12.\n\x13wants_chain_address\x18\x06\x20\x01(\tR\x11wa\
+    ntsChainAddress\x12\x1d\n\nwants_unit\x18\x07\x20\x01(\tR\twantsUnit\x12\
+    \x1b\n\tpays_unit\x18\x08\x20\x01(\tR\x08paysUnit\x12\x1d\n\nbc_address\
+    \x18\t\x20\x01(\tR\tbcAddress\x12+\n\x12bc_private_key_hex\x18\n\x20\x01\
+    (\tR\x0fbcPrivateKeyHex\x12-\n\x12collateralized_nrg\x18\x0b\x20\x01(\tR\
+    \x11collateralizedNrg\x12\x19\n\x08nrg_unit\x18\x0c\x20\x01(\tR\x07nrgUn\
+    it\x12\x15\n\x06tx_fee\x18\r\x20\x01(\tR\x05txFee\"\xe1\x02\n\x16PlaceTa\
+    kerOrderRequest\x12.\n\x13wants_chain_address\x18\x01\x20\x01(\tR\x11wan\
+    tsChainAddress\x12.\n\x13sends_chain_address\x18\x02\x20\x01(\tR\x11send\
+    sChainAddress\x12\"\n\rmaker_tx_hash\x18\x03\x20\x01(\tR\x0bmakerTxHash\
+    \x121\n\x15maker_tx_output_index\x18\x04\x20\x01(\rR\x12makerTxOutputInd\
+    ex\x12\x1d\n\nbc_address\x18\x05\x20\x01(\tR\tbcAddress\x12+\n\x12bc_pri\
+    vate_key_hex\x18\x06\x20\x01(\tR\x0fbcPrivateKeyHex\x12-\n\x12collateral\
+    ized_nrg\x18\x07\x20\x01(\tR\x11collateralizedNrg\x12\x15\n\x06tx_fee\
+    \x18\x08\x20\x01(\tR\x05txFee\"L\n\x12GetBlake2blRequest\x12\x20\n\x0cto\
+    _be_hashed\x18\x01\x20\x01(\tR\ntoBeHashed\x12\x14\n\x05times\x18\x02\
+    \x20\x01(\rR\x05times\")\n\x13GetBlake2blResponse\x12\x12\n\x04hash\x18\
+    \x01\x20\x01(\tR\x04hash\".\n\x14VanityConvertRequest\x12\x16\n\x06vanit\
+    y\x18\x01\x20\x01(\tR\x06vanity\"L\n\x15VanityConvertResponse\x12\x1d\n\
+    \nbc_address\x18\x01\x20\x01(\tR\tbcAddress\x12\x14\n\x05error\x18\x02\
+    \x20\x01(\tR\x05error*8\n\x1cRpcTransactionResponseStatus\x12\x0b\n\x07S\
+    uccess\x10\0\x12\x0b\n\x07Failure\x10\x012\xb2\x05\n\x02Bc\x12:\n\x0fGet\
+    LatestBlocks\x12\x08.bc.Null\x1a\x1b.bc.GetLatestBlocksResponse\"\0\x12$\
+    \n\x04Help\x12\x08.bc.Null\x1a\x10.bc.HelpResponse\"\0\x12&\n\x05Stats\
+    \x12\x08.bc.Null\x1a\x11.bc.StatsResponse\"\0\x129\n\x05NewTx\x12\x12.bc\
+    .RpcTransaction\x1a\x1a.bc.RpcTransactionResponse\"\0\x12=\n\nGetBalance\
+    \x12\x15.bc.GetBalanceRequest\x1a\x16.bc.GetBalanceResponse\"\0\x12K\n\
+    \x0fPlaceMakerOrder\x12\x1a.bc.PlaceMakerOrderRequest\x1a\x1a.bc.RpcTran\
+    sactionResponse\"\0\x12K\n\x0fPlaceTakerOrder\x12\x1a.bc.PlaceTakerOrder\
+    Request\x1a\x1a.bc.RpcTransactionResponse\"\0\x126\n\rGetOpenOrders\x12\
+    \x08.bc.Null\x1a\x19.bc.GetOpenOrdersResponse\"\0\x12D\n\x14GetMatchedOp\
+    enOrders\x12\x08.bc.Null\x1a\x20.bc.GetMatchedOpenOrdersResponse\"\0\x12\
+    @\n\x0bGetBlake2bl\x12\x16.bc.GetBlake2blRequest\x1a\x17.bc.GetBlake2blR\
+    esponse\"\0\x12N\n\x15GetBcAddressViaVanity\x12\x18.bc.VanityConvertRequ\
+    est\x1a\x19.bc.VanityConvertResponse\"\0b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
