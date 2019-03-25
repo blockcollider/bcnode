@@ -38,6 +38,17 @@ function deserialize_bc_RoverIdent(buffer_arg) {
   return rover_pb.RoverIdent.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_bc_RoverMessage(arg) {
+  if (!(arg instanceof rover_pb.RoverMessage)) {
+    throw new Error('Expected argument of type bc.RoverMessage');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_RoverMessage(buffer_arg) {
+  return rover_pb.RoverMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_bc_SettleTxCheckReq(arg) {
   if (!(arg instanceof rover_pb.SettleTxCheckReq)) {
     throw new Error('Expected argument of type bc.SettleTxCheckReq');
@@ -65,14 +76,14 @@ var RoverService = exports.RoverService = {
   // Sends a greeting
   join: {
     path: '/bc.Rover/Join',
-    requestStream: true,
+    requestStream: false,
     responseStream: true,
     requestType: rover_pb.RoverIdent,
-    responseType: rover_pb.RoverIdent,
+    responseType: rover_pb.RoverMessage,
     requestSerialize: serialize_bc_RoverIdent,
     requestDeserialize: deserialize_bc_RoverIdent,
-    responseSerialize: serialize_bc_RoverIdent,
-    responseDeserialize: deserialize_bc_RoverIdent,
+    responseSerialize: serialize_bc_RoverMessage,
+    responseDeserialize: deserialize_bc_RoverMessage,
   },
   // Rovers sends block collected from the respective network
   collectBlock: {

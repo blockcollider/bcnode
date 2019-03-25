@@ -6,7 +6,7 @@ import "core.proto";
 
 service Rover {
     // Sends a greeting
-    rpc Join (stream RoverIdent) returns (stream RoverIdent) {}
+    rpc Join (RoverIdent) returns (stream RoverMessage) {}
 
     // Rovers sends block collected from the respective network
     rpc CollectBlock (Block) returns (Null) {}
@@ -18,6 +18,29 @@ service Rover {
 message RoverIdent {
     string rover_name = 1;
 }
+
+enum RoverMessageType {
+    FetchBlock = 0;
+    RequestResync = 1;
+}
+
+message RoverMessage {
+    RoverMessageType type = 1;
+    oneof payload {
+        Resync resync = 2;
+        FetchBlock fetch_block = 3;
+    }
+    message Resync {
+        string from_block = 1;
+        string to_block = 2;
+    }
+
+    message FetchBlock {
+        string from_block = 1;
+        string to_block = 2;
+    }
+}
+
 
 message SettleTxCheckReq {
   string addr_to = 1;
