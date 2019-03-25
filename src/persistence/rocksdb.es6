@@ -781,7 +781,7 @@ export default class PersistenceRocksDb {
     await this.get(NRG_MINTED_PERISTENCE_KEY)
   }
 
-  async setNrgMintedSoFar (nrg: number) {
+  async setNrgMintedSoFar (nrg: number): Promise<boolean> {
     await this.put(NRG_MINTED_PERISTENCE_KEY, nrg)
   }
 
