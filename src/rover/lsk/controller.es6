@@ -7,6 +7,7 @@
  * @flow
  */
 import type { RoverClient } from '../../protos/rover_grpc_pb'
+import type { RoverMessage } from '../../protos/rover_pb'
 import type { Logger } from 'winston'
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
@@ -16,6 +17,7 @@ const { parallelLimit } = require('async')
 const BN = require('bn.js')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
+const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
 const logging = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
@@ -181,6 +183,31 @@ export default class Controller {
       this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
+
+    const rpcStream = this._rpc.rover.join(new RoverIdent(['lsk']))
+    // TODO remove this.message in favor of two separate methods
+    rpcStream.on('data', (message: RoverMessage) => {
+      this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
+      switch (message.getType()) { // Also could be message.getPayloadCase()
+        case RoverMessageType.REQUESTRESYNC:
+          this.message('needs_resync', '')
+          break
+
+        case RoverMessageType.FETCHBLOCK:
+          const payload = message.getFetchBlock()
+          const rawData = {
+            currentLatest: parseInt(payload.getFromBlock()),
+            previousLatest: parseInt(payload.getToBlock())
+          }
+          this.message('fetch_block', JSON.stringify(rawData))
+          break
+
+        default:
+          this._logger.warn(`Got unknown message type ${message.getType()}`)
+      }
+    })
+
+    rpcStream.on('close', () => this._logger.info(`gRPC stream from server closed`))
 
     this._cycleFn = (getOpts: { offset?: number, limit?: number}) => {
       this._logger.info('LSK rover active connection: ' + this._liskApi.hasAvailableNodes())
