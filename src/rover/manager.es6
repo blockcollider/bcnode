@@ -102,6 +102,9 @@ export class RoverManager {
     rover.on('exit', (code, signal) => {
       this._logger.warn(`rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting in ${ROVER_RESTART_TIMEOUT / 1000}s`)
       delete this._rovers[roverName]
+      this._roverConnections[roverName].end()
+      delete this._roverConnections[roverName]
+      delete this._roverBootstrap[roverName]
       // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
       if (code !== ROVER_DF_VOID_EXIT_CODE) {
         setTimeout(() => {
@@ -231,6 +234,7 @@ export class RoverManager {
    */
   _killRover (roverName: string) {
     this._roverConnections[roverName].end()
+    delete this._roverConnections[roverName]
     delete this._roverBootstrap[roverName]
     const { pid } = this._rovers[roverName]
     this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
