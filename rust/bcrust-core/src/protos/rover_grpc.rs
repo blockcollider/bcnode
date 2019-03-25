@@ -22,6 +22,8 @@
 // interface
 
 pub trait Rover {
+    fn join(&self, o: ::grpc::RequestOptions, p: ::grpc::StreamingRequest<super::rover::RoverIdent>) -> ::grpc::StreamingResponse<super::rover::RoverIdent>;
+
     fn collect_block(&self, o: ::grpc::RequestOptions, p: super::core::Block) -> ::grpc::SingleResponse<super::core::Null>;
 
     fn is_before_settle_height(&self, o: ::grpc::RequestOptions, p: super::rover::SettleTxCheckReq) -> ::grpc::SingleResponse<super::rover::SettleTxCheckResponse>;
@@ -31,6 +33,7 @@ pub trait Rover {
 
 pub struct RoverClient {
     grpc_client: ::grpc::Client,
+    method_Join: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::rover::RoverIdent, super::rover::RoverIdent>>,
     method_CollectBlock: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::core::Block, super::core::Null>>,
     method_IsBeforeSettleHeight: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::rover::SettleTxCheckReq, super::rover::SettleTxCheckResponse>>,
 }
@@ -39,6 +42,12 @@ impl RoverClient {
     pub fn with_client(grpc_client: ::grpc::Client) -> Self {
         RoverClient {
             grpc_client: grpc_client,
+            method_Join: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Rover/Join".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Bidi,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
             method_CollectBlock: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
                 name: "/bc.Rover/CollectBlock".to_string(),
                 streaming: ::grpc::rt::GrpcStreaming::Unary,
@@ -67,6 +76,10 @@ impl RoverClient {
 }
 
 impl Rover for RoverClient {
+    fn join(&self, o: ::grpc::RequestOptions, p: ::grpc::StreamingRequest<super::rover::RoverIdent>) -> ::grpc::StreamingResponse<super::rover::RoverIdent> {
+        self.grpc_client.call_bidi(o, p, self.method_Join.clone())
+    }
+
     fn collect_block(&self, o: ::grpc::RequestOptions, p: super::core::Block) -> ::grpc::SingleResponse<super::core::Null> {
         self.grpc_client.call_unary(o, p, self.method_CollectBlock.clone())
     }
@@ -86,6 +99,18 @@ impl RoverServer {
         let handler_arc = ::std::sync::Arc::new(handler);
         ::grpc::rt::ServerServiceDefinition::new("/bc.Rover",
             vec![
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Rover/Join".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Bidi,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerBidi::new(move |o, p| handler_copy.join(o, p))
+                    },
+                ),
                 ::grpc::rt::ServerMethod::new(
                     ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
                         name: "/bc.Rover/CollectBlock".to_string(),

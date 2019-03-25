@@ -22,6 +22,169 @@ use protobuf::Message as Message_imported_for_functions;
 use protobuf::ProtobufEnum as ProtobufEnum_imported_for_functions;
 
 #[derive(PartialEq,Clone,Default)]
+pub struct RoverIdent {
+    // message fields
+    pub rover_name: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl RoverIdent {
+    pub fn new() -> RoverIdent {
+        ::std::default::Default::default()
+    }
+
+    // string rover_name = 1;
+
+    pub fn clear_rover_name(&mut self) {
+        self.rover_name.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_rover_name(&mut self, v: ::std::string::String) {
+        self.rover_name = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_rover_name(&mut self) -> &mut ::std::string::String {
+        &mut self.rover_name
+    }
+
+    // Take field
+    pub fn take_rover_name(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.rover_name, ::std::string::String::new())
+    }
+
+    pub fn get_rover_name(&self) -> &str {
+        &self.rover_name
+    }
+}
+
+impl ::protobuf::Message for RoverIdent {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.rover_name)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.rover_name.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.rover_name);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.rover_name.is_empty() {
+            os.write_string(1, &self.rover_name)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> RoverIdent {
+        RoverIdent::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "rover_name",
+                    |m: &RoverIdent| { &m.rover_name },
+                    |m: &mut RoverIdent| { &mut m.rover_name },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<RoverIdent>(
+                    "RoverIdent",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static RoverIdent {
+        static mut instance: ::protobuf::lazy::Lazy<RoverIdent> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const RoverIdent,
+        };
+        unsafe {
+            instance.get(RoverIdent::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for RoverIdent {
+    fn clear(&mut self) {
+        self.clear_rover_name();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for RoverIdent {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for RoverIdent {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct SettleTxCheckReq {
     // message fields
     pub addr_to: ::std::string::String,
@@ -425,14 +588,16 @@ impl ::protobuf::reflect::ProtobufValue for SettleTxCheckResponse {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x0brover.proto\x12\x02bc\x1a\ncore.proto\"m\n\x10SettleTxCheckReq\x12\
+    \n\x0brover.proto\x12\x02bc\x1a\ncore.proto\"+\n\nRoverIdent\x12\x1d\n\n\
+    rover_name\x18\x01\x20\x01(\tR\troverName\"m\n\x10SettleTxCheckReq\x12\
     \x17\n\x07addr_to\x18\x01\x20\x01(\tR\x06addrTo\x12\x1b\n\taddr_from\x18\
     \x02\x20\x01(\tR\x08addrFrom\x12#\n\rbridged_chain\x18\x03\x20\x01(\tR\
     \x0cbridgedChain\"V\n\x15SettleTxCheckResponse\x12=\n\x1bis_before_settl\
-    ement_height\x18\x01\x20\x01(\x08R\x18isBeforeSettlementHeight2y\n\x05Ro\
-    ver\x12%\n\x0cCollectBlock\x12\t.bc.Block\x1a\x08.bc.Null\"\0\x12I\n\x14\
-    IsBeforeSettleHeight\x12\x14.bc.SettleTxCheckReq\x1a\x19.bc.SettleTxChec\
-    kResponse\"\0b\x06proto3\
+    ement_height\x18\x01\x20\x01(\x08R\x18isBeforeSettlementHeight2\xa7\x01\
+    \n\x05Rover\x12,\n\x04Join\x12\x0e.bc.RoverIdent\x1a\x0e.bc.RoverIdent\"\
+    \0(\x010\x01\x12%\n\x0cCollectBlock\x12\t.bc.Block\x1a\x08.bc.Null\"\0\
+    \x12I\n\x14IsBeforeSettleHeight\x12\x14.bc.SettleTxCheckReq\x1a\x19.bc.S\
+    ettleTxCheckResponse\"\0b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

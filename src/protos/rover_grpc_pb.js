@@ -27,6 +27,17 @@ function deserialize_bc_Null(buffer_arg) {
   return core_pb.Null.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_bc_RoverIdent(arg) {
+  if (!(arg instanceof rover_pb.RoverIdent)) {
+    throw new Error('Expected argument of type bc.RoverIdent');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_RoverIdent(buffer_arg) {
+  return rover_pb.RoverIdent.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_bc_SettleTxCheckReq(arg) {
   if (!(arg instanceof rover_pb.SettleTxCheckReq)) {
     throw new Error('Expected argument of type bc.SettleTxCheckReq');
@@ -52,6 +63,18 @@ function deserialize_bc_SettleTxCheckResponse(buffer_arg) {
 
 var RoverService = exports.RoverService = {
   // Sends a greeting
+  join: {
+    path: '/bc.Rover/Join',
+    requestStream: true,
+    responseStream: true,
+    requestType: rover_pb.RoverIdent,
+    responseType: rover_pb.RoverIdent,
+    requestSerialize: serialize_bc_RoverIdent,
+    requestDeserialize: deserialize_bc_RoverIdent,
+    responseSerialize: serialize_bc_RoverIdent,
+    responseDeserialize: deserialize_bc_RoverIdent,
+  },
+  // Rovers sends block collected from the respective network
   collectBlock: {
     path: '/bc.Rover/CollectBlock',
     requestStream: false,
@@ -63,6 +86,7 @@ var RoverService = exports.RoverService = {
     responseSerialize: serialize_bc_Null,
     responseDeserialize: deserialize_bc_Null,
   },
+  // Check is TX reciveved in rover is watched and before settlement height
   isBeforeSettleHeight: {
     path: '/bc.Rover/IsBeforeSettleHeight',
     requestStream: false,
