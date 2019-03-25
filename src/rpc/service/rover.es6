@@ -56,6 +56,10 @@ export default class CollectorServiceImpl {
     })
   }
 
+  join (call: Object, callback: Function) {
+    this.server.engine.rovers.roverRpcJoined(call)
+  }
+
   _getContext () : Object {
     return {
       server: this._server,

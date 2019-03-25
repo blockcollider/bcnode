@@ -41,20 +41,31 @@ export const rovers = {
  * Rover manager
  */
 export class RoverManager {
-  _logger: Object // eslint-disable-line no-undef
-  _rovers: Object // eslint-disable-line no-undef
-  _timeouts: Object // eslint-disable-line no-undef
+  _logger: Object
+  _rovers: Object
+  _roverConnections: { [roverName: string]: Object }
+  _roverBootstrap: { [roverName: string]: boolean }
+  _timeouts: Object
   _network: 'mainnet'|'testnet'
 
   constructor (network: 'mainnet'|'testnet') {
     this._logger = logging.getLogger(__filename)
     this._rovers = {}
+    this._roverConnections = {}
+    this._roverBootstrap = {}
     this._timeouts = {}
     this._network = network
   }
 
   get rovers (): Object {
     return this._rovers
+  }
+
+  roverRpcJoined (call: Object) {
+    const roverName = call.request.getRoverName()
+    this._logger.debug(`Rover ${roverName} joined using gRPC`)
+    // TODO check if connection not already present
+    this._roverConnections[roverName] = call
   }
 
   /**
@@ -185,6 +196,8 @@ export class RoverManager {
    * @private
    */
   _killRover (roverName: string) {
+    this._roverConnections[roverName].end()
+    delete this._roverBootstrap[roverName]
     const { pid } = this._rovers[roverName]
     this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
     try {
