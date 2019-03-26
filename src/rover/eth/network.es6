@@ -25,6 +25,7 @@ const logging = require('../../logger')
 const { getPrivateKey } = require('../utils')
 const { config } = require('../../config')
 const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { Block } = require('../../protos/core_pb')
 
 const BC_NETWORK = process.env.BC_NETWORK || 'main'
 const chainName = (true || BC_NETWORK === 'main') // eslint-disable-line
@@ -230,7 +231,7 @@ export default class Network extends EventEmitter {
     this.emit('newBlock', { block, isBlockFromInitialSync })
   }
 
-  requestBlock (fromBlock: { height: number }, toBlock: { height: number }) {
+  requestBlock (fromBlock: Block, toBlock: Block) {
     const peers = [].concat(Object.values(this._forkVerifiedForPeer))
 
     // select random floor(maximumPeers / 3)
@@ -240,7 +241,7 @@ export default class Network extends EventEmitter {
       askPeers.push(randomChoiceMut(peers))
     }
 
-    const blockNumbersToRequest = range(fromBlock.height + 1, toBlock.height)
+    const blockNumbersToRequest = range(fromBlock.getHeight() + 1, toBlock.getHeight())
     if (blockNumbersToRequest.length > ETH_MAX_FETCH_BLOCKS) {
       this._logger.info(`Requested ${blockNumbersToRequest.length} (more than ${ETH_MAX_FETCH_BLOCKS}) to be fetched either node is starting or very stale / different eth chain BC block received, giving up`)
       return

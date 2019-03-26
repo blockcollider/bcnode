@@ -8,6 +8,7 @@
  */
 import type { Logger } from 'winston'
 import type { RoverClient } from '../../protos/rover_grpc_pb'
+import type { RoverMessage } from '../../protos/rover_pb'
 
 const { inspect } = require('util')
 const EthereumBlock = require('ethereumjs-block')
@@ -20,6 +21,7 @@ const logging = require('../../logger')
 const { errToString } = require('../../helper/error')
 const { networks } = require('../../config/networks')
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
+const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
 const { createUnifiedBlock, isBeforeSettleHeight } = require('../helper')
@@ -201,23 +203,25 @@ export default class Controller {
       this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
-  }
 
-  message (message: string, rawData: string) {
-    switch (message) {
-      case 'fetch_block':
-        const data = JSON.parse(rawData)
-        const { previousLatest, currentLatest } = data
-        this.network.requestBlock(previousLatest, currentLatest)
-        break
+    const rpcStream = this._rpc.rover.join(new RoverIdent(['eth']))
+    rpcStream.on('data', (message: RoverMessage) => {
+      this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
+      switch (message.getType()) { // Also could be message.getPayloadCase()
+        case RoverMessageType.REQUESTRESYNC:
+          this.network.initialResync = true
+          break
 
-      case 'needs_resync':
-        this.network.initialResync = true
-        break
+        case RoverMessageType.FETCHBLOCK:
+          const payload = message.getFetchBlock()
+          this.network.requestBlock(payload.getFromBlock(), payload.getToBlock())
+          break
 
-      default:
-        this._logger.warn(`Unknown message type "${message}"`)
-    }
+        default:
+          this._logger.warn(`Got unknown message type ${message.getType()}`)
+      }
+    })
+    rpcStream.on('close', () => this._logger.info(`gRPC stream from server closed`))
   }
 
   close () {
