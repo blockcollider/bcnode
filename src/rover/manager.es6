@@ -102,7 +102,7 @@ export class RoverManager {
     rover.on('exit', (code, signal) => {
       this._logger.warn(`rover ${roverName} exited (code: ${code}, signal: ${signal}) - restarting in ${ROVER_RESTART_TIMEOUT / 1000}s`)
       delete this._rovers[roverName]
-      this._roverConnections[roverName].end()
+      this._roverConnections[roverName] && this._roverConnections[roverName].end()
       delete this._roverConnections[roverName]
       delete this._roverBootstrap[roverName]
       // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
