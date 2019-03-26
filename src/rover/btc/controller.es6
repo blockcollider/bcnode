@@ -4,10 +4,11 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @disable-flow
+ * @flow
  */
 import type { RoverClient } from '../../protos/rover_grpc_pb'
 import type { RoverMessage } from '../../protos/rover_pb'
+import type { Logger } from 'winston'
 
 const process = require('process')
 const { pathOr, contains, reverse, without, xprod } = require('ramda')
@@ -152,8 +153,18 @@ const randomChoiceMut = (arr: Array<any>) => {
 }
 
 export default class Controller {
+  _network: Network
+  _logger: Logger
+  _blockCache: LRUCache<string, boolean>
+  _blocksNumberCache: LRUCache<number, boolean>
+  _txCache: LRUCache<string, boolean>
+  _rpc: RpcClient
+  _isStandalone: boolean
+  _requestedBlockHashes: string[] // TODO really?
+  _hadQuorumAtLeastOnce: boolean
+  _initialSync: boolean
+
   constructor (isStandalone: boolean) {
-    this._network = undefined
     this._logger = logging.getLogger(__filename)
     this._blockCache = new LRUCache({ max: 110 })
     this._blocksNumberCache = new LRUCache({ max: 110 })
@@ -173,7 +184,7 @@ export default class Controller {
     return this._initialSync
   }
 
-  set initialSync (state) {
+  set initialSync (state: boolean) {
     this._initialSync = state
   }
 
@@ -525,6 +536,6 @@ export default class Controller {
   }
 
   close () {
-    this.network.close()
+    this.network.disconnect()
   }
 }
