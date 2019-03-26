@@ -201,7 +201,6 @@ export default class Controller {
           this._logger.warn(`Got unknown message type ${message.getType()}`)
       }
     })
-
     rpcStream.on('close', () => this._logger.info(`gRPC stream from server closed`))
 
     this._cycleFn = (getOpts: { offset?: number, limit?: number}) => {
