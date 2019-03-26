@@ -10,6 +10,7 @@
 import type { Logger } from 'winston'
 import type { DfConfig } from '../../bc/validation'
 import type { RoverClient } from '../../protos/rover_grpc_pb'
+import type { RoverMessage } from '../../protos/rover_pb'
 const { inspect } = require('util')
 const WavesApi = require('waves-api')
 const request = require('request')
@@ -19,6 +20,7 @@ const pRetry = require('p-retry')
 const BN = require('bn.js')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
+const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
 const { getLogger } = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
@@ -279,6 +281,25 @@ export default class Controller {
       process.exit(3)
     })
 
+    const rpcStream = this._rpc.rover.join(new RoverIdent(['wav']))
+    rpcStream.on('data', (message: RoverMessage) => {
+      this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
+      switch (message.getType()) { // Also could be message.getPayloadCase()
+        case RoverMessageType.REQUESTRESYNC:
+          this.startResync()
+          break
+
+        case RoverMessageType.FETCHBLOCK:
+          const payload = message.getFetchBlock()
+          this.fetchBlock(payload.getFromBlock(), payload.getToBlock())
+          break
+
+        default:
+          this._logger.warn(`Got unknown message type ${message.getType()}`)
+      }
+    })
+    rpcStream.on('close', () => this._logger.info(`gRPC stream from server closed`))
+
     const { dfBound, dfVoid } = this._config.dfConfig.wav
 
     const cycle = () => {
@@ -380,104 +401,95 @@ export default class Controller {
     this._checkFibersIntervalID = setInterval(checkFibers, 1000)
   }
 
-  message (message: string, rawData: string) {
-    switch (message) {
-      case 'fetch_block':
-        const data = JSON.parse(rawData)
-        const { previousLatest, currentLatest } = data
-        let from = previousLatest.height + 1
-        let to = currentLatest.height
+  fetchBlock (previousLatest: Block, currentLatest: Block) {
+    let from = previousLatest.getHeight() + 1
+    let to = currentLatest.getHeight()
 
-        // if more than WAV_MAX_FETCH_BLOCKS would be fetch, limit this to save centralized chains
-        if (to - from > WAV_MAX_FETCH_BLOCKS) {
-          this._logger.warn(`Would fetch ${to - from} blocks but WAV can't handle such load, fetching only ${WAV_MAX_FETCH_BLOCKS}`)
-          from = to - WAV_MAX_FETCH_BLOCKS
-        }
-        const whichBlocks = range(from, to)
+    // if more than WAV_MAX_FETCH_BLOCKS would be fetch, limit this to save centralized chains
+    if (to - from > WAV_MAX_FETCH_BLOCKS) {
+      this._logger.warn(`Would fetch ${to - from} blocks but WAV can't handle such load, fetching only ${WAV_MAX_FETCH_BLOCKS}`)
+      from = to - WAV_MAX_FETCH_BLOCKS
+    }
+    const whichBlocks = range(from, to)
 
-        this._logger.info(`Fetching missing blocks ${whichBlocks}`)
-        getBlockSequence(from, to).then(blocks => {
-          blocks.forEach(async (block) => {
-            const { height } = block
-            if (!this._blockCache.has(height)) {
-              this._blockCache.set(height, true)
-              this._logger.debug(`Fetched block with hash: ${block.signature}`)
+    this._logger.info(`Fetching missing blocks ${whichBlocks}`)
+    getBlockSequence(from, to).then(blocks => {
+      blocks.forEach(async (block) => {
+        const { height } = block
+        if (!this._blockCache.has(height)) {
+          this._blockCache.set(height, true)
+          this._logger.debug(`Fetched block with hash: ${block.signature}`)
 
-              const unifiedBlock = await createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, _createUnifiedBlock)
-              this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
-                if (err) {
-                  this._logger.error(`Error while collecting block ${inspect(err)}`)
-                  return
-                }
-                this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
-              })
+          const unifiedBlock = await createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, _createUnifiedBlock)
+          this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
+            if (err) {
+              this._logger.error(`Error while collecting block ${inspect(err)}`)
+              return
             }
+            this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
           })
-        }, reason => {
-          throw new Error(reason)
-        }).catch(err => {
-          this._logger.debug(`error while getting new block sequence: ${from} - ${to}, err: ${errToString(err)}`)
-        })
-        break
-
-      case 'needs_resync':
-        if (!this._timeoutResync) {
-          this._timeoutResync = setTimeout(() => {
-            getLastHeight().then(({ height, timestamp }) => {
-              const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['wav'] | 0
-              const to = height
-              const step = ((to - from) / 500) | 0
-              const boundaries = rangeStep(from, step, to)
-              console.log(`Getting ${boundaries.length} blocks`) // XXX remove after debug
-              let successCount = 0
-              for (let blockNumber of boundaries) {
-                pRetry(() => getBlock(blockNumber), {
-                  onFailedAttempt: error => {
-                    this._logger.debug(`Block ${blockNumber} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
-                  },
-                  retries: 50,
-                  factor: 1.24,
-                  randomize: true,
-                  maxTimeout: 5e3
-                })
-                  .then(async (block) => {
-                    successCount++
-                    if (successCount === boundaries.length) {
-                      this._timeoutResync = undefined
-                      this._logger.info(`Initial resync finished`)
-                      process.exit(0)
-                    } else { // XXX remove after debug
-                      this._logger.info(`${successCount} done, ${boundaries.length - successCount} to go`)
-                    }
-                    this._logger.debug(`Got block at height : "${blockNumber}"`)
-                    const { height } = block
-                    if (!this._blockCache.has(height)) {
-                      this._blockCache.set(height, true)
-                      this._logger.debug(`Fetched block with hash: ${block.signature}`)
-                      const unifiedBlock = await createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, _createUnifiedBlock)
-                      if (!this._config.isStandalone) {
-                        this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
-                          if (err) {
-                            this._logger.error(`Error while collecting block ${inspect(err)}`)
-                            throw new Error(`Error while collecting block ${inspect(err)}`)
-                          }
-                          this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
-                          return true
-                        })
-                      } else {
-                        this._logger.info(`Collected WAV block ${unifiedBlock.getHeight()}, h: ${unifiedBlock.getHash()}`)
-                        return true
-                      }
-                    }
-                  })
-              }
-            })
-          }, randomInt(2000, 5000))
         }
-        break
+      })
+    }, reason => {
+      throw new Error(reason)
+    }).catch(err => {
+      this._logger.debug(`error while getting new block sequence: ${from} - ${to}, err: ${errToString(err)}`)
+    })
+  }
 
-      default:
-        this._logger.warn(`Unknown message type "${message}"`)
+  startResync () {
+    if (!this._timeoutResync) {
+      this._timeoutResync = setTimeout(() => {
+        getLastHeight().then(({ height, timestamp }) => {
+          const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['wav'] | 0
+          const to = height
+          const step = ((to - from) / 500) | 0
+          const boundaries = rangeStep(from, step, to)
+          console.log(`Getting ${boundaries.length} blocks`) // XXX remove after debug
+          let successCount = 0
+          for (let blockNumber of boundaries) {
+            pRetry(() => getBlock(blockNumber), {
+              onFailedAttempt: error => {
+                this._logger.debug(`Block ${blockNumber} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
+              },
+              retries: 50,
+              factor: 1.24,
+              randomize: true,
+              maxTimeout: 5e3
+            })
+              .then(async (block) => {
+                successCount++
+                if (successCount === boundaries.length) {
+                  this._timeoutResync = undefined
+                  this._logger.info(`Initial resync finished`)
+                  process.exit(0)
+                } else { // XXX remove after debug
+                  this._logger.info(`${successCount} done, ${boundaries.length - successCount} to go`)
+                }
+                this._logger.debug(`Got block at height : "${blockNumber}"`)
+                const { height } = block
+                if (!this._blockCache.has(height)) {
+                  this._blockCache.set(height, true)
+                  this._logger.debug(`Fetched block with hash: ${block.signature}`)
+                  const unifiedBlock = await createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, _createUnifiedBlock)
+                  if (!this._config.isStandalone) {
+                    this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
+                      if (err) {
+                        this._logger.error(`Error while collecting block ${inspect(err)}`)
+                        throw new Error(`Error while collecting block ${inspect(err)}`)
+                      }
+                      this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
+                      return true
+                    })
+                  } else {
+                    this._logger.info(`Collected WAV block ${unifiedBlock.getHeight()}, h: ${unifiedBlock.getHash()}`)
+                    return true
+                  }
+                }
+              })
+          }
+        })
+      }, randomInt(2000, 5000))
     }
   }
 
