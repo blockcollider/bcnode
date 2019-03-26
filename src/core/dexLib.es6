@@ -237,14 +237,16 @@ export class DexLib {
     }
 
     let makerTxOutputScript = Buffer.from(makerTxOutput.getOutputScript()).toString('ascii')
-    let originalMakerTxHash = makerTx.getHash()
+    let monoidMakerTxHash = makerTx.getHash()
+    let monoidMakerTxOutputIndex = makerTxOutputIndex
     if (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
       // partial order
       while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
         const [parentTxHash, parentOutputIndex] = makerTxOutputScript.split(' ')
         const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
         const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
-        originalMakerTxHash = _makerTx.getHash()
+        monoidMakerTxHash = _makerTx.getHash()
+        monoidMakerTxOutputIndex = parentOutputIndex
 
         makerTxOutputScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
       }
@@ -279,7 +281,7 @@ export class DexLib {
       }
       const block = await this.persistence.get(`bc.block.${i}`)
       for (let tx of block.getTxsList()) {
-        if (tx.getHash() === originalMakerTxHash) {
+        if (tx.getHash() === monoidMakerTxHash) {
           foundBlock = block
           break
         }
@@ -288,7 +290,8 @@ export class DexLib {
     if (!foundBlock) {
       const errorInfo = {
         txHash: makerTxHash,
-        originalMakerTxHash: originalMakerTxHash,
+        originalMakerTxHash: monoidMakerTxHash,
+        originalMakerTxOutputIndex: monoidMakerTxOutputIndex,
         outputIndex: makerTxOutputIndex,
         shift: makerTxInfo.shiftStartsAt,
         depositEndsAt: makerTxInfo.depositEndsAt,
@@ -328,7 +331,7 @@ export class DexLib {
     }
 
     const newOutputToTakerTx = new TransactionOutput()
-    const outputLockScript = ScriptTemplates.createCrossChainTxTakerOutputScript(makerTxHash, makerTxOutputIndex, takerBCAddress)
+    const outputLockScript = ScriptTemplates.createCrossChainTxTakerOutputScript(monoidMakerTxHash, monoidMakerTxOutputIndex, takerBCAddress)
     // both maker and taker contribute to this output: collateralizedBN
     newOutputToTakerTx.setValue(new Uint8Array(collateralizedBN.add(collateralizedBN).toBuffer()))
     newOutputToTakerTx.setUnit(makerTxOutput.getUnit())
@@ -342,7 +345,7 @@ export class DexLib {
     const makerTxCollateralizedBNChange = makerTxCollateralizedBN.sub(collateralizedBN)
     if (makerTxCollateralizedBNChange.gt(new BN(0))) {
       const newOutputToTakerTxCb = new TransactionOutput()
-      const outputLockScriptCb = ScriptTemplates.createCrossChainTxTakerOutputCallbackScript(makerTxHash, makerTxOutputIndex)
+      const outputLockScriptCb = ScriptTemplates.createCrossChainTxTakerOutputCallbackScript(monoidMakerTxHash, monoidMakerTxOutputIndex)
       newOutputToTakerTxCb.setValue(new Uint8Array(makerTxCollateralizedBNChange.toBuffer()))
       newOutputToTakerTxCb.setUnit(makerTxOutput.getUnit())
       newOutputToTakerTxCb.setScriptLength(outputLockScriptCb.length)
