@@ -9,6 +9,7 @@
 import type { Logger } from 'winston'
 import type { DfConfig } from '../../bc/validation'
 import type { RoverClient } from '../../protos/rover_grpc_pb'
+import type { RoverMessage } from '../../protos/rover_pb'
 const profiles = require('@cityofzion/neo-js/dist/common/profiles')
 const { sites } = require('./mesh.json')
 const NeoMesh = require('@cityofzion/neo-js/dist/node/mesh')
@@ -21,6 +22,7 @@ const { shuffle } = require('lodash')
 const pRetry = require('p-retry')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
+const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
 const logging = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
@@ -288,6 +290,25 @@ export default class Controller {
       process.exit(3)
     })
 
+    const rpcStream = this._rpc.rover.join(new RoverIdent(['neo']))
+    rpcStream.on('data', (message: RoverMessage) => {
+      this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
+      switch (message.getType()) { // Also could be message.getPayloadCase()
+        case RoverMessageType.REQUESTRESYNC:
+          this.startResync()
+          break
+
+        case RoverMessageType.FETCHBLOCK:
+          const payload = message.getFetchBlock()
+          this.fetchBlock(payload.getFromBlock(), payload.getToBlock())
+          break
+
+        default:
+          this._logger.warn(`Got unknown message type ${message.getType()}`)
+      }
+    })
+    rpcStream.on('close', () => this._logger.info(`gRPC stream from server closed`))
+
     const { dfBound, dfVoid } = this._config.dfConfig.neo
     const loggerFn = this._logger.log.bind(this._logger)
 
@@ -444,30 +465,38 @@ export default class Controller {
     }, PING_PERIOD)
   }
 
-  message (message: string, rawData: string) {
-    switch (message) {
-      case 'fetch_block':
-        const data = JSON.parse(rawData)
-        const { previousLatest, currentLatest } = data
-        let from = previousLatest.height + 1
-        let to = currentLatest.height
-
-        // if more than NEO_MAX_FETCH_BLOCKS would be fetch, limit this to save centralized chains
-        if (to - from > NEO_MAX_FETCH_BLOCKS) {
-          this._logger.warn(`Would fetch ${to - from} blocks but NEO can't handle such load, fetching only ${NEO_MAX_FETCH_BLOCKS}`)
-          from = to - NEO_MAX_FETCH_BLOCKS
-        }
-        const whichBlocks = range(from, to)
-
-        if (from - to > 0) {
-          this._logger.info(`Fetching missing blocks ${whichBlocks}`)
-          const node = this._neoMesh.getHighestNode()
-          const loggerFn = this._logger.log.bind(this._logger)
-          whichBlocks.forEach(height => {
-            node.rpc.getBlock(height).then(block => {
-              if (!this._blockCache.has(height)) {
-                this._blockCache.set(height, true)
+  startResync () {
+    this._logger.debug(`needs_resync starting`)
+    if (!this._timeoutResync) {
+      this._timeoutResync = setTimeout(() => {
+        pRetry(() => {
+          this._logger.debug('retrying getBlockCount()')
+          return this._neoMesh.getRandomNode().rpc.getBlockCount()
+        }, { retries: 5, maxRetryTime: 5e3 }).then(height => {
+          const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['neo'] | 0
+          const to = height
+          const step = ((to - from) / 500) | 0
+          const whichBlocks = rangeStep(from, step, to)
+          let successCount = 0
+          for (let height of whichBlocks) {
+            pRetry(() => this._neoMesh.getRandomNode().rpc.getBlock(height), {
+              onFailedAttempt: error => {
+                this._logger.debug(`Block ${height} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
+              },
+              retries: 50,
+              factor: 1.1,
+              randomize: true,
+              maxTimeout: 2e3
+            }).then((block) => {
+              successCount++
+              if (successCount === whichBlocks.length) {
+                this._logger.info('Initial sync finished')
+                this._timeoutResync = undefined
+              }
+              if (!this._blockCache.has(block.index)) {
+                this._blockCache.set(block.index, true)
                 this._logger.debug(`Fetched block with hash: ${block.hash}`)
+                const loggerFn = this._logger.log.bind(this._logger)
 
                 createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, partial(_createUnifiedBlock, [loggerFn])).then((unifiedBlock) => {
                   if (!this._config.isStandalone) {
@@ -479,78 +508,61 @@ export default class Controller {
                       this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
                     })
                   } else {
-                    this._logger.info(`Rovered NEO block ${inspect(unifiedBlock)}`)
+                    this._logger.info(`Rovered NEO block ${unifiedBlock.getHeight()}, h: ${unifiedBlock.getHash()}`)
                   }
                 })
               }
-            }, reason => {
-              this._logger.error(reason)
-              throw new Error(reason)
             }).catch(err => {
               this._logger.debug(`error while getting new block height: ${height}, err: ${errToString(err)}`)
             })
-          })
-        }
-        break
+          }
+        })
+      }, randomInt(2000, 5000))
+    }
+  }
 
-      case 'needs_resync':
-        this._logger.debug(`needs_resync starting`)
-        if (!this._timeoutResync) {
-          this._timeoutResync = setTimeout(() => {
-            pRetry(() => {
-              this._logger.debug('retrying getBlockCount()')
-              return this._neoMesh.getRandomNode().rpc.getBlockCount()
-            }, { retries: 5, maxRetryTime: 5e3 }).then(height => {
-              const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['neo'] | 0
-              const to = height
-              const step = ((to - from) / 500) | 0
-              const whichBlocks = rangeStep(from, step, to)
-              let successCount = 0
-              for (let height of whichBlocks) {
-                pRetry(() => this._neoMesh.getRandomNode().rpc.getBlock(height), {
-                  onFailedAttempt: error => {
-                    this._logger.debug(`Block ${height} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
-                  },
-                  retries: 50,
-                  factor: 1.1,
-                  randomize: true,
-                  maxTimeout: 2e3
-                }).then((block) => {
-                  successCount++
-                  if (successCount === whichBlocks.length) {
-                    this._logger.info('Initial sync finished')
-                    this._timeoutResync = undefined
-                  }
-                  if (!this._blockCache.has(block.index)) {
-                    this._blockCache.set(block.index, true)
-                    this._logger.debug(`Fetched block with hash: ${block.hash}`)
-                    const loggerFn = this._logger.log.bind(this._logger)
+  fetchBlock (previousLatest: Block, currentLatest: Block) {
+    let from = previousLatest.getHeight() + 1
+    let to = currentLatest.getHeight()
 
-                    createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, partial(_createUnifiedBlock, [loggerFn])).then((unifiedBlock) => {
-                      if (!this._config.isStandalone) {
-                        this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
-                          if (err) {
-                            this._logger.debug(`Error while collecting block ${inspect(err)}`)
-                            return
-                          }
-                          this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
-                        })
-                      } else {
-                        this._logger.info(`Rovered NEO block ${unifiedBlock.getHeight()}, h: ${unifiedBlock.getHash()}`)
-                      }
-                    })
+    // if more than NEO_MAX_FETCH_BLOCKS would be fetch, limit this to save centralized chains
+    if (to - from > NEO_MAX_FETCH_BLOCKS) {
+      this._logger.warn(`Would fetch ${to - from} blocks but NEO can't handle such load, fetching only ${NEO_MAX_FETCH_BLOCKS}`)
+      from = to - NEO_MAX_FETCH_BLOCKS
+    }
+    const whichBlocks = range(from, to)
+
+    if (from - to > 0) {
+      this._logger.info(`Fetching missing blocks ${whichBlocks}`)
+      const node = this._neoMesh.getHighestNode()
+      const loggerFn = this._logger.log.bind(this._logger)
+      whichBlocks.forEach(height => {
+        node.rpc.getBlock(height).then(block => {
+          if (!this._blockCache.has(height)) {
+            this._blockCache.set(height, true)
+            this._logger.debug(`Fetched block with hash: ${block.hash}`)
+
+            createUnifiedBlock(this._config.isStandalone, block, this._rpc.rover, partial(_createUnifiedBlock, [loggerFn])).then((unifiedBlock) => {
+              if (!this._config.isStandalone) {
+                this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
+                  if (err) {
+                    this._logger.debug(`Error while collecting block ${inspect(err)}`)
+                    return
                   }
-                }).catch(err => {
-                  this._logger.debug(`error while getting new block height: ${height}, err: ${errToString(err)}`)
+                  this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
                 })
+              } else {
+                this._logger.info(`Rovered NEO block ${inspect(unifiedBlock)}`)
               }
             })
-          }, randomInt(2000, 5000))
-        }
-        break
-
-      default:
-        this._logger.warn(`Unknown message type "${message}"`)
+          }
+        }, reason => {
+          this._logger.error(reason)
+          throw new Error(reason)
+        }).catch(err => {
+          this._logger.debug(`error while getting new block height: ${height}, err: ${errToString(err)}`)
+        })
+      })
     }
   }
 
