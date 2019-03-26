@@ -1025,8 +1025,8 @@ export class Engine {
 
       if (is(Array, boundaries)) {
         // send fetch_block messages to rovers
-        boundaries.forEach(([chain, [from, to]]) => {
-          this.rovers.messageRover(chain, 'fetch_block', { previousLatest: from.toObject(), currentLatest: to.toObject() })
+        boundaries.forEach(([chain, [previousLatest: Block, currentLatest: Block]]) => {
+          this.rovers.messageRover(chain, 'fetch_block', { previousLatest, currentLatest })
         })
       }
 

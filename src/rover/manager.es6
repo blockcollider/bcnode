@@ -116,7 +116,7 @@ export class RoverManager {
     return true
   }
 
-  messageRover (roverName: string, message: string, payload: any): ?Error {
+  messageRover (roverName: string, message: string, payload: null|{ previousLatest: Block, currentLatest: Block }): ?Error {
     const roverRpc = this._roverConnections[roverName]
     if (!roverRpc) {
       // This is necessary to prevent fail while rovers are starting - once we
@@ -137,17 +137,18 @@ export class RoverManager {
     switch (message) {
       case 'needs_resync':
         const resyncPayload = new RoverMessage.Resync()
-        // resyncData.setFromBlock()
-        // resyncData.setToBlock()
         msg.setType(RoverMessageType.REQUESTRESYNC)
         msg.setResync(resyncPayload)
         roverRpc.write(msg)
         break
 
       case 'fetch_block':
+        if (!payload) {
+          throw new Error(`For fetch_block payload has to be provided, ${payload} given`)
+        }
         const fetchBlockPayload = new RoverMessage.FetchBlock()
-        // resyncData.setFromBlock()
-        // resyncData.setToBlock()
+        fetchBlockPayload.setFromBlock(payload.previousLatest)
+        fetchBlockPayload.setToBlock(payload.currentLatest)
         msg.setType(RoverMessageType.FETCHBLOCK)
         msg.setResync(fetchBlockPayload)
         roverRpc.write(msg)
