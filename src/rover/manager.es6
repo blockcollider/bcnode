@@ -234,7 +234,7 @@ export class RoverManager {
    * @private
    */
   _killRover (roverName: string) {
-    this._roverConnections[roverName].end()
+    this._roverConnections[roverName] && this._roverConnections[roverName].end()
     delete this._roverConnections[roverName]
     delete this._roverBootstrap[roverName]
     const { pid } = this._rovers[roverName]
