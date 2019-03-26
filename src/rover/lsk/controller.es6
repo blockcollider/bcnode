@@ -185,21 +185,16 @@ export default class Controller {
     })
 
     const rpcStream = this._rpc.rover.join(new RoverIdent(['lsk']))
-    // TODO remove this.message in favor of two separate methods
     rpcStream.on('data', (message: RoverMessage) => {
       this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
       switch (message.getType()) { // Also could be message.getPayloadCase()
         case RoverMessageType.REQUESTRESYNC:
-          this.message('needs_resync', '')
+          this.startResync()
           break
 
         case RoverMessageType.FETCHBLOCK:
           const payload = message.getFetchBlock()
-          const rawData = {
-            currentLatest: parseInt(payload.getFromBlock()),
-            previousLatest: parseInt(payload.getToBlock())
-          }
-          this.message('fetch_block', JSON.stringify(rawData))
+          this.fetchBlock(payload.getFromBlock(), payload.getToBlock())
           break
 
         default:
@@ -310,57 +305,48 @@ export default class Controller {
     // }, 60000)
   }
 
-  message (message: string, rawData: string) {
-    switch (message) {
-      case 'fetch_block':
-        const data = JSON.parse(rawData)
-        const { previousLatest, currentLatest } = data
-        let from = previousLatest.height + 1
-        let to = currentLatest.height
+  startResync () {
+    this._liskApi.blocks.get().then(lastBlocks => {
+      let lastBlock
+      if (lastBlocks.blocks !== undefined) {
+        lastBlock = lastBlocks.blocks[0]
+      } else {
+        lastBlock = lastBlocks.data[0]
+      }
 
-        // if more than LSK_MAX_FETCH_BLOCKS would be fetch, limit this to save centralized chains
-        if (to - from > LSK_MAX_FETCH_BLOCKS) {
-          this._logger.warn(`Would fetch ${to - from} blocks but LSK can't handle such load, fetching only ${LSK_MAX_FETCH_BLOCKS}`)
-          from = to - LSK_MAX_FETCH_BLOCKS
+      const to = lastBlock.height - 1
+      const from = to - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['lsk'])
+      const step = ((to - from) / 500) | 0
+      const boundaries = rangeStep(from, step, to)
+      const tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlock.height - blockNumber, limit: 1 }))
+
+      this._logger.info(`Requesting blocks ${from} - ${to} for initial resync (${tasks.length} tasks)`)
+      parallelLimit(tasks, 5, (err, resuls) => {
+        if (err) {
+          this._logger.warn(`Couldn't fetch all blocks for initial resync`)
         }
-        const whichBlocks = range(from, to)
+        this._logger.info(`Fetched blocks for initial resync`)
+      })
+    })
+  }
 
-        if (from - to > 0) {
-          this._logger.info(`Fetching missing blocks ${whichBlocks}`)
-          const opts = { offset: to - from, limit: to - from }
-          this._cycleFn(opts).then(() => {
-            this._logger.info(`Fetched missing blocks ${whichBlocks}`)
-          })
-        }
-        break
+  fetchBlock (currentLast: Block, previousLast: Block) {
+    let from = previousLast.getHeight() + 1
+    let to = currentLast.getHeight()
 
-      case 'needs_resync':
-        this._liskApi.blocks.get().then(lastBlocks => {
-          let lastBlock
-          if (lastBlocks.blocks !== undefined) {
-            lastBlock = lastBlocks.blocks[0]
-          } else {
-            lastBlock = lastBlocks.data[0]
-          }
+    // if more than LSK_MAX_FETCH_BLOCKS would be fetch, limit this to save centralized chains
+    if (to - from > LSK_MAX_FETCH_BLOCKS) {
+      this._logger.warn(`Would fetch ${to - from} blocks but LSK can't handle such load, fetching only ${LSK_MAX_FETCH_BLOCKS}`)
+      from = to - LSK_MAX_FETCH_BLOCKS
+    }
+    const whichBlocks = range(from, to)
 
-          const to = lastBlock.height - 1
-          const from = to - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['lsk'])
-          const step = ((to - from) / 500) | 0
-          const boundaries = rangeStep(from, step, to)
-          const tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlock.height - blockNumber, limit: 1 }))
-
-          this._logger.info(`Requesting blocks ${from} - ${to} for initial resync (${tasks.length} tasks)`)
-          parallelLimit(tasks, 5, (err, resuls) => {
-            if (err) {
-              this._logger.warn(`Couldn't fetch all blocks for initial resync`)
-            }
-            this._logger.info(`Fetched blocks for initial resync`)
-          })
-        })
-        break
-
-      default:
-        this._logger.warn(`Unknown message type "${message}"`)
+    if (from - to > 0) {
+      this._logger.info(`Fetching missing blocks ${whichBlocks}`)
+      const opts = { offset: to - from, limit: to - from }
+      this._cycleFn(opts).then(() => {
+        this._logger.info(`Fetched missing blocks ${whichBlocks}`)
+      })
     }
   }
 
