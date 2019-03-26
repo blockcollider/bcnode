@@ -6,7 +6,8 @@
  *
  * @disable-flow
  */
-import type { RoverClient } from '../protos/rover_grpc_pb'
+import type { RoverClient } from '../../protos/rover_grpc_pb'
+import type { RoverMessage } from '../../protos/rover_pb'
 
 const process = require('process')
 const { pathOr, contains, reverse, without, xprod } = require('ramda')
@@ -24,6 +25,7 @@ const logging = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
+const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
 const { RpcClient } = require('../../rpc')
 const { Network, isSatoshiPeer } = require('./network')
 const { swapOrder } = require('../../utils/strings')
@@ -207,6 +209,25 @@ export default class Controller {
       this._logger.error(`Uncaught exception: ${errToString(e)}`)
       process.exit(3)
     })
+
+    const rpcStream = this._rpc.rover.join(new RoverIdent(['btc']))
+    rpcStream.on('data', (message: RoverMessage) => {
+      this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
+      switch (message.getType()) { // Also could be message.getPayloadCase()
+        case RoverMessageType.REQUESTRESYNC:
+          this.initialSync = true
+          break
+
+        case RoverMessageType.FETCHBLOCK:
+          const payload = message.getFetchBlock()
+          this.requestBlock(payload.getFromBlock(), payload.getToBlock())
+          break
+
+        default:
+          this._logger.warn(`Got unknown message type ${message.getType()}`)
+      }
+    })
+    rpcStream.on('close', () => this._logger.info(`gRPC stream from server closed`))
 
     pool.on('peerready', (peer, addr) => {
       poolTimeout && clearTimeout(poolTimeout)
@@ -469,36 +490,20 @@ export default class Controller {
   //   )
   // }
   //
-  message (message: string, rawData: string) {
-    switch (message) {
-      case 'fetch_block':
-        const data = JSON.parse(rawData)
-        const { previousLatest, currentLatest } = data
-        this.requestBlock(previousLatest, currentLatest)
-        break
 
-      case 'needs_resync':
-        this.initialSync = true
-        break
-
-      default:
-        this._logger.warn(`Unknown message type "${message}"`)
-    }
-  }
-
-  requestBlock (fromBlock: { height: number, hash: string, previousHash: string }, toBlock: { height: number, hash: string, previousHash: string }) { // now can be just a consecutive from-to hashes
-    if (toBlock.previousBlock === fromBlock.hash) {
+  requestBlock (fromBlock: Block, toBlock: Block) { // now can be just a consecutive from-to hashes
+    if (toBlock.getPreviousHash() === fromBlock.getHash()) {
       // we have nothing to do here, consecutive blocks
       this._logger.debug(`Nothing to do, sent blocks are consecutive`)
       return
     }
-    if (toBlock.height - fromBlock.height > BTC_MAX_FETCH_BLOCKS) {
-      this._logger.info(`Requested ${toBlock.height - fromBlock.height} (more than ${BTC_MAX_FETCH_BLOCKS}) to be fetched either node is starting or very stale / different btc chain BC block received, giving up`)
+    if (toBlock.getHeight() - fromBlock.getHeight() > BTC_MAX_FETCH_BLOCKS) {
+      this._logger.info(`Requested ${toBlock.getHeight() - fromBlock.getHeight()} (more than ${BTC_MAX_FETCH_BLOCKS}) to be fetched either node is starting or very stale / different btc chain BC block received, giving up`)
       return
     }
     // request headers first to have a whole list of headers to be fetched
     // with this list we are able to track if requested blocks where fetched
-    const peerMessage = new Messages().GetHeaders({ starts: [fromBlock.hash], stop: toBlock.hash })
+    const peerMessage = new Messages().GetHeaders({ starts: [fromBlock.getHash()], stop: toBlock.getHash() })
     this._sendToRandomPeers(peerMessage)
   }
 
