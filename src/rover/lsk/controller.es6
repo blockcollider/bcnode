@@ -152,7 +152,7 @@ export default class Controller {
   _cycleFn: Function;
   /* eslint-enable */
 
-  constructor (config: { randomizeNodes: boolean = true, bannedPeers: string[] = [] }) {
+  constructor (config: { randomizeNodes: boolean, bannedPeers: string[] }) {
     this._config = config
     this._logger = logging.getLogger(__filename)
     this._blockCache = new LRUCache({
@@ -161,7 +161,7 @@ export default class Controller {
     })
     this._otherCache = new LRUCache({ max: 50 })
     // TODO pull this to networks config
-    const networkConfig = merge(config, { testnet: BC_NETWORK === 'test', randomizeNodes: true })
+    const networkConfig = merge(config, { testnet: BC_NETWORK === 'test', randomizeNodes: true, bannedPeers: [] })
     this._logger.info(networkConfig)
     this._liskApi = (BC_NETWORK === 'test')
       ? lisk.APIClient.createTestnetAPIClient(networkConfig)
