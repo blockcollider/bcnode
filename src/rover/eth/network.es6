@@ -151,7 +151,7 @@ export default class Network extends EventEmitter {
     this._maximumPeers = this._config.maximumPeers + (Math.floor(Math.random() * 18) - 9) // add variability to peer pool on boot
     this._requestedBlocks = []
     this._initialSyncBlocksToFetch = []
-    this._initialResync = true
+    this._initialResync = false
   }
 
   get peers (): string[] {
