@@ -504,9 +504,6 @@ impl ::protobuf::reflect::ProtobufValue for RoverMessage {
 
 #[derive(PartialEq,Clone,Default)]
 pub struct RoverMessage_Resync {
-    // message fields
-    pub from_block: ::std::string::String,
-    pub to_block: ::std::string::String,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -515,58 +512,6 @@ pub struct RoverMessage_Resync {
 impl RoverMessage_Resync {
     pub fn new() -> RoverMessage_Resync {
         ::std::default::Default::default()
-    }
-
-    // string from_block = 1;
-
-    pub fn clear_from_block(&mut self) {
-        self.from_block.clear();
-    }
-
-    // Param is passed by value, moved
-    pub fn set_from_block(&mut self, v: ::std::string::String) {
-        self.from_block = v;
-    }
-
-    // Mutable pointer to the field.
-    // If field is not initialized, it is initialized with default value first.
-    pub fn mut_from_block(&mut self) -> &mut ::std::string::String {
-        &mut self.from_block
-    }
-
-    // Take field
-    pub fn take_from_block(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.from_block, ::std::string::String::new())
-    }
-
-    pub fn get_from_block(&self) -> &str {
-        &self.from_block
-    }
-
-    // string to_block = 2;
-
-    pub fn clear_to_block(&mut self) {
-        self.to_block.clear();
-    }
-
-    // Param is passed by value, moved
-    pub fn set_to_block(&mut self, v: ::std::string::String) {
-        self.to_block = v;
-    }
-
-    // Mutable pointer to the field.
-    // If field is not initialized, it is initialized with default value first.
-    pub fn mut_to_block(&mut self) -> &mut ::std::string::String {
-        &mut self.to_block
-    }
-
-    // Take field
-    pub fn take_to_block(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.to_block, ::std::string::String::new())
-    }
-
-    pub fn get_to_block(&self) -> &str {
-        &self.to_block
     }
 }
 
@@ -579,12 +524,6 @@ impl ::protobuf::Message for RoverMessage_Resync {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
-                1 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.from_block)?;
-                },
-                2 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.to_block)?;
-                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -597,24 +536,12 @@ impl ::protobuf::Message for RoverMessage_Resync {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if !self.from_block.is_empty() {
-            my_size += ::protobuf::rt::string_size(1, &self.from_block);
-        }
-        if !self.to_block.is_empty() {
-            my_size += ::protobuf::rt::string_size(2, &self.to_block);
-        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
-        if !self.from_block.is_empty() {
-            os.write_string(1, &self.from_block)?;
-        }
-        if !self.to_block.is_empty() {
-            os.write_string(2, &self.to_block)?;
-        }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
     }
@@ -656,17 +583,7 @@ impl ::protobuf::Message for RoverMessage_Resync {
         };
         unsafe {
             descriptor.get(|| {
-                let mut fields = ::std::vec::Vec::new();
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                    "from_block",
-                    |m: &RoverMessage_Resync| { &m.from_block },
-                    |m: &mut RoverMessage_Resync| { &mut m.from_block },
-                ));
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                    "to_block",
-                    |m: &RoverMessage_Resync| { &m.to_block },
-                    |m: &mut RoverMessage_Resync| { &mut m.to_block },
-                ));
+                let fields = ::std::vec::Vec::new();
                 ::protobuf::reflect::MessageDescriptor::new::<RoverMessage_Resync>(
                     "RoverMessage_Resync",
                     fields,
@@ -689,8 +606,6 @@ impl ::protobuf::Message for RoverMessage_Resync {
 
 impl ::protobuf::Clear for RoverMessage_Resync {
     fn clear(&mut self) {
-        self.clear_from_block();
-        self.clear_to_block();
         self.unknown_fields.clear();
     }
 }
@@ -710,8 +625,8 @@ impl ::protobuf::reflect::ProtobufValue for RoverMessage_Resync {
 #[derive(PartialEq,Clone,Default)]
 pub struct RoverMessage_FetchBlock {
     // message fields
-    pub from_block: ::std::string::String,
-    pub to_block: ::std::string::String,
+    pub from_block: ::protobuf::SingularPtrField<super::core::Block>,
+    pub to_block: ::protobuf::SingularPtrField<super::core::Block>,
     // special fields
     unknown_fields: ::protobuf::UnknownFields,
     cached_size: ::protobuf::CachedSize,
@@ -722,61 +637,85 @@ impl RoverMessage_FetchBlock {
         ::std::default::Default::default()
     }
 
-    // string from_block = 1;
+    // .bc.Block from_block = 1;
 
     pub fn clear_from_block(&mut self) {
         self.from_block.clear();
     }
 
+    pub fn has_from_block(&self) -> bool {
+        self.from_block.is_some()
+    }
+
     // Param is passed by value, moved
-    pub fn set_from_block(&mut self, v: ::std::string::String) {
-        self.from_block = v;
+    pub fn set_from_block(&mut self, v: super::core::Block) {
+        self.from_block = ::protobuf::SingularPtrField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_from_block(&mut self) -> &mut ::std::string::String {
-        &mut self.from_block
+    pub fn mut_from_block(&mut self) -> &mut super::core::Block {
+        if self.from_block.is_none() {
+            self.from_block.set_default();
+        }
+        self.from_block.as_mut().unwrap()
     }
 
     // Take field
-    pub fn take_from_block(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.from_block, ::std::string::String::new())
+    pub fn take_from_block(&mut self) -> super::core::Block {
+        self.from_block.take().unwrap_or_else(|| super::core::Block::new())
     }
 
-    pub fn get_from_block(&self) -> &str {
-        &self.from_block
+    pub fn get_from_block(&self) -> &super::core::Block {
+        self.from_block.as_ref().unwrap_or_else(|| super::core::Block::default_instance())
     }
 
-    // string to_block = 2;
+    // .bc.Block to_block = 2;
 
     pub fn clear_to_block(&mut self) {
         self.to_block.clear();
     }
 
+    pub fn has_to_block(&self) -> bool {
+        self.to_block.is_some()
+    }
+
     // Param is passed by value, moved
-    pub fn set_to_block(&mut self, v: ::std::string::String) {
-        self.to_block = v;
+    pub fn set_to_block(&mut self, v: super::core::Block) {
+        self.to_block = ::protobuf::SingularPtrField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_to_block(&mut self) -> &mut ::std::string::String {
-        &mut self.to_block
+    pub fn mut_to_block(&mut self) -> &mut super::core::Block {
+        if self.to_block.is_none() {
+            self.to_block.set_default();
+        }
+        self.to_block.as_mut().unwrap()
     }
 
     // Take field
-    pub fn take_to_block(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.to_block, ::std::string::String::new())
+    pub fn take_to_block(&mut self) -> super::core::Block {
+        self.to_block.take().unwrap_or_else(|| super::core::Block::new())
     }
 
-    pub fn get_to_block(&self) -> &str {
-        &self.to_block
+    pub fn get_to_block(&self) -> &super::core::Block {
+        self.to_block.as_ref().unwrap_or_else(|| super::core::Block::default_instance())
     }
 }
 
 impl ::protobuf::Message for RoverMessage_FetchBlock {
     fn is_initialized(&self) -> bool {
+        for v in &self.from_block {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.to_block {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
         true
     }
 
@@ -785,10 +724,10 @@ impl ::protobuf::Message for RoverMessage_FetchBlock {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
                 1 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.from_block)?;
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.from_block)?;
                 },
                 2 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.to_block)?;
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.to_block)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -802,11 +741,13 @@ impl ::protobuf::Message for RoverMessage_FetchBlock {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if !self.from_block.is_empty() {
-            my_size += ::protobuf::rt::string_size(1, &self.from_block);
+        if let Some(ref v) = self.from_block.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         }
-        if !self.to_block.is_empty() {
-            my_size += ::protobuf::rt::string_size(2, &self.to_block);
+        if let Some(ref v) = self.to_block.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -814,11 +755,15 @@ impl ::protobuf::Message for RoverMessage_FetchBlock {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
-        if !self.from_block.is_empty() {
-            os.write_string(1, &self.from_block)?;
+        if let Some(ref v) = self.from_block.as_ref() {
+            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
         }
-        if !self.to_block.is_empty() {
-            os.write_string(2, &self.to_block)?;
+        if let Some(ref v) = self.to_block.as_ref() {
+            os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -862,12 +807,12 @@ impl ::protobuf::Message for RoverMessage_FetchBlock {
         unsafe {
             descriptor.get(|| {
                 let mut fields = ::std::vec::Vec::new();
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<super::core::Block>>(
                     "from_block",
                     |m: &RoverMessage_FetchBlock| { &m.from_block },
                     |m: &mut RoverMessage_FetchBlock| { &mut m.from_block },
                 ));
-                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<super::core::Block>>(
                     "to_block",
                     |m: &RoverMessage_FetchBlock| { &m.to_block },
                     |m: &mut RoverMessage_FetchBlock| { &mut m.to_block },
@@ -1372,24 +1317,22 @@ impl ::protobuf::reflect::ProtobufValue for RoverMessageType {
 
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x0brover.proto\x12\x02bc\x1a\ncore.proto\"+\n\nRoverIdent\x12\x1d\n\n\
-    rover_name\x18\x01\x20\x01(\tR\troverName\"\xc2\x02\n\x0cRoverMessage\
+    rover_name\x18\x01\x20\x01(\tR\troverName\"\x9e\x02\n\x0cRoverMessage\
     \x12(\n\x04type\x18\x01\x20\x01(\x0e2\x14.bc.RoverMessageTypeR\x04type\
     \x121\n\x06resync\x18\x02\x20\x01(\x0b2\x17.bc.RoverMessage.ResyncH\0R\
     \x06resync\x12>\n\x0bfetch_block\x18\x03\x20\x01(\x0b2\x1b.bc.RoverMessa\
-    ge.FetchBlockH\0R\nfetchBlock\x1aB\n\x06Resync\x12\x1d\n\nfrom_block\x18\
-    \x01\x20\x01(\tR\tfromBlock\x12\x19\n\x08to_block\x18\x02\x20\x01(\tR\
-    \x07toBlock\x1aF\n\nFetchBlock\x12\x1d\n\nfrom_block\x18\x01\x20\x01(\tR\
-    \tfromBlock\x12\x19\n\x08to_block\x18\x02\x20\x01(\tR\x07toBlockB\t\n\
-    \x07payload\"m\n\x10SettleTxCheckReq\x12\x17\n\x07addr_to\x18\x01\x20\
-    \x01(\tR\x06addrTo\x12\x1b\n\taddr_from\x18\x02\x20\x01(\tR\x08addrFrom\
-    \x12#\n\rbridged_chain\x18\x03\x20\x01(\tR\x0cbridgedChain\"V\n\x15Settl\
-    eTxCheckResponse\x12=\n\x1bis_before_settlement_height\x18\x01\x20\x01(\
-    \x08R\x18isBeforeSettlementHeight*5\n\x10RoverMessageType\x12\x0e\n\nFet\
-    chBlock\x10\0\x12\x11\n\rRequestResync\x10\x012\xa7\x01\n\x05Rover\x12,\
-    \n\x04Join\x12\x0e.bc.RoverIdent\x1a\x10.bc.RoverMessage\"\00\x01\x12%\n\
-    \x0cCollectBlock\x12\t.bc.Block\x1a\x08.bc.Null\"\0\x12I\n\x14IsBeforeSe\
-    ttleHeight\x12\x14.bc.SettleTxCheckReq\x1a\x19.bc.SettleTxCheckResponse\
-    \"\0b\x06proto3\
+    ge.FetchBlockH\0R\nfetchBlock\x1a\x08\n\x06Resync\x1a\\\n\nFetchBlock\
+    \x12(\n\nfrom_block\x18\x01\x20\x01(\x0b2\t.bc.BlockR\tfromBlock\x12$\n\
+    \x08to_block\x18\x02\x20\x01(\x0b2\t.bc.BlockR\x07toBlockB\t\n\x07payloa\
+    d\"m\n\x10SettleTxCheckReq\x12\x17\n\x07addr_to\x18\x01\x20\x01(\tR\x06a\
+    ddrTo\x12\x1b\n\taddr_from\x18\x02\x20\x01(\tR\x08addrFrom\x12#\n\rbridg\
+    ed_chain\x18\x03\x20\x01(\tR\x0cbridgedChain\"V\n\x15SettleTxCheckRespon\
+    se\x12=\n\x1bis_before_settlement_height\x18\x01\x20\x01(\x08R\x18isBefo\
+    reSettlementHeight*5\n\x10RoverMessageType\x12\x0e\n\nFetchBlock\x10\0\
+    \x12\x11\n\rRequestResync\x10\x012\xa7\x01\n\x05Rover\x12,\n\x04Join\x12\
+    \x0e.bc.RoverIdent\x1a\x10.bc.RoverMessage\"\00\x01\x12%\n\x0cCollectBlo\
+    ck\x12\t.bc.Block\x1a\x08.bc.Null\"\0\x12I\n\x14IsBeforeSettleHeight\x12\
+    \x14.bc.SettleTxCheckReq\x1a\x19.bc.SettleTxCheckResponse\"\0b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

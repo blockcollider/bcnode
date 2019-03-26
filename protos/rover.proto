@@ -30,14 +30,13 @@ message RoverMessage {
         Resync resync = 2;
         FetchBlock fetch_block = 3;
     }
+
     message Resync {
-        string from_block = 1;
-        string to_block = 2;
     }
 
     message FetchBlock {
-        string from_block = 1;
-        string to_block = 2;
+        Block from_block = 1;
+        Block to_block = 2;
     }
 }
 

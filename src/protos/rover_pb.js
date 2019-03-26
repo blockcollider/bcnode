@@ -389,8 +389,7 @@ proto.bc.RoverMessage.Resync.prototype.toObject = function(opt_includeInstance) 
  */
 proto.bc.RoverMessage.Resync.toObject = function(includeInstance, msg) {
   var f, obj = {
-    fromBlock: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    toBlock: jspb.Message.getFieldWithDefault(msg, 2, "")
+
   };
 
   if (includeInstance) {
@@ -427,14 +426,6 @@ proto.bc.RoverMessage.Resync.deserializeBinaryFromReader = function(msg, reader)
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setFromBlock(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setToBlock(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -464,50 +455,6 @@ proto.bc.RoverMessage.Resync.prototype.serializeBinary = function() {
  */
 proto.bc.RoverMessage.Resync.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getFromBlock();
-  if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
-  }
-  f = message.getToBlock();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
-};
-
-
-/**
- * optional string from_block = 1;
- * @return {string}
- */
-proto.bc.RoverMessage.Resync.prototype.getFromBlock = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
-};
-
-
-/** @param {string} value */
-proto.bc.RoverMessage.Resync.prototype.setFromBlock = function(value) {
-  jspb.Message.setField(this, 1, value);
-};
-
-
-/**
- * optional string to_block = 2;
- * @return {string}
- */
-proto.bc.RoverMessage.Resync.prototype.getToBlock = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/** @param {string} value */
-proto.bc.RoverMessage.Resync.prototype.setToBlock = function(value) {
-  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -558,8 +505,8 @@ proto.bc.RoverMessage.FetchBlock.prototype.toObject = function(opt_includeInstan
  */
 proto.bc.RoverMessage.FetchBlock.toObject = function(includeInstance, msg) {
   var f, obj = {
-    fromBlock: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    toBlock: jspb.Message.getFieldWithDefault(msg, 2, "")
+    fromBlock: (f = msg.getFromBlock()) && core_pb.Block.toObject(includeInstance, f),
+    toBlock: (f = msg.getToBlock()) && core_pb.Block.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -597,11 +544,13 @@ proto.bc.RoverMessage.FetchBlock.deserializeBinaryFromReader = function(msg, rea
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = new core_pb.Block;
+      reader.readMessage(value,core_pb.Block.deserializeBinaryFromReader);
       msg.setFromBlock(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
+      var value = new core_pb.Block;
+      reader.readMessage(value,core_pb.Block.deserializeBinaryFromReader);
       msg.setToBlock(value);
       break;
     default:
@@ -634,49 +583,81 @@ proto.bc.RoverMessage.FetchBlock.prototype.serializeBinary = function() {
 proto.bc.RoverMessage.FetchBlock.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getFromBlock();
-  if (f.length > 0) {
-    writer.writeString(
+  if (f != null) {
+    writer.writeMessage(
       1,
-      f
+      f,
+      core_pb.Block.serializeBinaryToWriter
     );
   }
   f = message.getToBlock();
-  if (f.length > 0) {
-    writer.writeString(
+  if (f != null) {
+    writer.writeMessage(
       2,
-      f
+      f,
+      core_pb.Block.serializeBinaryToWriter
     );
   }
 };
 
 
 /**
- * optional string from_block = 1;
- * @return {string}
+ * optional Block from_block = 1;
+ * @return {?proto.bc.Block}
  */
 proto.bc.RoverMessage.FetchBlock.prototype.getFromBlock = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+  return /** @type{?proto.bc.Block} */ (
+    jspb.Message.getWrapperField(this, core_pb.Block, 1));
 };
 
 
-/** @param {string} value */
+/** @param {?proto.bc.Block|undefined} value */
 proto.bc.RoverMessage.FetchBlock.prototype.setFromBlock = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setWrapperField(this, 1, value);
+};
+
+
+proto.bc.RoverMessage.FetchBlock.prototype.clearFromBlock = function() {
+  this.setFromBlock(undefined);
 };
 
 
 /**
- * optional string to_block = 2;
- * @return {string}
+ * Returns whether this field is set.
+ * @return {!boolean}
  */
-proto.bc.RoverMessage.FetchBlock.prototype.getToBlock = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+proto.bc.RoverMessage.FetchBlock.prototype.hasFromBlock = function() {
+  return jspb.Message.getField(this, 1) != null;
 };
 
 
-/** @param {string} value */
+/**
+ * optional Block to_block = 2;
+ * @return {?proto.bc.Block}
+ */
+proto.bc.RoverMessage.FetchBlock.prototype.getToBlock = function() {
+  return /** @type{?proto.bc.Block} */ (
+    jspb.Message.getWrapperField(this, core_pb.Block, 2));
+};
+
+
+/** @param {?proto.bc.Block|undefined} value */
 proto.bc.RoverMessage.FetchBlock.prototype.setToBlock = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+proto.bc.RoverMessage.FetchBlock.prototype.clearToBlock = function() {
+  this.setToBlock(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.bc.RoverMessage.FetchBlock.prototype.hasToBlock = function() {
+  return jspb.Message.getField(this, 2) != null;
 };
 
 
