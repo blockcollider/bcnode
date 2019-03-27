@@ -47,15 +47,13 @@ export class RoverManager {
   _roverConnections: { [roverName: string]: Object }
   _roverBootstrap: { [roverName: string]: boolean }
   _timeouts: Object
-  _network: 'mainnet'|'testnet'
 
-  constructor (network: 'mainnet'|'testnet') {
+  constructor () {
     this._logger = logging.getLogger(__filename)
     this._rovers = {}
     this._roverConnections = {}
     this._roverBootstrap = {}
     this._timeouts = {}
-    this._network = network
   }
 
   get rovers (): Object {
