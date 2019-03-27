@@ -202,6 +202,30 @@ describe('RocksDb', () => {
         expect(val).toBe('trololo')
       })
     })
+
+    describe('put', () => {
+      it('puts defined value as scheduled height at defined key', async () => {
+        const dataDir = `${TEST_DATA_DIR}_scheduled_put_1`
+        const db = new RocksDb(dataDir)
+        await db.open()
+        await db.scheduleAtBlockHeight(37, 'put', 'testing.key.123', 'tralala')
+        await db.runScheduledOperations(36)
+        let val = await db.get('testing.key.123')
+        expect(val).toBe(null)
+        await db.runScheduledOperations(37)
+        val = await db.get('testing.key.123')
+        expect(val).toBe('tralala')
+      })
+
+      it('fails with Block or any other protobuf because operation is not a protobuf itself now', async () => {
+        const dataDir = `${TEST_DATA_DIR}_scheduled_put_2`
+        const db = new RocksDb(dataDir)
+        await db.open()
+        await db.scheduleAtBlockHeight(37, 'put', 'testing.key.123', new BcBlock())
+        // see https://github.com/facebook/jest/issues/1700 for explanation why can't use toThrow matcher
+        await expect(db.runScheduledOperations(37)).rejects.toThrow()
+      })
+    })
   })
 
   afterAll(done => {
