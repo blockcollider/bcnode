@@ -14,7 +14,7 @@ import { all, identity } from 'ramda'
 import { getLogger } from '../logger'
 import { Transaction } from '../protos/core_pb'
 import Interpreter from '../script/index'
-import { COINBASE_MATURITY, ScriptTemplates } from '../core/txUtils'
+import { COINBASE_MATURITY, ScriptTemplates, getScriptStrFromBuffer } from '../core/txUtils'
 
 export class TxHandler {
   _logger: Logger
@@ -75,13 +75,16 @@ export class TxHandler {
       }
 
       // Reject "nonstandard" transactions: scriptSig doing anything other than pushing numbers on the stack, or scriptPubkey not matching the two usual forms[4]
-      if (!ScriptTemplates.validateScript(input.getInputScript())) {
+      const inputScript = getScriptStrFromBuffer(input.getInputScript())
+      if (!ScriptTemplates.validateScript(inputScript)) {
+        this._logger.warn(`invalid script format, script: ${inputScript}`)
+
         return false
       }
 
       // For each input, if the referenced output exists in any other tx in the pool, reject this transaction.[5]
       // For each input, if the referenced output does not exist (e.g. never existed or has already been spent), reject this transaction[6]
-      const outpoint = input.getOutpoint()
+      const outpoint = input.getOutPoint()
       const outputsKey = `${blockchain}.op.${outpoint.getHash()}.${outpoint.getIndex()}`
       // there is a reference to this outpoint and is non-empty => is spent
       let spenderTxHash
@@ -126,8 +129,8 @@ export class TxHandler {
       let result
       try {
         result = await this._interpreter.evaluateAsync(
-          referencedOutput.getOutputScript(),
-          input.getInputScript(),
+          getScriptStrFromBuffer(referencedOutput.getOutputScript()),
+          getScriptStrFromBuffer(input.getInputScript()),
           input,
           tx
         )
