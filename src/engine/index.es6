@@ -1399,14 +1399,27 @@ export class Engine {
         collateralizedNrg, additionalTxFee,
         this._minerKey
       )
-      this._logger.info(`adding crosschain taker tx to the pending pool: ${txTemplate.getHash()}`)
-      const wasAdded = await this._txPendingPool.tryAddingNewTx(txTemplate, 'bc')
-      if (wasAdded) {
-        this._emitter.emit('announceTx', {
-          data: txTemplate
+
+      return new Promise((resolve, reject) => {
+        this._txHandler.isValidTx(txTemplate).then(isValid => {
+          if (isValid) {
+            // Try to add to pending pool
+            this._logger.info(`adding crosschain taker tx to the pending pool: ${txTemplate.getHash()}`)
+            this._txPendingPool.tryAddingNewTx(txTemplate, 'bc').then(_ => {
+              // Relay transaction to peers
+              this._emitter.emit('announceTx', {
+                data: txTemplate
+              })
+
+              this._logger.debug(`TX: ${txHash(txTemplate)} is valid - adding to pool`)
+              return resolve({ status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() })
+            })
+          } else {
+            this._logger.info(`TX: ${txHash(txTemplate)} is invalid - not accepting to the pending TX pool`)
+            return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error('invalid tx') })
+          }
         })
-      }
-      return { status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() }
+      })
     } catch (e) {
       this._logger.error(e)
       return { status: RpcTransactionResponseStatus.FAILURE, error: e }
@@ -1431,14 +1444,26 @@ export class Engine {
         this._minerKey
       )
 
-      this._logger.info(`adding crosschain maker tx to the pending pool: ${txTemplate.getHash()}`)
-      const wasAdded = await this._txPendingPool.tryAddingNewTx(txTemplate, 'bc')
-      if (wasAdded) {
-        this._emitter.emit('announceTx', {
-          data: txTemplate
+      return new Promise((resolve, reject) => {
+        this._txHandler.isValidTx(txTemplate).then(isValid => {
+          if (isValid) {
+            // Try to add to pending pool
+            this._logger.info(`adding crosschain maker tx to the pending pool: ${txTemplate.getHash()}`)
+            this._txPendingPool.tryAddingNewTx(txTemplate, 'bc').then(_ => {
+              // Relay transaction to peers
+              this._emitter.emit('announceTx', {
+                data: txTemplate
+              })
+
+              this._logger.debug(`TX: ${txHash(txTemplate)} is valid - adding to pool`)
+              return resolve({ status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() })
+            })
+          } else {
+            this._logger.info(`TX: ${txHash(txTemplate)} is invalid - not accepting to the pending TX pool`)
+            return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error("invalid tx") })
+          }
         })
-      }
-      return { status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() }
+      })
     } catch (e) {
       this._logger.error(e)
       return { status: RpcTransactionResponseStatus.FAILURE, error: e }
