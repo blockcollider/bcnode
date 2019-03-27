@@ -1124,7 +1124,7 @@ export default class PersistenceRocksDb {
       return true
     }
     scheduledOperations.push(eventArgs)
-    await this.put(refKey, eventArgs)
+    await this.put(refKey, scheduledOperations)
 
     return true
   }
