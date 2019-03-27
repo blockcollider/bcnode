@@ -226,6 +226,22 @@ describe('RocksDb', () => {
         await expect(db.runScheduledOperations(37)).rejects.toThrow()
       })
     })
+
+    describe('del', () => {
+      it('deletes scheduled key at defined height', async () => {
+        const dataDir = `${TEST_DATA_DIR}_scheduled_del`
+        const db = new RocksDb(dataDir)
+        await db.open()
+        await db.put('testing.key.123', 'trololo')
+        await db.scheduleAtBlockHeight(37, 'del', 'testing.key.123')
+        await db.runScheduledOperations(36)
+        let op = await db.get('testing.key.123')
+        expect(op).toBe('trololo')
+        await db.runScheduledOperations(37)
+        op = await db.get('testing.key.123')
+        expect(op).toBe(null)
+      })
+    })
   })
 
   afterAll(done => {
