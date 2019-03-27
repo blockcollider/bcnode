@@ -4,14 +4,16 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow-disable
+ * @flow
  */
-const { resolve } = require('path')
+const { join } = require('path')
+const { tmpdir } = require('os')
 const rimraf = require('rimraf')
 
 const { RocksDb } = require('../')
+const { BcBlock } = require('../../protos/core_pb')
 
-const TEST_DATA_DIR = resolve(__filename, '..', '..', '..', '_test_data')
+const TEST_DATA_DIR = join(tmpdir(), 'bcnode_db_test')
 
 describe('RocksDb', () => {
   it('can instantiate self', () => {
@@ -161,6 +163,29 @@ describe('RocksDb', () => {
       .catch((err) => {
         expect(err).toEqual(null)
       })
+  })
+
+  describe('scheduled operations', () => {
+    test('are stored correctly', async () => {
+      const OP1 = [37, 'del', 'testing.key.123', 'bc']
+      const OP2 = [37, 'put', 'block.key.123', 'test_value', 'bc']
+      const dataDir = `${TEST_DATA_DIR}_scheduled_common`
+      const db = new RocksDb(dataDir)
+      await db.open()
+      await db.scheduleAtBlockHeight(OP1[0], OP1[1], OP1[2])
+      let ops = await db.get('bc.schedule.37')
+      expect(ops).toEqual([OP1])
+
+      // same operation will not be scheduled twice
+      await db.scheduleAtBlockHeight(OP1[0], OP1[1], OP1[2])
+      ops = await db.get('bc.schedule.37')
+      expect(ops).toEqual([OP1])
+
+      // different op gets stored
+      await db.scheduleAtBlockHeight(OP2[0], OP2[1], OP2[2], OP2[3])
+      ops = await db.get('bc.schedule.37')
+      expect(ops).toEqual([OP1, OP2])
+    })
   })
 
   afterAll(done => {
