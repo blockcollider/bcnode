@@ -1058,16 +1058,17 @@ export default class PersistenceRocksDb {
   async runScheduledOperations (height: number|string, blockchain: string = 'bc', opts: Object = { asBuffer: true }): Promise<boolean> {
     let scheduledOperations = await this.get(`${blockchain}.schedule.${height}`)
     if (!scheduledOperations || !Array.isArray(scheduledOperations)) {
-      return Promise.resolve(true)
+      return true
     }
 
-    for (let i = 0; i < scheduledOperations.length; i++) {
-      if (scheduledOperations[i].length >= 4) {
-        let operation = scheduledOperations[1]
-        let key = scheduledOperations[2]
-        // if the operation has a value sdf
-        if (scheduledOperations[i].length === 5) {
-          let value = scheduledOperations[3]
+    for (const op of scheduledOperations) {
+      debug(`runScheduledOperations(): ${op}`)
+      if (op.length >= 4) {
+        let operation: SupportedScheduledOperations = op[1]
+        let key = op[2]
+        // if the operation has a value
+        if (op.length === 5) {
+          let value = op[3]
           // check if the operation is a delfromlist
           if (operation !== 'delfromlist') {
             await this[operation](key, value)
@@ -1090,7 +1091,7 @@ export default class PersistenceRocksDb {
         }
       }
     }
-    return Promise.resolve(true)
+    return true
   }
 
   /**
