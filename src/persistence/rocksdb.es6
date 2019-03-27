@@ -15,7 +15,7 @@ const LRUCache = require('lru-cache')
 // const BeamToJson = require('../../script/beamtojson')
 const { blake2bl } = require('../utils/crypto')
 const { networks } = require('../config/networks')
-const { flatten, max, equals, is, toPairs } = require('ramda')
+const { contains, flatten, max, equals, is, toPairs } = require('ramda')
 const { BcBlock, Block, BlockchainHeaders, BlockchainHeader, Transaction, MarkedTransaction, TransactionInput, TransactionOutput } = require('../protos/core_pb')
 const { serialize, deserialize } = require('./codec')
 const { getLogger } = require('../logger')
@@ -24,7 +24,8 @@ const { isValidBlock } = require('../bc/validation')
 
 const { ROVER_SECONDS_PER_BLOCK } = require('../rover/utils')
 
-const SCHEDULE_OPERATORS = ['get', 'put', 'del', 'delfromlist']
+const SUPPORTED_SCHEDULED_OPERATIONS = ['get', 'put', 'del', 'delfromlist']
+type SupportedScheduledOperations = 'get'|'put'|'del'|'delfromlist'
 
 type BlockBoundary = [string, [BlockchainHeader, BlockchainHeader]]
 
@@ -1100,15 +1101,15 @@ export default class PersistenceRocksDb {
    * @param value {string} value of data
    * @param blockchain {string} value of data
    */
-  async scheduleAtBlockHeight (height: number, operation: string, key: string, value: any = '', blockchain: string = 'bc', opts: Object = { asBuffer: true }): Promise<boolean> {
+  async scheduleAtBlockHeight (height: number, operation: SupportedScheduledOperations, key: string, value: any = '', blockchain: string = 'bc', opts: Object = { asBuffer: true }): Promise<boolean|string> {
     const refKey = `${blockchain}.schedule.${height}`
     let scheduledOperations = await this.get(refKey)
     if (!scheduledOperations || !Array.isArray(scheduledOperations)) {
       scheduledOperations = []
     }
     // check if the given operation is supported
-    if (SCHEDULE_OPERATORS[operation] === undefined) {
-      return Promise.resolve(false)
+    if (!contains(operation, SUPPORTED_SCHEDULED_OPERATIONS)) {
+      return false
     }
     let eventArgs = [height, operation, key, value, blockchain]
     // if the value is empty or default do not store in the schedule
@@ -1120,12 +1121,12 @@ export default class PersistenceRocksDb {
       return blake2bl(s.join(''))
     })
     if (restrictedSet.indexOf(uniqueKey) > -1) {
-      return Promise.resolve(true)
+      return true
     }
     scheduledOperations.push(eventArgs)
     await this.put(refKey, eventArgs)
 
-    return Promise.resolve(true)
+    return true
   }
 
   /**
