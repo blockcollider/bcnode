@@ -1117,6 +1117,7 @@ export default class PersistenceRocksDb {
     if (value === '') {
       eventArgs = [height, operation, key, blockchain]
     }
+    // FIXME cannot join nonstring values (what if I store e.g. array as a value?)
     const uniqueKey = blake2bl(eventArgs.join(''))
     const restrictedSet = scheduledOperations.map((s) => {
       return blake2bl(s.join(''))
