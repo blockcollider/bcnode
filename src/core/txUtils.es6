@@ -78,14 +78,15 @@ export class ScriptTemplates {
    */
   static validateNrgBalanceTransferScriptFormat (script: string): boolean {
     const parts = script.split(' ')
+    const inputUnlockScriptPartsLength = 3
 
-    if (parts.length !== 2 && parts.length !== 5 && parts.length !== 7) {
+    if (parts.length !== inputUnlockScriptPartsLength && parts.length !== 5 && parts.length !== 7) {
       debug(`0 - l: ${parts.length}`)
       return false
     }
 
-    if (parts.length === 2) { // input lock script
-      const [pubKey, signature] = parts
+    if (parts.length === inputUnlockScriptPartsLength) { // input lock script
+      const [signature, pubKey, _] = parts
 
       // secp256k1.publicKeyCreate with compressed = true produces 33B pub key
       if (pubKey.length !== 66 || !isHexString(pubKey)) {
@@ -276,6 +277,10 @@ export class ScriptTemplates {
     ]
     return script.map(part => part.join(' ')).join(' ')
   }
+}
+
+export const getScriptStrFromBuffer = (scriptBuffer: Uint8Array): string => {
+  return Buffer.from(scriptBuffer, 'ascii').toString('ascii')
 }
 
 export const extractInfoFromCrossChainTxTakerOutputScript = (script: string): {
