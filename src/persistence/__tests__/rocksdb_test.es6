@@ -186,6 +186,22 @@ describe('RocksDb', () => {
       ops = await db.get('bc.schedule.37')
       expect(ops).toEqual([OP1, OP2])
     })
+
+    describe('get', () => {
+      it('gets does nothing', async () => {
+        const dataDir = `${TEST_DATA_DIR}_scheduled_get`
+        const db = new RocksDb(dataDir)
+        await db.open()
+        await db.put('testing.key.123', 'trololo')
+        await db.scheduleAtBlockHeight(37, 'get', 'testing.key.123')
+        await db.runScheduledOperations(36)
+        let val = await db.get('testing.key.123')
+        expect(val).toBe('trololo')
+        await db.runScheduledOperations(37)
+        val = await db.get('testing.key.123')
+        expect(val).toBe('trololo')
+      })
+    })
   })
 
   afterAll(done => {
