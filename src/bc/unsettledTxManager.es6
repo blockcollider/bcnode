@@ -211,21 +211,21 @@ class UnsettledTxManager {
     toAddr: string, bindFromAddr: string = '0' // toMakerAddress, fromTakerAddress
   ) {
     const key = UnsettledTxManager.watchKey(bridgedChain, toAddr)
-    const watchlist = await this._persistence.get(key)
+    let watchlist = await this._persistence.get(key)
     const bind = bindFromAddr === '0' ? false : bindFromAddr
     if (bindFromAddr === undefined || toAddr === bindFromAddr) {
-      return Promise.resolve(false)
+      return false
     }
     // basic protection against binding marked addresses from different chains
     if (bindFromAddr !== '0' && toAddr.length !== bindFromAddr.length) {
-      return Promise.resolve(false)
+      return false
     }
     const update = {
-      callbackHash: callbackHash,
-      callbackIndex: callbackIndex,
-      bridgedChain: bridgedChain,
-      bcSettleWindow: bcSettleWindow,
-      toAddr: toAddr,
+      callbackHash,
+      callbackIndex,
+      bridgedChain,
+      bcSettleWindow,
+      toAddr,
       bindFromAddress: bind
     }
     if (watchlist) {
@@ -234,16 +234,15 @@ class UnsettledTxManager {
         return blake2bl(values(w).join(''))
       })
       if (map.indexOf(updateValues) > -1) {
-        return Promise.resolve(false)
+        return false
       }
       watchlist.push(update)
-      await this._persistence.scheduleAtBlockHeight(bcSettleWindow, 'delfromlist', key, update)
-      await this._persistence.put(key, watchlist)
     } else {
-      await this._persistence.scheduleAtBlockHeight(bcSettleWindow, 'delfromlist', key, update)
-      await this._persistence.put(key, [update])
+      watchlist = [update]
     }
-    return Promise.resolve(true)
+    await this._persistence.scheduleAtBlockHeight(bcSettleWindow, 'delfromlist', key, update)
+    await this._persistence.put(key, watchlist)
+    return true
   }
 
   async isMarkedWatch (bridgedChain: string, toAddr: string, bindFromAddr: string = '0', currentBlockHeight: number) {
