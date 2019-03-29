@@ -8,6 +8,7 @@
  */
 // const { Block, BcBlock, Transaction, TransactionOutput, TransactionInput } = require()
 import type { TransactionInput, Transaction } from '../protos/core_pb'
+import type RocksDb from '../persistence/rocksdb'
 
 var { parser } = require('./script')
 var Validator = require('./validator')
@@ -21,7 +22,11 @@ var debug = require('debug')('bcnode:script:interpreter')
 var LRUCache = require('lru-cache')
 
 class Interpreter {
-  constructor (persistence) {
+  persistence: RocksDb
+  txManager: UnsettledTxManager
+  cache: LRUCache<string, Transaction>
+
+  constructor (persistence: RocksDb) {
     this.persistence = persistence
     this.txManager = new UnsettledTxManager(persistence)
     this.cache = LRUCache({
@@ -33,7 +38,7 @@ class Interpreter {
    * @param {BcBlock} bc block
    * @return {Array} list of marked transactions
    */
-  async getScriptMarkedTxs (script, env) {
+  async getScriptMarkedTxs (script: string, env: Object): Promise<Transaction[]> {
     var markedOperations = Validator.includesMarkedOpcode(script)
     // if there are no marked operations return an empty array
     if (markedOperations.length === 0) {
@@ -143,7 +148,7 @@ class Interpreter {
    * @param inputScript string script to unlock outputScript
    * @return Object
    */
-  async getScriptEnv (outputScript, inputScript, input, tx) {
+  async getScriptEnv (outputScript: string, inputScript: string, input: TransactionInput, tx: Transaction) {
     try {
       var env = {
         SCRIPT: inputScript + ' ' + outputScript,
