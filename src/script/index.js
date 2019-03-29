@@ -51,6 +51,9 @@ class Interpreter {
       if (ScriptTemplates.validateScript(script)) {
         var depset = BeamToJson.toJSON('OP_DEPSET', script)
         var makerColl = BeamToJson.toJSON('OP_MAKERCOLL', script)
+        if (!depset || !makerColl) {
+          throw new Error('Could not parse depset or makerColl from the script')
+        }
         var currentHeight = env.LATEST_BLOCK.getHeight()
         var startBlock = env.CALLBACK_TX_BLOCK !== false ? env.CALLBACK_TX_BLOCK : env.OUTPOINT_TX_BLOCK
         var callbackHash = env.CALLBACK_HASH !== false ? env.CALLBACK_HASH : env.OUTPOINT_HASH
@@ -164,6 +167,8 @@ class Interpreter {
         INPUT_TX: false,
         INPUT_TX_BLOCK: false,
         MARKED_TXS: [],
+        CALLBACK_HASH: undefined,
+        CALLBACK_INDEX: undefined,
         /*
          * Address space human readable 'X' change for the hex equivalent
          *
