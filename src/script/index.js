@@ -42,7 +42,7 @@ class Interpreter {
     var markedOperations = Validator.includesMarkedOpcode(script)
     // if there are no marked operations return an empty array
     if (markedOperations.length === 0) {
-      return Promise.resolve(markedOperations)
+      return markedOperations
     } else if (script.indexOf('OP_MARK') > -1) {
       var mark = BeamToJson.toJSON('OP_MARK', script)
     } else if (script.indexOf('OP_MAKERCOLL') > -1) {
@@ -77,7 +77,7 @@ class Interpreter {
         await this.txManager.setMarkedWatch(callbackHash, callbackIndex, fromChain.toLowerCase(), settlementBlockHeight, toTakerAddress)
 
         if (blocks.length < 1) {
-          return Promise.resolve([])
+          return []
         }
 
         var blockCap = blocks.slice(blocks.length - 1, blocks.length)
@@ -122,7 +122,7 @@ class Interpreter {
           return all
         }, [])
 
-        return Promise.resolve(markedTxs)
+        return markedTxs
       }
     }
   }
@@ -241,13 +241,13 @@ class Interpreter {
             debug('2%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
             debug(env.SCRIPT)
           } else {
-            return Promise.reject(new Error('callback referenced script does not contain monadic property'))
+            throw new Error('callback referenced script does not contain monadic property')
           }
         } else {
-          return Promise.reject(new Error('unable to recover script referenced callback'))
+          throw new Error('unable to recover script referenced callback')
         }
       } else if (Validator.includesCallbackOpcode(outputScript)) {
-        return Promise.reject(new Error('script contains monoid and callback'))
+        throw new Error('script contains monoid and callback')
       }
 
       if (this.cache.has(blockchain + outPointTxHash)) {
@@ -259,7 +259,7 @@ class Interpreter {
       if (env.OUTPOINT_TX !== null && env.OUTPOINT_TX !== false) {
         this.cache.set(blockchain + outPointTxHash, env.OUTPOINT_TX)
       } else {
-        return Promise.reject(new Error('unable to load tx of outpoint'))
+        throw new Error('unable to load tx of outpoint')
       }
 
       // Assert monoid isomorphism
@@ -291,11 +291,11 @@ class Interpreter {
         })
 
         if (monoidIso.forceFail) {
-          return Promise.reject(new Error('force failed isomorphism -> unable to load outpoint script from disk'))
+          throw new Error('force failed isomorphism -> unable to load outpoint script from disk')
         } else if (monoidIso.spendMonoidInputs.length > 1) {
-          return Promise.reject(new Error('failed isomorphism assertion -> multiple monoids in inputs'))
+          throw new Error('failed isomorphism assertion -> multiple monoids in inputs')
         } else if (monoidIso.spendMonoidInputs.length === 0) {
-          return Promise.reject(new Error('failed isomorphism assertion -> monoid not found in outpoints'))
+          throw new Error('failed isomorphism assertion -> monoid not found in outpoints')
         }
       }
 
@@ -325,7 +325,7 @@ class Interpreter {
           }
         }
       } else {
-        return Promise.reject(new Error('unable to load referenced block containing tx of outpoint'))
+        throw new Error('unable to load referenced block containing tx of outpoint')
       }
 
       // !!! IMPORTANT !!!
@@ -375,10 +375,10 @@ class Interpreter {
       // !!! IMPORTANT !!!
       // When creating scripting environment marked transactions must be calculated last
       env.MARKED_TXS = await this.getScriptMarkedTxs(env.SCRIPT, env)
-      return Promise.resolve(env)
+      return env
     } catch (err) {
       debug(err)
-      return Promise.resolve(false)
+      return false
     }
   }
 
@@ -407,14 +407,14 @@ class Interpreter {
       // get context of the transaction
       parser.yy.env = await this.getScriptEnv(outputScript, inputScript, input, tx)
       script = parser.yy.env.SCRIPT
-      return Promise.resolve(this.parse(dataToSign, script))
+      return this.parse(dataToSign, script)
     } catch (e) {
       debug(e)
-      return Promise.resolve({
+      return {
         code: null,
         value: false,
         error: e
-      })
+      }
     }
   }
 
