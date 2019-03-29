@@ -9,7 +9,7 @@ function serialize_bc_Block(arg) {
   if (!(arg instanceof core_pb.Block)) {
     throw new Error('Expected argument of type bc.Block');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_Block(buffer_arg) {
@@ -20,7 +20,7 @@ function serialize_bc_Null(arg) {
   if (!(arg instanceof core_pb.Null)) {
     throw new Error('Expected argument of type bc.Null');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_Null(buffer_arg) {
@@ -31,7 +31,7 @@ function serialize_bc_RoverIdent(arg) {
   if (!(arg instanceof rover_pb.RoverIdent)) {
     throw new Error('Expected argument of type bc.RoverIdent');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_RoverIdent(buffer_arg) {
@@ -42,7 +42,7 @@ function serialize_bc_RoverMessage(arg) {
   if (!(arg instanceof rover_pb.RoverMessage)) {
     throw new Error('Expected argument of type bc.RoverMessage');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_RoverMessage(buffer_arg) {
@@ -53,7 +53,7 @@ function serialize_bc_SettleTxCheckReq(arg) {
   if (!(arg instanceof rover_pb.SettleTxCheckReq)) {
     throw new Error('Expected argument of type bc.SettleTxCheckReq');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_SettleTxCheckReq(buffer_arg) {
@@ -64,7 +64,7 @@ function serialize_bc_SettleTxCheckResponse(arg) {
   if (!(arg instanceof rover_pb.SettleTxCheckResponse)) {
     throw new Error('Expected argument of type bc.SettleTxCheckResponse');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_SettleTxCheckResponse(buffer_arg) {

@@ -186,7 +186,7 @@ proto.bc.DbValue.prototype.getType = function() {
 
 /** @param {string} value */
 proto.bc.DbValue.prototype.setType = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -225,7 +225,7 @@ proto.bc.DbValue.prototype.getData_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.DbValue.prototype.setData = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3BytesField(this, 2, value);
 };
 
 
@@ -240,7 +240,7 @@ proto.bc.DbValue.prototype.getVersion = function() {
 
 /** @param {number} value */
 proto.bc.DbValue.prototype.setVersion = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -257,7 +257,7 @@ proto.bc.DbValue.prototype.getIsNative = function() {
 
 /** @param {boolean} value */
 proto.bc.DbValue.prototype.setIsNative = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3BooleanField(this, 4, value);
 };
 
 

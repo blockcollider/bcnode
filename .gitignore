@@ -128,3 +128,6 @@ tmp/
 
 # vscode
 .vscode/
+
+# debian index 
+.DS_Store

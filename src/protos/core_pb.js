@@ -369,7 +369,7 @@ proto.bc.Block.prototype.getBlockchain = function() {
 
 /** @param {string} value */
 proto.bc.Block.prototype.setBlockchain = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -384,7 +384,7 @@ proto.bc.Block.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.Block.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -399,7 +399,7 @@ proto.bc.Block.prototype.getPreviousHash = function() {
 
 /** @param {string} value */
 proto.bc.Block.prototype.setPreviousHash = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -414,7 +414,7 @@ proto.bc.Block.prototype.getTimestamp = function() {
 
 /** @param {number} value */
 proto.bc.Block.prototype.setTimestamp = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -429,7 +429,7 @@ proto.bc.Block.prototype.getHeight = function() {
 
 /** @param {number} value */
 proto.bc.Block.prototype.setHeight = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
@@ -444,7 +444,7 @@ proto.bc.Block.prototype.getMerkleRoot = function() {
 
 /** @param {string} value */
 proto.bc.Block.prototype.setMerkleRoot = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -459,21 +459,21 @@ proto.bc.Block.prototype.getMarkedtxCount = function() {
 
 /** @param {number} value */
 proto.bc.Block.prototype.setMarkedtxCount = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
  * repeated MarkedTransaction marked_txs = 8;
- * @return {!Array.<!proto.bc.MarkedTransaction>}
+ * @return {!Array<!proto.bc.MarkedTransaction>}
  */
 proto.bc.Block.prototype.getMarkedTxsList = function() {
-  return /** @type{!Array.<!proto.bc.MarkedTransaction>} */ (
+  return /** @type{!Array<!proto.bc.MarkedTransaction>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.MarkedTransaction, 8));
 };
 
 
-/** @param {!Array.<!proto.bc.MarkedTransaction>} value */
+/** @param {!Array<!proto.bc.MarkedTransaction>} value */
 proto.bc.Block.prototype.setMarkedTxsList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 8, value);
 };
@@ -740,7 +740,7 @@ proto.bc.MarkedTransaction.prototype.getValue_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.MarkedTransaction.prototype.setValue = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3BytesField(this, 1, value);
 };
 
 
@@ -755,7 +755,7 @@ proto.bc.MarkedTransaction.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.MarkedTransaction.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -770,7 +770,7 @@ proto.bc.MarkedTransaction.prototype.getId = function() {
 
 /** @param {string} value */
 proto.bc.MarkedTransaction.prototype.setId = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -785,7 +785,7 @@ proto.bc.MarkedTransaction.prototype.getToken = function() {
 
 /** @param {string} value */
 proto.bc.MarkedTransaction.prototype.setToken = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -800,7 +800,7 @@ proto.bc.MarkedTransaction.prototype.getAddrFrom = function() {
 
 /** @param {string} value */
 proto.bc.MarkedTransaction.prototype.setAddrFrom = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -815,7 +815,7 @@ proto.bc.MarkedTransaction.prototype.getAddrTo = function() {
 
 /** @param {string} value */
 proto.bc.MarkedTransaction.prototype.setAddrTo = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -830,7 +830,7 @@ proto.bc.MarkedTransaction.prototype.getBlockHeight = function() {
 
 /** @param {number} value */
 proto.bc.MarkedTransaction.prototype.setBlockHeight = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
@@ -845,7 +845,7 @@ proto.bc.MarkedTransaction.prototype.getIndex = function() {
 
 /** @param {number} value */
 proto.bc.MarkedTransaction.prototype.setIndex = function(value) {
-  jspb.Message.setField(this, 8, value);
+  jspb.Message.setProto3IntField(this, 8, value);
 };
 
 
@@ -1048,15 +1048,15 @@ proto.bc.BlockchainHeaders.serializeBinaryToWriter = function(message, writer) {
 
 /**
  * repeated BlockchainHeader btc = 1;
- * @return {!Array.<!proto.bc.BlockchainHeader>}
+ * @return {!Array<!proto.bc.BlockchainHeader>}
  */
 proto.bc.BlockchainHeaders.prototype.getBtcList = function() {
-  return /** @type{!Array.<!proto.bc.BlockchainHeader>} */ (
+  return /** @type{!Array<!proto.bc.BlockchainHeader>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.BlockchainHeader, 1));
 };
 
 
-/** @param {!Array.<!proto.bc.BlockchainHeader>} value */
+/** @param {!Array<!proto.bc.BlockchainHeader>} value */
 proto.bc.BlockchainHeaders.prototype.setBtcList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
@@ -1079,15 +1079,15 @@ proto.bc.BlockchainHeaders.prototype.clearBtcList = function() {
 
 /**
  * repeated BlockchainHeader eth = 2;
- * @return {!Array.<!proto.bc.BlockchainHeader>}
+ * @return {!Array<!proto.bc.BlockchainHeader>}
  */
 proto.bc.BlockchainHeaders.prototype.getEthList = function() {
-  return /** @type{!Array.<!proto.bc.BlockchainHeader>} */ (
+  return /** @type{!Array<!proto.bc.BlockchainHeader>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.BlockchainHeader, 2));
 };
 
 
-/** @param {!Array.<!proto.bc.BlockchainHeader>} value */
+/** @param {!Array<!proto.bc.BlockchainHeader>} value */
 proto.bc.BlockchainHeaders.prototype.setEthList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 2, value);
 };
@@ -1110,15 +1110,15 @@ proto.bc.BlockchainHeaders.prototype.clearEthList = function() {
 
 /**
  * repeated BlockchainHeader lsk = 3;
- * @return {!Array.<!proto.bc.BlockchainHeader>}
+ * @return {!Array<!proto.bc.BlockchainHeader>}
  */
 proto.bc.BlockchainHeaders.prototype.getLskList = function() {
-  return /** @type{!Array.<!proto.bc.BlockchainHeader>} */ (
+  return /** @type{!Array<!proto.bc.BlockchainHeader>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.BlockchainHeader, 3));
 };
 
 
-/** @param {!Array.<!proto.bc.BlockchainHeader>} value */
+/** @param {!Array<!proto.bc.BlockchainHeader>} value */
 proto.bc.BlockchainHeaders.prototype.setLskList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 3, value);
 };
@@ -1141,15 +1141,15 @@ proto.bc.BlockchainHeaders.prototype.clearLskList = function() {
 
 /**
  * repeated BlockchainHeader neo = 4;
- * @return {!Array.<!proto.bc.BlockchainHeader>}
+ * @return {!Array<!proto.bc.BlockchainHeader>}
  */
 proto.bc.BlockchainHeaders.prototype.getNeoList = function() {
-  return /** @type{!Array.<!proto.bc.BlockchainHeader>} */ (
+  return /** @type{!Array<!proto.bc.BlockchainHeader>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.BlockchainHeader, 4));
 };
 
 
-/** @param {!Array.<!proto.bc.BlockchainHeader>} value */
+/** @param {!Array<!proto.bc.BlockchainHeader>} value */
 proto.bc.BlockchainHeaders.prototype.setNeoList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 4, value);
 };
@@ -1172,15 +1172,15 @@ proto.bc.BlockchainHeaders.prototype.clearNeoList = function() {
 
 /**
  * repeated BlockchainHeader wav = 5;
- * @return {!Array.<!proto.bc.BlockchainHeader>}
+ * @return {!Array<!proto.bc.BlockchainHeader>}
  */
 proto.bc.BlockchainHeaders.prototype.getWavList = function() {
-  return /** @type{!Array.<!proto.bc.BlockchainHeader>} */ (
+  return /** @type{!Array<!proto.bc.BlockchainHeader>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.BlockchainHeader, 5));
 };
 
 
-/** @param {!Array.<!proto.bc.BlockchainHeader>} value */
+/** @param {!Array<!proto.bc.BlockchainHeader>} value */
 proto.bc.BlockchainHeaders.prototype.setWavList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 5, value);
 };
@@ -1711,7 +1711,7 @@ proto.bc.BcBlock.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -1726,7 +1726,7 @@ proto.bc.BcBlock.prototype.getPreviousHash = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setPreviousHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -1741,7 +1741,7 @@ proto.bc.BcBlock.prototype.getVersion = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setVersion = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -1756,7 +1756,7 @@ proto.bc.BcBlock.prototype.getSchemaVersion = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setSchemaVersion = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -1771,7 +1771,7 @@ proto.bc.BcBlock.prototype.getHeight = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setHeight = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
@@ -1786,7 +1786,7 @@ proto.bc.BcBlock.prototype.getMiner = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setMiner = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -1801,7 +1801,7 @@ proto.bc.BcBlock.prototype.getDifficulty = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setDifficulty = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -1816,7 +1816,7 @@ proto.bc.BcBlock.prototype.getTimestamp = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setTimestamp = function(value) {
-  jspb.Message.setField(this, 8, value);
+  jspb.Message.setProto3IntField(this, 8, value);
 };
 
 
@@ -1831,7 +1831,7 @@ proto.bc.BcBlock.prototype.getMerkleRoot = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setMerkleRoot = function(value) {
-  jspb.Message.setField(this, 9, value);
+  jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -1846,7 +1846,7 @@ proto.bc.BcBlock.prototype.getChainRoot = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setChainRoot = function(value) {
-  jspb.Message.setField(this, 10, value);
+  jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
@@ -1861,7 +1861,7 @@ proto.bc.BcBlock.prototype.getDistance = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setDistance = function(value) {
-  jspb.Message.setField(this, 11, value);
+  jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
@@ -1876,7 +1876,7 @@ proto.bc.BcBlock.prototype.getTotalDistance = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setTotalDistance = function(value) {
-  jspb.Message.setField(this, 12, value);
+  jspb.Message.setProto3StringField(this, 12, value);
 };
 
 
@@ -1891,7 +1891,7 @@ proto.bc.BcBlock.prototype.getNonce = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setNonce = function(value) {
-  jspb.Message.setField(this, 13, value);
+  jspb.Message.setProto3StringField(this, 13, value);
 };
 
 
@@ -1906,7 +1906,7 @@ proto.bc.BcBlock.prototype.getNrgGrant = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setNrgGrant = function(value) {
-  jspb.Message.setField(this, 14, value);
+  jspb.Message.setProto3IntField(this, 14, value);
 };
 
 
@@ -1921,7 +1921,7 @@ proto.bc.BcBlock.prototype.getTargetHash = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setTargetHash = function(value) {
-  jspb.Message.setField(this, 15, value);
+  jspb.Message.setProto3StringField(this, 15, value);
 };
 
 
@@ -1936,7 +1936,7 @@ proto.bc.BcBlock.prototype.getTargetHeight = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setTargetHeight = function(value) {
-  jspb.Message.setField(this, 16, value);
+  jspb.Message.setProto3IntField(this, 16, value);
 };
 
 
@@ -1951,7 +1951,7 @@ proto.bc.BcBlock.prototype.getTargetMiner = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setTargetMiner = function(value) {
-  jspb.Message.setField(this, 17, value);
+  jspb.Message.setProto3StringField(this, 17, value);
 };
 
 
@@ -1966,7 +1966,7 @@ proto.bc.BcBlock.prototype.getTargetSignature = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setTargetSignature = function(value) {
-  jspb.Message.setField(this, 18, value);
+  jspb.Message.setProto3StringField(this, 18, value);
 };
 
 
@@ -1981,27 +1981,27 @@ proto.bc.BcBlock.prototype.getTwn = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setTwn = function(value) {
-  jspb.Message.setField(this, 19, value);
+  jspb.Message.setProto3IntField(this, 19, value);
 };
 
 
 /**
  * repeated string tws = 20;
- * @return {!Array.<string>}
+ * @return {!Array<string>}
  */
 proto.bc.BcBlock.prototype.getTwsList = function() {
-  return /** @type {!Array.<string>} */ (jspb.Message.getRepeatedField(this, 20));
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 20));
 };
 
 
-/** @param {!Array.<string>} value */
+/** @param {!Array<string>} value */
 proto.bc.BcBlock.prototype.setTwsList = function(value) {
   jspb.Message.setField(this, 20, value || []);
 };
 
 
 /**
- * @param {!string} value
+ * @param {string} value
  * @param {number=} opt_index
  */
 proto.bc.BcBlock.prototype.addTws = function(value, opt_index) {
@@ -2025,7 +2025,7 @@ proto.bc.BcBlock.prototype.getEmblemWeight = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setEmblemWeight = function(value) {
-  jspb.Message.setField(this, 21, value);
+  jspb.Message.setProto3IntField(this, 21, value);
 };
 
 
@@ -2040,7 +2040,7 @@ proto.bc.BcBlock.prototype.getEmblemChainBlockHash = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setEmblemChainBlockHash = function(value) {
-  jspb.Message.setField(this, 22, value);
+  jspb.Message.setProto3StringField(this, 22, value);
 };
 
 
@@ -2055,7 +2055,7 @@ proto.bc.BcBlock.prototype.getEmblemChainFingerprintRoot = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setEmblemChainFingerprintRoot = function(value) {
-  jspb.Message.setField(this, 23, value);
+  jspb.Message.setProto3StringField(this, 23, value);
 };
 
 
@@ -2070,7 +2070,7 @@ proto.bc.BcBlock.prototype.getEmblemChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setEmblemChainAddress = function(value) {
-  jspb.Message.setField(this, 24, value);
+  jspb.Message.setProto3StringField(this, 24, value);
 };
 
 
@@ -2085,21 +2085,21 @@ proto.bc.BcBlock.prototype.getTxCount = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setTxCount = function(value) {
-  jspb.Message.setField(this, 25, value);
+  jspb.Message.setProto3IntField(this, 25, value);
 };
 
 
 /**
  * repeated Transaction txs = 26;
- * @return {!Array.<!proto.bc.Transaction>}
+ * @return {!Array<!proto.bc.Transaction>}
  */
 proto.bc.BcBlock.prototype.getTxsList = function() {
-  return /** @type{!Array.<!proto.bc.Transaction>} */ (
+  return /** @type{!Array<!proto.bc.Transaction>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.Transaction, 26));
 };
 
 
-/** @param {!Array.<!proto.bc.Transaction>} value */
+/** @param {!Array<!proto.bc.Transaction>} value */
 proto.bc.BcBlock.prototype.setTxsList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 26, value);
 };
@@ -2131,7 +2131,7 @@ proto.bc.BcBlock.prototype.getTxFeeBase = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setTxFeeBase = function(value) {
-  jspb.Message.setField(this, 27, value);
+  jspb.Message.setProto3IntField(this, 27, value);
 };
 
 
@@ -2146,7 +2146,7 @@ proto.bc.BcBlock.prototype.getTxDistanceSumLimit = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setTxDistanceSumLimit = function(value) {
-  jspb.Message.setField(this, 28, value);
+  jspb.Message.setProto3IntField(this, 28, value);
 };
 
 
@@ -2161,7 +2161,7 @@ proto.bc.BcBlock.prototype.getBlockchainHeadersCount = function() {
 
 /** @param {number} value */
 proto.bc.BcBlock.prototype.setBlockchainHeadersCount = function(value) {
-  jspb.Message.setField(this, 29, value);
+  jspb.Message.setProto3IntField(this, 29, value);
 };
 
 
@@ -2188,7 +2188,7 @@ proto.bc.BcBlock.prototype.clearBlockchainHeaders = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.BcBlock.prototype.hasBlockchainHeaders = function() {
   return jspb.Message.getField(this, 30) != null;
@@ -2206,7 +2206,7 @@ proto.bc.BcBlock.prototype.getBlockchainFingerprintsRoot = function() {
 
 /** @param {string} value */
 proto.bc.BcBlock.prototype.setBlockchainFingerprintsRoot = function(value) {
-  jspb.Message.setField(this, 31, value);
+  jspb.Message.setProto3StringField(this, 31, value);
 };
 
 
@@ -2396,7 +2396,7 @@ proto.bc.OutPoint.prototype.getValue_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.OutPoint.prototype.setValue = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3BytesField(this, 1, value);
 };
 
 
@@ -2411,7 +2411,7 @@ proto.bc.OutPoint.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.OutPoint.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -2426,7 +2426,7 @@ proto.bc.OutPoint.prototype.getIndex = function() {
 
 /** @param {number} value */
 proto.bc.OutPoint.prototype.setIndex = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -2677,7 +2677,7 @@ proto.bc.Transaction.prototype.getVersion = function() {
 
 /** @param {number} value */
 proto.bc.Transaction.prototype.setVersion = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -2692,7 +2692,7 @@ proto.bc.Transaction.prototype.getNonce = function() {
 
 /** @param {string} value */
 proto.bc.Transaction.prototype.setNonce = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -2707,7 +2707,7 @@ proto.bc.Transaction.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.Transaction.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -2722,7 +2722,7 @@ proto.bc.Transaction.prototype.getOverline = function() {
 
 /** @param {string} value */
 proto.bc.Transaction.prototype.setOverline = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -2737,7 +2737,7 @@ proto.bc.Transaction.prototype.getNinCount = function() {
 
 /** @param {number} value */
 proto.bc.Transaction.prototype.setNinCount = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
@@ -2752,21 +2752,21 @@ proto.bc.Transaction.prototype.getNoutCount = function() {
 
 /** @param {number} value */
 proto.bc.Transaction.prototype.setNoutCount = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3IntField(this, 6, value);
 };
 
 
 /**
  * repeated TransactionInput inputs = 7;
- * @return {!Array.<!proto.bc.TransactionInput>}
+ * @return {!Array<!proto.bc.TransactionInput>}
  */
 proto.bc.Transaction.prototype.getInputsList = function() {
-  return /** @type{!Array.<!proto.bc.TransactionInput>} */ (
+  return /** @type{!Array<!proto.bc.TransactionInput>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.TransactionInput, 7));
 };
 
 
-/** @param {!Array.<!proto.bc.TransactionInput>} value */
+/** @param {!Array<!proto.bc.TransactionInput>} value */
 proto.bc.Transaction.prototype.setInputsList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 7, value);
 };
@@ -2789,15 +2789,15 @@ proto.bc.Transaction.prototype.clearInputsList = function() {
 
 /**
  * repeated TransactionOutput outputs = 8;
- * @return {!Array.<!proto.bc.TransactionOutput>}
+ * @return {!Array<!proto.bc.TransactionOutput>}
  */
 proto.bc.Transaction.prototype.getOutputsList = function() {
-  return /** @type{!Array.<!proto.bc.TransactionOutput>} */ (
+  return /** @type{!Array<!proto.bc.TransactionOutput>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.TransactionOutput, 8));
 };
 
 
-/** @param {!Array.<!proto.bc.TransactionOutput>} value */
+/** @param {!Array<!proto.bc.TransactionOutput>} value */
 proto.bc.Transaction.prototype.setOutputsList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 8, value);
 };
@@ -2829,7 +2829,7 @@ proto.bc.Transaction.prototype.getLockTime = function() {
 
 /** @param {number} value */
 proto.bc.Transaction.prototype.setLockTime = function(value) {
-  jspb.Message.setField(this, 9, value);
+  jspb.Message.setProto3IntField(this, 9, value);
 };
 
 
@@ -3009,7 +3009,7 @@ proto.bc.TransactionInput.prototype.clearOutPoint = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.TransactionInput.prototype.hasOutPoint = function() {
   return jspb.Message.getField(this, 1) != null;
@@ -3027,7 +3027,7 @@ proto.bc.TransactionInput.prototype.getScriptLength = function() {
 
 /** @param {number} value */
 proto.bc.TransactionInput.prototype.setScriptLength = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -3066,7 +3066,7 @@ proto.bc.TransactionInput.prototype.getInputScript_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.TransactionInput.prototype.setInputScript = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3BytesField(this, 3, value);
 };
 
 
@@ -3268,7 +3268,7 @@ proto.bc.TransactionOutput.prototype.getValue_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.TransactionOutput.prototype.setValue = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3BytesField(this, 1, value);
 };
 
 
@@ -3307,7 +3307,7 @@ proto.bc.TransactionOutput.prototype.getUnit_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.TransactionOutput.prototype.setUnit = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3BytesField(this, 2, value);
 };
 
 
@@ -3322,7 +3322,7 @@ proto.bc.TransactionOutput.prototype.getScriptLength = function() {
 
 /** @param {number} value */
 proto.bc.TransactionOutput.prototype.setScriptLength = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -3361,7 +3361,7 @@ proto.bc.TransactionOutput.prototype.getOutputScript_asU8 = function() {
 
 /** @param {!(string|Uint8Array)} value */
 proto.bc.TransactionOutput.prototype.setOutputScript = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3BytesField(this, 4, value);
 };
 
 
@@ -3597,7 +3597,7 @@ proto.bc.BlockchainHeader.prototype.getBlockchain = function() {
 
 /** @param {string} value */
 proto.bc.BlockchainHeader.prototype.setBlockchain = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -3612,7 +3612,7 @@ proto.bc.BlockchainHeader.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.BlockchainHeader.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -3627,7 +3627,7 @@ proto.bc.BlockchainHeader.prototype.getPreviousHash = function() {
 
 /** @param {string} value */
 proto.bc.BlockchainHeader.prototype.setPreviousHash = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -3642,7 +3642,7 @@ proto.bc.BlockchainHeader.prototype.getTimestamp = function() {
 
 /** @param {number} value */
 proto.bc.BlockchainHeader.prototype.setTimestamp = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -3657,7 +3657,7 @@ proto.bc.BlockchainHeader.prototype.getHeight = function() {
 
 /** @param {number} value */
 proto.bc.BlockchainHeader.prototype.setHeight = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
@@ -3672,7 +3672,7 @@ proto.bc.BlockchainHeader.prototype.getMerkleRoot = function() {
 
 /** @param {string} value */
 proto.bc.BlockchainHeader.prototype.setMerkleRoot = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -3687,21 +3687,21 @@ proto.bc.BlockchainHeader.prototype.getBlockchainConfirmationsInParentCount = fu
 
 /** @param {number} value */
 proto.bc.BlockchainHeader.prototype.setBlockchainConfirmationsInParentCount = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
  * repeated MarkedTransaction marked_txs = 8;
- * @return {!Array.<!proto.bc.MarkedTransaction>}
+ * @return {!Array<!proto.bc.MarkedTransaction>}
  */
 proto.bc.BlockchainHeader.prototype.getMarkedTxsList = function() {
-  return /** @type{!Array.<!proto.bc.MarkedTransaction>} */ (
+  return /** @type{!Array<!proto.bc.MarkedTransaction>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.MarkedTransaction, 8));
 };
 
 
-/** @param {!Array.<!proto.bc.MarkedTransaction>} value */
+/** @param {!Array<!proto.bc.MarkedTransaction>} value */
 proto.bc.BlockchainHeader.prototype.setMarkedTxsList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 8, value);
 };

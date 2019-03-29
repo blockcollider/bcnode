@@ -12,6 +12,7 @@ var goog = jspb;
 var global = Function('return this')();
 
 var core_pb = require('./core_pb.js');
+goog.object.extend(proto, core_pb);
 goog.exportSymbol('proto.bc.RoverIdent', null, global);
 goog.exportSymbol('proto.bc.RoverMessage', null, global);
 goog.exportSymbol('proto.bc.RoverMessage.FetchBlock', null, global);
@@ -157,7 +158,7 @@ proto.bc.RoverIdent.prototype.getRoverName = function() {
 
 /** @param {string} value */
 proto.bc.RoverIdent.prototype.setRoverName = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -624,7 +625,7 @@ proto.bc.RoverMessage.FetchBlock.prototype.clearFromBlock = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.RoverMessage.FetchBlock.prototype.hasFromBlock = function() {
   return jspb.Message.getField(this, 1) != null;
@@ -654,7 +655,7 @@ proto.bc.RoverMessage.FetchBlock.prototype.clearToBlock = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.RoverMessage.FetchBlock.prototype.hasToBlock = function() {
   return jspb.Message.getField(this, 2) != null;
@@ -672,7 +673,7 @@ proto.bc.RoverMessage.prototype.getType = function() {
 
 /** @param {!proto.bc.RoverMessageType} value */
 proto.bc.RoverMessage.prototype.setType = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
@@ -699,7 +700,7 @@ proto.bc.RoverMessage.prototype.clearResync = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.RoverMessage.prototype.hasResync = function() {
   return jspb.Message.getField(this, 2) != null;
@@ -729,7 +730,7 @@ proto.bc.RoverMessage.prototype.clearFetchBlock = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.RoverMessage.prototype.hasFetchBlock = function() {
   return jspb.Message.getField(this, 3) != null;
@@ -898,7 +899,7 @@ proto.bc.SettleTxCheckReq.prototype.getAddrTo = function() {
 
 /** @param {string} value */
 proto.bc.SettleTxCheckReq.prototype.setAddrTo = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -913,7 +914,7 @@ proto.bc.SettleTxCheckReq.prototype.getAddrFrom = function() {
 
 /** @param {string} value */
 proto.bc.SettleTxCheckReq.prototype.setAddrFrom = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -928,7 +929,7 @@ proto.bc.SettleTxCheckReq.prototype.getBridgedChain = function() {
 
 /** @param {string} value */
 proto.bc.SettleTxCheckReq.prototype.setBridgedChain = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -1072,7 +1073,7 @@ proto.bc.SettleTxCheckResponse.prototype.getIsBeforeSettlementHeight = function(
 
 /** @param {boolean} value */
 proto.bc.SettleTxCheckResponse.prototype.setIsBeforeSettlementHeight = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3BooleanField(this, 1, value);
 };
 
 

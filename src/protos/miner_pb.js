@@ -12,6 +12,7 @@ var goog = jspb;
 var global = Function('return this')();
 
 var core_pb = require('./core_pb.js');
+goog.object.extend(proto, core_pb);
 goog.exportSymbol('proto.bc.BlockFingerprint', null, global);
 goog.exportSymbol('proto.bc.MinerRequest', null, global);
 goog.exportSymbol('proto.bc.MinerResponse', null, global);
@@ -190,7 +191,7 @@ proto.bc.BlockFingerprint.prototype.getBlockchain = function() {
 
 /** @param {string} value */
 proto.bc.BlockFingerprint.prototype.setBlockchain = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -205,7 +206,7 @@ proto.bc.BlockFingerprint.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.BlockFingerprint.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -220,7 +221,7 @@ proto.bc.BlockFingerprint.prototype.getTimestamp = function() {
 
 /** @param {number} value */
 proto.bc.BlockFingerprint.prototype.setTimestamp = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -237,7 +238,7 @@ proto.bc.BlockFingerprint.prototype.getIsCurrent = function() {
 
 /** @param {boolean} value */
 proto.bc.BlockFingerprint.prototype.setIsCurrent = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3BooleanField(this, 4, value);
 };
 
 
@@ -479,7 +480,7 @@ proto.bc.MinerRequest.prototype.getWorkId = function() {
 
 /** @param {string} value */
 proto.bc.MinerRequest.prototype.setWorkId = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -494,7 +495,7 @@ proto.bc.MinerRequest.prototype.getCurrentTimestamp = function() {
 
 /** @param {number} value */
 proto.bc.MinerRequest.prototype.setCurrentTimestamp = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -509,7 +510,7 @@ proto.bc.MinerRequest.prototype.getOffset = function() {
 
 /** @param {number} value */
 proto.bc.MinerRequest.prototype.setOffset = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -524,7 +525,7 @@ proto.bc.MinerRequest.prototype.getWork = function() {
 
 /** @param {string} value */
 proto.bc.MinerRequest.prototype.setWork = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -539,7 +540,7 @@ proto.bc.MinerRequest.prototype.getMinerKey = function() {
 
 /** @param {string} value */
 proto.bc.MinerRequest.prototype.setMinerKey = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -554,7 +555,7 @@ proto.bc.MinerRequest.prototype.getMerkleRoot = function() {
 
 /** @param {string} value */
 proto.bc.MinerRequest.prototype.setMerkleRoot = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -569,7 +570,7 @@ proto.bc.MinerRequest.prototype.getDifficulty = function() {
 
 /** @param {string} value */
 proto.bc.MinerRequest.prototype.setDifficulty = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -596,7 +597,7 @@ proto.bc.MinerRequest.prototype.clearLastPreviousBlock = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.MinerRequest.prototype.hasLastPreviousBlock = function() {
   return jspb.Message.getField(this, 8) != null;
@@ -626,7 +627,7 @@ proto.bc.MinerRequest.prototype.clearNewBlockHeaders = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.MinerRequest.prototype.hasNewBlockHeaders = function() {
   return jspb.Message.getField(this, 9) != null;
@@ -843,7 +844,7 @@ proto.bc.MinerResponse.prototype.getResult = function() {
 
 /** @param {!proto.bc.MinerResponseResult} value */
 proto.bc.MinerResponse.prototype.setResult = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
@@ -858,7 +859,7 @@ proto.bc.MinerResponse.prototype.getNonce = function() {
 
 /** @param {string} value */
 proto.bc.MinerResponse.prototype.setNonce = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -873,7 +874,7 @@ proto.bc.MinerResponse.prototype.getDifficulty = function() {
 
 /** @param {string} value */
 proto.bc.MinerResponse.prototype.setDifficulty = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -888,7 +889,7 @@ proto.bc.MinerResponse.prototype.getDistance = function() {
 
 /** @param {string} value */
 proto.bc.MinerResponse.prototype.setDistance = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -903,7 +904,7 @@ proto.bc.MinerResponse.prototype.getTimestamp = function() {
 
 /** @param {number} value */
 proto.bc.MinerResponse.prototype.setTimestamp = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
@@ -918,7 +919,7 @@ proto.bc.MinerResponse.prototype.getIterations = function() {
 
 /** @param {number} value */
 proto.bc.MinerResponse.prototype.setIterations = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3IntField(this, 6, value);
 };
 
 
@@ -933,7 +934,7 @@ proto.bc.MinerResponse.prototype.getTimeDiff = function() {
 
 /** @param {number} value */
 proto.bc.MinerResponse.prototype.setTimeDiff = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3IntField(this, 7, value);
 };
 
 

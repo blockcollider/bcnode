@@ -164,7 +164,7 @@ proto.bc.MessageGetObjectsRequest.prototype.getType = function() {
 
 /** @param {!proto.bc.MsgType} value */
 proto.bc.MessageGetObjectsRequest.prototype.setType = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
@@ -179,7 +179,7 @@ proto.bc.MessageGetObjectsRequest.prototype.getBody = function() {
 
 /** @param {!proto.bc.ObjType} value */
 proto.bc.MessageGetObjectsRequest.prototype.setBody = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3EnumField(this, 2, value);
 };
 
 

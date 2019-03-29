@@ -9,7 +9,7 @@ function serialize_bc_MinerRequest(arg) {
   if (!(arg instanceof miner_pb.MinerRequest)) {
     throw new Error('Expected argument of type bc.MinerRequest');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_MinerRequest(buffer_arg) {
@@ -20,7 +20,7 @@ function serialize_bc_MinerResponse(arg) {
   if (!(arg instanceof miner_pb.MinerResponse)) {
     throw new Error('Expected argument of type bc.MinerResponse');
   }
-  return new Buffer(arg.serializeBinary());
+  return Buffer.from(arg.serializeBinary());
 }
 
 function deserialize_bc_MinerResponse(buffer_arg) {

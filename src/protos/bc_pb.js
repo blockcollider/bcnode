@@ -12,6 +12,7 @@ var goog = jspb;
 var global = Function('return this')();
 
 var core_pb = require('./core_pb.js');
+goog.object.extend(proto, core_pb);
 goog.exportSymbol('proto.bc.GetBalanceRequest', null, global);
 goog.exportSymbol('proto.bc.GetBalanceResponse', null, global);
 goog.exportSymbol('proto.bc.GetBlake2blRequest', null, global);
@@ -170,15 +171,15 @@ proto.bc.GetLatestBlocksResponse.serializeBinaryToWriter = function(message, wri
 
 /**
  * repeated Block blocks = 1;
- * @return {!Array.<!proto.bc.Block>}
+ * @return {!Array<!proto.bc.Block>}
  */
 proto.bc.GetLatestBlocksResponse.prototype.getBlocksList = function() {
-  return /** @type{!Array.<!proto.bc.Block>} */ (
+  return /** @type{!Array<!proto.bc.Block>} */ (
     jspb.Message.getRepeatedWrapperField(this, core_pb.Block, 1));
 };
 
 
-/** @param {!Array.<!proto.bc.Block>} value */
+/** @param {!Array<!proto.bc.Block>} value */
 proto.bc.GetLatestBlocksResponse.prototype.setBlocksList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
@@ -337,7 +338,7 @@ proto.bc.HelpResponse.prototype.getHelpText = function() {
 
 /** @param {string} value */
 proto.bc.HelpResponse.prototype.setHelpText = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -479,7 +480,7 @@ proto.bc.StatsResponse.prototype.getCalls = function() {
 
 /** @param {number} value */
 proto.bc.StatsResponse.prototype.setCalls = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -669,7 +670,7 @@ proto.bc.RpcTransaction.prototype.getFromAddr = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setFromAddr = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -684,7 +685,7 @@ proto.bc.RpcTransaction.prototype.getToAddr = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setToAddr = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -699,7 +700,7 @@ proto.bc.RpcTransaction.prototype.getAmount = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setAmount = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -714,7 +715,7 @@ proto.bc.RpcTransaction.prototype.getTxFee = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setTxFee = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -729,7 +730,7 @@ proto.bc.RpcTransaction.prototype.getPrivateKeyHex = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setPrivateKeyHex = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -895,7 +896,7 @@ proto.bc.RpcTransactionResponse.prototype.getStatus = function() {
 
 /** @param {!proto.bc.RpcTransactionResponseStatus} value */
 proto.bc.RpcTransactionResponse.prototype.setStatus = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3EnumField(this, 1, value);
 };
 
 
@@ -910,7 +911,7 @@ proto.bc.RpcTransactionResponse.prototype.getTxHash = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransactionResponse.prototype.setTxHash = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -925,7 +926,7 @@ proto.bc.RpcTransactionResponse.prototype.getError = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransactionResponse.prototype.setError = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -1067,7 +1068,7 @@ proto.bc.GetBalanceRequest.prototype.getAddress = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceRequest.prototype.setAddress = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -1245,7 +1246,7 @@ proto.bc.GetBalanceResponse.prototype.getConfirmed = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setConfirmed = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -1260,7 +1261,7 @@ proto.bc.GetBalanceResponse.prototype.getUnconfirmed = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setUnconfirmed = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -1275,7 +1276,7 @@ proto.bc.GetBalanceResponse.prototype.getCollateralized = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setCollateralized = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -1290,7 +1291,7 @@ proto.bc.GetBalanceResponse.prototype.getUnit = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setUnit = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -1624,7 +1625,7 @@ proto.bc.MakerOrderInfo.prototype.getShiftStartsAt = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setShiftStartsAt = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -1639,7 +1640,7 @@ proto.bc.MakerOrderInfo.prototype.getDepositEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setDepositEndsAt = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -1654,7 +1655,7 @@ proto.bc.MakerOrderInfo.prototype.getSettleEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setSettleEndsAt = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -1669,7 +1670,7 @@ proto.bc.MakerOrderInfo.prototype.getPaysChainId = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setPaysChainId = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -1684,7 +1685,7 @@ proto.bc.MakerOrderInfo.prototype.getWantsChainId = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setWantsChainId = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -1699,7 +1700,7 @@ proto.bc.MakerOrderInfo.prototype.getWantsAddress = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setWantsAddress = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -1714,7 +1715,7 @@ proto.bc.MakerOrderInfo.prototype.getWantsUnit = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setWantsUnit = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -1729,7 +1730,7 @@ proto.bc.MakerOrderInfo.prototype.getPaysUnit = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setPaysUnit = function(value) {
-  jspb.Message.setField(this, 8, value);
+  jspb.Message.setProto3StringField(this, 8, value);
 };
 
 
@@ -1744,7 +1745,7 @@ proto.bc.MakerOrderInfo.prototype.getDoubleHashedBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setDoubleHashedBcAddress = function(value) {
-  jspb.Message.setField(this, 9, value);
+  jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -1759,7 +1760,7 @@ proto.bc.MakerOrderInfo.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setField(this, 10, value);
+  jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
@@ -1774,7 +1775,7 @@ proto.bc.MakerOrderInfo.prototype.getNrgUnit = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setNrgUnit = function(value) {
-  jspb.Message.setField(this, 11, value);
+  jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
@@ -1789,7 +1790,7 @@ proto.bc.MakerOrderInfo.prototype.getTxHash = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setTxHash = function(value) {
-  jspb.Message.setField(this, 12, value);
+  jspb.Message.setProto3StringField(this, 12, value);
 };
 
 
@@ -1804,7 +1805,7 @@ proto.bc.MakerOrderInfo.prototype.getTxOutputIndex = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setTxOutputIndex = function(value) {
-  jspb.Message.setField(this, 13, value);
+  jspb.Message.setProto3IntField(this, 13, value);
 };
 
 
@@ -1819,7 +1820,7 @@ proto.bc.MakerOrderInfo.prototype.getBlockHash = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setBlockHash = function(value) {
-  jspb.Message.setField(this, 14, value);
+  jspb.Message.setProto3StringField(this, 14, value);
 };
 
 
@@ -1834,7 +1835,7 @@ proto.bc.MakerOrderInfo.prototype.getBlockHeight = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setBlockHeight = function(value) {
-  jspb.Message.setField(this, 15, value);
+  jspb.Message.setProto3IntField(this, 15, value);
 };
 
 
@@ -1851,7 +1852,7 @@ proto.bc.MakerOrderInfo.prototype.getIsSettled = function() {
 
 /** @param {boolean} value */
 proto.bc.MakerOrderInfo.prototype.setIsSettled = function(value) {
-  jspb.Message.setField(this, 16, value);
+  jspb.Message.setProto3BooleanField(this, 16, value);
 };
 
 
@@ -1866,7 +1867,7 @@ proto.bc.MakerOrderInfo.prototype.getBlockHeightHasOriginalMakerTx = function() 
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setBlockHeightHasOriginalMakerTx = function(value) {
-  jspb.Message.setField(this, 17, value);
+  jspb.Message.setProto3IntField(this, 17, value);
 };
 
 
@@ -2116,7 +2117,7 @@ proto.bc.TakerOrderInfo.prototype.getSendsAddress = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setSendsAddress = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -2131,7 +2132,7 @@ proto.bc.TakerOrderInfo.prototype.getWantsAddress = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setWantsAddress = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -2146,7 +2147,7 @@ proto.bc.TakerOrderInfo.prototype.getMakerTxHash = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setMakerTxHash = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -2161,7 +2162,7 @@ proto.bc.TakerOrderInfo.prototype.getMakerTxOutputIndex = function() {
 
 /** @param {number} value */
 proto.bc.TakerOrderInfo.prototype.setMakerTxOutputIndex = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -2176,7 +2177,7 @@ proto.bc.TakerOrderInfo.prototype.getDoubleHashedBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setDoubleHashedBcAddress = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -2191,7 +2192,7 @@ proto.bc.TakerOrderInfo.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -2206,7 +2207,7 @@ proto.bc.TakerOrderInfo.prototype.getBlockHash = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setBlockHash = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -2221,7 +2222,7 @@ proto.bc.TakerOrderInfo.prototype.getBlockHeight = function() {
 
 /** @param {number} value */
 proto.bc.TakerOrderInfo.prototype.setBlockHeight = function(value) {
-  jspb.Message.setField(this, 8, value);
+  jspb.Message.setProto3IntField(this, 8, value);
 };
 
 
@@ -2238,7 +2239,7 @@ proto.bc.TakerOrderInfo.prototype.getIsSettled = function() {
 
 /** @param {boolean} value */
 proto.bc.TakerOrderInfo.prototype.setIsSettled = function(value) {
-  jspb.Message.setField(this, 9, value);
+  jspb.Message.setProto3BooleanField(this, 9, value);
 };
 
 
@@ -2253,7 +2254,7 @@ proto.bc.TakerOrderInfo.prototype.getTxHash = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setTxHash = function(value) {
-  jspb.Message.setField(this, 10, value);
+  jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
@@ -2423,7 +2424,7 @@ proto.bc.MatchedOpenOrder.prototype.clearMaker = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.MatchedOpenOrder.prototype.hasMaker = function() {
   return jspb.Message.getField(this, 1) != null;
@@ -2453,7 +2454,7 @@ proto.bc.MatchedOpenOrder.prototype.clearTaker = function() {
 
 /**
  * Returns whether this field is set.
- * @return {!boolean}
+ * @return {boolean}
  */
 proto.bc.MatchedOpenOrder.prototype.hasTaker = function() {
   return jspb.Message.getField(this, 2) != null;
@@ -2599,15 +2600,15 @@ proto.bc.GetOpenOrdersResponse.serializeBinaryToWriter = function(message, write
 
 /**
  * repeated MakerOrderInfo open_orders = 1;
- * @return {!Array.<!proto.bc.MakerOrderInfo>}
+ * @return {!Array<!proto.bc.MakerOrderInfo>}
  */
 proto.bc.GetOpenOrdersResponse.prototype.getOpenOrdersList = function() {
-  return /** @type{!Array.<!proto.bc.MakerOrderInfo>} */ (
+  return /** @type{!Array<!proto.bc.MakerOrderInfo>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.MakerOrderInfo, 1));
 };
 
 
-/** @param {!Array.<!proto.bc.MakerOrderInfo>} value */
+/** @param {!Array<!proto.bc.MakerOrderInfo>} value */
 proto.bc.GetOpenOrdersResponse.prototype.setOpenOrdersList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
@@ -2767,15 +2768,15 @@ proto.bc.GetMatchedOpenOrdersResponse.serializeBinaryToWriter = function(message
 
 /**
  * repeated MatchedOpenOrder orders = 1;
- * @return {!Array.<!proto.bc.MatchedOpenOrder>}
+ * @return {!Array<!proto.bc.MatchedOpenOrder>}
  */
 proto.bc.GetMatchedOpenOrdersResponse.prototype.getOrdersList = function() {
-  return /** @type{!Array.<!proto.bc.MatchedOpenOrder>} */ (
+  return /** @type{!Array<!proto.bc.MatchedOpenOrder>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.MatchedOpenOrder, 1));
 };
 
 
-/** @param {!Array.<!proto.bc.MatchedOpenOrder>} value */
+/** @param {!Array<!proto.bc.MatchedOpenOrder>} value */
 proto.bc.GetMatchedOpenOrdersResponse.prototype.setOrdersList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
@@ -3078,7 +3079,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getShiftStartsAt = function() {
 
 /** @param {number} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setShiftStartsAt = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -3093,7 +3094,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getDepositEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setDepositEndsAt = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -3108,7 +3109,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getSettleEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setSettleEndsAt = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -3123,7 +3124,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getPaysWithChainId = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setPaysWithChainId = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -3138,7 +3139,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getWantsChainId = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setWantsChainId = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -3153,7 +3154,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getWantsChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setWantsChainAddress = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -3168,7 +3169,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getWantsUnit = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setWantsUnit = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -3183,7 +3184,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getPaysUnit = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setPaysUnit = function(value) {
-  jspb.Message.setField(this, 8, value);
+  jspb.Message.setProto3StringField(this, 8, value);
 };
 
 
@@ -3198,7 +3199,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setBcAddress = function(value) {
-  jspb.Message.setField(this, 9, value);
+  jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -3213,7 +3214,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getBcPrivateKeyHex = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setBcPrivateKeyHex = function(value) {
-  jspb.Message.setField(this, 10, value);
+  jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
@@ -3228,7 +3229,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setField(this, 11, value);
+  jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
@@ -3243,7 +3244,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getNrgUnit = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setNrgUnit = function(value) {
-  jspb.Message.setField(this, 12, value);
+  jspb.Message.setProto3StringField(this, 12, value);
 };
 
 
@@ -3258,7 +3259,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getTxFee = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setTxFee = function(value) {
-  jspb.Message.setField(this, 13, value);
+  jspb.Message.setProto3StringField(this, 13, value);
 };
 
 
@@ -3484,7 +3485,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getWantsChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setWantsChainAddress = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -3499,7 +3500,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getSendsChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setSendsChainAddress = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -3514,7 +3515,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getMakerTxHash = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setMakerTxHash = function(value) {
-  jspb.Message.setField(this, 3, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -3529,7 +3530,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getMakerTxOutputIndex = function() {
 
 /** @param {number} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setMakerTxOutputIndex = function(value) {
-  jspb.Message.setField(this, 4, value);
+  jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -3544,7 +3545,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setBcAddress = function(value) {
-  jspb.Message.setField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -3559,7 +3560,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getBcPrivateKeyHex = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setBcPrivateKeyHex = function(value) {
-  jspb.Message.setField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -3574,7 +3575,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setField(this, 7, value);
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -3589,7 +3590,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getTxFee = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setTxFee = function(value) {
-  jspb.Message.setField(this, 8, value);
+  jspb.Message.setProto3StringField(this, 8, value);
 };
 
 
@@ -3743,7 +3744,7 @@ proto.bc.GetBlake2blRequest.prototype.getToBeHashed = function() {
 
 /** @param {string} value */
 proto.bc.GetBlake2blRequest.prototype.setToBeHashed = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -3758,7 +3759,7 @@ proto.bc.GetBlake2blRequest.prototype.getTimes = function() {
 
 /** @param {number} value */
 proto.bc.GetBlake2blRequest.prototype.setTimes = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -3900,7 +3901,7 @@ proto.bc.GetBlake2blResponse.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.GetBlake2blResponse.prototype.setHash = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -4042,7 +4043,7 @@ proto.bc.VanityConvertRequest.prototype.getVanity = function() {
 
 /** @param {string} value */
 proto.bc.VanityConvertRequest.prototype.setVanity = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -4196,7 +4197,7 @@ proto.bc.VanityConvertResponse.prototype.getBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.VanityConvertResponse.prototype.setBcAddress = function(value) {
-  jspb.Message.setField(this, 1, value);
+  jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -4211,7 +4212,7 @@ proto.bc.VanityConvertResponse.prototype.getError = function() {
 
 /** @param {string} value */
 proto.bc.VanityConvertResponse.prototype.setError = function(value) {
-  jspb.Message.setField(this, 2, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
