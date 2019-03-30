@@ -15,45 +15,47 @@ var debug = require('debug')('bcnode:script:crypto')
 // var schnorr = require('../crypto/blorr.js')
 
 module.exports = {
-  ripemd160 (data) {
-    data = data.toString(base)
+  convertToHex (data: BN|string): string {
+    if (BN.isBN(data)) {
+      data = data.toBuffer().toString('hex')
+    }
+    return data
+  },
+  ripemd160 (data: BN|string): string {
+    data = this.convertToHex(data)
     return require('ripemd160')(data).toString('hex')
   },
-  sha1 (data) {
-    data = data.toString(base)
+  sha1 (data: BN|string): string {
+    data = this.convertToHex(data)
     return require('sha1')(data)
   },
-  sha256 (data) {
-    data = data.toString(base)
+  sha256 (data: BN|string): string {
+    data = this.convertToHex(data)
     return require('sha256')(data)
   },
-  blake2bl (data) {
-    if (BN.isBN(data)) {
-      data = data.toString(base)
-    }
+  blake2bl (data: BN|string): string {
+    data = this.convertToHex(data)
     return blake2bl(data)
   },
-  blake2bls (data) {
-    if (BN.isBN(data)) {
-      data = data.toString(base)
-    }
+  blake2bls (data: BN|string): string {
+    data = this.convertToHex(data)
     return blake2bls(data)
   },
-  processPubKey (data) {
+  processPubKey (data: BN): Buffer {
     // get pubkey from stack as a buffer
     return data.toBuffer()
   },
-  processSignature (data) {
+  processSignature (data: BN): Buffer {
     // get signature from stack as buffer
     return data.toBuffer()
   },
-  verifySignature (msg, signature, pubKey) {
+  verifySignature (msg: BN, signature: Buffer, pubKey: Buffer): Boolean {
     // use just first 64B of the signature - last one is recovery number
     debug(`${msg.toBuffer().toString('hex')},${signature.slice(0, 64).toString('hex')},${pubKey.toString('hex')}`)
     return secp256k1.verify(msg.toBuffer(), signature.slice(0, 64), pubKey)
   },
   // see txUtils.pubKeyRecover - that one returns uncompressed version of the public key
-  pubKeyFromSignature (msg, signature) {
+  pubKeyFromSignature (msg: BN, signature: Buffer): Buffer {
     const pubKey = secp256k1.recover(
       msg.toBuffer(),
       signature.slice(0, 64),

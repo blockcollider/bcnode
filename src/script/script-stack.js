@@ -43,14 +43,13 @@ function StackEmptyException () {
 }
 
 var serialize = (data) => {
+  if (Buffer.isBuffer(data)) {
+    return data.toString('hex')
+  }
   return data.toString(config.base)
 }
 var deserialize = (data) => {
   return new BN(data, config.base)
-}
-
-var convertBNtoHex = (bn: BN) => {
-  return bn.toBuffer().toString('hex')
 }
 
 class ScriptStack {
@@ -455,19 +454,19 @@ class ScriptStack {
     this.push(crypto.sha256(crypto.sha256(this.pop())))
   }
   OP_BLAKE2BL () {
-    const h = convertBNtoHex(this.pop())
-    debug(`OP_BLAKE2BL(): raw: ${h}, h: ${crypto.blake2bl(h)}`)
+    const h = this.pop()
+    debug(`OP_BLAKE2BL(): raw: ${h.toBuffer().toString('hex')}, h: ${crypto.blake2bl(h)}`)
     this.push(crypto.blake2bl(h))
   }
   /* BLAKE2BL with slicing 32 */
   OP_BLAKE2BLS () {
-    const h = convertBNtoHex(this.pop())
-    debug(`OP_BLAKE2BLS(): raw: ${h}, h: ${crypto.blake2bls(h)}`)
+    const h = this.pop()
+    debug(`OP_BLAKE2BLS(): raw: ${h.toBuffer().toString('hex')}, h: ${crypto.blake2bls(h)}`)
     this.push(crypto.blake2bls(h))
   }
   /* alias compressed for hashing once with BLAKE2BL and once with BLAKE2BLS */
   OP_BLAKE2BLC () {
-    const h = convertBNtoHex(this.pop())
+    const h = this.pop()
     const bl = crypto.blake2bl(h)
     const blc = crypto.blake2bls(bl)
     debug(`OP_BLAKE2BLC(): raw: ${h.toString(16)}, hash: ${blc}`)
