@@ -1470,7 +1470,7 @@ export class Engine {
     }
   }
 
-  async createTx (newTx: RpcTransaction) : Promise<Transaction|Error> {
+  async createTx (newTx: RpcTransaction) : Promise<{ status: number, txHash?: string, error?: Error}> {
     const obj = newTx.toObject()
     this._logger.info(`Trying to create TX: ${JSON.stringify(obj)}`)
     const latestBlock = await this.persistence.get('bc.block.latest')
@@ -1566,14 +1566,21 @@ export class Engine {
     txTemplate.setHash(txTemplateHash)
 
     this._logger.debug(JSON.stringify(txTemplate.toObject()))
-    // TODO validate the tx?
-    const wasAdded = await this._txPendingPool.tryAddingNewTx(txTemplate, 'bc')
-    if (wasAdded) {
-      this._emitter.emit('announceTx', {
-        data: txTemplate
-      })
+
+    const isValid = await this._txHandler.isValidTx(txTemplate)
+    if (isValid) {
+      const wasAdded = await this._txPendingPool.tryAddingNewTx(txTemplate, 'bc')
+      if (wasAdded) {
+        this._emitter.emit('announceTx', {
+          data: txTemplate
+        })
+        return { status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplateHash }
+      } else {
+        return { status: RpcTransactionResponseStatus.FAILURE, error: new Error('failed to add to tx pool') }
+      }
+    } else {
+      return { status: RpcTransactionResponseStatus.FAILURE, error: new Error('invalid tx') }
     }
-    return { status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplateHash }
   }
 
   /**
