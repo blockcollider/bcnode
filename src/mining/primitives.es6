@@ -429,7 +429,7 @@ const hash: ((BlockchainHeader|Block) => string) = invoker(0, 'getHash')
 const merkleRoot: ((BlockchainHeader|Block) => string) = invoker(0, 'getMerkleRoot')
 
 export const markedTransactionHash = (tTx: MarkedTransaction): string => {
-  const payload = `${tTx.getId()}${tTx.getToken()}${tTx.getAddrFrom()}${tTx.getAddrTo()}${tTx.getAmount()}`
+  const payload = `${tTx.getId()}${tTx.getToken()}${tTx.getAddrFrom()}${tTx.getAddrTo()}${tTx.getValue()}`
   return blake2bl(payload)
 }
 
