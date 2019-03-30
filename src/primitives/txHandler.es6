@@ -143,7 +143,7 @@ export class TxHandler {
         return false
       }
 
-      if (new BN(outpoint.getValue()).neq(new BN(referencedOutput.getValue()))) {
+      if (!(new BN(outpoint.getValue()).eq(new BN(referencedOutput.getValue())))) {
         return false
       }
     }
