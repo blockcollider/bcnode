@@ -462,7 +462,6 @@ class Interpreter {
       const res = await this.parseAsync(outputScript, inputScript, input, tx, allowDisabled)
       return res.value
     } catch (e) {
-      debug(e)
       return false
     }
   }
