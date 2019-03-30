@@ -1487,7 +1487,11 @@ export class Engine {
     this._logger.info(`NRG managed by address confirmed: ${balanceData.confirmedUnspentOutPoints.length} unconfirmed: ${balanceData.unconfirmedUnspentOutPoints.length}`)
 
     const transferAmountBN = humanToBN(newTx.getAmount(), NRG)
-    const txFeeBN = humanToBN(newTx.getTxFee(), NRG)
+    const txFee = newTx.getTxFee()
+    let txFeeBN = new BN(0)
+    if (txFee !== 0) {
+      txFeeBN = humanToBN(newTx.getTxFee(), NRG)
+    }
     this._logger.info(`has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN, NRG)}`)
     if ((transferAmountBN.add(txFeeBN)).gt(balanceData.confirmed)) {
       this._logger.error(`${newTx.getFromAddr()} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN.toBuffer(), NRG)}`)

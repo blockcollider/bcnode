@@ -132,8 +132,10 @@ export class DexLib {
 
     const blockWindow = new BN(parseInt(settle, 10) - parseInt(shift, 10))
     let txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
-    const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
-    txFeeBN = txFeeBN.add(additionalTxFeeBN)
+    if (additionalTxFee !== '0') {
+      const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
+      txFeeBN = txFeeBN.add(additionalTxFeeBN)
+    }
     this._logger.info(`Tx Fee: ${internalToHuman(txFeeBN, NRG)} NRG`)
     if ((collateralizedBN.add(txFeeBN)).gt(balanceData.confirmed)) { // TODO: make sure confirmed is in humanToBN format
       this._logger.error(`${makerBCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, collateralized: ${internalToHuman(collateralizedBN, NRG)}`)
@@ -317,13 +319,15 @@ export class DexLib {
       throw new Error(msg)
     }
 
-    this._logger.info(`NRG managed by address confirmed: ${balanceData.confirmed.toString(10)} unconfirmed: ${balanceData.confirmed.toString(10)}`)
+    this._logger.info(`NRG managed by address confirmed: ${balanceData.confirmed.toString(10)} unconfirmed: ${balanceData.unconfirmed.toString(10)}`)
 
     const settledAtBCHeight = (new BN(foundBlock.getHeight())).add(new BN(makerTxInfo.shiftStartsAt + makerTxInfo.settleEndsAt))
     const blockWindow = settledAtBCHeight.sub(new BN(latestBlockHeight))
     let txFeeBN = await this.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlockHeight), 'taker')
-    const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
-    txFeeBN = txFeeBN.add(additionalTxFeeBN)
+    if (additionalTxFee !== '0') {
+      const additionalTxFeeBN = humanToBN(additionalTxFee, NRG)
+      txFeeBN = txFeeBN.add(additionalTxFeeBN)
+    }
     this._logger.info(`Tx fee for taker: ${internalToHuman(txFeeBN, NRG)} NRG`)
     if ((collateralizedBN.add(txFeeBN)).gt(balanceData.confirmed)) {
       this._logger.error(`${takerBCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, collateralized: ${internalToHuman(collateralizedBN, NRG)}`)
