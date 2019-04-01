@@ -14,7 +14,7 @@ var { parser } = require('./script')
 var Validator = require('./validator')
 var BeamToJson = require('./beamtojson')
 var BN = require('bn.js')
-var { ScriptTemplates, generateDataToSignForSig } = require('../core/txUtils')
+var { ScriptTemplates, generateDataToSignForSig, getScriptStrFromBuffer } = require('../core/txUtils')
 const { blake2bl } = require('../utils/crypto')
 var { UnsettledTxManager } = require('../bc/unsettledTxManager')
 var TxPendingPool = require('../bc/txPendingPool')
@@ -270,30 +270,30 @@ class Interpreter {
       // Assert monoid isomorphism
       if (env.SCRIPT.indexOf('OP_MONOID') > -1) {
         const inputs = env.INPUT_TX.getInputsList()
-        const readTxs = {}
         // scan through inputs and check for OP_MONOID the script of their outpoint
-        const monoidIso = inputs.reduce(async (all, input) => {
-          const op = input.getOutPoint()
-          if (all.readTxs[op.getHash()] === undefined) {
-            all.readTxs[op.getHash()] = input
-            const optx = await this.persistence.getTransactionByHash(op.getHash(), 'bc')
-            if (optx === null || optx === false) {
-              // if the transaction referenced does not exist fail
-              all.forceFail = true
-            } else {
-              const refop = optx.getOutputsList()[op.getIndex()]
-              const s = refop.getOutputScript().toString('ascii')
-              if (s.indexOf('OP_MONOID') > -1) {
-                all.spendMonoidInputs.push(input)
-              }
-            }
-          }
-          return all
-        }, {
+        const monoidIso = {
           forceFail: false,
           spendMonoidInputs: [],
           readTxs: []
-        })
+        }
+        for (var i = 0; i < inputs.length; i++) {
+          const input = inputs[i]
+          const op = input.getOutPoint()
+          if (!(op.getHash() in monoidIso.readTxs)) {
+            monoidIso.readTxs[op.getHash()] = input
+            const optx = await this.persistence.getTransactionByHash(op.getHash(), 'bc')
+            if (optx === null || optx === false) {
+              // if the transaction referenced does not exist fail
+              monoidIso.forceFail = true
+            } else {
+              const refop = optx.getOutputsList()[op.getIndex()]
+              const s = getScriptStrFromBuffer(refop.getOutputScript())
+              if (s.indexOf('OP_MONOID') > -1) {
+                monoidIso.spendMonoidInputs.push(input)
+              }
+            }
+          }
+        }
 
         if (monoidIso.forceFail) {
           throw new Error('force failed isomorphism -> unable to load outpoint script from disk')
@@ -382,7 +382,7 @@ class Interpreter {
       env.MARKED_TXS = await this.getScriptMarkedTxs(env.SCRIPT, env)
       return env
     } catch (err) {
-      debug(err)
+      console.error('errrrr', err)
       return false
     }
   }
@@ -431,9 +431,9 @@ class Interpreter {
     const scriptWithDataToSignHash = blake2bl(dataToSign) + ' ' + wholeScript
     try {
       const res = parser.parse(scriptWithDataToSignHash)
-      debug(res)
       return res
     } catch (e) {
+      console.error('error', e)
       return {
         code: null,
         value: false,

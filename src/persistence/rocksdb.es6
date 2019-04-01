@@ -803,7 +803,7 @@ export default class PersistenceRocksDb {
       if (indexedTx !== undefined && indexedTx !== false) {
         await this.put(key, tx, opts)
         // check if it's a marked transaction if not confirm the spendability of outpoints
-        if (tx.getInputsList!== undefined) {
+        if (tx.getInputsList !== undefined) {
           if (opts.force === true) {
             await Promise.all(tx.getInputsList().map((txInput) => {
               return this.putOutPointClaim(txInput, tx.getHash(), blockchain, opts)
