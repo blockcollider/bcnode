@@ -269,7 +269,7 @@ class Interpreter {
 
       // Assert monoid isomorphism
       if (env.SCRIPT.indexOf('OP_MONOID') > -1) {
-        const inputs = env.INPUT_TX.getTransactionInputsList()
+        const inputs = env.INPUT_TX.getInputsList()
         const readTxs = {}
         // scan through inputs and check for OP_MONOID the script of their outpoint
         const monoidIso = inputs.reduce(async (all, input) => {

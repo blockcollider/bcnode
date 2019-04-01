@@ -803,14 +803,14 @@ export default class PersistenceRocksDb {
       if (indexedTx !== undefined && indexedTx !== false) {
         await this.put(key, tx, opts)
         // check if it's a marked transaction if not confirm the spendability of outpoints
-        if (tx.getTransactionInputsList !== undefined) {
+        if (tx.getInputsList!== undefined) {
           if (opts.force === true) {
-            await Promise.all(tx.getTransactionInputsList().map((txInput) => {
+            await Promise.all(tx.getInputsList().map((txInput) => {
               return this.putOutPointClaim(txInput, tx.getHash(), blockchain, opts)
             }))
             // if branch is 0 it is a main branch update
           } else if (branch !== undefined && branch === 0) {
-            const availability = await Promise.all(tx.getTransactionInputsList().map((txInput) => {
+            const availability = await Promise.all(tx.getInputsList().map((txInput) => {
               return this.putOutPointClaim(txInput, tx.getHash(), blockchain, opts)
             }))
             const status = availability.every((op) => {
