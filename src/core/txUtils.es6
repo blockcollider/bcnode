@@ -69,6 +69,10 @@ export class ScriptTemplates {
       debug('validating bound operations as marketplace transaction')
       return ScriptTemplates.validateMakerCollTakerPairScriptFormat(script)
     }
+    const parts = script.split(' ')
+    if (parts.length === 2) { // taker's input script see createCrossChainTxTakerInputScript
+      return true
+    }
     // default evaluate standard NRG transfer
     return ScriptTemplates.validateNrgBalanceTransferScriptFormat(script)
   }
