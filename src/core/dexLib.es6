@@ -396,7 +396,7 @@ export class DexLib {
       const inputUnlockScript = [
         signature.toString('hex'),
         pubKey.toString('hex'),
-        blake2bl(takerBCPrivateKeyHex)
+        blake2bl(takerBCAddress)
       ].join(' ')
 
       input.setScriptLength(inputUnlockScript.length)
