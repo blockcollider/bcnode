@@ -121,6 +121,43 @@ message PlaceTakerOrderRequest {
     string  tx_fee = 8;
 }
 
+message TakerOrder {
+    string  wants_chain_address = 1;
+    string  sends_chain_address = 2;
+    string  maker_tx_hash = 3;
+    uint32  maker_tx_output_index = 4;
+    string  collateralized_nrg = 5;
+}
+
+message PlaceTakerOrdersRequest {
+    repeated TakerOrder orders = 1;
+    string  bc_address = 2;
+    string  bc_private_key_hex = 3;
+    string  tx_fee = 4;
+}
+
+message CalculateMakerFeeRequest {
+    uint64  shift_starts_at = 1;
+    uint64  deposit_ends_at = 2;
+    uint64  settle_ends_at = 3;
+    string  pays_with_chain_id = 4;
+    string  pays_unit = 5;
+    string  wants_chain_id = 6;
+    string  wants_unit = 7;
+    string  collateralized_nrg = 8;
+    string  nrg_unit = 9;
+}
+
+message CalculateTakerFeeRequest {
+    string  maker_tx_hash = 1;
+    uint32  maker_tx_output_index = 2;
+    string  collateralized_nrg = 3;
+}
+
+message FeeResponse {
+    string fee = 1;
+}
+
 message GetBlake2blRequest {
     string to_be_hashed = 1;
     uint32 times = 2;
@@ -145,8 +182,14 @@ service Bc {
     rpc Stats (Null) returns (StatsResponse) {}
     rpc NewTx (RpcTransaction) returns (RpcTransactionResponse) {}
     rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {}
+
     rpc PlaceMakerOrder (PlaceMakerOrderRequest) returns (RpcTransactionResponse) {}
     rpc PlaceTakerOrder (PlaceTakerOrderRequest) returns (RpcTransactionResponse) {}
+    rpc PlaceTakerOrders (PlaceTakerOrdersRequest) returns (RpcTransactionResponse) {}
+
+    rpc CalculateMakerFee (CalculateMakerFeeRequest) returns (FeeResponse) {}
+    rpc CalculateTakerFee (CalculateTakerFeeRequest) returns (FeeResponse) {}
+
     rpc GetOpenOrders (Null) returns (GetOpenOrdersResponse) {}
     rpc GetMatchedOpenOrders (Null) returns (GetMatchedOpenOrdersResponse) {}
     rpc GetBlake2bl (GetBlake2blRequest) returns (GetBlake2blResponse) {}

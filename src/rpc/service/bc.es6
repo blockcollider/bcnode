@@ -15,8 +15,9 @@ const { blake2bl } = require('../../utils/crypto')
 const RpcServer = require('../server').default
 
 const {
+  CalculateMakerFeeRequest,CalculateTakerFeeRequest,FeeResponse,
   GetBlake2blRequest, GetBlake2blResponse,
-  RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest,
+  RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest, PlaceTakerOrdersRequest,
   RpcTransactionResponseStatus,
   GetOpenOrdersResponse, MakerOrderInfo,
   GetMatchedOpenOrdersResponse, MatchedOpenOrder, TakerOrderInfo,
@@ -90,6 +91,51 @@ export default class BcServiceImpl {
       res = blake2bl(res)
     }
     callback(null, new GetBlake2blResponse([res]))
+  }
+
+  calculateMakerFee(call: Object, callback: Function){
+    const calcReq: CalculateMakerFeeRequest = call.request;
+    const shift = calcReq.getShiftStartsAt()
+    const deposit = calcReq.getDepositEndsAt()
+    const settle = calcReq.getSettleEndsAt()
+
+    const payWithChainId = calcReq.getPaysWithChainId()
+    const wantChainId = calcReq.getWantsChainId()
+    const makerWantsUnit = calcReq.getWantsUnit()
+    const makerPaysUnit = calcReq.getPaysUnit()
+
+    const collateralizedNrg = calcReq.getCollateralizedNrg()
+    const nrgUnit = calcReq.getNrgUnit()
+
+    this._server.engine.dexLib.calculateMakerFee(
+      shift, deposit, settle,
+      payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit,
+      collateralizedNrg, nrgUnit,
+    ).then(res => {
+      const response = new FeeResponse()
+      response.setFee(res.toString());
+      callback(null, response)
+    }).catch((err) => {
+      callback(err)
+    });
+  }
+
+  calculateTakerFee(call: Object, callback: Function){
+    const calcReq: CalculateTakerFeeRequest = call.request;
+    const makerTxHash = calcReq.getMakerTxHash();
+    const makerTxOutputIndex = calcReq.getMakerTxOutputIndex();
+    const collateralizedNrg = calcReq.getCollateralizedNrg();
+
+    this._server.engine.dexLib.calculateTakerFee(
+      makerTxHash,makerTxOutputIndex,collateralizedNrg
+    ).then(res => {
+      const response = new FeeResponse()
+      response.setFee(res.toString());
+      callback(null, response)
+    }).catch((err) => {
+      callback(err)
+    });
+
   }
 
   placeMakerOrder (call: Object, callback: Function) {
@@ -248,7 +294,7 @@ export default class BcServiceImpl {
       } else {
         res.setBcAddress(bCAddress)
       }
-      callback(null, res)
+      callback(null, res);
     })
   }
 

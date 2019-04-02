@@ -30,6 +30,8 @@ const logging = require('../logger')
 const { config } = require('../config')
 const { Null, Block } = require('../protos/core_pb')
 const {
+  CalculateMakerFeeRequest,
+  CalculateTakerFeeRequest,
   GetBalanceRequest,
   GetBlake2blRequest,
   PlaceMakerOrderRequest,
@@ -122,6 +124,8 @@ export class Server {
     const mapping = {
       getLatestBlocks: Null,
       help: Null,
+      calculateMakerFee: CalculateMakerFeeRequest,
+      calculateTakerFee: CalculateTakerFeeRequest,
       getBalance: GetBalanceRequest,
       placeMakerOrder: PlaceMakerOrderRequest,
       placeTakerOrder: PlaceTakerOrderRequest,
