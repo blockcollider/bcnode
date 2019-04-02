@@ -903,6 +903,9 @@ export default class PersistenceRocksDb {
    */
   async putTransactionBlockIndex (txHash: string, blockHash: string, branch: number = 0, blockchain: string = 'bc', opts: Object = { asBuffer: true }): Promise<boolean> {
     const key = `${blockchain}.txs.${blockHash}`
+    const txBlockKey = `${blockchain}.txblock.${txHash}`
+    await this.put(txBlockKey, `${blockchain}.block.${blockHash}`)
+
     try {
       let hashes = await this.get(key, { asBuffer: true, softFail: true })
       if (hashes === false || hashes === null) {
@@ -912,13 +915,9 @@ export default class PersistenceRocksDb {
       }
       hashes.push(txHash)
       // assign a block hash to a tx
-      const txBlockKey = `${blockchain}.txblock.${txHash}`
-      await this.put(txBlockKey, `${blockchain}.block.${blockHash}`)
       await this.put(key, hashes, opts)
       return Promise.resolve(true)
-    } catch (_) {
-      const txBlockKey = `${blockchain}.txblock.${txHash}`
-      await this.put(txBlockKey, `${blockchain}.block.${blockHash}`)
+    } catch (e) {
       await this.put(key, [txBlockKey], opts)
       return Promise.resolve(true)
     }
@@ -981,7 +980,7 @@ export default class PersistenceRocksDb {
         await this.put(key, block)
         return Promise.all([].concat(
           block.getMarkedTxsList().reduce((all, tx) => {
-            all.push(this.putTransaction(tx.getHash(), block.getHash(), branch, blockchain))
+            all.push(this.putTransaction(tx, block.getHash(), branch, blockchain))
             return all
           }, [])
         )).then(allResults => {
