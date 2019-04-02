@@ -6,6 +6,7 @@
  *
  * @flow
  */
+import type { RoverSyncStatus } from '../persistence/rocksdb'
 
 const { fork } = require('child_process')
 const { glob } = require('glob')
@@ -114,7 +115,7 @@ export class RoverManager {
     return true
   }
 
-  messageRover (roverName: string, message: string, payload: null|{ previousLatest: Block, currentLatest: Block }): ?Error {
+  messageRover (roverName: string, message: string, payload: RoverSyncStatus|{ previousLatest: Block, currentLatest: Block }): ?Error {
     const roverRpc = this._roverConnections[roverName]
     if (!roverRpc) {
       // This is necessary to prevent fail while rovers are starting - once we
@@ -136,6 +137,10 @@ export class RoverManager {
       case 'needs_resync':
         const resyncPayload = new RoverMessage.Resync()
         msg.setType(RoverMessageType.REQUESTRESYNC)
+        resyncPayload.setMissingLatest(payload.missingLatest)
+        const intervalsFetchBlocks = payload.intervals.map(([from, to]) => new RoverMessage.Resync.Interval([from, to]))
+        console.log(intervalsFetchBlocks.map(i => i.toObject()))
+        resyncPayload.setIntervalsList(intervalsFetchBlocks)
         msg.setResync(resyncPayload)
         roverRpc.write(msg)
         break
