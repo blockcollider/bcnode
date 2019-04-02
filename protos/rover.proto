@@ -31,12 +31,18 @@ message RoverMessage {
         FetchBlock fetch_block = 3;
     }
 
-    message Resync {
-    }
-
     message FetchBlock {
         Block from_block = 1;
         Block to_block = 2;
+    }
+
+    message Resync {
+        message Interval {
+            uint64 from_block = 1;
+            uint64 to_block = 2;
+        }
+        bool missing_latest = 1;
+        repeated Interval intervals = 2;
     }
 }
 
