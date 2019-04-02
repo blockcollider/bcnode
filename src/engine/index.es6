@@ -1641,6 +1641,7 @@ export class Engine {
       })
       this._logger.info('broadcasting block challenge ' + newBlock.getHeight() + ' -> considered next block in current multiverse')
       this.node.broadcastNewBlock(newBlock)
+      this._persistence.putBlock(newBlock, 0)
       // NOTE: Do we really need nested try-catch ?
     } catch (err) {
       return Promise.reject(err)
