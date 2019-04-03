@@ -30,8 +30,8 @@ type SupportedScheduledOperations = 'get'|'put'|'del'|'delfromlist'
 type BlockBoundary = [string, [BlockchainHeader, BlockchainHeader]]
 
 export type RoverSyncStatus = {
-  missingLatest: boolean,
-  intervals: ?[[Block, Block]],
+  latestBlock: ?Block,
+  intervals: ?[[number, number]],
   synced: boolean
 }
 
@@ -1534,26 +1534,29 @@ export default class PersistenceRocksDb {
     const chains = ['btc', 'eth', 'lsk', 'neo', 'wav']
     const toMissingIntervals = (blockNumbers: number[]) =>
       groupWith((a, b) => a - 1 === b, blockNumbers)
-        .map((arr) => [arr[0],arr[arr.length-1]])
+        .map((arr) => [arr[0], arr[arr.length - 1]])
 
     for (const chain of chains) {
       result[chain] = {
-        missingLatest: false,
+        latestBlock: undefined,
         intervals: [],
         synced: true
       }
 
       const latest = await this.get(`${chain}.block.latest`)
 
-      // we don't have chain latest -> we didn't rover this chain yet
+      // we don't have chain latest
       if (!latest) {
-        result[chain].missingLatest = true
         result[chain].synced = false
         // do not even try to fetch intervals - we still have to wait for missing blocks to sync
         continue
       }
 
+      result[chain].latestBlock = latest
+
       if (latest) {
+        if (now - latest.getTimestamp() > ROVER_SECONDS_PER_BLOCK[chain] * 2) {
+        }
         const missingBlocks = []
         // check from latest to (now - 72h) of chain blocks
         const lowestHeightOfDecisivePeriod = latest.getHeight() - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK[chain])

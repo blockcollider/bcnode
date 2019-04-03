@@ -11,12 +11,20 @@ service Rover {
     // Rovers sends block collected from the respective network
     rpc CollectBlock (Block) returns (Null) {}
 
+    // Rover reports back sync status
+    rpc ReportSyncStatus (RoverSyncStatus) returns (Null) {}
+
     // Check is TX reciveved in rover is watched and before settlement height
     rpc IsBeforeSettleHeight(SettleTxCheckReq) returns (SettleTxCheckResponse) {}
 }
 
 message RoverIdent {
     string rover_name = 1;
+}
+
+message RoverSyncStatus {
+    string rover_name = 1;
+    bool status = 2;
 }
 
 enum RoverMessageType {
@@ -41,7 +49,8 @@ message RoverMessage {
             uint64 from_block = 1;
             uint64 to_block = 2;
         }
-        bool missing_latest = 1;
+        // latest know block we have in storage, can be empty
+        Block latest_block = 1;
         repeated Interval intervals = 2;
     }
 }
