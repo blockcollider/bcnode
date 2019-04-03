@@ -8,6 +8,7 @@ message Block {
     string blockchain = 1;
     string hash = 2;
     string previous_hash = 3;
+    // with ms
     uint64 timestamp = 4;
     uint64 height = 5;
     string merkle_root = 6;
