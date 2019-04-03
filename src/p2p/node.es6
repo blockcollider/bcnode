@@ -272,8 +272,7 @@ export class PeerNode {
         events = []
       }
       // if a peer has just been rejected this peer will be removed from events
-      const needsResyncData = await this._engine.persistence.getDecisivePeriodOfCrossChainBlocksStatus()
-      let roverSyncComplete = Object.values(needsResyncData).every(i => !i)
+      let roverSyncComplete = this._engine.rovers.areRoversSynced()
       roverSyncComplete = true // TODO: Remove override after P2P sync complete
       if (!roverSyncComplete) {
         debug('process peer evaluation requested, rover sync not complete')
@@ -632,8 +631,7 @@ export class PeerNode {
         // create peer sync group <- sort peers by best block
         // sync backwards from top to bottom if a peer fails switch
         // begin syncing after pool size
-        const needsResyncData = await this._engine.persistence.getDecisivePeriodOfCrossChainBlocksStatus()
-        let roverSyncComplete = Object.values(needsResyncData).every(i => !i)
+        let roverSyncComplete = this._engine.rovers.areRoversSynced()
         roverSyncComplete = true
 
         // greeting reponse to connection with provided host information and connection ID
