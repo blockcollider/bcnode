@@ -317,7 +317,7 @@ export default class Controller {
       const from = to - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['lsk'])
       const step = ((to - from) / 500) | 0
       const boundaries = rangeStep(from, step, to)
-      const tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlock.height - blockNumber, limit: 1 }))
+      const tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlock.height - blockNumber, limit: step }))
 
       this._logger.info(`Requesting blocks ${from} - ${to} for initial resync (${tasks.length} tasks)`)
       parallelLimit(tasks, 5, (err, resuls) => {
