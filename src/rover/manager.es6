@@ -153,7 +153,12 @@ export class RoverManager {
         const resyncPayload = new RoverMessage.Resync()
         msg.setType(RoverMessageType.REQUESTRESYNC)
         resyncPayload.setLatestBlock(payload.latestBlock)
-        const intervalsFetchBlocks = payload.intervals.map(([from, to]) => new RoverMessage.Resync.Interval([from, to]))
+        const intervalsFetchBlocks = payload.intervals.map(([to, from]) => {
+          const i = new RoverMessage.Resync.Interval()
+          i.setFromBlock(from)
+          i.setToBlock(to)
+          return i
+        })
         resyncPayload.setIntervalsList(intervalsFetchBlocks)
         msg.setResync(resyncPayload)
         roverRpc.write(msg)
