@@ -60,6 +60,10 @@ export default class CollectorServiceImpl {
     this.server.engine.rovers.roverRpcJoined(call)
   }
 
+  reportSyncStatus (call: Object, callback: Function) {
+    this.server.engine.rovers.setRoverSyncStatus(call)
+  }
+
   _getContext () : Object {
     return {
       server: this._server,

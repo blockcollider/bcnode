@@ -49,6 +49,17 @@ function deserialize_bc_RoverMessage(buffer_arg) {
   return rover_pb.RoverMessage.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_bc_RoverSyncStatus(arg) {
+  if (!(arg instanceof rover_pb.RoverSyncStatus)) {
+    throw new Error('Expected argument of type bc.RoverSyncStatus');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_bc_RoverSyncStatus(buffer_arg) {
+  return rover_pb.RoverSyncStatus.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_bc_SettleTxCheckReq(arg) {
   if (!(arg instanceof rover_pb.SettleTxCheckReq)) {
     throw new Error('Expected argument of type bc.SettleTxCheckReq');
@@ -94,6 +105,18 @@ var RoverService = exports.RoverService = {
     responseType: core_pb.Null,
     requestSerialize: serialize_bc_Block,
     requestDeserialize: deserialize_bc_Block,
+    responseSerialize: serialize_bc_Null,
+    responseDeserialize: deserialize_bc_Null,
+  },
+  // Rover reports back sync status
+  reportSyncStatus: {
+    path: '/bc.Rover/ReportSyncStatus',
+    requestStream: false,
+    responseStream: false,
+    requestType: rover_pb.RoverSyncStatus,
+    responseType: core_pb.Null,
+    requestSerialize: serialize_bc_RoverSyncStatus,
+    requestDeserialize: deserialize_bc_RoverSyncStatus,
     responseSerialize: serialize_bc_Null,
     responseDeserialize: deserialize_bc_Null,
   },

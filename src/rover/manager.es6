@@ -12,7 +12,7 @@ const { fork } = require('child_process')
 const { glob } = require('glob')
 const fs = require('fs')
 const path = require('path')
-const { flatten, groupBy } = require('ramda')
+const { all, flatten, groupBy, values } = require('ramda')
 
 const debug = require('debug')('bcnode:rover:manager')
 const logging = require('../logger')
@@ -47,6 +47,7 @@ export class RoverManager {
   _rovers: Object
   _roverConnections: { [roverName: string]: Object }
   _roverBootstrap: { [roverName: string]: boolean }
+  _roverSyncStatus: { [roverName: string]: boolean }
   _timeouts: Object
 
   constructor () {
@@ -66,6 +67,17 @@ export class RoverManager {
     this._logger.debug(`Rover ${roverName} joined using gRPC`)
     // TODO check if connection not already present
     this._roverConnections[roverName] = call
+  }
+
+  setRoverSyncStatus (call: Object) {
+    const roverName = call.request.getRoverName()
+    const isSynced = call.request.getStatus()
+    this._logger.debug(`Rover ${roverName} reporting sync status: ${isSynced}`)
+    this._roverSyncStatus[roverName] = isSynced
+  }
+
+  areRoversSynced () {
+    return all(t => t, values(this._roverSyncStatus))
   }
 
   /**
@@ -94,6 +106,7 @@ export class RoverManager {
     )
     this._logger.info(`rover started '${roverName}'`)
     this._rovers[roverName] = rover
+    this._roverSyncStatus[roverName] = true
     // this._timeouts[roverName] = setTimeout(() => {
     //  this._logger.info('cycling rover ' + roverName)
     //  return this._killRover(roverName)
@@ -104,6 +117,7 @@ export class RoverManager {
       this._roverConnections[roverName] && this._roverConnections[roverName].end()
       delete this._roverConnections[roverName]
       delete this._roverBootstrap[roverName]
+      this._roverSyncStatus[roverName] = true
       // TODO ROVER_RESTART_TIMEOUT should not be static 5s but probably some exponential backoff series separate for each rover
       if (code !== ROVER_DF_VOID_EXIT_CODE) {
         setTimeout(() => {
@@ -137,12 +151,12 @@ export class RoverManager {
       case 'needs_resync':
         const resyncPayload = new RoverMessage.Resync()
         msg.setType(RoverMessageType.REQUESTRESYNC)
-        resyncPayload.setMissingLatest(payload.missingLatest)
+        resyncPayload.setLatestBlock(payload.latestBlock)
         const intervalsFetchBlocks = payload.intervals.map(([from, to]) => new RoverMessage.Resync.Interval([from, to]))
-        console.log(intervalsFetchBlocks.map(i => i.toObject()))
         resyncPayload.setIntervalsList(intervalsFetchBlocks)
         msg.setResync(resyncPayload)
         roverRpc.write(msg)
+        this._roverSyncStatus[roverName] = false
         break
 
       case 'fetch_block':
@@ -240,6 +254,7 @@ export class RoverManager {
     this._roverConnections[roverName] && this._roverConnections[roverName].end()
     delete this._roverConnections[roverName]
     delete this._roverBootstrap[roverName]
+    this._roverSyncStatus[roverName] = true
     const { pid } = this._rovers[roverName]
     this._logger.info(`Killing rover '${roverName}', PID: ${pid}`)
     try {
