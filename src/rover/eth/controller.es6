@@ -158,7 +158,7 @@ export default class Controller {
         }
         this._logger.warn(`Incoming block has invalid difficulty - rejecting the block, info: ${JSON.stringify(blockInfo)}`)
         if (this._invalidDifficultyCount > MAX_INVALID_COUNT) {
-          this._logger.warn(`Maximum amount of invalid ETH blocks reached - restarting rover to try to connect to valid peers`)
+          this._logger.warn(`limit invalid ETH blocks <- restarting rover`)
           process.exit(1)
         }
         return
