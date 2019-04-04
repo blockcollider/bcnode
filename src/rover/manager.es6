@@ -55,6 +55,7 @@ export class RoverManager {
     this._rovers = {}
     this._roverConnections = {}
     this._roverBootstrap = {}
+    this._roverSyncStatus = {}
     this._timeouts = {}
   }
 
