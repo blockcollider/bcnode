@@ -7,6 +7,8 @@
  * @flow
  */
 const BN = require('bn.js')
+const { groupWith } = require('ramda')
+
 const { BcBlock } = require('../protos/core_pb')
 
 /**
@@ -23,3 +25,7 @@ export const sortBlocks = (list: BcBlock[]): BcBlock[] => {
     return 0
   })
 }
+
+export const toMissingIntervals = (blockNumbers: number[]) =>
+  groupWith((a, b) => a - 1 === b, blockNumbers)
+    .map((arr) => [arr[0], arr[arr.length - 1]])

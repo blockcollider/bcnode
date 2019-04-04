@@ -14,8 +14,9 @@ const LRUCache = require('lru-cache')
 // const Validator = require('../../script/validator')
 // const BeamToJson = require('../../script/beamtojson')
 const { blake2bl } = require('../utils/crypto')
+const { toMissingIntervals } = require('../utils/protoBuffers')
 const { networks } = require('../config/networks')
-const { contains, flatten, groupWith, max, equals, is, toPairs } = require('ramda')
+const { contains, flatten, max, equals, is, toPairs } = require('ramda')
 const { BcBlock, Block, BlockchainHeaders, BlockchainHeader, Transaction, MarkedTransaction, TransactionInput, TransactionOutput } = require('../protos/core_pb')
 const { serialize, deserialize } = require('./codec')
 const { getLogger } = require('../logger')
@@ -1532,9 +1533,6 @@ export default class PersistenceRocksDb {
     const result = {}
     const now = Date.now()
     const chains = ['btc', 'eth', 'lsk', 'neo', 'wav']
-    const toMissingIntervals = (blockNumbers: number[]) =>
-      groupWith((a, b) => a - 1 === b, blockNumbers)
-        .map((arr) => [arr[0], arr[arr.length - 1]])
 
     for (const chain of chains) {
       result[chain] = {
