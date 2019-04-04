@@ -210,6 +210,7 @@ export default class Controller {
       switch (message.getType()) { // Also could be message.getPayloadCase()
         case RoverMessageType.REQUESTRESYNC:
           this.network.initialResync = true
+          this.network.resyncData = message.getResync()
           break
 
         case RoverMessageType.FETCHBLOCK:
