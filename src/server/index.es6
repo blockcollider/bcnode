@@ -36,6 +36,7 @@ const {
   GetBlake2blRequest,
   PlaceMakerOrderRequest,
   PlaceTakerOrderRequest,
+  PlaceTakerOrdersRequest,
   VanityConvertRequest,
   RpcTransaction
 } = require('../protos/bc_pb')
@@ -129,6 +130,7 @@ export class Server {
       getBalance: GetBalanceRequest,
       placeMakerOrder: PlaceMakerOrderRequest,
       placeTakerOrder: PlaceTakerOrderRequest,
+      placeTakerOrders: PlaceTakerOrdersRequest,
       getOpenOrders: Null,
       getBlake2bl: GetBlake2blRequest,
       getMatchedOpenOrders: Null,

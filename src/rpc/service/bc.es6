@@ -17,7 +17,7 @@ const RpcServer = require('../server').default
 const {
   CalculateMakerFeeRequest,CalculateTakerFeeRequest,FeeResponse,
   GetBlake2blRequest, GetBlake2blResponse,
-  RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest, PlaceTakerOrdersRequest,
+  RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest, PlaceTakerOrdersRequest, TakerOrder,
   RpcTransactionResponseStatus,
   GetOpenOrdersResponse, MakerOrderInfo,
   GetMatchedOpenOrdersResponse, MatchedOpenOrder, TakerOrderInfo,
@@ -157,6 +157,7 @@ export default class BcServiceImpl {
 
     const collateralizedNrg = placeMakerOrderReq.getCollateralizedNrg()
     const nrgUnit = placeMakerOrderReq.getNrgUnit()
+
     let additionalTxFee = placeMakerOrderReq.getTxFee()
     if (additionalTxFee === '') {
       additionalTxFee = '0'
@@ -186,6 +187,54 @@ export default class BcServiceImpl {
     }).catch((err) => {
       callback(err)
     })
+  }
+
+  placeTakerOrders(call:Object, callback: Function){
+    const placeTakerOrdersReq: PlaceTakerOrdersRequest = call.request
+
+    const bCAddress = placeTakerOrdersReq.getBcAddress()
+    const bCPrivateKeyHex = placeTakerOrdersReq.getBcPrivateKeyHex()
+
+    const orders = placeTakerOrderReq.getOrders();
+
+    const orders = placeTakerOrderReq.getOrders().map((o)=>{
+      const order: TakerOrder = o;
+      const takerWantsAddress = order.getWantsChainAddress()
+      const takerSendsAddress = order.getSendsChainAddress()
+      const makerTxHash = order.getMakerTxHash()
+      const makerTxOutputIndex = order.getMakerTxOutputIndex()
+      const collateralizedNrg = order.getCollateralizedNrg()
+      return {takerWantsAddress,takerSendsAddress,makerTxHash,makerTxOutputIndex,collateralizedNrg}
+    });
+
+    let additionalTxFee = placeTakerOrdersReq.getTxFee()
+    if (additionalTxFee === '') {
+      additionalTxFee = '0'
+    }
+    const response = new RpcTransactionResponse()
+
+    if (isNaN(parseFloat(additionalTxFee))) {
+      response.setStatus(RpcTransactionResponseStatus.FAILURE)
+      response.setError(`Invalid tx_fee: ${additionalTxFee}`)
+      callback(null, response)
+      return
+    }
+
+    this._server.engine.createCrossChainTakerManyTx(
+      orders,
+      bCAddress, bCPrivateKeyHex,
+      additionalTxFee
+    ).then(res => {
+      response.setStatus(res.status)
+      response.setTxHash(res.txHash)
+      if (res.status !== 0 && res.error) {
+        response.setError(res.error.toString())
+      }
+      callback(null, response)
+    }).catch((err) => {
+      this._logger.error(err)
+      callback(err)
+    });
   }
 
   placeTakerOrder (call: Object, callback: Function) {
