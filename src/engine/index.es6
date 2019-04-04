@@ -1460,7 +1460,7 @@ export class Engine {
             })
           } else {
             this._logger.info(`TX: ${txHash(txTemplate)} is invalid - not accepting to the pending TX pool`)
-            return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error("invalid tx") })
+            return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error('invalid tx') })
           }
         })
       })
