@@ -164,7 +164,7 @@ export default class Controller {
     this._otherCache = new LRUCache({ max: 50 })
     // TODO pull this to networks config
     const networkConfig = merge(config, { testnet: BC_NETWORK === 'test', randomizeNodes: true, bannedPeers: [] })
-    this._logger.info(networkConfig)
+    this._logger.debug(`network config: ${JSON.stringify(networkConfig)}`)
     this._liskApi = (BC_NETWORK === 'test')
       ? lisk.APIClient.createTestnetAPIClient(networkConfig)
       : lisk.APIClient.createMainnetAPIClient(networkConfig)
