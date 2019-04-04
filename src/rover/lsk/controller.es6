@@ -272,36 +272,6 @@ export default class Controller {
         })
       }
     }, 5600)
-
-    // setInterval(function () {
-    //  lisk.api(liskOptions).getPeersList({}, function (error, success, response) {
-    //    if (error) {
-    //      console.trace(error)
-    //    } else {
-    //      var t = response.peers.reduce(function (all, a) {
-    //        if (all[a.height] == undefined) {
-    //          all[a.height] = 1
-    //        } else {
-    //          all[a.height]++
-    //        }
-    //        return all
-    //      }, {})
-
-    //      var tp = Object.keys(t).sort(function (a, b) {
-    //        if (t[a] > t[b]) {
-    //          return -1
-    //        }
-    //        if (t[a] < t[b]) {
-    //          return 1
-    //        }
-    //        return 0
-    //      })
-
-    //      log.debug('peer sample: ' + response.peers.length)
-    //      log.debug('probable lsk block height ' + tp[0])
-    //    }
-    //  })
-    // }, 60000)
   }
 
   startResync () {
