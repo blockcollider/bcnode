@@ -195,9 +195,7 @@ export default class BcServiceImpl {
     const bCAddress = placeTakerOrdersReq.getBcAddress()
     const bCPrivateKeyHex = placeTakerOrdersReq.getBcPrivateKeyHex()
 
-    const orders = placeTakerOrderReq.getOrders();
-
-    const orders = placeTakerOrderReq.getOrders().map((o)=>{
+    const orders = placeTakerOrdersReq.getOrders().map((o)=>{
       const order: TakerOrder = o;
       const takerWantsAddress = order.getWantsChainAddress()
       const takerSendsAddress = order.getSendsChainAddress()
