@@ -89,27 +89,34 @@ export class Multiverse {
    * @returns {*}
    */
   async validateBlockSequenceInline (blocks: BcBlock[]): Promise<bool> {
-    if (blocks === undefined || blocks.length < 1) {
+    if (blocks === undefined || blocks.length < 2) {
       return Promise.resolve(false)
     }
     const sorted = sortBlocks(blocks)
     // check if the actually sequence itself is valid
     const upperBound = sorted[0]
     const lowerBound = sorted[sorted.length - 1]
+    this._logger.info(`validating sequence with upper ${upperBound.getHeight()} to lower ${lowerBound.getHeight()} `)
 
-    try {
-      const upperBoundChild: BcBlock|false = await this.persistence.get(`pending.bc.block.${sorted[0].getHeight()}`)
-      // current pending block does not match the purposed block at that height
-      if (upperBoundChild !== false && upperBound.getHash() !== upperBoundChild.getPreviousHash()) return Promise.reject(new Error('pending block does not match purposed block'))
-      // add the child block of the sequence
-      sorted.unshift(upperBoundChild)
-    } catch (err) {
-      this._logger.warn('load warning')
+    if (sorted[0].getHeight() > 2) {
+      try {
+        const upperBoundChild: BcBlock|false = await this.persistence.get(`bc.block.${sorted[0].getHeight()}`)
+        // current pending block does not match the purposed block at that height
+        if (upperBoundChild !== false && upperBound.getHash() !== upperBoundChild.getPreviousHash()) return Promise.reject(new Error('pending block does not match purposed block'))
+        // add the child block of the sequence
+        sorted.unshift(upperBoundChild)
+      } catch (err) {
+        this._logger.error(err)
+        return Promise.resolve(false)
+      }
+    } else {
+      this._logger.warn(`first block ${sorted[0].getHash()} in sequence claims to be the first block after the genesis block`)
     }
 
     if (lowerBound.getHeight() === 1) {
       // if at final depth this will equal 1 or the genesis block
       const lowerBoundParent: BcBlock = await this.persistence.get('bc.block.1') // will always return genesis block
+      this._logger.info(`${lowerBoundParent.getHeight()} lower bound height`)
       if (lowerBound.getPreviousHash() !== lowerBoundParent.getHash()) return Promise.reject(new Error('sync did not resolve to genesis block'))
       // add the genesis block to the sequence
       sorted.push(lowerBoundParent)
@@ -117,7 +124,7 @@ export class Multiverse {
     // finally check the entire sequence
     // enabled during AT
     // TODO: Adam lets review if this is still necessary
-    // if (!validateBlockSequence(sorted)) return Promise.reject(new Error('block sequence invalid'))
+    if (!validateBlockSequence(sorted)) return Promise.reject(new Error('block sequence invalid'))
 
     return Promise.resolve(true)
   }
@@ -265,14 +272,19 @@ export class Multiverse {
       /// ////////////////////////////////////////////////////
       // 1. block further extends the main branch
       if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
-        debug(`${source} addBlock() put newBlock hash: ${newBlock.getHash()}`)
-        await this.persistence.put(`${blockchain}.block.latest`, newBlock)
-        await this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
-        await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
-        await this.persistence.putBlock(newBlock)
-        this._logger.info('addBlock(): block extends main branch ' + latestBlock.getHash())
-        // FIX: says it extends main branch but stored = false
-        return Promise.resolve({ stored: true, needsResync: false })
+        const valid = await this.validateBlockSequenceInline([latestBlock, newBlock])
+        if (valid) {
+          debug(`${source} addBlock() put newBlock hash: ${newBlock.getHash()}`)
+          await this.persistence.put(`${blockchain}.block.latest`, newBlock)
+          await this.persistence.put(`${blockchain}.block.${newBlock.getHeight()}`, newBlock)
+          await this.persistence.put(`${blockchain}.block.${newBlock.getHash()}`, newBlock)
+          await this.persistence.putBlock(newBlock)
+          this._logger.info('addBlock(): block extends main ' + latestBlock.getHash() + ' -> ' + newBlock.getHash())
+          return Promise.resolve({ stored: true, needsResync: false })
+        } else {
+          this._logger.warn('addBlock(): proposed block invalid sequence ' + newBlock.getHash())
+          return Promise.resolve({ stored: false, needsResync: false })
+        }
       }
 
       /// ////////////////////////////////////////////////////
@@ -285,7 +297,7 @@ export class Multiverse {
       }
 
       if (originBlock.getHash() === newBlock.getPreviousHash()) {
-        this._logger.info(`${source} addBlock(): no chain for purposed newBlock edge <- needsResync: true`)
+        this._logger.info(`${source} addBlock(): newBlock edge extends alternative block height`)
         if (parseInt(newBlock.getHeight(), 10) > parseInt(latestBlock.getHeight(), 10)) {
           await this.persistence.put('bc.block.latest', newBlock)
         }

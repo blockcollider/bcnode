@@ -14,6 +14,7 @@ const LRUCache = require('lru-cache')
 // const Validator = require('../../script/validator')
 // const BeamToJson = require('../../script/beamtojson')
 const { blake2bl } = require('../utils/crypto')
+const { toMissingIntervals } = require('../utils/protoBuffers')
 const { networks } = require('../config/networks')
 const { contains, flatten, max, equals, is, toPairs } = require('ramda')
 const { BcBlock, Block, BlockchainHeaders, BlockchainHeader, Transaction, MarkedTransaction, TransactionInput, TransactionOutput } = require('../protos/core_pb')
@@ -28,6 +29,12 @@ const SUPPORTED_SCHEDULED_OPERATIONS = ['get', 'put', 'del', 'delfromlist']
 type SupportedScheduledOperations = 'get'|'put'|'del'|'delfromlist'
 
 type BlockBoundary = [string, [BlockchainHeader, BlockchainHeader]]
+
+export type RoverSyncStatus = {
+  latestBlock: ?Block,
+  intervals: ?[[number, number]],
+  synced: boolean
+}
 
 const BC_NETWORK = process.env.BC_NETWORK || 'main'
 const EMBLEM_CONTRACT_ADDRESS = networks[BC_NETWORK].rovers.eth.embContractId
@@ -1521,37 +1528,44 @@ export default class PersistenceRocksDb {
 
   /**
    * Returns flags for each chain signaling if chain has a full 72h history from now
-   *
    */
-  async getDecisivePeriodOfCrossChainBlocksStatus (): Promise<{'btc': bool, 'eth': bool, 'lsk': bool, 'neo': bool, 'wav': bool}> {
+  async getDecisivePeriodOfCrossChainBlocksStatus (): Promise<{'btc': RoverSyncStatus, 'eth': RoverSyncStatus, 'lsk': RoverSyncStatus, 'neo': RoverSyncStatus, 'wav': RoverSyncStatus}> {
     const result = {}
     const now = Date.now()
     const chains = ['btc', 'eth', 'lsk', 'neo', 'wav']
+
     for (const chain of chains) {
-      result[chain] = false
+      result[chain] = {
+        latestBlock: undefined,
+        intervals: [],
+        synced: true
+      }
 
       const latest = await this.get(`${chain}.block.latest`)
 
-      // we don't have chain latest -> we didn't rover this chain yet
+      // we don't have chain latest
       if (!latest) {
-        result[chain] = true
+        result[chain].synced = false
+        // do not even try to fetch intervals - we still have to wait for missing blocks to sync
+        continue
       }
 
-      if (latest) {
-        // chain latest timestamp we have is older than now (allow for waiting period for the next block)
-        if (latest.getTimestamp() + ROVER_SECONDS_PER_BLOCK[chain] * 2 < now) {
-          result[chain] = true
-        }
+      result[chain].latestBlock = latest
 
+      if (latest) {
+        if (now - latest.getTimestamp() > ROVER_SECONDS_PER_BLOCK[chain] * 2) {
+        }
+        const missingBlocks = []
         // check from latest to (now - 72h) of chain blocks
         const lowestHeightOfDecisivePeriod = latest.getHeight() - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK[chain])
         for (let i = latest.getHeight() - 1; i >= lowestHeightOfDecisivePeriod || i === 0; i--) {
           const block = await this.get(`${chain}.block.${i}`)
           if (!block) {
-            result[chain] = true
-            break
+            missingBlocks.push(i)
           }
         }
+
+        result[chain].intervals = toMissingIntervals(missingBlocks)
       }
     }
 

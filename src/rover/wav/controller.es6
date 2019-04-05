@@ -15,12 +15,12 @@ const { inspect } = require('util')
 const WavesApi = require('waves-api')
 const request = require('request')
 const LRUCache = require('lru-cache')
-const { isEmpty, range } = require('ramda')
+const { isEmpty, range, sort } = require('ramda')
 const pRetry = require('p-retry')
 const BN = require('bn.js')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
-const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
+const { RoverMessageType, RoverIdent, RoverSyncStatus } = require('../../protos/rover_pb')
 const { getLogger } = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
@@ -31,7 +31,7 @@ const { randomInt } = require('../utils')
 const { randRange } = require('../../utils/ramda')
 const ts = require('../../utils/time').default // ES6 default export
 const { ROVER_DF_VOID_EXIT_CODE } = require('../manager')
-const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { ROVER_RESYNC_PERIOD, ROVER_SECONDS_PER_BLOCK } = require('../utils')
 const { rangeStep } = require('../../utils/ramda')
 
 const BC_NETWORK = process.env.BC_NETWORK || 'main'
@@ -286,7 +286,7 @@ export default class Controller {
       this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
       switch (message.getType()) { // Also could be message.getPayloadCase()
         case RoverMessageType.REQUESTRESYNC:
-          this.startResync()
+          this.startResync(message.getResync())
           break
 
         case RoverMessageType.FETCHBLOCK:
@@ -437,17 +437,31 @@ export default class Controller {
     })
   }
 
-  startResync () {
+  startResync (resyncMsg: RoverMessage.Resync) {
     if (!this._timeoutResync) {
       this._timeoutResync = setTimeout(() => {
         getLastHeight().then(({ height, timestamp }) => {
-          const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['wav'] | 0
-          const to = height
-          const step = ((to - from) / 500) | 0
-          const boundaries = rangeStep(from, step, to)
-          console.log(`Getting ${boundaries.length} blocks`) // XXX remove after debug
+          let whichBlocks: number[] = []
+          if (!isEmpty(resyncMsg.getIntervalsList())) {
+            for (const interval of resyncMsg.getIntervalsList()) {
+              whichBlocks = range(interval.getFromBlock(), interval.getToBlock() + 1).concat(whichBlocks)
+            }
+            const knownLatestBlock = resyncMsg.getLatestBlock()
+            if (knownLatestBlock && knownLatestBlock.getHeight() < height) {
+              whichBlocks = range(knownLatestBlock.getHeight(), height).concat(whichBlocks)
+            }
+
+            // sort blocks in reverse order
+            whichBlocks = sort((a, b) => b - a, whichBlocks)
+          } else {
+            const from = height - ROVER_RESYNC_PERIOD / ROVER_SECONDS_PER_BLOCK['wav'] | 0
+            const to = height
+            const step = ((to - from) / 500) | 0
+            whichBlocks = rangeStep(from, step, to) // TODO these should not be interspersed
+          }
+          this._logger.debug(`Getting ${whichBlocks.length} blocks`) // XXX remove after debug
           let successCount = 0
-          for (let blockNumber of boundaries) {
+          for (let blockNumber of whichBlocks) {
             pRetry(() => getBlock(blockNumber), {
               onFailedAttempt: error => {
                 this._logger.debug(`Block ${blockNumber} attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
@@ -459,12 +473,12 @@ export default class Controller {
             })
               .then(async (block) => {
                 successCount++
-                if (successCount === boundaries.length) {
+                if (successCount === whichBlocks.length) {
                   this._timeoutResync = undefined
                   this._logger.info(`Initial resync finished`)
-                  process.exit(0)
-                } else { // XXX remove after debug
-                  this._logger.info(`${successCount} done, ${boundaries.length - successCount} to go`)
+                  this._rpc.rover.reportSyncStatus(new RoverSyncStatus(['wav', true]))
+                } else {
+                  this._logger.debug(`${successCount} done, ${whichBlocks.length - successCount} to go`)
                 }
                 this._logger.debug(`Got block at height : "${blockNumber}"`)
                 const { height } = block

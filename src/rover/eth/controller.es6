@@ -21,7 +21,7 @@ const logging = require('../../logger')
 const { errToString } = require('../../helper/error')
 const { networks } = require('../../config/networks')
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
-const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
+const { RoverMessageType, RoverIdent, RoverSyncStatus } = require('../../protos/rover_pb')
 const { RpcClient } = require('../../rpc')
 const Network = require('./network').default
 const { createUnifiedBlock, isBeforeSettleHeight } = require('../helper')
@@ -186,6 +186,9 @@ export default class Controller {
   start (config: { maximumPeers: number }) {
     var network = new Network(config)
     network.on('newBlock', ({ block, isBlockFromInitialSync }) => this.transmitNewBlock(block, isBlockFromInitialSync))
+    network.on('reportSyncStatus', (status) => {
+      this._rpc.rover.reportSyncStatus((new RoverSyncStatus(['eth', status])))
+    })
     network.connect()
 
     this._network = network
@@ -210,6 +213,7 @@ export default class Controller {
       switch (message.getType()) { // Also could be message.getPayloadCase()
         case RoverMessageType.REQUESTRESYNC:
           this.network.initialResync = true
+          this.network.resyncData = message.getResync()
           break
 
         case RoverMessageType.FETCHBLOCK:

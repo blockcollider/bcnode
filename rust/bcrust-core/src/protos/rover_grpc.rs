@@ -26,6 +26,8 @@ pub trait Rover {
 
     fn collect_block(&self, o: ::grpc::RequestOptions, p: super::core::Block) -> ::grpc::SingleResponse<super::core::Null>;
 
+    fn report_sync_status(&self, o: ::grpc::RequestOptions, p: super::rover::RoverSyncStatus) -> ::grpc::SingleResponse<super::core::Null>;
+
     fn is_before_settle_height(&self, o: ::grpc::RequestOptions, p: super::rover::SettleTxCheckReq) -> ::grpc::SingleResponse<super::rover::SettleTxCheckResponse>;
 }
 
@@ -35,6 +37,7 @@ pub struct RoverClient {
     grpc_client: ::grpc::Client,
     method_Join: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::rover::RoverIdent, super::rover::RoverMessage>>,
     method_CollectBlock: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::core::Block, super::core::Null>>,
+    method_ReportSyncStatus: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::rover::RoverSyncStatus, super::core::Null>>,
     method_IsBeforeSettleHeight: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::rover::SettleTxCheckReq, super::rover::SettleTxCheckResponse>>,
 }
 
@@ -50,6 +53,12 @@ impl RoverClient {
             }),
             method_CollectBlock: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
                 name: "/bc.Rover/CollectBlock".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
+            method_ReportSyncStatus: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Rover/ReportSyncStatus".to_string(),
                 streaming: ::grpc::rt::GrpcStreaming::Unary,
                 req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                 resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
@@ -82,6 +91,10 @@ impl Rover for RoverClient {
 
     fn collect_block(&self, o: ::grpc::RequestOptions, p: super::core::Block) -> ::grpc::SingleResponse<super::core::Null> {
         self.grpc_client.call_unary(o, p, self.method_CollectBlock.clone())
+    }
+
+    fn report_sync_status(&self, o: ::grpc::RequestOptions, p: super::rover::RoverSyncStatus) -> ::grpc::SingleResponse<super::core::Null> {
+        self.grpc_client.call_unary(o, p, self.method_ReportSyncStatus.clone())
     }
 
     fn is_before_settle_height(&self, o: ::grpc::RequestOptions, p: super::rover::SettleTxCheckReq) -> ::grpc::SingleResponse<super::rover::SettleTxCheckResponse> {
@@ -121,6 +134,18 @@ impl RoverServer {
                     {
                         let handler_copy = handler_arc.clone();
                         ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.collect_block(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Rover/ReportSyncStatus".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Unary,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.report_sync_status(o, p))
                     },
                 ),
                 ::grpc::rt::ServerMethod::new(

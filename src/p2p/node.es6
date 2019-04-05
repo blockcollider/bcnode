@@ -272,8 +272,7 @@ export class PeerNode {
         events = []
       }
       // if a peer has just been rejected this peer will be removed from events
-      const needsResyncData = await this._engine.persistence.getDecisivePeriodOfCrossChainBlocksStatus()
-      let roverSyncComplete = Object.values(needsResyncData).every(i => !i)
+      let roverSyncComplete = this._engine.rovers.areRoversSynced()
       roverSyncComplete = true // TODO: Remove override after P2P sync complete
       if (!roverSyncComplete) {
         debug('process peer evaluation requested, rover sync not complete')
@@ -632,8 +631,7 @@ export class PeerNode {
         // create peer sync group <- sort peers by best block
         // sync backwards from top to bottom if a peer fails switch
         // begin syncing after pool size
-        const needsResyncData = await this._engine.persistence.getDecisivePeriodOfCrossChainBlocksStatus()
-        let roverSyncComplete = Object.values(needsResyncData).every(i => !i)
+        let roverSyncComplete = this._engine.rovers.areRoversSynced()
         roverSyncComplete = true
 
         // greeting reponse to connection with provided host information and connection ID
@@ -1420,11 +1418,11 @@ export class PeerNode {
         // Peer Sends Block List 0007 // Peer Sends Multiverse 001
       } else if (type === MESSAGES.BLOCKS) {
         const address = conn.remoteAddress + ':' + conn.remotePort
-        this._logger.info(`received BLOCKS from peer ${address}`)
         // TODO: blacklist functionality should go here to prevent peers from requesting large bandwidth multiple times
         const parts = bufferSplit(str, Buffer.from(MSG_SEPARATOR[type]))
         const [, ...blocks] = parts
         const latestBlock = await this._engine.persistence.get('bc.block.latest')
+        this._logger.info(`received ${blocks.length} from peer ${address}`)
         const ipd = await this._engine.persistence.get('bc.sync.initialpeerdata')
 
         if (ipd !== 'complete') {
@@ -1436,51 +1434,50 @@ export class PeerNode {
           return false
         }
         if (blocks.length > MAX_DATA_RANGE) {
-          this._logger.warn(`peer sending more blocks beyond MAX_DATA_RANGE`)
+          this._logger.warn(`blocks from peer is beyond MAX_DATA_RANGE`)
           return false
         }
 
         let validDataUpdate = true
         let currentHeight = 2
 
+        this._logger.info(`${blocks.length} blocks sent from peer range`)
+
         const isBestBlockRange = await this._engine.blockRangeFromPeer(conn, blocks)
 
         // TODO: compare the submitted blocks with the new blocks range in the multiverse pass to engine first (blockRangeFromPeer)
-
-        if (isBestBlockRange) {
-          for (let i = 0; i < blocks.length; i++) {
-            const newBlock = BcBlock.deserializeBinary(blocks[i])
-            const blockHeight = newBlock.getHeight()
-            // if the block is not defined or corrupt reject the transmission
-            debug(`loading newBlock: ${blockHeight}`)
-            const block = await this._engine.persistence.get(`bc.block.${blockHeight}`)
-            if (block === null || newBlock.getHash() !== block.getHash()) {
-              // check if the peer simply sent more blocks
-              if (block !== null && block !== undefined) {
-                debug(`newBlock ${newBlock.getHeight()}:${newBlock.getHash()} vs loaded block ${block.getHeight()}:${block.getHash()}`)
-              } else {
-                debug(`new block ${newBlock.getHeight()} is an update from peer`)
-                // validDateUpdate = false
-                continue
-              }
-              // TODO add peer to deconnect list
-              // if (newBlock.getHeight() < latestBlock.getHeight()) {
-              //  debug(`newBlock ${newBlock.getHeight()} does not exist latestBlock ${latestBlock.getHeight()}`)
-              //  validDataUpdate = false
-              //  continue
-              // }
+        for (let i = 0; i < blocks.length; i++) {
+          const newBlock = BcBlock.deserializeBinary(blocks[i])
+          const blockHeight = newBlock.getHeight()
+          // if the block is not defined or corrupt reject the transmission
+          debug(`loading newBlock: ${blockHeight}`)
+          const block = await this._engine.persistence.get(`bc.block.${blockHeight}`)
+          if (block === null || newBlock.getHash() !== block.getHash()) {
+            // check if the peer simply sent more blocks
+            if (block !== null && block !== undefined) {
+              debug(`newBlock ${newBlock.getHeight()}:${newBlock.getHash()} vs loaded block ${block.getHeight()}:${block.getHash()}`)
+            } else {
+              debug(`new block ${newBlock.getHeight()} is an update from peer`)
+              // validDateUpdate = false
+              continue
             }
-            // FIX: add block valid test
-            if (validDataUpdate === true && newBlock !== undefined && newBlock !== null) {
-              const storedBlock = await this._engine.persistence.putBlock(newBlock)
-              debug(`storedBlock: ${storedBlock}`)
-              if (parseInt(newBlock.getHeight(), 10) >= parseInt(latestBlock.getHeight(), 10) && parseInt(latestBlock.getHeight(), 10) > currentHeight) {
-                await this._engine.persistence.put('bc.block.latest', newBlock)
-              }
-              // if valid set the new height
-              if (currentHeight < newBlock.getHeight()) {
-                currentHeight = parseInt(newBlock.getHeight(), 10)
-              }
+            // TODO add peer to deconnect list
+            // if (newBlock.getHeight() < latestBlock.getHeight()) {
+            //  debug(`newBlock ${newBlock.getHeight()} does not exist latestBlock ${latestBlock.getHeight()}`)
+            //  validDataUpdate = false
+            //  continue
+            // }
+          }
+          // FIX: add block valid test
+          if (validDataUpdate === true && newBlock !== undefined && newBlock !== null) {
+            const storedBlock = await this._engine.persistence.putBlock(newBlock)
+            debug(`storedBlock: ${storedBlock}`)
+            if (parseInt(newBlock.getHeight(), 10) >= parseInt(latestBlock.getHeight(), 10) && parseInt(latestBlock.getHeight(), 10) > currentHeight) {
+              await this._engine.persistence.put('bc.block.latest', newBlock)
+            }
+            // if valid set the new height
+            if (currentHeight < newBlock.getHeight()) {
+              currentHeight = parseInt(newBlock.getHeight(), 10)
             }
           }
         }

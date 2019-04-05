@@ -846,16 +846,16 @@ export class Engine {
     this._logger.info(`starting rovers '${rovers.join(',')}'`)
 
     const needsResyncData = await this.persistence.getDecisivePeriodOfCrossChainBlocksStatus()
-    rovers.forEach(name => {
-      if (name) {
-        this._rovers.startRover(name)
+    for (const roverName of rovers) {
+      if (roverName) {
+        this._rovers.startRover(roverName)
 
-        if (!BC_PREVENT_INITAL_SYNC && needsResyncData[name]) {
-          this._logger.info(`${name} rover needs resync`)
-          this._rovers.messageRover(name, 'needs_resync', null)
+        if (!BC_PREVENT_INITAL_SYNC && needsResyncData[roverName]) {
+          this._logger.info(`${roverName} rover needs resync`)
+          this._rovers.messageRover(roverName, 'needs_resync', needsResyncData[roverName])
         }
       }
-    })
+    }
 
     this.workerPool.allRise().then(() => {
       this._emitter.on('collectBlock', ({

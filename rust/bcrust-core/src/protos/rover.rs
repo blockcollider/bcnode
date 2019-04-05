@@ -185,6 +185,204 @@ impl ::protobuf::reflect::ProtobufValue for RoverIdent {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct RoverSyncStatus {
+    // message fields
+    pub rover_name: ::std::string::String,
+    pub status: bool,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl RoverSyncStatus {
+    pub fn new() -> RoverSyncStatus {
+        ::std::default::Default::default()
+    }
+
+    // string rover_name = 1;
+
+    pub fn clear_rover_name(&mut self) {
+        self.rover_name.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_rover_name(&mut self, v: ::std::string::String) {
+        self.rover_name = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_rover_name(&mut self) -> &mut ::std::string::String {
+        &mut self.rover_name
+    }
+
+    // Take field
+    pub fn take_rover_name(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.rover_name, ::std::string::String::new())
+    }
+
+    pub fn get_rover_name(&self) -> &str {
+        &self.rover_name
+    }
+
+    // bool status = 2;
+
+    pub fn clear_status(&mut self) {
+        self.status = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_status(&mut self, v: bool) {
+        self.status = v;
+    }
+
+    pub fn get_status(&self) -> bool {
+        self.status
+    }
+}
+
+impl ::protobuf::Message for RoverSyncStatus {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.rover_name)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.status = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.rover_name.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.rover_name);
+        }
+        if self.status != false {
+            my_size += 2;
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.rover_name.is_empty() {
+            os.write_string(1, &self.rover_name)?;
+        }
+        if self.status != false {
+            os.write_bool(2, self.status)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> RoverSyncStatus {
+        RoverSyncStatus::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "rover_name",
+                    |m: &RoverSyncStatus| { &m.rover_name },
+                    |m: &mut RoverSyncStatus| { &mut m.rover_name },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "status",
+                    |m: &RoverSyncStatus| { &m.status },
+                    |m: &mut RoverSyncStatus| { &mut m.status },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<RoverSyncStatus>(
+                    "RoverSyncStatus",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static RoverSyncStatus {
+        static mut instance: ::protobuf::lazy::Lazy<RoverSyncStatus> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const RoverSyncStatus,
+        };
+        unsafe {
+            instance.get(RoverSyncStatus::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for RoverSyncStatus {
+    fn clear(&mut self) {
+        self.clear_rover_name();
+        self.clear_status();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for RoverSyncStatus {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for RoverSyncStatus {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct RoverMessage {
     // message fields
     pub field_type: RoverMessageType,
@@ -503,126 +701,6 @@ impl ::protobuf::reflect::ProtobufValue for RoverMessage {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct RoverMessage_Resync {
-    // special fields
-    unknown_fields: ::protobuf::UnknownFields,
-    cached_size: ::protobuf::CachedSize,
-}
-
-impl RoverMessage_Resync {
-    pub fn new() -> RoverMessage_Resync {
-        ::std::default::Default::default()
-    }
-}
-
-impl ::protobuf::Message for RoverMessage_Resync {
-    fn is_initialized(&self) -> bool {
-        true
-    }
-
-    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
-        while !is.eof()? {
-            let (field_number, wire_type) = is.read_tag_unpack()?;
-            match field_number {
-                _ => {
-                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
-                },
-            };
-        }
-        ::std::result::Result::Ok(())
-    }
-
-    // Compute sizes of nested messages
-    #[allow(unused_variables)]
-    fn compute_size(&self) -> u32 {
-        let mut my_size = 0;
-        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
-        self.cached_size.set(my_size);
-        my_size
-    }
-
-    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
-        os.write_unknown_fields(self.get_unknown_fields())?;
-        ::std::result::Result::Ok(())
-    }
-
-    fn get_cached_size(&self) -> u32 {
-        self.cached_size.get()
-    }
-
-    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
-        &self.unknown_fields
-    }
-
-    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
-        &mut self.unknown_fields
-    }
-
-    fn as_any(&self) -> &::std::any::Any {
-        self as &::std::any::Any
-    }
-    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
-        self as &mut ::std::any::Any
-    }
-    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
-        self
-    }
-
-    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
-        Self::descriptor_static()
-    }
-
-    fn new() -> RoverMessage_Resync {
-        RoverMessage_Resync::new()
-    }
-
-    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
-        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
-            lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
-        };
-        unsafe {
-            descriptor.get(|| {
-                let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<RoverMessage_Resync>(
-                    "RoverMessage_Resync",
-                    fields,
-                    file_descriptor_proto()
-                )
-            })
-        }
-    }
-
-    fn default_instance() -> &'static RoverMessage_Resync {
-        static mut instance: ::protobuf::lazy::Lazy<RoverMessage_Resync> = ::protobuf::lazy::Lazy {
-            lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const RoverMessage_Resync,
-        };
-        unsafe {
-            instance.get(RoverMessage_Resync::new)
-        }
-    }
-}
-
-impl ::protobuf::Clear for RoverMessage_Resync {
-    fn clear(&mut self) {
-        self.unknown_fields.clear();
-    }
-}
-
-impl ::std::fmt::Debug for RoverMessage_Resync {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        ::protobuf::text_format::fmt(self, f)
-    }
-}
-
-impl ::protobuf::reflect::ProtobufValue for RoverMessage_Resync {
-    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
-        ::protobuf::reflect::ProtobufValueRef::Message(self)
-    }
-}
-
-#[derive(PartialEq,Clone,Default)]
 pub struct RoverMessage_FetchBlock {
     // message fields
     pub from_block: ::protobuf::SingularPtrField<super::core::Block>,
@@ -852,6 +930,424 @@ impl ::std::fmt::Debug for RoverMessage_FetchBlock {
 }
 
 impl ::protobuf::reflect::ProtobufValue for RoverMessage_FetchBlock {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct RoverMessage_Resync {
+    // message fields
+    pub latest_block: ::protobuf::SingularPtrField<super::core::Block>,
+    pub intervals: ::protobuf::RepeatedField<RoverMessage_Resync_Interval>,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl RoverMessage_Resync {
+    pub fn new() -> RoverMessage_Resync {
+        ::std::default::Default::default()
+    }
+
+    // .bc.Block latest_block = 1;
+
+    pub fn clear_latest_block(&mut self) {
+        self.latest_block.clear();
+    }
+
+    pub fn has_latest_block(&self) -> bool {
+        self.latest_block.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_latest_block(&mut self, v: super::core::Block) {
+        self.latest_block = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_latest_block(&mut self) -> &mut super::core::Block {
+        if self.latest_block.is_none() {
+            self.latest_block.set_default();
+        }
+        self.latest_block.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_latest_block(&mut self) -> super::core::Block {
+        self.latest_block.take().unwrap_or_else(|| super::core::Block::new())
+    }
+
+    pub fn get_latest_block(&self) -> &super::core::Block {
+        self.latest_block.as_ref().unwrap_or_else(|| super::core::Block::default_instance())
+    }
+
+    // repeated .bc.RoverMessage.Resync.Interval intervals = 2;
+
+    pub fn clear_intervals(&mut self) {
+        self.intervals.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_intervals(&mut self, v: ::protobuf::RepeatedField<RoverMessage_Resync_Interval>) {
+        self.intervals = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_intervals(&mut self) -> &mut ::protobuf::RepeatedField<RoverMessage_Resync_Interval> {
+        &mut self.intervals
+    }
+
+    // Take field
+    pub fn take_intervals(&mut self) -> ::protobuf::RepeatedField<RoverMessage_Resync_Interval> {
+        ::std::mem::replace(&mut self.intervals, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_intervals(&self) -> &[RoverMessage_Resync_Interval] {
+        &self.intervals
+    }
+}
+
+impl ::protobuf::Message for RoverMessage_Resync {
+    fn is_initialized(&self) -> bool {
+        for v in &self.latest_block {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.intervals {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.latest_block)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.intervals)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(ref v) = self.latest_block.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
+        for value in &self.intervals {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if let Some(ref v) = self.latest_block.as_ref() {
+            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        for v in &self.intervals {
+            os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> RoverMessage_Resync {
+        RoverMessage_Resync::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<super::core::Block>>(
+                    "latest_block",
+                    |m: &RoverMessage_Resync| { &m.latest_block },
+                    |m: &mut RoverMessage_Resync| { &mut m.latest_block },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<RoverMessage_Resync_Interval>>(
+                    "intervals",
+                    |m: &RoverMessage_Resync| { &m.intervals },
+                    |m: &mut RoverMessage_Resync| { &mut m.intervals },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<RoverMessage_Resync>(
+                    "RoverMessage_Resync",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static RoverMessage_Resync {
+        static mut instance: ::protobuf::lazy::Lazy<RoverMessage_Resync> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const RoverMessage_Resync,
+        };
+        unsafe {
+            instance.get(RoverMessage_Resync::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for RoverMessage_Resync {
+    fn clear(&mut self) {
+        self.clear_latest_block();
+        self.clear_intervals();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for RoverMessage_Resync {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for RoverMessage_Resync {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct RoverMessage_Resync_Interval {
+    // message fields
+    pub from_block: u64,
+    pub to_block: u64,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl RoverMessage_Resync_Interval {
+    pub fn new() -> RoverMessage_Resync_Interval {
+        ::std::default::Default::default()
+    }
+
+    // uint64 from_block = 1;
+
+    pub fn clear_from_block(&mut self) {
+        self.from_block = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_from_block(&mut self, v: u64) {
+        self.from_block = v;
+    }
+
+    pub fn get_from_block(&self) -> u64 {
+        self.from_block
+    }
+
+    // uint64 to_block = 2;
+
+    pub fn clear_to_block(&mut self) {
+        self.to_block = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_to_block(&mut self, v: u64) {
+        self.to_block = v;
+    }
+
+    pub fn get_to_block(&self) -> u64 {
+        self.to_block
+    }
+}
+
+impl ::protobuf::Message for RoverMessage_Resync_Interval {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.from_block = tmp;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.to_block = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if self.from_block != 0 {
+            my_size += ::protobuf::rt::value_size(1, self.from_block, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.to_block != 0 {
+            my_size += ::protobuf::rt::value_size(2, self.to_block, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if self.from_block != 0 {
+            os.write_uint64(1, self.from_block)?;
+        }
+        if self.to_block != 0 {
+            os.write_uint64(2, self.to_block)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> RoverMessage_Resync_Interval {
+        RoverMessage_Resync_Interval::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "from_block",
+                    |m: &RoverMessage_Resync_Interval| { &m.from_block },
+                    |m: &mut RoverMessage_Resync_Interval| { &mut m.from_block },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "to_block",
+                    |m: &RoverMessage_Resync_Interval| { &m.to_block },
+                    |m: &mut RoverMessage_Resync_Interval| { &mut m.to_block },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<RoverMessage_Resync_Interval>(
+                    "RoverMessage_Resync_Interval",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static RoverMessage_Resync_Interval {
+        static mut instance: ::protobuf::lazy::Lazy<RoverMessage_Resync_Interval> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const RoverMessage_Resync_Interval,
+        };
+        unsafe {
+            instance.get(RoverMessage_Resync_Interval::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for RoverMessage_Resync_Interval {
+    fn clear(&mut self) {
+        self.clear_from_block();
+        self.clear_to_block();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for RoverMessage_Resync_Interval {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for RoverMessage_Resync_Interval {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -1317,21 +1813,28 @@ impl ::protobuf::reflect::ProtobufValue for RoverMessageType {
 
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x0brover.proto\x12\x02bc\x1a\ncore.proto\"+\n\nRoverIdent\x12\x1d\n\n\
-    rover_name\x18\x01\x20\x01(\tR\troverName\"\x9e\x02\n\x0cRoverMessage\
-    \x12(\n\x04type\x18\x01\x20\x01(\x0e2\x14.bc.RoverMessageTypeR\x04type\
-    \x121\n\x06resync\x18\x02\x20\x01(\x0b2\x17.bc.RoverMessage.ResyncH\0R\
-    \x06resync\x12>\n\x0bfetch_block\x18\x03\x20\x01(\x0b2\x1b.bc.RoverMessa\
-    ge.FetchBlockH\0R\nfetchBlock\x1a\x08\n\x06Resync\x1a\\\n\nFetchBlock\
-    \x12(\n\nfrom_block\x18\x01\x20\x01(\x0b2\t.bc.BlockR\tfromBlock\x12$\n\
-    \x08to_block\x18\x02\x20\x01(\x0b2\t.bc.BlockR\x07toBlockB\t\n\x07payloa\
-    d\"m\n\x10SettleTxCheckReq\x12\x17\n\x07addr_to\x18\x01\x20\x01(\tR\x06a\
-    ddrTo\x12\x1b\n\taddr_from\x18\x02\x20\x01(\tR\x08addrFrom\x12#\n\rbridg\
-    ed_chain\x18\x03\x20\x01(\tR\x0cbridgedChain\"V\n\x15SettleTxCheckRespon\
-    se\x12=\n\x1bis_before_settlement_height\x18\x01\x20\x01(\x08R\x18isBefo\
-    reSettlementHeight*5\n\x10RoverMessageType\x12\x0e\n\nFetchBlock\x10\0\
-    \x12\x11\n\rRequestResync\x10\x012\xa7\x01\n\x05Rover\x12,\n\x04Join\x12\
-    \x0e.bc.RoverIdent\x1a\x10.bc.RoverMessage\"\00\x01\x12%\n\x0cCollectBlo\
-    ck\x12\t.bc.Block\x1a\x08.bc.Null\"\0\x12I\n\x14IsBeforeSettleHeight\x12\
+    rover_name\x18\x01\x20\x01(\tR\troverName\"H\n\x0fRoverSyncStatus\x12\
+    \x1d\n\nrover_name\x18\x01\x20\x01(\tR\troverName\x12\x16\n\x06status\
+    \x18\x02\x20\x01(\x08R\x06status\"\xd3\x03\n\x0cRoverMessage\x12(\n\x04t\
+    ype\x18\x01\x20\x01(\x0e2\x14.bc.RoverMessageTypeR\x04type\x121\n\x06res\
+    ync\x18\x02\x20\x01(\x0b2\x17.bc.RoverMessage.ResyncH\0R\x06resync\x12>\
+    \n\x0bfetch_block\x18\x03\x20\x01(\x0b2\x1b.bc.RoverMessage.FetchBlockH\
+    \0R\nfetchBlock\x1a\\\n\nFetchBlock\x12(\n\nfrom_block\x18\x01\x20\x01(\
+    \x0b2\t.bc.BlockR\tfromBlock\x12$\n\x08to_block\x18\x02\x20\x01(\x0b2\t.\
+    bc.BlockR\x07toBlock\x1a\xbc\x01\n\x06Resync\x12,\n\x0clatest_block\x18\
+    \x01\x20\x01(\x0b2\t.bc.BlockR\x0blatestBlock\x12>\n\tintervals\x18\x02\
+    \x20\x03(\x0b2\x20.bc.RoverMessage.Resync.IntervalR\tintervals\x1aD\n\
+    \x08Interval\x12\x1d\n\nfrom_block\x18\x01\x20\x01(\x04R\tfromBlock\x12\
+    \x19\n\x08to_block\x18\x02\x20\x01(\x04R\x07toBlockB\t\n\x07payload\"m\n\
+    \x10SettleTxCheckReq\x12\x17\n\x07addr_to\x18\x01\x20\x01(\tR\x06addrTo\
+    \x12\x1b\n\taddr_from\x18\x02\x20\x01(\tR\x08addrFrom\x12#\n\rbridged_ch\
+    ain\x18\x03\x20\x01(\tR\x0cbridgedChain\"V\n\x15SettleTxCheckResponse\
+    \x12=\n\x1bis_before_settlement_height\x18\x01\x20\x01(\x08R\x18isBefore\
+    SettlementHeight*5\n\x10RoverMessageType\x12\x0e\n\nFetchBlock\x10\0\x12\
+    \x11\n\rRequestResync\x10\x012\xdc\x01\n\x05Rover\x12,\n\x04Join\x12\x0e\
+    .bc.RoverIdent\x1a\x10.bc.RoverMessage\"\00\x01\x12%\n\x0cCollectBlock\
+    \x12\t.bc.Block\x1a\x08.bc.Null\"\0\x123\n\x10ReportSyncStatus\x12\x13.b\
+    c.RoverSyncStatus\x1a\x08.bc.Null\"\0\x12I\n\x14IsBeforeSettleHeight\x12\
     \x14.bc.SettleTxCheckReq\x1a\x19.bc.SettleTxCheckResponse\"\0b\x06proto3\
 ";
 

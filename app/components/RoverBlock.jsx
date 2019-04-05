@@ -42,19 +42,19 @@ const BlockLink = ({network, blockchain, hash}: {network: string, blockchain: st
   let url = '#'
   switch (blockchain) {
     case 'btc':
-      url = network === 'main' ? `https://blockchair.com/bitcoin/block/${hash}` : `https://testnet.blockchain.info/block/${hash}`
+      url = network === 'testnet' ? `https://testnet.blockchain.info/block/${hash}` : `https://blockchair.com/bitcoin/block/${hash}`
       break
     case 'eth':
-      url = network === 'main' ? `https://etherscan.io/block/${hash}` : `https://ropsten.etherscan.io/block/${hash}`
+      url = network === 'testnet' ? `https://ropsten.etherscan.io/block/${hash}` : `https://etherscan.io/block/${hash}` 
       break
     case 'lsk':
-      url = network === 'main' ? `https://explorer.lisk.io/block/${hash}` : `https://testnet-explorer.lisk.io/block/${hash}`
+      url = network === 'testnet' ? `https://testnet-explorer.lisk.io/block/${hash}` : `https://explorer.lisk.io/block/${hash}` 
       break
     case 'wav':
-      url = network === 'main' ? `https://wavesexplorer.com/blocks/s/${hash}` : `https://testnet.wavesexplorer.com/blocks/s/${hash}`
+      url = network === 'testnet' ? `https://testnet.wavesexplorer.com/blocks/s/${hash}` : `https://wavesexplorer.com/blocks/s/${hash}`
       break
     case 'neo':
-      url = network === 'main' ? `https://neotracker.io/search/${hash.slice(2)}` : `https://neotracker.io/search/${hash.slice(2)}`
+      url = network === 'testnet' ? `https://neotracker.io/search/${hash.slice(2)}` : `https://neotracker.io/search/${hash.slice(2)}`
       break
     default:
       throw new Error(`Unkown blockchain ${blockchain}`)

@@ -12,19 +12,19 @@ import type { Logger } from 'winston'
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
 const lisk = require('lisk-elements')
-const { range, merge } = require('ramda')
+const { flatten, isEmpty, range, merge } = require('ramda')
 const { parallelLimit } = require('async')
 const BN = require('bn.js')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
-const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
+const { RoverMessageType, RoverIdent, RoverSyncStatus } = require('../../protos/rover_pb')
 const logging = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
 const { RpcClient } = require('../../rpc')
 const { blake2b } = require('../../utils/crypto')
 const { createUnifiedBlock, isBeforeSettleHeight } = require('../helper')
-const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { ROVER_RESYNC_PERIOD, ROVER_SECONDS_PER_BLOCK } = require('../utils')
 const { rangeStep } = require('../../utils/ramda')
 
 let skip = []
@@ -164,7 +164,7 @@ export default class Controller {
     this._otherCache = new LRUCache({ max: 50 })
     // TODO pull this to networks config
     const networkConfig = merge(config, { testnet: BC_NETWORK === 'test', randomizeNodes: true, bannedPeers: [] })
-    this._logger.info(networkConfig)
+    this._logger.debug(`network config: ${JSON.stringify(networkConfig)}`)
     this._liskApi = (BC_NETWORK === 'test')
       ? lisk.APIClient.createTestnetAPIClient(networkConfig)
       : lisk.APIClient.createMainnetAPIClient(networkConfig)
@@ -189,7 +189,7 @@ export default class Controller {
       this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
       switch (message.getType()) { // Also could be message.getPayloadCase()
         case RoverMessageType.REQUESTRESYNC:
-          this.startResync()
+          this.startResync(message.getResync())
           break
 
         case RoverMessageType.FETCHBLOCK:
@@ -208,6 +208,7 @@ export default class Controller {
       const opts = merge({ limit: 1 }, getOpts)
 
       return this._liskApi.blocks.get(opts).then(lastBlocks => {
+        let errorOccured = false
         try {
           let blocks
           if (lastBlocks.blocks !== undefined) {
@@ -222,7 +223,7 @@ export default class Controller {
               this._blockCache.set(lastBlock.id, true)
               this._logger.debug(`unseen block with id: ${inspect(lastBlock.id)} => using for BC chain`)
 
-              return this._liskApi.transactions.get({ blockId: lastBlock.id }).then(async ({ data }) => {
+              this._liskApi.transactions.get({ blockId: lastBlock.id }).then(async ({ data }) => {
                 lastBlock.transactions = data
                 this._logger.debug(`Got txs for block ${lastBlock.id}, ${inspect(data)}`)
 
@@ -235,7 +236,7 @@ export default class Controller {
                       if (err) {
                         this._logger.error(`error while collecting block ${inspect(err)}`)
                         skip = skip.concat(['1', '1'])
-                        return
+                        errorOccured = true
                       }
                       this._logger.debug(`Collector Response: ${JSON.stringify(response.toObject(), null, 4)}`)
                     })
@@ -252,7 +253,10 @@ export default class Controller {
         } catch (err) {
           skip.push('1')
           this._logger.error(err)
+          errorOccured = true
         }
+
+        return Promise.resolve(!errorOccured)
       })
         .catch((err) => {
           skip.push('1')
@@ -272,59 +276,64 @@ export default class Controller {
         })
       }
     }, 5600)
-
-    // setInterval(function () {
-    //  lisk.api(liskOptions).getPeersList({}, function (error, success, response) {
-    //    if (error) {
-    //      console.trace(error)
-    //    } else {
-    //      var t = response.peers.reduce(function (all, a) {
-    //        if (all[a.height] == undefined) {
-    //          all[a.height] = 1
-    //        } else {
-    //          all[a.height]++
-    //        }
-    //        return all
-    //      }, {})
-
-    //      var tp = Object.keys(t).sort(function (a, b) {
-    //        if (t[a] > t[b]) {
-    //          return -1
-    //        }
-    //        if (t[a] < t[b]) {
-    //          return 1
-    //        }
-    //        return 0
-    //      })
-
-    //      log.debug('peer sample: ' + response.peers.length)
-    //      log.debug('probable lsk block height ' + tp[0])
-    //    }
-    //  })
-    // }, 60000)
   }
 
-  startResync () {
+  startResync (resyncMsg: RoverMessage.Resync) {
     this._liskApi.blocks.get().then(lastBlocks => {
-      let lastBlock
+      let tasks
+      let lastBlockHeight
       if (lastBlocks.blocks !== undefined) {
-        lastBlock = lastBlocks.blocks[0]
+        lastBlockHeight = lastBlocks.blocks[0].height
       } else {
-        lastBlock = lastBlocks.data[0]
+        lastBlockHeight = lastBlocks.data[0].height
       }
 
-      const to = lastBlock.height - 1
-      const from = to - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['lsk'])
-      const step = ((to - from) / 500) | 0
-      const boundaries = rangeStep(from, step, to)
-      const tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlock.height - blockNumber, limit: 1 }))
+      if (!isEmpty(resyncMsg.getIntervalsList())) {
+        tasks = flatten(resyncMsg.getIntervalsList().map((interval) => {
+          if (interval.getToBlock() - interval.getFromBlock() + 1 > 100) {
+            const boundaries = rangeStep(interval.getFromBlock(), 100, interval.getToBlock())
+            return boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlockHeight - blockNumber, limit: 100 }))
+          } else {
+            return [async () => this._cycleFn({ offset: lastBlockHeight - interval.getToBlock(), limit: interval.getToBlock() - interval.getFromBlock() + 1 })]
+          }
+        }))
 
-      this._logger.info(`Requesting blocks ${from} - ${to} for initial resync (${tasks.length} tasks)`)
+        // if latest block is older than block period * 2, fetch [latestBlock - known latest block] interval too
+        const knownLatestBlock = resyncMsg.getLatestBlock()
+        if (
+          knownLatestBlock &&
+          Date.now() - knownLatestBlock.getTimestamp() > ROVER_SECONDS_PER_BLOCK['lsk']
+        ) {
+          const knownLatestBlockHeight = resyncMsg.getLatestBlock().getHeight()
+          // TODO if latest know block is older than 100 block, limit will be larger too
+          tasks.unshift(async () => this._cycleFn({ offset: lastBlockHeight - knownLatestBlockHeight, limit: lastBlockHeight - knownLatestBlockHeight + 1 }))
+        }
+      } else {
+        const to = lastBlockHeight - 1
+        const from = to - (ROVER_RESYNC_PERIOD / ROVER_SECONDS_PER_BLOCK['lsk'])
+        const step = ((to - from) / 500) | 0
+        const boundaries = rangeStep(from, step, to)
+        tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlockHeight - blockNumber, limit: step + 1 }))
+
+        this._logger.info(`Requesting blocks ${from} - ${to} for initial resync (${tasks.length} tasks)`)
+      }
       parallelLimit(tasks, 5, (err, resuls) => {
         if (err) {
           this._logger.warn(`Couldn't fetch all blocks for initial resync`)
+          this._rpc.rover.reportSyncStatus(new RoverSyncStatus(['lsk', false]), (err, response) => {
+            err && this._logger.err(err)
+          })
+          return
         }
         this._logger.info(`Fetched blocks for initial resync`)
+        this._rpc.rover.reportSyncStatus(new RoverSyncStatus(['lsk', true]), (err, response) => {
+          if (err) {
+            this._logger.warn(`Error while reporing RoverSyncStatus: ${err}`)
+            return
+          }
+
+          this._logger.info(`Initial resync status reported successfuly`)
+        })
       })
     })
   }
