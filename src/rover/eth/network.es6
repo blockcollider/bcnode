@@ -499,6 +499,11 @@ export default class Network extends EventEmitter {
       }
       this.requestBlockRange(batch)
     }
+
+    // TODO this should ideally happen just once
+    if (isEmpty(this._initialSyncBlocksToFetch)) {
+      this.emit('reportSyncStatus', true)
+    }
   }
 
   handleMessageBlockHeaders (payload: Object, peer: Object) {

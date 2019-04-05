@@ -103,4 +103,3 @@ describe('eth network module', () => {
     })
   })
 })
-
