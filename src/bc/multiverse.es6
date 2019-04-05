@@ -116,7 +116,9 @@ export class Multiverse {
     if (lowerBound.getHeight() === 1) {
       // if at final depth this will equal 1 or the genesis block
       const lowerBoundParent: BcBlock = await this.persistence.get('bc.block.1') // will always return genesis block
-      this._logger.info(`${lowerBoundParent.getHeight()} lower bound height`)
+      this._logger.info(`${lowerBoundParent.getHeight()} <- lower bound height [current]`)
+      this._logger.info(`${lowerBoundParent.getHash()} <- lower bound hash [current]`)
+      this._logger.info(`${lowerBound.getHash()} <- lower bound hash [purposed]`)
       if (lowerBound.getPreviousHash() !== lowerBoundParent.getHash()) return Promise.reject(new Error('sync did not resolve to genesis block'))
       // add the genesis block to the sequence
       sorted.push(lowerBoundParent)
@@ -272,7 +274,8 @@ export class Multiverse {
       /// ////////////////////////////////////////////////////
       // 1. block further extends the main branch
       if (latestBlock && latestBlock.getHash() === newBlock.getPreviousHash()) {
-        const valid = await this.validateBlockSequenceInline([latestBlock, newBlock])
+        // const valid = await this.validateBlockSequenceInline([latestBlock, newBlock])
+        const valid = true
         if (valid) {
           debug(`${source} addBlock() put newBlock hash: ${newBlock.getHash()}`)
           await this.persistence.put(`${blockchain}.block.latest`, newBlock)
