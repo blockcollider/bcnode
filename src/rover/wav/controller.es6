@@ -20,7 +20,7 @@ const pRetry = require('p-retry')
 const BN = require('bn.js')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
-const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
+const { RoverMessageType, RoverIdent, RoverSyncStatus } = require('../../protos/rover_pb')
 const { getLogger } = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
@@ -476,9 +476,9 @@ export default class Controller {
                 if (successCount === whichBlocks.length) {
                   this._timeoutResync = undefined
                   this._logger.info(`Initial resync finished`)
-                  process.exit(0)
-                } else { // XXX remove after debug
-                  this._logger.info(`${successCount} done, ${whichBlocks.length - successCount} to go`)
+                  this._rpc.rover.reportSyncStatus(new RoverSyncStatus(['wav', true]))
+                } else {
+                  this._logger.debug(`${successCount} done, ${whichBlocks.length - successCount} to go`)
                 }
                 this._logger.debug(`Got block at height : "${blockNumber}"`)
                 const { height } = block
