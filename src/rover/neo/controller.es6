@@ -477,10 +477,10 @@ export default class Controller {
           if (!isEmpty(resyncMsg.getIntervalsList())) {
             for (const interval of resyncMsg.getIntervalsList()) {
               whichBlocks = range(interval.getFromBlock(), interval.getToBlock() + 1).concat(whichBlocks)
-              const knownLatestBlock = resyncMsg.getLatestBlock()
-              if (knownLatestBlock && knownLatestBlock.getHeight() < height) {
-                whichBlocks = range(knownLatestBlock.getHeight(), height).concat(whichBlocks)
-              }
+            }
+            const knownLatestBlock = resyncMsg.getLatestBlock()
+            if (knownLatestBlock && knownLatestBlock.getHeight() < height) {
+              whichBlocks = range(knownLatestBlock.getHeight(), height).concat(whichBlocks)
             }
 
             // sort blocks in reverse order
