@@ -21,14 +21,19 @@ const rlp = require('rlp-encoding')
 const fs = require('fs')
 const BN = require('bn.js')
 const {
+  aperture,
   contains,
+  concat,
   drop,
   head,
+  init,
   isEmpty,
+  last,
   map,
   range,
   reverse,
   splitEvery,
+  sort,
   take,
   without
 } = require('ramda')
@@ -37,6 +42,7 @@ const logging = require('../../logger')
 const { getPrivateKey } = require('../utils')
 const { config } = require('../../config')
 const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { rangeStep } = require('../../utils/ramda')
 const { Block } = require('../../protos/core_pb')
 
 const BC_NETWORK = process.env.BC_NETWORK || 'main'
@@ -289,18 +295,58 @@ export default class Network extends EventEmitter {
   }
 
   scheduleInitialSync (knownBlock: number) {
-    // if (!isEmpty(this.resyncData.getIntervalsList()))
-    const count = (72 * 60 * 60) / ROVER_SECONDS_PER_BLOCK['eth']
-    const from = knownBlock - count + 1
-    const to = knownBlock
-    const blockIntervalsToRequest: [number, number][] = map(
-      interval => [interval[0], interval[interval.length - 1]],
-      splitEvery(
-        ETH_MAX_FETCH_BLOCKS,
-        reverse(range(from, to + 1))
+    let blockIntervalsToRequest: [number, number][]
+    if (!isEmpty(this.resyncData.getIntervalsList())) {
+      // sort intervals in reverse order
+      const sortedIntervals = sort(
+        (a, b) => b.getFromBlock() - a.getFromBlock(),
+        this.resyncData.getIntervalsList()
       )
-    )
-    this._logger.info(`blockIntervalsToRequest: ${from} - ${to}`)
+      blockIntervalsToRequest = []
+      for (const interval of sortedIntervals) {
+        // if intervals spans more than ETH_MAX_FETCH_BLOCKS
+        if (interval.getToBlock() - interval.getFromBlock() > ETH_MAX_FETCH_BLOCKS) {
+          const tempIntervals = aperture(2, reverse(rangeStep(interval.getFromBlock(), ETH_MAX_FETCH_BLOCKS, interval.getToBlock()).concat(interval.getToBlock())))
+          blockIntervalsToRequest = blockIntervalsToRequest.concat(
+            init(tempIntervals).map(([from, to]) => ([from, to + 1]))
+          )
+          blockIntervalsToRequest.push(last(tempIntervals))
+        } else {
+          blockIntervalsToRequest.push([interval.getToBlock(), interval.getFromBlock()])
+        }
+      }
+      const knownLatestBlock = this.resyncData.getLatestBlock()
+      if (
+        knownLatestBlock &&
+        Date.now() - knownLatestBlock.getTimestamp() > ROVER_SECONDS_PER_BLOCK['lsk']
+      ) {
+        const knownLatestBlockHeight = knownLatestBlock.getHeight()
+        const latestIntervals = []
+        if (knownBlock - knownLatestBlockHeight > ETH_MAX_FETCH_BLOCKS) {
+          const tempIntervals = aperture(2, reverse(rangeStep(knownLatestBlockHeight, ETH_MAX_FETCH_BLOCKS, knownBlock).concat(knownBlock)))
+          blockIntervalsToRequest = [last(tempIntervals)].concat(blockIntervalsToRequest)
+          blockIntervalsToRequest = init(tempIntervals).map(
+            ([from, to]) => ([from, to + 1])
+          ).concat(blockIntervalsToRequest)
+        } else {
+          blockIntervalsToRequest = [[knownBlock, knownLatestBlockHeight]].concat(blockIntervalsToRequest)
+        }
+        blockIntervalsToRequest = latestIntervals.concat(blockIntervalsToRequest)
+      }
+    } else {
+      const count = (72 * 60 * 60) / ROVER_SECONDS_PER_BLOCK['eth']
+      const from = Math.max(0, knownBlock - count + 1)
+      const to = knownBlock
+      blockIntervalsToRequest = map(
+        interval => [interval[0], interval[interval.length - 1]],
+        splitEvery(
+          ETH_MAX_FETCH_BLOCKS,
+          reverse(range(from, to + 1))
+        )
+      )
+      this._logger.info(`blockIntervalsToRequest: ${from} - ${to}`)
+    }
+    this._logger.info(`blockIntervalsToRequest: ${JSON.stringify(blockIntervalsToRequest)}`)
     this._initialSyncBlocksToFetch = drop(1, blockIntervalsToRequest)
     const firstBatch = head(take(1, blockIntervalsToRequest))
     if (!firstBatch) {
@@ -312,7 +358,7 @@ export default class Network extends EventEmitter {
 
   requestBlockRange ([to, from]: [number, number]) {
     const peers = [].concat(Object.values(this._forkVerifiedForPeer))
-    const WAIT_FOR_PEERS = 8
+    const WAIT_FOR_PEERS = 2
     const WAIT_FOR_PEERS_TIMEOUT = 10000
 
     if (peers.length < WAIT_FOR_PEERS) {
