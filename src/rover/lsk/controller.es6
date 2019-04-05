@@ -24,7 +24,7 @@ const { errToString } = require('../../helper/error')
 const { RpcClient } = require('../../rpc')
 const { blake2b } = require('../../utils/crypto')
 const { createUnifiedBlock, isBeforeSettleHeight } = require('../helper')
-const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { ROVER_RESYNC_PERIOD, ROVER_SECONDS_PER_BLOCK } = require('../utils')
 const { rangeStep } = require('../../utils/ramda')
 
 let skip = []
@@ -310,7 +310,7 @@ export default class Controller {
         }
       } else {
         const to = lastBlockHeight - 1
-        const from = to - (72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['lsk'])
+        const from = to - (ROVER_RESYNC_PERIOD / ROVER_SECONDS_PER_BLOCK['lsk'])
         const step = ((to - from) / 500) | 0
         const boundaries = rangeStep(from, step, to)
         tasks = boundaries.map(blockNumber => async () => this._cycleFn({ offset: lastBlockHeight - blockNumber, limit: step + 1 }))

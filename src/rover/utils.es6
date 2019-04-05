@@ -24,6 +24,8 @@ export const ROVER_SECONDS_PER_BLOCK = {
   'wav': 65.0 // measured on blocks 1352650 - 1352150
 }
 
+export const ROVER_RESYNC_PERIOD = 72 * 60 * 60 // 72h in s
+
 export function randomInt (low: number, high: number): number {
   return Math.floor(Math.random() * (high - low) + low)
 }

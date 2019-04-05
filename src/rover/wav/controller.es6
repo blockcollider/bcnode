@@ -31,7 +31,7 @@ const { randomInt } = require('../utils')
 const { randRange } = require('../../utils/ramda')
 const ts = require('../../utils/time').default // ES6 default export
 const { ROVER_DF_VOID_EXIT_CODE } = require('../manager')
-const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { ROVER_RESYNC_PERIOD, ROVER_SECONDS_PER_BLOCK } = require('../utils')
 const { rangeStep } = require('../../utils/ramda')
 
 const BC_NETWORK = process.env.BC_NETWORK || 'main'
@@ -454,7 +454,7 @@ export default class Controller {
             // sort blocks in reverse order
             whichBlocks = sort((a, b) => b - a, whichBlocks)
           } else {
-            const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['wav'] | 0
+            const from = height - ROVER_RESYNC_PERIOD / ROVER_SECONDS_PER_BLOCK['wav'] | 0
             const to = height
             const step = ((to - from) / 500) | 0
             whichBlocks = rangeStep(from, step, to) // TODO these should not be interspersed

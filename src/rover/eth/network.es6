@@ -41,7 +41,7 @@ const {
 const logging = require('../../logger')
 const { getPrivateKey } = require('../utils')
 const { config } = require('../../config')
-const { ROVER_SECONDS_PER_BLOCK } = require('../utils')
+const { ROVER_RESYNC_PERIOD, ROVER_SECONDS_PER_BLOCK } = require('../utils')
 const { rangeStep } = require('../../utils/ramda')
 const { Block } = require('../../protos/core_pb')
 
@@ -334,7 +334,7 @@ export default class Network extends EventEmitter {
         blockIntervalsToRequest = latestIntervals.concat(blockIntervalsToRequest)
       }
     } else {
-      const count = (72 * 60 * 60) / ROVER_SECONDS_PER_BLOCK['eth']
+      const count = ROVER_RESYNC_PERIOD / ROVER_SECONDS_PER_BLOCK['eth']
       const from = Math.max(0, knownBlock - count + 1)
       const to = knownBlock
       blockIntervalsToRequest = map(
