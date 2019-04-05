@@ -17,7 +17,7 @@ const NeoNode = require('@cityofzion/neo-js/dist/node/node')
 const Neon = require('@cityofzion/neon-js')
 const { inspect } = require('util')
 const LRUCache = require('lru-cache')
-const { isEmpty, range, partial } = require('ramda')
+const { isEmpty, partial, range, sort } = require('ramda')
 const { shuffle } = require('lodash')
 const pRetry = require('p-retry')
 
@@ -295,7 +295,7 @@ export default class Controller {
       this._logger.debug(`rpcStream: Received ${JSON.stringify(message.toObject(), null, 2)}`)
       switch (message.getType()) { // Also could be message.getPayloadCase()
         case RoverMessageType.REQUESTRESYNC:
-          this.startResync()
+          this.startResync(message.getResync())
           break
 
         case RoverMessageType.FETCHBLOCK:
@@ -465,7 +465,7 @@ export default class Controller {
     }, PING_PERIOD)
   }
 
-  startResync () {
+  startResync (resyncMsg: RoverMessage.Resync) {
     this._logger.debug(`needs_resync starting`)
     if (!this._timeoutResync) {
       this._timeoutResync = setTimeout(() => {
@@ -473,10 +473,24 @@ export default class Controller {
           this._logger.debug('retrying getBlockCount()')
           return this._neoMesh.getRandomNode().rpc.getBlockCount()
         }, { retries: 5, maxRetryTime: 5e3 }).then(height => {
-          const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['neo'] | 0
-          const to = height
-          const step = ((to - from) / 500) | 0
-          const whichBlocks = rangeStep(from, step, to)
+          let whichBlocks: number[] = []
+          if (!isEmpty(resyncMsg.getIntervalsList())) {
+            for (const interval of resyncMsg.getIntervalsList()) {
+              whichBlocks = range(interval.getFromBlock(), interval.getToBlock() + 1).concat(whichBlocks)
+              const knownLatestBlock = resyncMsg.getLatestBlock()
+              if (knownLatestBlock && knownLatestBlock.getHeight() < height) {
+                whichBlocks = range(knownLatestBlock.getHeight(), height).concat(whichBlocks)
+              }
+            }
+
+            // sort blocks in reverse order
+            whichBlocks = sort((a, b) => b - a, whichBlocks)
+          } else {
+            const from = height - 72 * 60 * 60 / ROVER_SECONDS_PER_BLOCK['neo'] | 0
+            const to = height
+            const step = ((to - from) / 500) | 0
+            whichBlocks = rangeStep(from, step, to) // TODO do not intersperse these
+          }
           let successCount = 0
           for (let height of whichBlocks) {
             pRetry(() => this._neoMesh.getRandomNode().rpc.getBlock(height), {
