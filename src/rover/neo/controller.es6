@@ -22,7 +22,7 @@ const { shuffle } = require('lodash')
 const pRetry = require('p-retry')
 
 const { Block, MarkedTransaction } = require('../../protos/core_pb')
-const { RoverMessageType, RoverIdent } = require('../../protos/rover_pb')
+const { RoverMessageType, RoverIdent, RoverSyncStatus } = require('../../protos/rover_pb')
 const logging = require('../../logger')
 const { networks } = require('../../config/networks')
 const { errToString } = require('../../helper/error')
@@ -506,6 +506,7 @@ export default class Controller {
               if (successCount === whichBlocks.length) {
                 this._logger.info('Initial sync finished')
                 this._timeoutResync = undefined
+                this._rpc.rover.reportSyncStatus(new RoverSyncStatus(['neo', true]))
               }
               if (!this._blockCache.has(block.index)) {
                 this._blockCache.set(block.index, true)
