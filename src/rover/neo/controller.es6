@@ -507,7 +507,10 @@ export default class Controller {
                 this._logger.info('Initial sync finished')
                 this._timeoutResync = undefined
                 this._rpc.rover.reportSyncStatus(new RoverSyncStatus(['neo', true]))
+              } else {
+                this._logger.debug(`${successCount} done, ${whichBlocks.length - successCount} to go`)
               }
+
               if (!this._blockCache.has(block.index)) {
                 this._blockCache.set(block.index, true)
                 this._logger.debug(`Fetched block with hash: ${block.hash}`)
