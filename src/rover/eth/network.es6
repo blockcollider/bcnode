@@ -344,9 +344,9 @@ export default class Network extends EventEmitter {
           reverse(range(from, to + 1))
         )
       )
-      this._logger.info(`blockIntervalsToRequest: ${from} - ${to}`)
+      this._logger.debug(`blockIntervalsToRequest: ${from} - ${to}`)
     }
-    this._logger.info(`blockIntervalsToRequest: ${JSON.stringify(blockIntervalsToRequest)}`)
+    this._logger.debug(`blockIntervalsToRequest: ${JSON.stringify(blockIntervalsToRequest)}`)
     this._initialSyncBlocksToFetch = drop(1, blockIntervalsToRequest)
     const firstBatch = head(take(1, blockIntervalsToRequest))
     if (!firstBatch) {
