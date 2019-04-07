@@ -15,8 +15,9 @@ const { blake2bl } = require('../../utils/crypto')
 const RpcServer = require('../server').default
 
 const {
+  CalculateMakerFeeRequest,CalculateTakerFeeRequest,FeeResponse,
   GetBlake2blRequest, GetBlake2blResponse,
-  RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest,
+  RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest, PlaceTakerOrdersRequest, TakerOrder,
   RpcTransactionResponseStatus,
   GetOpenOrdersResponse, MakerOrderInfo,
   GetMatchedOpenOrdersResponse, MatchedOpenOrder, TakerOrderInfo,
@@ -92,6 +93,51 @@ export default class BcServiceImpl {
     callback(null, new GetBlake2blResponse([res]))
   }
 
+  calculateMakerFee(call: Object, callback: Function){
+    const calcReq: CalculateMakerFeeRequest = call.request;
+    const shift = calcReq.getShiftStartsAt()
+    const deposit = calcReq.getDepositEndsAt()
+    const settle = calcReq.getSettleEndsAt()
+
+    const payWithChainId = calcReq.getPaysWithChainId()
+    const wantChainId = calcReq.getWantsChainId()
+    const makerWantsUnit = calcReq.getWantsUnit()
+    const makerPaysUnit = calcReq.getPaysUnit()
+
+    const collateralizedNrg = calcReq.getCollateralizedNrg()
+    const nrgUnit = calcReq.getNrgUnit()
+
+    this._server.engine.dexLib.calculateMakerFee(
+      shift, deposit, settle,
+      payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit,
+      collateralizedNrg, nrgUnit,
+    ).then(res => {
+      const response = new FeeResponse()
+      response.setFee(res.toString());
+      callback(null, response)
+    }).catch((err) => {
+      callback(err)
+    });
+  }
+
+  calculateTakerFee(call: Object, callback: Function){
+    const calcReq: CalculateTakerFeeRequest = call.request;
+    const makerTxHash = calcReq.getMakerTxHash();
+    const makerTxOutputIndex = calcReq.getMakerTxOutputIndex();
+    const collateralizedNrg = calcReq.getCollateralizedNrg();
+
+    this._server.engine.dexLib.calculateTakerFee(
+      makerTxHash,makerTxOutputIndex,collateralizedNrg
+    ).then(res => {
+      const response = new FeeResponse()
+      response.setFee(res.toString());
+      callback(null, response)
+    }).catch((err) => {
+      callback(err)
+    });
+
+  }
+
   placeMakerOrder (call: Object, callback: Function) {
     const placeMakerOrderReq: PlaceMakerOrderRequest = call.request
 
@@ -111,6 +157,7 @@ export default class BcServiceImpl {
 
     const collateralizedNrg = placeMakerOrderReq.getCollateralizedNrg()
     const nrgUnit = placeMakerOrderReq.getNrgUnit()
+
     let additionalTxFee = placeMakerOrderReq.getTxFee()
     if (additionalTxFee === '') {
       additionalTxFee = '0'
@@ -140,6 +187,52 @@ export default class BcServiceImpl {
     }).catch((err) => {
       callback(err)
     })
+  }
+
+  placeTakerOrders(call:Object, callback: Function){
+    const placeTakerOrdersReq: PlaceTakerOrdersRequest = call.request
+
+    const bCAddress = placeTakerOrdersReq.getBcAddress()
+    const bCPrivateKeyHex = placeTakerOrdersReq.getBcPrivateKeyHex()
+
+    const orders = placeTakerOrdersReq.getOrders().map((o)=>{
+      const order: TakerOrder = o;
+      const takerWantsAddress = order.getWantsChainAddress()
+      const takerSendsAddress = order.getSendsChainAddress()
+      const makerTxHash = order.getMakerTxHash()
+      const makerTxOutputIndex = order.getMakerTxOutputIndex()
+      const collateralizedNrg = order.getCollateralizedNrg()
+      return {takerWantsAddress,takerSendsAddress,makerTxHash,makerTxOutputIndex,collateralizedNrg}
+    });
+
+    let additionalTxFee = placeTakerOrdersReq.getTxFee()
+    if (additionalTxFee === '') {
+      additionalTxFee = '0'
+    }
+    const response = new RpcTransactionResponse()
+
+    if (isNaN(parseFloat(additionalTxFee))) {
+      response.setStatus(RpcTransactionResponseStatus.FAILURE)
+      response.setError(`Invalid tx_fee: ${additionalTxFee}`)
+      callback(null, response)
+      return
+    }
+
+    this._server.engine.createCrossChainTakerManyTx(
+      orders,
+      bCAddress, bCPrivateKeyHex,
+      additionalTxFee
+    ).then(res => {
+      response.setStatus(res.status)
+      response.setTxHash(res.txHash)
+      if (res.status !== 0 && res.error) {
+        response.setError(res.error.toString())
+      }
+      callback(null, response)
+    }).catch((err) => {
+      this._logger.error(err)
+      callback(err)
+    });
   }
 
   placeTakerOrder (call: Object, callback: Function) {
@@ -248,7 +341,7 @@ export default class BcServiceImpl {
       } else {
         res.setBcAddress(bCAddress)
       }
-      callback(null, res)
+      callback(null, res);
     })
   }
 

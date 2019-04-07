@@ -1383,6 +1383,7 @@ export class Engine {
     }
   }
 
+
   async createCrossChainTakerTx (
     takerWantsAddress: string, takerSendsAddress: string,
     makerTxHash: string, makerTxOutputIndex: number,
@@ -1400,26 +1401,32 @@ export class Engine {
         this._minerKey
       )
 
-      return new Promise((resolve, reject) => {
-        this._txHandler.isValidTx(txTemplate).then(isValid => {
-          if (isValid) {
-            // Try to add to pending pool
-            this._logger.info(`adding crosschain taker tx to the pending pool: ${txTemplate.getHash()}`)
-            this._txPendingPool.tryAddingNewTx(txTemplate, 'bc').then(_ => {
-              // Relay transaction to peers
-              this._emitter.emit('announceTx', {
-                data: txTemplate
-              })
+      return await this.sendTx(txTemplate);
 
-              this._logger.debug(`TX: ${txHash(txTemplate)} is valid - adding to pool`)
-              return resolve({ status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() })
-            })
-          } else {
-            this._logger.info(`TX: ${txHash(txTemplate)} is invalid - not accepting to the pending TX pool`)
-            return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error('invalid tx') })
-          }
-        })
-      })
+    } catch (e) {
+      this._logger.error(e)
+      return { status: RpcTransactionResponseStatus.FAILURE, error: e }
+    }
+  }
+
+  async createCrossChainTakerManyTx (
+    orders:[{takerWantsAddress: string, takerSendsAddress: string,
+    makerTxHash: string, makerTxOutputIndex: number,collateralizedNrg: string}],
+    takerBCAddress: string, takerBCPrivateKeyHex: string,
+    additionalTxFee: string
+  ): Promise<{ status: number, txHash?: string, error?: Error}> {
+    this._logger.info(`Trying to create createCrossChainTakerTx: ${arguments}`)
+
+    try {
+      const txTemplate = await this.dexLib.placeTakerOrders(
+        orders,
+        takerBCAddress, takerBCPrivateKeyHex,
+        additionalTxFee,
+        this._minerKey
+      )
+
+      return await this.sendTx(txTemplate);
+
     } catch (e) {
       this._logger.error(e)
       return { status: RpcTransactionResponseStatus.FAILURE, error: e }
@@ -1443,31 +1450,36 @@ export class Engine {
         additionalTxFee,
         this._minerKey
       )
+      return await this.sendTx(txTemplate)
 
-      return new Promise((resolve, reject) => {
-        this._txHandler.isValidTx(txTemplate).then(isValid => {
-          if (isValid) {
-            // Try to add to pending pool
-            this._logger.info(`adding crosschain maker tx to the pending pool: ${txTemplate.getHash()}`)
-            this._txPendingPool.tryAddingNewTx(txTemplate, 'bc').then(_ => {
-              // Relay transaction to peers
-              this._emitter.emit('announceTx', {
-                data: txTemplate
-              })
-
-              this._logger.debug(`TX: ${txHash(txTemplate)} is valid - adding to pool`)
-              return resolve({ status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() })
-            })
-          } else {
-            this._logger.info(`TX: ${txHash(txTemplate)} is invalid - not accepting to the pending TX pool`)
-            return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error('invalid tx') })
-          }
-        })
-      })
     } catch (e) {
       this._logger.error(e)
       return { status: RpcTransactionResponseStatus.FAILURE, error: e }
     }
+  }
+
+  //helper to send Tx once the Transaction details have been filled
+  async sendTx(txTemplate: Transaction) : Promise<{ status: number, txHash?: string, error?: Error}> {
+    return new Promise((resolve, reject) => {
+      this._txHandler.isValidTx(txTemplate).then(isValid => {
+        if (isValid) {
+          // Try to add to pending pool
+          this._logger.info(`adding crosschain maker tx to the pending pool: ${txTemplate.getHash()}`)
+          this._txPendingPool.tryAddingNewTx(txTemplate, 'bc').then(_ => {
+            // Relay transaction to peers
+            this._emitter.emit('announceTx', {
+              data: txTemplate
+            })
+
+            this._logger.debug(`TX: ${txHash(txTemplate)} is valid - adding to pool`)
+            return resolve({ status: RpcTransactionResponseStatus.SUCCESS, txHash: txTemplate.getHash() })
+          })
+        } else {
+          this._logger.info(`TX: ${txHash(txTemplate)} is invalid - not accepting to the pending TX pool`)
+          return resolve({ status: RpcTransactionResponseStatus.FAILURE, error: new Error("invalid tx") })
+        }
+      })
+    })
   }
 
   async createTx (newTx: RpcTransaction) : Promise<{ status: number, txHash?: string, error?: Error}> {

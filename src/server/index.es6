@@ -30,10 +30,13 @@ const logging = require('../logger')
 const { config } = require('../config')
 const { Null, Block } = require('../protos/core_pb')
 const {
+  CalculateMakerFeeRequest,
+  CalculateTakerFeeRequest,
   GetBalanceRequest,
   GetBlake2blRequest,
   PlaceMakerOrderRequest,
   PlaceTakerOrderRequest,
+  PlaceTakerOrdersRequest,
   VanityConvertRequest,
   RpcTransaction
 } = require('../protos/bc_pb')
@@ -122,9 +125,12 @@ export class Server {
     const mapping = {
       getLatestBlocks: Null,
       help: Null,
+      calculateMakerFee: CalculateMakerFeeRequest,
+      calculateTakerFee: CalculateTakerFeeRequest,
       getBalance: GetBalanceRequest,
       placeMakerOrder: PlaceMakerOrderRequest,
       placeTakerOrder: PlaceTakerOrderRequest,
+      placeTakerOrders: PlaceTakerOrdersRequest,
       getOpenOrders: Null,
       getBlake2bl: GetBlake2blRequest,
       getMatchedOpenOrders: Null,
