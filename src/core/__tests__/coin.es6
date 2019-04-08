@@ -77,7 +77,6 @@ describe('Currency.toMinimumUnitAsBN', () => {
       })
     }
   }
-
 })
 
 describe('coin utils', () => {
