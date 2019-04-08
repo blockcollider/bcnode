@@ -224,7 +224,7 @@ export class DexUtils {
   async signInputs (
     BCAddress: string, BCPrivateKeyHex: string,
     txTemplate: Transaction, spentOutPoints: []
-  ):Promise<{txTemplateInputs: []}> {
+  ):Promise<{txTemplateInputs: TransactionInput[]}> {
     const txTemplateInputs = spentOutPoints.map((outPoint) => {
       // txInputSignature requires txTemplate sets the outputs first
       const signature = txInputSignature(outPoint, txTemplate, Buffer.from(BCPrivateKeyHex, 'hex'))
@@ -254,7 +254,7 @@ export class DexUtils {
     return leftChangeOutput
   }
 
-  async getUnspentOutpointsWithEnoughBalance (BCAddress:string, totalAmount:BN):Promise<[]> {
+  async getUnspentOutpointsWithEnoughBalance (BCAddress:string, totalAmount:BN):Promise<TransactionOutpoint[]> {
     let balanceData
     try {
       balanceData = await this.wallet.getBalanceData(BCAddress.toLowerCase())
