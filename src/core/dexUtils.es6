@@ -12,6 +12,7 @@
 /*
 */
 import type { Logger } from 'winston'
+import type { TransactionOutpoint } from '../protos/core_pb'
 
 type MakerOpenOrder = {
   shiftStartsAt: number,
@@ -272,7 +273,7 @@ export class DexUtils {
     return balanceData.confirmedUnspentOutPoints
   }
 
-  async isClaimedCheck (makerTxHash: string, makerTxOutputIndex: number): void {
+  async isClaimedCheck (makerTxHash: string, makerTxOutputIndex: number): Promise<TransactionOutpoint> {
     const claimedKey = TxPendingPool.getOutpointClaimKey(makerTxHash, makerTxOutputIndex, 'bc')
     const isClaimed = await this.persistence.get(claimedKey)
     if (isClaimed) {
