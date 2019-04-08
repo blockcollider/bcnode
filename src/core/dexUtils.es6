@@ -362,7 +362,7 @@ export class DexUtils {
     const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
     const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
     let txBlockHashKey = await this.persistence.get(`bc.txblock.${monoidMakerTxHash}`)
-    let txBlockHeight = (await this.persistance.get(txBlockHashKey)).getHeight()
+    let txBlockHeight = (await this.persistence.get(txBlockHashKey)).getHeight()
     if (txBlockHeight + makerTxInfo.shiftStartsAt > latestBlockHeight || txBlockHeight + makerTxInfo.depositEndsAt < latestBlockHeight) {
       throw new Error(`Maker Tx is not in deposit window, ${makerTxHash}`)
     }
