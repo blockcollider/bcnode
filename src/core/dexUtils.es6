@@ -160,14 +160,14 @@ export class DexUtils {
 
     // add taker<->maker script as output
     const outputLockScript = ScriptTemplates.createCrossChainTxTakerOutputScript(monoidMakerTxHash, monoidMakerTxOutputIndex, takerBCAddress)
-    const newOutputToTakerTx = await this.createTransactionOutput(outputLockScript, makerUnitBN, collateralizedBN.add(collateralizedBN))
+    const newOutputToTakerTx = await this.createTransactionOutput(outputLockScript, makerTxUnitBN, collateralizedBN.add(collateralizedBN))
 
     // add leftover taker<->maker script as output
     let newOutputToTakerTxCb = null
     const makerTxCollateralizedBNChange = makerTxCollateralizedBN.sub(collateralizedBN)
     if (makerTxCollateralizedBNChange.gt(new BN(0))) {
       const outputLockScriptCb = ScriptTemplates.createCrossChainTxTakerOutputCallbackScript(monoidMakerTxHash, monoidMakerTxOutputIndex)
-      newOutputToTakerTxCb = await this.createTransactionOutput(outputLockScriptCb, makerUnitBN, makerTxCollateralizedBNChange)
+      newOutputToTakerTxCb = await this.createTransactionOutput(outputLockScriptCb, makerTxUnitBN, makerTxCollateralizedBNChange)
     }
 
     // maker tx's output as the input
@@ -345,10 +345,10 @@ export class DexUtils {
     }
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
-    const makerUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
+    const makerTxUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
 
     // check collateralizedBN is a multiply of maker unit
-    if (!(collateralizedBN.div(makerUnitBN).mul(makerUnitBN).eq(collateralizedBN))) {
+    if (!(collateralizedBN.div(makerTxUnitBN).mul(makerTxUnitBN).eq(collateralizedBN))) {
       throw new Error('Invalid amount of collateralizedNrg')
     }
 
