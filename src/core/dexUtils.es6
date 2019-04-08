@@ -302,26 +302,26 @@ export class DexUtils {
     }
   }
 
-  async getMakerTransactionAndOutput (txHash: string, index: number):Promise<{tx:Transaction, output:TransactionOutput}> {
-    const tx = await this.persistence.getTransactionByHash(txHash, 'bc')
-    if (!tx) {
+  async getMakerTransactionAndOutput (txHash: string, index: number):Promise<{makerTx:Transaction, makerTxOutput:TransactionOutput}> {
+    const makerTx = await this.persistence.getTransactionByHash(txHash, 'bc')
+    if (!makerTx) {
       throw new Error(`No maker Tx associate with ${txHash}`)
     }
-    const txOutput = makerTx.getOutputsList()[index]
-    if (!txOutput) {
+    const makerTxOutput = makerTx.getOutputsList()[index]
+    if (!makerTxOutput) {
       throw new Error(`No maker Tx output associate with hash: ${txHash}, outputIndex: ${index}`)
     }
-    return {tx, txOutput}
+    return {makerTx, makerTxOutput}
   }
 
   async getMakerData (makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg:string):Promise<{
     monoidMakerTxHash:string, monoidMakerTxOutputIndex:number,
     makerTxInfo: Object, makerTxUnitBN:BN, makerTxCollateralizedBN:BN
   }> {
-    const tx = await this.getMakerTransactionAndOutput(makerTxHash, makerTxOutputIndex)
-    const [makerTx, makerTxOutput] = [tx.tx, tx.txOutput]
+    const makerTxData = await this.getMakerTransactionAndOutput(makerTxHash, makerTxOutputIndex)
+    const { makerTx, makerTxOutput } = makerTxData
 
-    await isClaimedCheck(makerTxHash, makerTxOutputIndex)
+    await this.isClaimedCheck(makerTxHash, makerTxOutputIndex)
 
     let makerTxOutputScript = Buffer.from(makerTxOutput.getOutputScript()).toString('ascii')
     let monoidMakerTxHash = makerTx.getHash()
@@ -331,8 +331,8 @@ export class DexUtils {
       // partial order
       while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
         const [parentTxHash, parentOutputIndex] = makerTxOutputScript.split(' ')
-        const _tx = await this.getMakerTransactionAndOutput(parentTxHash, parentOutputIndex)
-        const [_makerTx, _makerTxOutput] = [_tx.tx, _tx.txOutput]
+        const _makerTxData = await this.getMakerTransactionAndOutput(parentTxHash, parseInt(parentOutputIndex, 10))
+        const { makerTx: _makerTx, makerTxOutput: _makerTxOutput } = _makerTxData
 
         monoidMakerTxHash = _makerTx.getHash()
         monoidMakerTxOutputIndex = parentOutputIndex
