@@ -60,3 +60,11 @@ While the main process is recieving BC blockchain blocks, some rovered chain blo
 referenced from this block can be missing in the persistence. `fetch_block` command
 is used to request specific block fron the rovered blockchain to be able to validate
 the incoming BC block.
+
+
+## Rovers sending information back to main process
+
+- rover successfully started - `join(RoverIdent)` rpc call
+- report rovered block - `collectBlock` rpc call
+- report initial sync status - `reportSyncStatus(RoverSyncStatus)` rpc call
+- check if TX is before settlement height - `isBeforeSettleHeight` rpc call
