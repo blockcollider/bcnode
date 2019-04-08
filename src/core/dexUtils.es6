@@ -149,7 +149,7 @@ export class DexUtils {
   ):Promise<{outputs:[TransactionOutput], input:TransactionInput}> {
     // get relevant maker data for placing taker order
     let {
-      monoidMakerTxHash, monoidMakerTxOutputIndex,
+      monoidMakerTxHash, monoidMakerTxOutputIndex, monoidMakerTxOutput,
       makerTxInfo, makerTxUnitBN, makerTxCollateralizedBN,
       blockWindow
     } = await this.getMakerData(makerTxHash, makerTxOutputIndex, collateralizedNrg)
@@ -170,7 +170,7 @@ export class DexUtils {
 
     // maker tx's output as the input
     const makerTxOutpoint = new OutPoint()
-    makerTxOutpoint.setValue(makerTxOutput.getValue())
+    makerTxOutpoint.setValue(monoidMakerTxOutput.getValue())
     makerTxOutpoint.setHash(makerTxHash)
     makerTxOutpoint.setIndex(makerTxOutputIndex)
 
@@ -313,7 +313,7 @@ export class DexUtils {
   }
 
   async getMakerData (makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg:string):Promise<{
-    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number,
+    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number, monoidMakerTxOutput: TransactionOutput,
     makerTxInfo: Object, makerTxUnitBN:BN, makerTxCollateralizedBN:BN
   }> {
     const makerTxData = await this.getMakerTransactionAndOutput(makerTxHash, makerTxOutputIndex)
@@ -324,6 +324,7 @@ export class DexUtils {
     let makerTxOutputScript = Buffer.from(makerTxOutput.getOutputScript()).toString('ascii')
     let monoidMakerTxHash = makerTx.getHash()
     let monoidMakerTxOutputIndex = makerTxOutputIndex
+    let monoidMakerTxOutput = makerTxOutput
 
     if (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
       // partial order
@@ -335,6 +336,7 @@ export class DexUtils {
         monoidMakerTxHash = _makerTx.getHash()
         monoidMakerTxOutputIndex = parentOutputIndex
         makerTxOutputScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
+        monoidMakerTxOutput = _makerTxOutput
       }
     }
 
@@ -371,6 +373,7 @@ export class DexUtils {
     return {
       monoidMakerTxHash,
       monoidMakerTxOutputIndex,
+      monoidMakerTxOutput,
       makerTxInfo,
       makerTxUnitBN,
       makerTxCollateralizedBN,
