@@ -54,25 +54,23 @@ const BN = require('bn.js')
 const Random = require('random-js')
 const secp256k1 = require('secp256k1')
 
-const ROOT_DIR = '../'
+const { default: PersistenceRocksDb } = require('../persistence/rocksdb')
+const { Transaction, TransactionOutput, TransactionInput, OutPoint } = require('../protos/core_pb')
 
-const PersistenceRocksDb = require(ROOT_DIR + 'persistence').RocksDb
-const { Transaction, TransactionOutput, TransactionInput, OutPoint } = require(ROOT_DIR + 'protos/core_pb')
-
-const { blake2bl } = require(ROOT_DIR + 'utils/crypto')
-const { getLogger } = require(ROOT_DIR + 'logger')
-const { humanToBN, internalToBN, internalToHuman, COIN_FRACS: { NRG, BOSON } } = require(ROOT_DIR + 'core/coin')
+const { blake2bl } = require('../utils/crypto')
+const { getLogger } = require('../logger')
+const { humanToBN, internalToBN, internalToHuman, COIN_FRACS: { NRG, BOSON } } = require('../core/coin')
 
 const {
   txHash, txInputSignature, ScriptTemplates,
   extractInfoFromCrossChainTxMakerOutputScript,
   extractInfoFromCrossChainTxTakerOutputScript,
   extractInfoFromCrossChainTxTakerInputScript
-} = require(ROOT_DIR + 'core/txUtils')
-const TxPendingPool = require(ROOT_DIR + 'bc/txPendingPool')
-const { Wallet } = require(ROOT_DIR + 'bc/wallet')
+} = require('../core/txUtils')
+const TxPendingPool = require('../bc/txPendingPool')
+const { Wallet } = require('../bc/wallet')
 
-const { UnsettledTxManager } = require(ROOT_DIR + 'bc/unsettledTxManager')
+const { UnsettledTxManager } = require('../bc/unsettledTxManager')
 
 const LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER = 7 * 24 * 3600 / 5
 
