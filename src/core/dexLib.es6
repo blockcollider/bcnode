@@ -74,7 +74,7 @@ const { Wallet } = require(ROOT_DIR + 'bc/wallet')
 const { UnsettledTxManager } = require(ROOT_DIR + 'bc/unsettledTxManager')
 
 const LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER = 7 * 24 * 3600 / 5
-const {DexUtils} = require('./dexUtils');
+const {DexUtils} = require('./dexUtils')
 
 export class DexLib {
   persistence: PersistenceRocksDb
@@ -88,7 +88,7 @@ export class DexLib {
     this._logger = getLogger(__filename)
     this.unsettledTxManager = new UnsettledTxManager(this.persistence)
     this.wallet = new Wallet(persistence, this.unsettledTxManager)
-    this.utils = new DexUtils(persistence);
+    this.utils = new DexUtils(persistence)
   }
 
   async placeMakerOrder (
@@ -101,26 +101,22 @@ export class DexLib {
   ): Promise<Transaction|Error> {
     this._logger.info(`placeMakerOrder`)
 
-    //get fee and total amount to spend
-    let txFeeBN = await this.calculateMakerFee(shift, deposit, settle, payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit, collateralizedNrg, nrgUnit);
-    const totalAmount = humanToBN(collateralizedNrg, NRG).add(txFeeBN)
-    if(additionalTxFee !== '0') totalAmount.add(humanToBN(additionalTxFee, NRG))
+    // get total amount to spend
+    let {totalNRG} = await this.calculateMakerFee(shift, deposit, settle,payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit,collateralizedNrg, nrgUnit)
 
     //get maker order output
-    const collateralizedBN = humanToBN(collateralizedNrg, NRG)
-    const unitBN = humanToBN(nrgUnit, NRG)
-    const outputLockScript = ScriptTemplates.createCrossChainTxMakerOutputScript(
+    const newOutputToReceiver = await this.utils.getMakerOrderOutput(
       shift, deposit, settle,
       payWithChainId, wantChainId, receiveAddress, makerWantsUnit, makerPaysUnit,
-      makerBCAddress
+      makerBCAddress, collateralizedNrg, nrgUnit
     )
-    const newOutputToReceiver = await this.utils.createTransactionOutput(outputLockScript,unitBN,collateralizedBN)
 
     //compile tx
     return await this.utils.compileTx(
-      [newOutputToReceiver],[],totalAmount,
+      [newOutputToReceiver],[],totalNRG,
       makerBCAddress,makerBCPrivateKeyHex,minerKey
     )
+
   }
 
   async placeTakerOrder (
@@ -133,10 +129,8 @@ export class DexLib {
   ): Promise<Transaction|Error> {
     this._logger.info(`placeTakerOrder`)
 
-    // get fee and total amount to spend
-    let txFeeBN = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
-    const totalAmount = humanToBN(collateralizedNrg, NRG).add(txFeeBN)
-    if(additionalTxFee !== '0') totalAmount.add(humanToBN(additionalTxFee, NRG))
+    // get total amount to spend
+    let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex,collateralizedNrg)
 
     //get the relevant maker inputs and outpoint for the tx
     const {input,outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
@@ -147,7 +141,7 @@ export class DexLib {
 
     //compile tx
     return await this.utils.compileTx(
-      outputs,[input],totalAmount,
+      outputs,[input],totalNRG,
       takerBCAddress,takerBCPrivateKeyHex,minerKey
     )
 
@@ -161,17 +155,16 @@ export class DexLib {
   ): Promise<Transaction|Error> {
     this._logger.info(`placeTakerOrders`)
 
-    //setup total amount of nrg taker has to spend
-    let totalAmount = BN(0);
-    if(additionalTxFee !== '0') totalAmount = totalAmount.add(humanToBN(additionalTxFee, NRG));
+    //setup total amount of nrg taker has to spend, inputs and outputs
+    let totalAmount = (additionalTxFee !== '0') ? totalAmount.add(humanToBN(additionalTxFee, NRG)) : BN(0)
     let allInputs = []
     let allOutputs = []
 
     orders.map(async ({takerWantsAddress,takerSendsAddress,makerTxHash,makerTxOutputIndex,takerBCAddress,collateralizedNrg})=>{
 
       //add to total amount of nrg to spend
-      let txFeeBN = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex,collateralizedNrg)
-      totalAmount = totalAmount.add(humanToBN(collateralizedNrg, NRG).add(txFeeBN))
+      let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex,collateralizedNrg)
+      totalAmount = totalAmount.add(totalNRG)
 
       //add to inputs and outputs
       const {input,outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
@@ -179,274 +172,175 @@ export class DexLib {
         makerTxHash, makerTxOutputIndex,
         takerBCAddress, collateralizedNrg
       )
+
       allInputs.push(input)
-      allOutputs = allinputs.concat(outputs)
-    });
+      allOutputs = allOutputs.concat(outputs)
+    })
 
     //compile tx
     return await this.utils.compileTx(
       allOutputs,allInputs,totalAmount,
       takerBCAddress,takerBCPrivateKeyHex,minerKey
     )
-
   }
 
   async calculateMakerFee(
     shift: string, deposit: string, settle: string,
     payWithChainId: string, wantChainId: string, makerWantsUnit: string, makerPaysUnit: string,
-    collateralizedNrg: string, nrgUnit: string
-  ): Promise<BN> {
+    collateralizedNrg: string, nrgUnit: string, additionalTxFee : string = '0'
+  ): Promise<{total:BN,txFee:BN}> {
     this._logger.info(`calculateMakerFee`)
 
     //params check
-    this.utils.makerParamsCheck(deposit,settle, makerWantsUnit, makerPaysUnit,collateralizedNrg, nrgUnit);
+    this.utils.makerParamsCheck(deposit,settle, makerWantsUnit, makerPaysUnit,collateralizedNrg, nrgUnit)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const latestBlock = await this.persistence.get('bc.block.latest')
     const blockWindow = new BN(parseInt(settle, 10) - parseInt(shift, 10))
 
-    return await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
+    const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
+    const totalNRG = (additionalTxFee !== '0') ? txFee.add(collateralizedBN).add(humanToBN(additionalTxFee, NRG)) : txFee.add(collateralizedBN)
+
+    return {totalNRG,txFee}
   }
 
   async calculateTakerFee(
     makerTxHash: string, makerTxOutputIndex: number,
-    collateralizedNrg: string,
-  ): Promise<BN> {
+    collateralizedNrg: string, additionalTxFee : string = '0'
+  ): Promise<{total:BN,txFee:BN}> {
     this._logger.info(`calculateTakerFee`)
-
-    let {blockWindow} = await this.utils.getMakerData(makerTxHash,makerTxOutputIndex,collateralizedNrg)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const latestBlock = await this.persistence.get('bc.block.latest')
-    const latestBlockHeight = latestBlock.getHeight()
+    let {blockWindow} = await this.utils.getMakerData(makerTxHash,makerTxOutputIndex,collateralizedNrg)
 
-    return await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlockHeight), 'taker')
+    const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'taker')
+    const totalNRG = (additionalTxFee !== '0') ? txFee.add(collateralizedBN).add(humanToBN(additionalTxFee, NRG)) : txFee.add(collateralizedBN)
+
+    return {totalNRG ,txFee}
   }
 
   async getOpenOrders (): Promise<MakerOpenOrder[]|Error> {
     const openOrders = []
-    const latestBlock = await this.persistence.get('bc.block.latest')
-    if (!latestBlock) {
-      throw new Error('Latest block not found')
-    }
-    const latestBlockHeight = latestBlock.getHeight()
-    let currentBlockIndex = Math.max(1, latestBlockHeight - LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER)
+    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const currentBlockIndex = Math.max(1, latestBlockHeight - LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER)
     this._logger.info(`getOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}`)
-    const txHashToBlockHeightMap = {}
 
-    for (let i = currentBlockIndex; i <= latestBlockHeight; i++) {
-      try {
-        const block: Object = await this.persistence.get(`bc.block.${i}`)
-        const currentBlockHeight = block.getHeight()
-        for (let tx of block.getTxsList()) {
+    let blocks = []
+    for(let i = currentBlockIndex; i < latestBlockHeight; i++){
+      blocks.push(`bc.block.${currentBlockIndex+i}`)
+    }
+    blocks = await this.persistence.getBulk(blocks)
 
-          const txOutputs = tx.getOutputsList()
-          for (let index = 0; index < txOutputs.length; index++) {
+    for (let block of blocks) {
+      for (let tx of block.getTxsList()) {
+        const txOutputs = tx.getOutputsList()
+        for (let index = 0; index < txOutputs.length; index++) {
+          const output = txOutputs[index]
 
-            const output = txOutputs[index]
-            let outputLockScript = Buffer.from(output.getOutputScript()).toString('ascii')
-            if (outputLockScript.startsWith('OP_MONOID')) {
-              txHashToBlockHeightMap[tx.getHash()] = currentBlockHeight
-            }
+          try {
+            let {monoidMakerTxHash,makerTxOutputScript,monoidMakerTxOutput,monoidMakerTxOutputIndex} = await this.utils.getMonoidForMaker(tx,output,index)
+            await this.utils.isClaimedCheck(monoidMakerTxHash,monoidMakerTxOutputIndex)
 
-            let originalMakerInfo = { hash: tx.getHash(), output: output }
-            while (outputLockScript.endsWith('OP_CALLBACK')) {
-              const [parentTxHash, parentOutputIndex] = outputLockScript.split(' ')
-              const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
-              const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
-              outputLockScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
+            let blockWindow =  await this.utils.getBlockWindowIfWithinDepositWindow(makerTxOutputScript,monoidMakerTxHash)
+            let tradeInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
+            const blockHasOriginalMakerTxHeight = blockWindow.add(new BN(latestBlockHeight)).sub(new BN(tradeInfo.shiftStartsAt + tradeInfo.settleEndsAt))
 
-              originalMakerInfo.hash = _makerTx.getHash()
-              originalMakerInfo.output = _makerTxOutput
-            }
+            let order = await this.utils.formatTradeInfoForOpenOrders(
+              monoidMakerTxHash,tx.getHash(),
+              output,monoidMakerTxOutput,
+              tradeInfo,index,block,
+              blockHasOriginalMakerTxHeight
+            )
+            openOrders.push(order)
 
-            const blockHasOriginalMakerTxHeight = txHashToBlockHeightMap[originalMakerInfo.hash]
-
-            if (outputLockScript.startsWith('OP_MONOID')) {
-              const claimedKey = TxPendingPool.getOutpointClaimKey(tx.getHash(), index, 'bc')
-              const isClaimed = await this.persistence.get(claimedKey)
-
-              if (!isClaimed) {
-                const tradeInfo = extractInfoFromCrossChainTxMakerOutputScript(outputLockScript)
-                // check shift, deposit and settle
-                if (!(latestBlockHeight >= blockHasOriginalMakerTxHeight + tradeInfo.shiftStartsAt && latestBlockHeight <= blockHasOriginalMakerTxHeight + tradeInfo.depositEndsAt)) {
-                  const logMsg = {
-                    txHash: tx.getHash(),
-                    txOutputIndex: index,
-                    blockHeight: currentBlockHeight,
-                    blockHasOriginalMakerTxHeight: blockHasOriginalMakerTxHeight,
-                    shiftStartsAt: tradeInfo.shiftStartsAt,
-                    depositEndsAt: tradeInfo.depositEndsAt,
-                    latestBlockHeight: latestBlockHeight
-                  }
-                  this._logger.info(`Maker tx: ${JSON.stringify(logMsg)} is outside the deposit window`)
-                  continue
-                }
-                if (originalMakerInfo.hash !== tx.getHash()) {
-                  // update wantsUnit and paysUnit
-                  const remainingRatio = parseFloat(internalToHuman(output.getValue(), NRG)) / parseFloat(internalToHuman(originalMakerInfo.output.getValue(), NRG))
-                  tradeInfo['wantsUnit'] = (parseFloat(tradeInfo['wantsUnit']) * remainingRatio).toString()
-                  tradeInfo['paysUnit'] = (parseFloat(tradeInfo['paysUnit']) * remainingRatio).toString()
-                }
-
-                tradeInfo['collateralizedNrg'] = internalToHuman(output.getValue(), NRG)
-                tradeInfo['nrgUnit'] = internalToHuman(output.getUnit(), NRG)
-                tradeInfo['txHash'] = tx.getHash()
-                tradeInfo['txOutputIndex'] = index
-                tradeInfo['blockHash'] = block.getHash()
-                tradeInfo['blockHeight'] = currentBlockHeight
-                tradeInfo['isSettled'] = false
-                tradeInfo['blockHeightHasOriginalMakerTx'] = blockHasOriginalMakerTxHeight
-
-                openOrders.push(tradeInfo)
-              }
-            }
+          }
+          catch(e){
+            //not a maker order nor callback maker order or is claimed
+            // if(! e.toString().includes('not a valid maker tx')) console.log({e})
+            continue
           }
         }
-      } catch (e) {
-        this._logger.error(e)
       }
     }
-
-    this._logger.info(`getOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}, orders: ${openOrders.length}`)
     return openOrders
   }
 
-  async getMatchedOpenOrders (): Promise<MatchedNotSettledOpenOrder[]|Error> {
+  async getMatchedOrders (onlySettled: boolean): Promise<MatchedNotSettledOpenOrder[]|Error> {
     const matchedNotSettledOrders = []
-    const latestBlock = await this.persistence.get('bc.block.latest')
-    if (!latestBlock) {
-      throw new Error('Latest block not found')
+    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const currentBlockIndex = Math.max(1, latestBlockHeight - LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER)
+    this._logger.info(`getMatchedOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}`)
+
+    let blocks = []
+    for(let i = currentBlockIndex; i < latestBlockHeight; i++){
+      blocks.push(`bc.block.${currentBlockIndex+i}`)
     }
-    const latestBlockHeight = latestBlock.getHeight()
-    const hashToTxMap = {}
+    blocks = await this.persistence.getBulk(blocks)
 
-    let currentBlockIndex = 1
-    if (latestBlockHeight > 2 * Math.pow(10, 6)) {
-      currentBlockIndex = Math.max(1, latestBlockHeight - LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER)
-    }
-    for (let i = currentBlockIndex; i <= latestBlockHeight; i++) {
-      try {
-        const block: Object = await this.persistence.get(`bc.block.${i}`)
-        if (!block) {
-          this._logger.warn(`block-${i} is not found`)
-          continue
-        }
-        for (let tx of block.getTxsList()) {
-          let takerTradeInfo = null
-          const txOutputs = tx.getOutputsList()
-          for (let i = 0; i < txOutputs.length; i++) {
-            const txOutput = txOutputs[i]
-            const txOutputScript = Buffer.from(txOutput.getOutputScript()).toString('ascii')
-            if (txOutputScript.indexOf('OP_MONAD') > -1 && txOutputScript.indexOf('OP_CALLBACK') > -1) {
-              takerTradeInfo = extractInfoFromCrossChainTxTakerOutputScript(txOutputScript)
+    for (let block of blocks) {
+      for (let tx of block.getTxsList()) {
 
-              takerTradeInfo['collateralizedNrg'] = internalToHuman(txOutput.getValue(), NRG)
-              takerTradeInfo['txHash'] = tx.getHash()
-              takerTradeInfo['blockHash'] = block.getHash()
-              takerTradeInfo['blockHeight'] = block.getHeight()
-            } else if (txOutputScript.startsWith('OP_MONOID') || txOutputScript.endsWith('OP_CALLBACK')) {
-              hashToTxMap[tx.getHash()] = { blockHeight: block.getHeight(), blockHash: block.getHash() }
-            }
-          }
-
-          if (!takerTradeInfo) { // not a taker tx
-            continue
-          }
-
-          let makerTradeInfo = null
+        //get all the taker orders within a tx
+        let takerTradeOrders = await this.utils.extractTakerFromTx(tx,block)
+        //for each taker order find the respective maker order
+        for(let takerTradeInfo of takerTradeOrders) {
           const txInputs = tx.getInputsList()
+          let makerTradeInfo = null
+          let found = false
           for (let txInput of txInputs) {
+            if(found) break //found the tx
+
             const outPoint = txInput.getOutPoint()
             const outPointTxHash = outPoint.getHash()
             const outputIndex = outPoint.getIndex()
-            // check matching taker info
+
+            // check if the outpoint matches the makerTxHash
             if (outPointTxHash !== takerTradeInfo.makerTxHash || outputIndex !== takerTradeInfo.makerTxOutputIndex) {
               continue
             }
 
             const referencedTx = await this.persistence.getTransactionByHash(outPointTxHash, 'bc')
             const referencedTxOutput = referencedTx.getOutputsList()[outputIndex]
-            if (!referencedTxOutput) {
-              throw new Error(`Invalid output for txHash: ${referencedTx}, outputIndex: ${outputIndex}`)
+
+            try {
+
+              let {monoidMakerTxHash,makerTxOutputScript,monoidMakerTxOutput} = await this.utils.getMonoidForMaker(referencedTx,referencedTxOutput,outputIndex)
+              let originalBlockHeight =  await this.utils.getBlockHeightIfWithinSettleWindow(makerTxOutputScript,monoidMakerTxHash)
+              let tradeInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
+
+              makerTradeInfo = await this.utils.formatTradeInfoForOpenOrders(
+                monoidMakerTxHash,outPointTxHash,
+                referencedTxOutput,monoidMakerTxOutput,
+                tradeInfo,outputIndex,block,
+                originalBlockHeight
+              )
+
+              //add wants and sends information to Taker
+              const inputScript = Buffer.from(txInput.getInputScript()).toString('ascii')
+              const takerInputInfo = extractInfoFromCrossChainTxTakerInputScript(inputScript)
+              takerTradeInfo['wantsAddress'] = takerInputInfo.takerWantsAddress
+              takerTradeInfo['sendsAddress'] = takerInputInfo.takerSendsAddress
+
+              makerTradeInfo['isSettled'] = !!(await this.unsettledTxManager.getTxSettleInfo(makerTradeInfo.txHash, makerTradeInfo.txOutputIndex))
+              takerTradeInfo['isSettled'] = !!(await this.unsettledTxManager.getTxSettleInfo(takerTradeInfo.txHash, takerTradeInfo.txOutputIndex))
+
+              if (onlySettled && !makerTradeInfo['isSettled'] && !takerTradeInfo['isSettled']) continue
+
+              matchedNotSettledOrders.push({
+                maker: makerTradeInfo,
+                taker: takerTradeInfo
+              })
+
+              found = true
             }
+            catch(e){
 
-            let outputLockScript = Buffer.from(referencedTxOutput.getOutputScript()).toString('ascii')
-            let originalMakerInfo = { hash: outPointTxHash, output: referencedTxOutput }
-            while (outputLockScript.endsWith('OP_CALLBACK')) {
-              const [parentTxHash, parentOutputIndex] = outputLockScript.split(' ')
-              const _makerTx = await this.persistence.getTransactionByHash(parentTxHash, 'bc')
-              const _makerTxOutput = _makerTx.getOutputsList()[parentOutputIndex]
-              originalMakerInfo.hash = _makerTx.getHash()
-              originalMakerInfo.output = _makerTxOutput
-
-              outputLockScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
             }
-            if (outputLockScript.indexOf('OP_MAKERCOLL') === -1) {
-              continue
-            }
-
-            const originalBlockHeightHasMaker = hashToTxMap[originalMakerInfo.hash].blockHeight
-            makerTradeInfo = extractInfoFromCrossChainTxMakerOutputScript(outputLockScript)
-
-            const isBeforeSettleHeight = (latestBlockHeight < originalBlockHeightHasMaker + makerTradeInfo['shiftStartsAt'] + makerTradeInfo['settleEndsAt'])
-            if (!isBeforeSettleHeight) { // out of settlement window
-              makerTradeInfo = null
-              continue
-            }
-            if (originalMakerInfo.hash !== outPointTxHash) {
-              // update wantsUnit and paysUnit
-              const remainingRatio = parseFloat(internalToHuman(referencedTxOutput.getValue(), NRG)) / parseFloat(internalToHuman(originalMakerInfo.output.getValue(), NRG))
-              makerTradeInfo['wantsUnit'] = (parseFloat(makerTradeInfo['wantsUnit']) * remainingRatio).toString()
-              makerTradeInfo['paysUnit'] = (parseFloat(makerTradeInfo['paysUnit']) * remainingRatio).toString()
-            }
-
-            makerTradeInfo['collateralizedNrg'] = internalToHuman(referencedTxOutput.getValue(), NRG)
-            makerTradeInfo['nrgUnit'] = internalToHuman(referencedTxOutput.getUnit(), NRG)
-            makerTradeInfo['txHash'] = outPointTxHash
-            makerTradeInfo['txOutputIndex'] = outputIndex
-
-            makerTradeInfo['blockHash'] = hashToTxMap[referencedTx.getHash()].blockHash
-            makerTradeInfo['blockHeight'] = hashToTxMap[referencedTx.getHash()].blockHeight
-
-            makerTradeInfo['blockHeightHasOriginalMakerTx'] = originalBlockHeightHasMaker
-
-            const inputScript = Buffer.from(txInput.getInputScript()).toString('ascii')
-            const takerInputInfo = extractInfoFromCrossChainTxTakerInputScript(inputScript)
-            takerTradeInfo['wantsAddress'] = takerInputInfo.takerWantsAddress
-            takerTradeInfo['sendsAddress'] = takerInputInfo.takerSendsAddress
-
-            const makerSettlesInfo = await this.unsettledTxManager.getTxSettleInfo(makerTradeInfo.txHash, makerTradeInfo.txOutputIndex)
-            const takerSettlesInfo = await this.unsettledTxManager.getTxSettleInfo(takerTradeInfo.txHash, takerTradeInfo.txOutputIndex)
-            if (makerSettlesInfo && takerSettlesInfo) {
-              continue
-            }
-            makerTradeInfo['isSettled'] = !!makerSettlesInfo
-            takerTradeInfo['isSettled'] = !!takerSettlesInfo
-
-            break // only one input points to a maker output script
           }
-          if (!makerTradeInfo) {
-            continue
-          }
-
-          // update
-
-          const order = {
-            maker: makerTradeInfo,
-            taker: takerTradeInfo
-          }
-
-          // validate
-
-          matchedNotSettledOrders.push(order)
         }
-      } catch (e) {
-        this._logger.error(e)
       }
     }
-
-    this._logger.info(`getMatchedOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}, orders: ${matchedNotSettledOrders.length}`)
     return matchedNotSettledOrders
   }
 }

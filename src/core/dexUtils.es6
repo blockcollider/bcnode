@@ -142,35 +142,38 @@ export class DexUtils {
   }
 
   // helper for getting the inputs and output with respect to the makers original order
-  async getMakerInputsAndOutpointForTaker (
+  async getMakerInputsAndOutpointForTaker(
     takerWantsAddress: string, takerSendsAddress: string,
     makerTxHash: string, makerTxOutputIndex: number,
     takerBCAddress: string, collateralizedNrg: string
   ):Promise<{outputs:[TransactionOutput], input:TransactionInput}> {
-    // get relevant maker data for placing taker order
+
+    //get relevant maker data for placing taker order
     let {
-      monoidMakerTxHash, monoidMakerTxOutputIndex, monoidMakerTxOutput,
-      makerTxInfo, makerTxUnitBN, makerTxCollateralizedBN,
-      blockWindow
-    } = await this.getMakerData(makerTxHash, makerTxOutputIndex, collateralizedNrg)
+      monoidMakerTxHash,monoidMakerTxOutputIndex,
+      makerTxUnitBN,makerTxCollateralizedBN,
+    } = await this.getMakerData(makerTxHash,makerTxOutputIndex,collateralizedNrg)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
 
-    // add taker<->maker script as output
-    const outputLockScript = ScriptTemplates.createCrossChainTxTakerOutputScript(monoidMakerTxHash, monoidMakerTxOutputIndex, takerBCAddress)
-    const newOutputToTakerTx = await this.createTransactionOutput(outputLockScript, makerTxUnitBN, collateralizedBN.add(collateralizedBN))
+    //add taker<->maker script as output
+    const outputLockScript = ScriptTemplates.createCrossChainTxTakerOutputScript(makerTxHash, makerTxOutputIndex, takerBCAddress)
+    const newOutputToTakerTx = await this.createTransactionOutput(outputLockScript,makerTxUnitBN,collateralizedBN.add(collateralizedBN))
 
-    // add leftover taker<->maker script as output
+    //add leftover taker<->maker script as output
     let newOutputToTakerTxCb = null
     const makerTxCollateralizedBNChange = makerTxCollateralizedBN.sub(collateralizedBN)
     if (makerTxCollateralizedBNChange.gt(new BN(0))) {
-      const outputLockScriptCb = ScriptTemplates.createCrossChainTxTakerOutputCallbackScript(monoidMakerTxHash, monoidMakerTxOutputIndex)
-      newOutputToTakerTxCb = await this.createTransactionOutput(outputLockScriptCb, makerTxUnitBN, makerTxCollateralizedBNChange)
+      const outputLockScriptCb = ScriptTemplates.createCrossChainTxTakerOutputCallbackScript(makerTxHash, makerTxOutputIndex)
+      newOutputToTakerTxCb = await this.createTransactionOutput(outputLockScriptCb,makerTxUnitBN,makerTxCollateralizedBNChange)
     }
+
+    //set outputs
+    const outputs = newOutputToTakerTxCb ? [newOutputToTakerTx,newOutputToTakerTxCb] : [newOutputToTakerTx]
 
     // maker tx's output as the input
     const makerTxOutpoint = new OutPoint()
-    makerTxOutpoint.setValue(monoidMakerTxOutput.getValue())
+    makerTxOutpoint.setValue(makerTxCollateralizedBN.toString())
     makerTxOutpoint.setHash(makerTxHash)
     makerTxOutpoint.setIndex(makerTxOutputIndex)
 
@@ -182,10 +185,7 @@ export class DexUtils {
     takerMatchesMakerInput.setScriptLength(takerInputUnlockScript.length)
     takerMatchesMakerInput.setInputScript(new Uint8Array(Buffer.from(takerInputUnlockScript, 'ascii')))
 
-    const outputs = [newOutputToTakerTx]
-    if (newOutputToTakerTxCb) outputs.push(newOutputToTakerTxCb)
-
-    return {outputs, input: takerMatchesMakerInput}
+    return {outputs,input:takerMatchesMakerInput}
   }
 
   async getInputsAndLeftover (
@@ -224,7 +224,6 @@ export class DexUtils {
     txTemplate: Transaction, spentOutPoints: []
   ):Promise<{txTemplateInputs: TransactionInput[]}> {
     const txTemplateInputs = spentOutPoints.map((outPoint) => {
-      // txInputSignature requires txTemplate sets the outputs first
       const signature = txInputSignature(outPoint, txTemplate, Buffer.from(BCPrivateKeyHex, 'hex'))
       const pubKey = secp256k1.publicKeyCreate(Buffer.from(BCPrivateKeyHex, 'hex'), true)
       const input = new TransactionInput()
@@ -275,12 +274,27 @@ export class DexUtils {
     const claimedKey = TxPendingPool.getOutpointClaimKey(makerTxHash, makerTxOutputIndex, 'bc')
     const isClaimed = await this.persistence.get(claimedKey)
     if (isClaimed) {
-      this._logger.info(`${makerTxHash}-${makerTxOutputIndex} is already settled`)
+      // this._logger.info(`${makerTxHash}-${makerTxOutputIndex} is already settled`)
       throw new Error(`${makerTxHash}-${makerTxOutputIndex} is already settled`)
     }
   }
 
-  async makerParamsCheck (deposit: string, settle: string, makerWantsUnit: string, makerPaysUnit: string, collateralizedNrg:string, nrgUnit:string) {
+  async getMakerOrderOutput(shift: string, deposit: string, settle: string,
+  payWithChainId: string, wantChainId: string, receiveAddress: string, makerWantsUnit: string, makerPaysUnit: string,
+  makerBCAddress: string,collateralizedNrg: string, nrgUnit: string) : Promise<TransactionOutput> {
+    const collateralizedBN = humanToBN(collateralizedNrg, NRG)
+    const unitBN = humanToBN(nrgUnit, NRG)
+    const outputLockScript = ScriptTemplates.createCrossChainTxMakerOutputScript(
+      shift, deposit, settle,
+      payWithChainId, wantChainId, receiveAddress, makerWantsUnit, makerPaysUnit,
+      makerBCAddress
+    )
+    const newOutputToReceiver = await this.createTransactionOutput(outputLockScript,unitBN,collateralizedBN)
+
+    return newOutputToReceiver
+  }
+
+  async makerParamsCheck (deposit: string, settle: string, makerWantsUnit: string, makerPaysUnit: string, collateralizedNrg:string, nrgUnit:string):void {
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const unitBN = humanToBN(nrgUnit, NRG)
 
@@ -300,84 +314,138 @@ export class DexUtils {
     }
   }
 
-  async getMakerTransactionAndOutput (txHash: string, index: number):Promise<{makerTx:Transaction, makerTxOutput:TransactionOutput}> {
-    const makerTx = await this.persistence.getTransactionByHash(txHash, 'bc')
-    if (!makerTx) {
-      throw new Error(`No maker Tx associate with ${txHash}`)
-    }
-    const makerTxOutput = makerTx.getOutputsList()[index]
-    if (!makerTxOutput) {
-      throw new Error(`No maker Tx output associate with hash: ${txHash}, outputIndex: ${index}`)
-    }
-    return {makerTx, makerTxOutput}
+  async getTransactionAndOutput(txHash: string, index: number):Promise<{tx:Transaction,txOutput:TransactionOutput}> {
+    const tx = await this.persistence.getTransactionByHash(txHash, 'bc')
+    if (!tx) throw new Error(`No maker Tx associate with ${txHash}`)
+    const txOutput = tx.getOutputsList()[index]
+    if (!txOutput) throw new Error(`No maker Tx output associate with hash: ${txHash}, outputIndex: ${index}`)
+    return {tx,txOutput}
   }
 
-  async getMakerData (makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg:string):Promise<{
-    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number, monoidMakerTxOutput: TransactionOutput,
-    makerTxInfo: Object, makerTxUnitBN:BN, makerTxCollateralizedBN:BN
-  }> {
-    const makerTxData = await this.getMakerTransactionAndOutput(makerTxHash, makerTxOutputIndex)
-    const { makerTx, makerTxOutput } = makerTxData
-
-    await this.isClaimedCheck(makerTxHash, makerTxOutputIndex)
-
+  async getMonoidForMaker(makerTx: Transaction,makerTxOutput: TransactionOutput,makerTxOutputIndex:number):Promise<{monoidMakerTxHash:string,monoidMakerTxOutputIndex:number,makerTxOutputScript:string,monoidMakerTxOutput:TransactionOutput}>{
     let makerTxOutputScript = Buffer.from(makerTxOutput.getOutputScript()).toString('ascii')
     let monoidMakerTxHash = makerTx.getHash()
     let monoidMakerTxOutputIndex = makerTxOutputIndex
     let monoidMakerTxOutput = makerTxOutput
 
-    if (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
-      // partial order
-      while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
-        const [parentTxHash, parentOutputIndex] = makerTxOutputScript.split(' ')
-        const _makerTxData = await this.getMakerTransactionAndOutput(parentTxHash, parseInt(parentOutputIndex, 10))
-        const { makerTx: _makerTx, makerTxOutput: _makerTxOutput } = _makerTxData
-
-        monoidMakerTxHash = _makerTx.getHash()
-        monoidMakerTxOutputIndex = parentOutputIndex
-        makerTxOutputScript = Buffer.from(_makerTxOutput.getOutputScript()).toString('ascii')
-        monoidMakerTxOutput = _makerTxOutput
-      }
+    //partial order
+    while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
+      [monoidMakerTxHash, monoidMakerTxOutputIndex] = makerTxOutputScript.split(' ')
+      const {txOutput} = await this.getTransactionAndOutput(monoidMakerTxHash,monoidMakerTxOutputIndex)
+      makerTxOutputScript = Buffer.from(txOutput.getOutputScript()).toString('ascii')
     }
 
-    if (makerTxOutputScript.indexOf('OP_MAKERCOLL') === -1) {
-      throw new Error(`hash: ${makerTxHash}, outputIndex: ${makerTxOutputIndex} not a valid maker tx`)
+    if (makerTxOutputScript.indexOf('OP_MAKERCOLL') === -1 || !makerTxOutputScript.startsWith('OP_MONOID')) {
+      throw new Error(`hash: ${makerTx.getHash()}, outputIndex: ${makerTxOutputIndex} not a valid maker tx`)
     }
-
-    const collateralizedBN = humanToBN(collateralizedNrg, NRG)
-    const makerTxUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
-
-    // check collateralizedBN is a multiply of maker unit
-    if (!(collateralizedBN.div(makerTxUnitBN).mul(makerTxUnitBN).eq(collateralizedBN))) {
-      throw new Error('Invalid amount of collateralizedNrg')
-    }
-
-    // check that the takers collateral is not bigger than the makers
-    const makerTxCollateralizedBN = new BN(makerTxOutput.getValue())
-    if (collateralizedBN.gt(makerTxCollateralizedBN)) {
-      throw new Error(`taker collateralizedNrg: ${collateralizedNrg} is greater than the amount of maker: ${makerTxCollateralizedBN.toString(10)}`)
-    }
-
-    // check if the tx is within the appropriate window
-    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
-    const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
-    let txBlockHashKey = await this.persistence.get(`bc.txblock.${monoidMakerTxHash}`)
-    let txBlockHeight = (await this.persistence.get(txBlockHashKey)).getHeight()
-    if (txBlockHeight + makerTxInfo.shiftStartsAt > latestBlockHeight || txBlockHeight + makerTxInfo.depositEndsAt < latestBlockHeight) {
-      throw new Error(`Maker Tx is not in deposit window, ${makerTxHash}`)
-    }
-
-    const settledAtBCHeight = (new BN(txBlockHeight)).add(new BN(makerTxInfo.shiftStartsAt + makerTxInfo.settleEndsAt))
-    const blockWindow = settledAtBCHeight.sub(new BN(latestBlockHeight))
 
     return {
       monoidMakerTxHash,
       monoidMakerTxOutputIndex,
-      monoidMakerTxOutput,
-      makerTxInfo,
-      makerTxUnitBN,
-      makerTxCollateralizedBN,
-      blockWindow
+      makerTxOutputScript,
+      monoidMakerTxOutput
     }
+  }
+
+  async extractTakerFromTx(tx:Transaction,block:BCBlock):Promise<[]>{
+    const txOutputs = tx.getOutputsList()
+    let takerTradeOrders = []
+
+    for (let i = 0; i < txOutputs.length; i++) {
+      const txOutput = txOutputs[i]
+      const txOutputScript = Buffer.from(txOutput.getOutputScript()).toString('ascii')
+      if (txOutputScript.indexOf('OP_MONAD') > -1 && txOutputScript.indexOf('OP_CALLBACK') > -1) {
+        let takerTradeInfo = extractInfoFromCrossChainTxTakerOutputScript(txOutputScript)
+        takerTradeInfo['collateralizedNrg'] = internalToHuman(txOutput.getValue(), NRG)
+        takerTradeInfo['txHash'] = tx.getHash()
+        takerTradeInfo['blockHash'] = block.getHash()
+        takerTradeInfo['blockHeight'] = block.getHeight()
+        takerTradeOrders.push(takerTradeInfo)
+      }
+    }
+    return takerTradeOrders
+  }
+
+  async formatTradeInfoForOpenOrders(
+    monoidMakerTxHash:string,txHash:string,
+    output:TransactionOutput,monoidMakerTxOutput:TransactionOutput,
+    tradeInfo:Object,index:number,block:BCBlock,
+    blockHasOriginalMakerTxHeight:number): Promise<Object>{
+    if (monoidMakerTxHash !== txHash) {
+      const remainingRatio = parseFloat(internalToHuman(output.getValue(), NRG)) / parseFloat(internalToHuman(monoidMakerTxOutput.getValue(), NRG))
+      tradeInfo['wantsUnit'] = (parseFloat(tradeInfo['wantsUnit']) * remainingRatio).toString()
+      tradeInfo['paysUnit'] = (parseFloat(tradeInfo['paysUnit']) * remainingRatio).toString()
+    }
+
+    tradeInfo['collateralizedNrg'] = internalToHuman(output.getValue(), NRG)
+    tradeInfo['nrgUnit'] = internalToHuman(output.getUnit(), NRG)
+    tradeInfo['txHash'] = txHash
+    tradeInfo['txOutputIndex'] = index
+    tradeInfo['blockHash'] = block.getHash()
+    tradeInfo['blockHeight'] = block.getHeight()
+    tradeInfo['isSettled'] = false
+    tradeInfo['blockHeightHasOriginalMakerTx'] = blockHasOriginalMakerTxHeight
+
+    return tradeInfo
+  }
+
+  async getBlockWindowIfWithinDepositWindow(outputScript:string,txHash:string):Promise<BN> {
+    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(outputScript)
+    let txBlockHashKey = await this.persistence.get(`bc.txblock.${txHash}`)
+    let txBlockHeight = (await this.persistence.get(txBlockHashKey)).getHeight()
+    if(txBlockHeight + makerTxInfo.shiftStartsAt >  latestBlockHeight || txBlockHeight + makerTxInfo.depositEndsAt < latestBlockHeight){
+      throw new Error(`Maker Tx is not in deposit window, ${txHash}`)
+    }
+    const settledAtBCHeight = (new BN(txBlockHeight)).add(new BN(makerTxInfo.shiftStartsAt + makerTxInfo.settleEndsAt))
+    const blockWindow = settledAtBCHeight.sub(new BN(latestBlockHeight))
+
+    return blockWindow
+  }
+
+  async getBlockHeightIfWithinSettleWindow(outputScript:string,txHash:string):Promise<BN> {
+    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(outputScript)
+    let txBlockHashKey = await this.persistence.get(`bc.txblock.${txHash}`)
+    let txBlockHeight = (await this.persistence.get(txBlockHashKey)).getHeight()
+    if(txBlockHeight + makerTxInfo.settletEndsAt < latestBlockHeight){
+      throw new Error(`Maker Tx is not in settle window, ${txHash}`)
+    }
+    return txBlockHeight
+  }
+
+  async getMakerData(makerTxHash: string, makerTxOutputIndex: number,collateralizedNrg:string):Promise<{
+    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number,makerTxUnitBN:BN, makerTxCollateralizedBN:BN}>{
+      const tx = await this.getTransactionAndOutput(makerTxHash,makerTxOutputIndex)
+      const [makerTx,makerTxOutput] = [tx.tx,tx.txOutput]
+
+      //check if the order is claimed
+      await this.isClaimedCheck(makerTxHash,makerTxOutputIndex)
+
+      //get the monoid maker data
+      const {monoidMakerTxHash, monoidMakerTxOutputIndex, makerTxOutputScript} = await this.getMonoidForMaker(makerTx, makerTxOutput, makerTxOutputIndex)
+
+      const collateralizedBN = humanToBN(collateralizedNrg, NRG)
+      const makerTxUnitBN = internalToBN(makerTxOutput.getUnit(), BOSON)
+
+      // check collateralizedBN is a multiply of maker unit
+      if (!(collateralizedBN.div(makerTxUnitBN).mul(makerTxUnitBN).eq(collateralizedBN))) {
+        throw new Error('Invalid amount of collateralizedNrg')
+      }
+
+      //check that the takers collateral is not bigger than the makers
+      const makerTxCollateralizedBN = new BN(makerTxOutput.getValue())
+      if (collateralizedBN.gt(makerTxCollateralizedBN)) {
+        throw new Error(`taker collateralizedNrg: ${collateralizedNrg} is greater than the amount of maker: ${makerTxCollateralizedBN.toString(10)}`)
+      }
+
+      // check if the tx is within the appropriate window
+      const blockWindow = this.getBlockWindowIfWithinDepositWindow(makerTxOutputScript,monoidMakerTxHash)
+
+      return {
+        monoidMakerTxHash, monoidMakerTxOutputIndex,
+        makerTxUnitBN, makerTxCollateralizedBN,
+        blockWindow
+      }
   }
 }

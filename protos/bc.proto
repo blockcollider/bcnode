@@ -88,7 +88,11 @@ message GetOpenOrdersResponse {
     repeated  MakerOrderInfo open_orders = 1;
 }
 
-message GetMatchedOpenOrdersResponse {
+message GetMatchedOrdersRequest {
+    bool only_settled = 1;
+}
+
+message GetMatchedOrdersResponse {
     repeated MatchedOpenOrder orders = 1;
 }
 
@@ -191,7 +195,7 @@ service Bc {
     rpc CalculateTakerFee (CalculateTakerFeeRequest) returns (FeeResponse) {}
 
     rpc GetOpenOrders (Null) returns (GetOpenOrdersResponse) {}
-    rpc GetMatchedOpenOrders (Null) returns (GetMatchedOpenOrdersResponse) {}
+    rpc GetMatchedOrders (GetMatchedOrdersRequest) returns (GetMatchedOrdersResponse) {}
     rpc GetBlake2bl (GetBlake2blRequest) returns (GetBlake2blResponse) {}
     rpc GetBcAddressViaVanity (VanityConvertRequest) returns (VanityConvertResponse) {}
 }

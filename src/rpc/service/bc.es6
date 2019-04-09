@@ -20,7 +20,7 @@ const {
   RpcTransactionResponse, PlaceMakerOrderRequest, PlaceTakerOrderRequest, PlaceTakerOrdersRequest, TakerOrder,
   RpcTransactionResponseStatus,
   GetOpenOrdersResponse, MakerOrderInfo,
-  GetMatchedOpenOrdersResponse, MatchedOpenOrder, TakerOrderInfo,
+  GetMatchedOrdersRequest,GetMatchedOrdersResponse, MatchedOpenOrder, TakerOrderInfo,
   VanityConvertResponse, VanityConvertRequest
 } = require('../../protos/bc_pb')
 
@@ -113,7 +113,7 @@ export default class BcServiceImpl {
       collateralizedNrg, nrgUnit,
     ).then(res => {
       const response = new FeeResponse()
-      response.setFee(res.toString());
+      response.setFee(res.txFee.toString());
       callback(null, response)
     }).catch((err) => {
       callback(err)
@@ -130,7 +130,7 @@ export default class BcServiceImpl {
       makerTxHash,makerTxOutputIndex,collateralizedNrg
     ).then(res => {
       const response = new FeeResponse()
-      response.setFee(res.toString());
+      response.setFee(res.txFee.toString());
       callback(null, response)
     }).catch((err) => {
       callback(err)
@@ -299,9 +299,11 @@ export default class BcServiceImpl {
     })
   }
 
-  getMatchedOpenOrders (call: Object, callback: Function) {
-    this._server.engine.dexLib.getMatchedOpenOrders().then(openOrders => {
-      const grpcRes = new GetMatchedOpenOrdersResponse()
+  getMatchedOrders (call: Object, callback: Function) {
+    const matchedOrderRequest: GetMatchedOrdersRequest = call.request
+
+    this._server.engine.dexLib.getMatchedOrders(matchedOrderRequest.getOnlySettled()).then(openOrders => {
+      const grpcRes = new GetMatchedOrdersResponse()
 
       const orders = openOrders.map((openOrder) => {
         const order = new MatchedOpenOrder()
