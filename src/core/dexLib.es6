@@ -102,21 +102,20 @@ export class DexLib {
     this._logger.info(`placeMakerOrder`)
 
     // get total amount to spend
-    let {totalNRG} = await this.calculateMakerFee(shift, deposit, settle,payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit,collateralizedNrg, nrgUnit)
+    let {totalNRG} = await this.calculateMakerFee(shift, deposit, settle, payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit, collateralizedNrg, nrgUnit)
 
-    //get maker order output
+    // get maker order output
     const newOutputToReceiver = await this.utils.getMakerOrderOutput(
       shift, deposit, settle,
       payWithChainId, wantChainId, receiveAddress, makerWantsUnit, makerPaysUnit,
       makerBCAddress, collateralizedNrg, nrgUnit
     )
 
-    //compile tx
+    // compile tx
     return await this.utils.compileTx(
-      [newOutputToReceiver],[],totalNRG,
-      makerBCAddress,makerBCPrivateKeyHex,minerKey
+      [newOutputToReceiver], [], totalNRG,
+      makerBCAddress, makerBCPrivateKeyHex, minerKey
     )
-
   }
 
   async placeTakerOrder (
@@ -130,45 +129,43 @@ export class DexLib {
     this._logger.info(`placeTakerOrder`)
 
     // get total amount to spend
-    let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex,collateralizedNrg)
+    let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
 
-    //get the relevant maker inputs and outpoint for the tx
-    const {input,outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
-      takerWantsAddress,takerSendsAddress,
+    // get the relevant maker inputs and outpoint for the tx
+    const {input, outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
+      takerWantsAddress, takerSendsAddress,
       makerTxHash, makerTxOutputIndex,
       takerBCAddress, collateralizedNrg
     )
 
-    //compile tx
+    // compile tx
     return await this.utils.compileTx(
-      outputs,[input],totalNRG,
-      takerBCAddress,takerBCPrivateKeyHex,minerKey
+      outputs, [input], totalNRG,
+      takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
-
   }
 
   async placeTakerOrders (
     orders:[{takerWantsAddress: string, takerSendsAddress: string,
-    makerTxHash: string, makerTxOutputIndex: number,collateralizedNrg: string}],
+    makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg: string}],
     takerBCAddress: string, takerBCPrivateKeyHex: string,
     additionalTxFee: string
   ): Promise<Transaction|Error> {
     this._logger.info(`placeTakerOrders`)
 
-    //setup total amount of nrg taker has to spend, inputs and outputs
+    // setup total amount of nrg taker has to spend, inputs and outputs
     let totalAmount = (additionalTxFee !== '0') ? totalAmount.add(humanToBN(additionalTxFee, NRG)) : BN(0)
     let allInputs = []
     let allOutputs = []
 
-    orders.map(async ({takerWantsAddress,takerSendsAddress,makerTxHash,makerTxOutputIndex,takerBCAddress,collateralizedNrg})=>{
-
-      //add to total amount of nrg to spend
-      let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex,collateralizedNrg)
+    orders.map(async ({takerWantsAddress, takerSendsAddress, makerTxHash, makerTxOutputIndex, takerBCAddress, collateralizedNrg}) => {
+      // add to total amount of nrg to spend
+      let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
       totalAmount = totalAmount.add(totalNRG)
 
-      //add to inputs and outputs
-      const {input,outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
-        takerWantsAddress,takerSendsAddress,
+      // add to inputs and outputs
+      const {input, outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
+        takerWantsAddress, takerSendsAddress,
         makerTxHash, makerTxOutputIndex,
         takerBCAddress, collateralizedNrg
       )
@@ -177,22 +174,22 @@ export class DexLib {
       allOutputs = allOutputs.concat(outputs)
     })
 
-    //compile tx
+    // compile tx
     return await this.utils.compileTx(
-      allOutputs,allInputs,totalAmount,
-      takerBCAddress,takerBCPrivateKeyHex,minerKey
+      allOutputs, allInputs, totalAmount,
+      takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
   }
 
-  async calculateMakerFee(
+  async calculateMakerFee (
     shift: string, deposit: string, settle: string,
     payWithChainId: string, wantChainId: string, makerWantsUnit: string, makerPaysUnit: string,
     collateralizedNrg: string, nrgUnit: string, additionalTxFee : string = '0'
-  ): Promise<{total:BN,txFee:BN}> {
+  ): Promise<{total:BN, txFee:BN}> {
     this._logger.info(`calculateMakerFee`)
 
-    //params check
-    this.utils.makerParamsCheck(deposit,settle, makerWantsUnit, makerPaysUnit,collateralizedNrg, nrgUnit)
+    // params check
+    this.utils.makerParamsCheck(deposit, settle, makerWantsUnit, makerPaysUnit, collateralizedNrg, nrgUnit)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const latestBlock = await this.persistence.get('bc.block.latest')
@@ -201,23 +198,23 @@ export class DexLib {
     const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
     const totalNRG = (additionalTxFee !== '0') ? txFee.add(collateralizedBN).add(humanToBN(additionalTxFee, NRG)) : txFee.add(collateralizedBN)
 
-    return {totalNRG,txFee}
+    return {totalNRG, txFee}
   }
 
-  async calculateTakerFee(
+  async calculateTakerFee (
     makerTxHash: string, makerTxOutputIndex: number,
     collateralizedNrg: string, additionalTxFee : string = '0'
-  ): Promise<{total:BN,txFee:BN}> {
+  ): Promise<{total:BN, txFee:BN}> {
     this._logger.info(`calculateTakerFee`)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const latestBlock = await this.persistence.get('bc.block.latest')
-    let {blockWindow} = await this.utils.getMakerData(makerTxHash,makerTxOutputIndex,collateralizedNrg)
+    let {blockWindow} = await this.utils.getMakerData(makerTxHash, makerTxOutputIndex, collateralizedNrg)
 
     const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'taker')
     const totalNRG = (additionalTxFee !== '0') ? txFee.add(collateralizedBN).add(humanToBN(additionalTxFee, NRG)) : txFee.add(collateralizedBN)
 
-    return {totalNRG ,txFee}
+    return {totalNRG, txFee}
   }
 
   async getOpenOrders (): Promise<MakerOpenOrder[]|Error> {
@@ -227,8 +224,8 @@ export class DexLib {
     this._logger.info(`getOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}`)
 
     let blocks = []
-    for(let i = currentBlockIndex; i < latestBlockHeight; i++){
-      blocks.push(`bc.block.${currentBlockIndex+i}`)
+    for (let i = currentBlockIndex; i < latestBlockHeight; i++) {
+      blocks.push(`bc.block.${currentBlockIndex + i}`)
     }
     blocks = await this.persistence.getBulk(blocks)
 
@@ -239,24 +236,22 @@ export class DexLib {
           const output = txOutputs[index]
 
           try {
-            let {monoidMakerTxHash,makerTxOutputScript,monoidMakerTxOutput,monoidMakerTxOutputIndex} = await this.utils.getMonoidForMaker(tx,output,index)
-            await this.utils.isClaimedCheck(monoidMakerTxHash,monoidMakerTxOutputIndex)
+            let {monoidMakerTxHash, makerTxOutputScript, monoidMakerTxOutput, monoidMakerTxOutputIndex} = await this.utils.getMonoidForMaker(tx, output, index)
+            await this.utils.isClaimedCheck(monoidMakerTxHash, monoidMakerTxOutputIndex)
 
-            let blockWindow =  await this.utils.getBlockWindowIfWithinDepositWindow(makerTxOutputScript,monoidMakerTxHash)
+            let blockWindow = await this.utils.getBlockWindowIfWithinDepositWindow(makerTxOutputScript, monoidMakerTxHash)
             let tradeInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
             const blockHasOriginalMakerTxHeight = blockWindow.add(new BN(latestBlockHeight)).sub(new BN(tradeInfo.shiftStartsAt + tradeInfo.settleEndsAt))
 
             let order = await this.utils.formatTradeInfoForOpenOrders(
-              monoidMakerTxHash,tx.getHash(),
-              output,monoidMakerTxOutput,
-              tradeInfo,index,block,
+              monoidMakerTxHash, tx.getHash(),
+              output, monoidMakerTxOutput,
+              tradeInfo, index, block,
               blockHasOriginalMakerTxHeight
             )
             openOrders.push(order)
-
-          }
-          catch(e){
-            //not a maker order nor callback maker order or is claimed
+          } catch (e) {
+            // not a maker order nor callback maker order or is claimed
             // if(! e.toString().includes('not a valid maker tx')) console.log({e})
             continue
           }
@@ -273,23 +268,22 @@ export class DexLib {
     this._logger.info(`getMatchedOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}`)
 
     let blocks = []
-    for(let i = currentBlockIndex; i < latestBlockHeight; i++){
-      blocks.push(`bc.block.${currentBlockIndex+i}`)
+    for (let i = currentBlockIndex; i < latestBlockHeight; i++) {
+      blocks.push(`bc.block.${currentBlockIndex + i}`)
     }
     blocks = await this.persistence.getBulk(blocks)
 
     for (let block of blocks) {
       for (let tx of block.getTxsList()) {
-
-        //get all the taker orders within a tx
-        let takerTradeOrders = await this.utils.extractTakerFromTx(tx,block)
-        //for each taker order find the respective maker order
-        for(let takerTradeInfo of takerTradeOrders) {
+        // get all the taker orders within a tx
+        let takerTradeOrders = await this.utils.extractTakerFromTx(tx, block)
+        // for each taker order find the respective maker order
+        for (let takerTradeInfo of takerTradeOrders) {
           const txInputs = tx.getInputsList()
           let makerTradeInfo = null
           let found = false
           for (let txInput of txInputs) {
-            if(found) break //found the tx
+            if (found) break // found the tx
 
             const outPoint = txInput.getOutPoint()
             const outPointTxHash = outPoint.getHash()
@@ -304,19 +298,18 @@ export class DexLib {
             const referencedTxOutput = referencedTx.getOutputsList()[outputIndex]
 
             try {
-
-              let {monoidMakerTxHash,makerTxOutputScript,monoidMakerTxOutput} = await this.utils.getMonoidForMaker(referencedTx,referencedTxOutput,outputIndex)
-              let originalBlockHeight =  await this.utils.getBlockHeightIfWithinSettleWindow(makerTxOutputScript,monoidMakerTxHash)
+              let {monoidMakerTxHash, makerTxOutputScript, monoidMakerTxOutput} = await this.utils.getMonoidForMaker(referencedTx, referencedTxOutput, outputIndex)
+              let originalBlockHeight = await this.utils.getBlockHeightIfWithinSettleWindow(makerTxOutputScript, monoidMakerTxHash)
               let tradeInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
 
               makerTradeInfo = await this.utils.formatTradeInfoForOpenOrders(
-                monoidMakerTxHash,outPointTxHash,
-                referencedTxOutput,monoidMakerTxOutput,
-                tradeInfo,outputIndex,block,
+                monoidMakerTxHash, outPointTxHash,
+                referencedTxOutput, monoidMakerTxOutput,
+                tradeInfo, outputIndex, block,
                 originalBlockHeight
               )
 
-              //add wants and sends information to Taker
+              // add wants and sends information to Taker
               const inputScript = Buffer.from(txInput.getInputScript()).toString('ascii')
               const takerInputInfo = extractInfoFromCrossChainTxTakerInputScript(inputScript)
               takerTradeInfo['wantsAddress'] = takerInputInfo.takerWantsAddress
@@ -333,8 +326,7 @@ export class DexLib {
               })
 
               found = true
-            }
-            catch(e){
+            } catch (e) {
 
             }
           }
