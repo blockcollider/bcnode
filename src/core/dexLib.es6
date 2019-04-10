@@ -233,7 +233,11 @@ export class DexLib {
 
   async getOpenOrders (): Promise<MakerOpenOrder[]|Error> {
     const openOrders = []
-    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const latestBlock = await this.persistence.get('bc.block.latest')
+    if (!latestBlock) {
+      throw new Error('Latest block not found')
+    }
+    const latestBlockHeight = latestBlock.getHeight()
     const currentBlockIndex = Math.max(1, latestBlockHeight - LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER)
     this._logger.info(`getOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}`)
 
@@ -277,7 +281,11 @@ export class DexLib {
 
   async getMatchedOrders (onlySettled: boolean): Promise<MatchedNotSettledOpenOrder[]|Error> {
     const matchedNotSettledOrders = []
-    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const latestBlock = await this.persistence.get('bc.block.latest')
+    if (!latestBlock) {
+      throw new Error('Latest block not found')
+    }
+    const latestBlockHeight = latestBlock.getHeight()
     const currentBlockIndex = Math.max(1, latestBlockHeight - LOOK_BACK_BC_HEIGHT_FOR_OPEN_ORDER)
     this._logger.info(`getMatchedOpenOrders from BC height: ${currentBlockIndex}, to BC height: ${latestBlockHeight}`)
 
@@ -309,6 +317,10 @@ export class DexLib {
             }
 
             const referencedTx = await this.persistence.getTransactionByHash(outPointTxHash, 'bc')
+            if (!referencedTx) {
+              // TODO (Arjun) - only continue if referencedTx not in persistence?
+              throw new Error('Referenced TX not found')
+            }
             const referencedTxOutput = referencedTx.getOutputsList()[outputIndex]
 
             try {
