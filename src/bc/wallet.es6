@@ -27,7 +27,7 @@ const {
 const BC_NETWORK = process.env.BC_NETWORK || 'main'
 const EMBLEM_CONTRACT_ADDRESS = networks[BC_NETWORK].rovers.eth.embContractId
 
-type AccountBalanceData = {
+export type AccountBalanceData = {
   confirmed: BN,
   unconfirmed: BN,
   collateralized: BN,

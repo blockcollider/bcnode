@@ -9,6 +9,7 @@
 
 import type { Logger } from 'winston'
 import type { TransactionOutpoint } from '../protos/core_pb'
+import type { AccountBalanceData } from '../bc/wallet'
 
 type MakerOpenOrder = {
   shiftStartsAt: number,
@@ -256,20 +257,20 @@ export class DexUtils {
     return leftChangeOutput
   }
 
-  async getUnspentOutpointsWithEnoughBalance (BCAddress:string, totalAmount:BN):Promise<TransactionOutpoint[]> {
-    let balanceData
+  async getUnspentOutpointsWithEnoughBalance (bcAddress:string, totalAmount:BN):Promise<TransactionOutpoint[]> {
+    let balanceData: AccountBalanceData
     try {
-      balanceData = await this.wallet.getBalanceData(BCAddress.toLowerCase())
+      balanceData = await this.wallet.getBalanceData(bcAddress.toLowerCase())
     } catch (e) {
-      const msg = `Could not find balance for given from address: ${BCAddress}`
+      const msg = `Could not find balance for given from address: ${bcAddress}`
       this._logger.warn(msg)
       throw new Error(msg)
     }
     this._logger.info(`NRG managed by address confirmed: ${internalToHuman(balanceData.confirmed, NRG)} unconfirmed: ${internalToHuman(balanceData.unconfirmed, NRG)}`)
 
     if (totalAmount.gt(balanceData.confirmed)) { // TODO: make sure confirmed is in humanToBN format
-      this._logger.error(`${BCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, total: ${internalToHuman(totalAmount, NRG)}`)
-      throw new Error(`${BCAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, total: ${internalToHuman(totalAmount, NRG)}`)
+      this._logger.error(`${bcAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, total: ${internalToHuman(totalAmount, NRG)}`)
+      throw new Error(`${bcAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, total: ${internalToHuman(totalAmount, NRG)}`)
     }
 
     return balanceData.confirmedUnspentOutPoints

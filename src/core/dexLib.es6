@@ -252,7 +252,7 @@ export class DexLib {
             let tradeInfo = extractInfoFromCrossChainTxMakerOutputScript(makerTxOutputScript)
             const blockHasOriginalMakerTxHeight = blockWindow.add(new BN(latestBlockHeight)).sub(new BN(tradeInfo.shiftStartsAt + tradeInfo.settleEndsAt))
 
-            let order = await this.utils.formatTradeInfoForOpenOrders(
+            let order = this.utils.formatTradeInfoForOpenOrders(
               monoidMakerTxHash, tx.getHash(),
               output, monoidMakerTxOutput,
               tradeInfo, index, block,
