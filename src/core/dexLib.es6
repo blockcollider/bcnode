@@ -310,7 +310,7 @@ export class DexLib {
             const referencedTx = await this.persistence.getTransactionByHash(outPointTxHash, 'bc')
             if (!referencedTx) {
               // TODO (Arjun) - only continue if referencedTx not in persistence?
-              throw new Error('Referenced TX not found')
+              continue
             }
             const referencedTxOutput = referencedTx.getOutputsList()[outputIndex]
 
