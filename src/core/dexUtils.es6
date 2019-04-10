@@ -109,7 +109,7 @@ export class DexUtils {
     return humanToBN(fee.toString(), NRG)
   }
 
-  async compileTx (txTemplateOutputs:[], otherInputs:[], totalAmount:BN, BCAddress:string, BCPrivateKeyHex:string, minerKey:string): Promise<Transaction> {
+  async compileTx (txTemplateOutputs: TransactionOutput[], otherInputs: TransactionInput[], totalAmount:BN, BCAddress:string, BCPrivateKeyHex:string, minerKey:string): Promise<Transaction> {
     // set up tx
     const txTemplate = new Transaction()
     txTemplate.setNonce('0')
@@ -415,7 +415,7 @@ export class DexUtils {
   }
 
   async getMakerData(makerTxHash: string, makerTxOutputIndex: number,collateralizedNrg:string):Promise<{
-    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number,makerTxUnitBN:BN, makerTxCollateralizedBN:BN}>{
+    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number,makerTxUnitBN:BN, makerTxCollateralizedBN:BN, blockWindow:BN}>{
       const tx = await this.getTransactionAndOutput(makerTxHash,makerTxOutputIndex)
       const [makerTx,makerTxOutput] = [tx.tx,tx.txOutput]
 

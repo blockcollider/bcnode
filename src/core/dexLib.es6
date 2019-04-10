@@ -52,6 +52,7 @@ type MatchedNotSettledOpenOrder = {
 const BN = require('bn.js')
 const Random = require('random-js')
 const secp256k1 = require('secp256k1')
+const debug = require('debug')('bcnode:dex:dexLib')
 
 const { default: PersistenceRocksDb } = require('../persistence/rocksdb')
 const { Transaction, TransactionOutput, TransactionInput, OutPoint } = require('../protos/core_pb')
@@ -79,7 +80,7 @@ export class DexLib {
   _logger: Logger
   unsettledTxManager: UnsettledTxManager
   wallet: Wallet
-  utils: DexUitls
+  utils: DexUtils
 
   constructor (persistence: PersistenceRocksDb) {
     this.persistence = persistence
@@ -110,7 +111,7 @@ export class DexLib {
     )
 
     // compile tx
-    return await this.utils.compileTx(
+    return this.utils.compileTx(
       [newOutputToReceiver], [], totalNRG,
       makerBCAddress, makerBCPrivateKeyHex, minerKey
     )
@@ -124,7 +125,7 @@ export class DexLib {
     additionalTxFee: string,
     minerKey: string
   ): Promise<Transaction|Error> {
-    this._logger.info(`placeTakerOrder`)
+    debug(`placeTakerOrder`)
 
     // get total amount to spend
     let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
@@ -137,26 +138,35 @@ export class DexLib {
     )
 
     // compile tx
-    return await this.utils.compileTx(
-      outputs, [input], totalNRG,
+    return this.utils.compileTx(
+      [outputs], [input], totalNRG,
       takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
   }
 
   async placeTakerOrders (
-    orders:[{takerWantsAddress: string, takerSendsAddress: string,
-    makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg: string}],
+    orders:[{
+      takerWantsAddress: string,
+      takerSendsAddress: string,
+      makerTxHash: string,
+      makerTxOutputIndex: number,
+      collateralizedNrg: string
+    }],
     takerBCAddress: string, takerBCPrivateKeyHex: string,
-    additionalTxFee: string
+    additionalTxFee: string,
+    minerKey: string
   ): Promise<Transaction|Error> {
-    this._logger.info(`placeTakerOrders`)
+    debug(`placeTakerOrders`)
 
     // setup total amount of nrg taker has to spend, inputs and outputs
-    let totalAmount = (additionalTxFee !== '0') ? totalAmount.add(humanToBN(additionalTxFee, NRG)) : BN(0)
+    let totalAmount = new BN(0)
+    if (additionalTxFee !== '0') {
+      totalAmount.add(humanToBN(additionalTxFee, NRG))
+    }
     let allInputs = []
     let allOutputs = []
 
-    orders.map(async ({takerWantsAddress, takerSendsAddress, makerTxHash, makerTxOutputIndex, takerBCAddress, collateralizedNrg}) => {
+    orders.map(async ({takerWantsAddress, takerSendsAddress, makerTxHash, makerTxOutputIndex, collateralizedNrg}) => {
       // add to total amount of nrg to spend
       let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
       totalAmount = totalAmount.add(totalNRG)
@@ -173,7 +183,7 @@ export class DexLib {
     })
 
     // compile tx
-    return await this.utils.compileTx(
+    return this.utils.compileTx(
       allOutputs, allInputs, totalAmount,
       takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
@@ -183,14 +193,17 @@ export class DexLib {
     shift: string, deposit: string, settle: string,
     payWithChainId: string, wantChainId: string, makerWantsUnit: string, makerPaysUnit: string,
     collateralizedNrg: string, nrgUnit: string, additionalTxFee : string = '0'
-  ): Promise<{total:BN, txFee:BN}> {
-    this._logger.info(`calculateMakerFee`)
+  ): Promise<{totalNRG:BN, txFee:BN}> {
+    debug(`calculateMakerFee`)
 
     // params check
     this.utils.makerParamsCheck(deposit, settle, makerWantsUnit, makerPaysUnit, collateralizedNrg, nrgUnit)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const latestBlock = await this.persistence.get('bc.block.latest')
+    if (!latestBlock) {
+      throw new Error('Latest block not found')
+    }
     const blockWindow = new BN(parseInt(settle, 10) - parseInt(shift, 10))
 
     const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'maker')
@@ -202,11 +215,14 @@ export class DexLib {
   async calculateTakerFee (
     makerTxHash: string, makerTxOutputIndex: number,
     collateralizedNrg: string, additionalTxFee : string = '0'
-  ): Promise<{total:BN, txFee:BN}> {
-    this._logger.info(`calculateTakerFee`)
+  ): Promise<{totalNRG:BN, txFee:BN}> {
+    debug(`calculateTakerFee`)
 
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const latestBlock = await this.persistence.get('bc.block.latest')
+    if (!latestBlock) {
+      throw new Error('Latest block not found')
+    }
     let {blockWindow} = await this.utils.getMakerData(makerTxHash, makerTxOutputIndex, collateralizedNrg)
 
     const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'taker')
