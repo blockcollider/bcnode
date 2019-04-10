@@ -386,11 +386,11 @@ export class DexUtils {
     return takerTradeOrders
   }
 
-  async formatTradeInfoForOpenOrders (
+  formatTradeInfoForOpenOrders (
     monoidMakerTxHash:string, txHash:string,
     output:TransactionOutput, monoidMakerTxOutput:TransactionOutput,
     tradeInfo:Object, index:number, block: BcBlock,
-    blockHasOriginalMakerTxHeight:number): Promise<Object> {
+    blockHasOriginalMakerTxHeight:number): Promise<Object> { // TODO return type should be MakerOpenOrder
     if (monoidMakerTxHash !== txHash) {
       const remainingRatio = parseFloat(internalToHuman(output.getValue(), NRG)) / parseFloat(internalToHuman(monoidMakerTxOutput.getValue(), NRG))
       tradeInfo['wantsUnit'] = (parseFloat(tradeInfo['wantsUnit']) * remainingRatio).toString()
@@ -410,10 +410,18 @@ export class DexUtils {
   }
 
   async getBlockWindowIfWithinDepositWindow (outputScript:string, txHash:string):Promise<BN> {
-    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const latestBlock = await this.persistence.get('bc.block.latest')
+    if (!latestBlock) {
+      throw new Error('Latest block not found')
+    }
+    const latestBlockHeight = latestBlock.getHeight()
     const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(outputScript)
-    let txBlockHashKey = await this.persistence.get(`bc.txblock.${txHash}`)
-    let txBlockHeight = (await this.persistence.get(txBlockHashKey)).getHeight()
+    const txBlockHashKey = await this.persistence.get(`bc.txblock.${txHash}`)
+    const txBlock = await this.persistence.get(txBlockHashKey)
+    if (!txBlock) {
+      throw new Error(`Block for tx has: ${txHash} not found`)
+    }
+    let txBlockHeight = txBlock.getHeight()
     if (txBlockHeight + makerTxInfo.shiftStartsAt > latestBlockHeight || txBlockHeight + makerTxInfo.depositEndsAt < latestBlockHeight) {
       throw new Error(`Maker Tx is not in deposit window, ${txHash}`)
     }
@@ -424,11 +432,20 @@ export class DexUtils {
   }
 
   async getBlockHeightIfWithinSettleWindow (outputScript:string, txHash:string):Promise<BN> {
-    const latestBlockHeight = (await this.persistence.get('bc.block.latest')).getHeight()
+    const latestBlock = await this.persistence.get('bc.block.latest')
+    if (!latestBlock) {
+      throw new Error('Latest block not found')
+    }
+    const latestBlockHeight = latestBlock.getHeight()
     const makerTxInfo = extractInfoFromCrossChainTxMakerOutputScript(outputScript)
-    let txBlockHashKey = await this.persistence.get(`bc.txblock.${txHash}`)
-    let txBlockHeight = (await this.persistence.get(txBlockHashKey)).getHeight()
-    if (txBlockHeight + makerTxInfo.settletEndsAt < latestBlockHeight) {
+    const txBlockHashKey = await this.persistence.get(`bc.txblock.${txHash}`)
+    const txBlock = await this.persistence.get(txBlockHashKey)
+    if (!txBlock) {
+      throw new Error(`Block for tx has: ${txHash} not found`)
+    }
+    let txBlockHeight = txBlock.getHeight()
+
+    if (txBlockHeight + makerTxInfo.settleEndsAt< latestBlockHeight) {
       throw new Error(`Maker Tx is not in settle window, ${txHash}`)
     }
     return txBlockHeight
