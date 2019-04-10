@@ -50,24 +50,18 @@ type MatchedNotSettledOpenOrder = {
 }
 
 const BN = require('bn.js')
-const Random = require('random-js')
-const secp256k1 = require('secp256k1')
 const debug = require('debug')('bcnode:dex:dexLib')
 
 const { default: PersistenceRocksDb } = require('../persistence/rocksdb')
-const { Transaction, TransactionOutput, TransactionInput, OutPoint } = require('../protos/core_pb')
+const { Transaction } = require('../protos/core_pb')
 
-const { blake2bl } = require('../utils/crypto')
 const { getLogger } = require('../logger')
-const { humanToBN, internalToBN, internalToHuman, COIN_FRACS: { NRG, BOSON } } = require('../core/coin')
+const { humanToBN, COIN_FRACS: { NRG } } = require('../core/coin')
 
 const {
-  txHash, txInputSignature, ScriptTemplates,
   extractInfoFromCrossChainTxMakerOutputScript,
-  extractInfoFromCrossChainTxTakerOutputScript,
   extractInfoFromCrossChainTxTakerInputScript
 } = require('../core/txUtils')
-const TxPendingPool = require('../bc/txPendingPool')
 const { Wallet } = require('../bc/wallet')
 
 const { UnsettledTxManager } = require('../bc/unsettledTxManager')
