@@ -46,12 +46,23 @@ type MatchedNotSettledOpenOrder = {
   }
 }
 
+type TakerTxInfo = {
+  collateralizedNrg: string,
+  txHash: string,
+  blockHash: string,
+  blockHeight: number,
+  makerTxHash: string,
+  makerTxOutputIndex: number,
+  doubleHashedBcAddress: string
+}
+
 const BN = require('bn.js')
 const Random = require('random-js')
 const secp256k1 = require('secp256k1')
+const { merge } = require('ramda')
 
 const { default: PersistenceRocksDb } = require('../persistence/rocksdb')
-const { Transaction, TransactionOutput, TransactionInput, OutPoint } = require('../protos/core_pb')
+const { BcBlock, Transaction, TransactionOutput, TransactionInput, OutPoint } = require('../protos/core_pb')
 
 const { blake2bl } = require('../utils/crypto')
 const { getLogger } = require('../logger')
@@ -60,7 +71,7 @@ const { humanToBN, internalToBN, internalToHuman, COIN_FRACS: { NRG, BOSON } } =
 const {
   txHash, txInputSignature, ScriptTemplates,
   extractInfoFromCrossChainTxMakerOutputScript,
-  extractInfoFromCrossChainTxTakerOutputScript,
+  extractInfoFromCrossChainTxTakerOutputScript
 } = require('../core/txUtils')
 const TxPendingPool = require('../bc/txPendingPool')
 const { Wallet } = require('../bc/wallet')
@@ -351,19 +362,24 @@ export class DexUtils {
     }
   }
 
-  async extractTakerFromTx (tx:Transaction, block:BcBlock):Promise<[]> {
+  async extractTakerFromTx (tx: Transaction, block: BcBlock): Promise<TakerTxInfo[]> {
     const txOutputs = tx.getOutputsList()
-    let takerTradeOrders = []
+    let takerTradeOrders: TakerTxInfo[] = []
 
     for (let i = 0; i < txOutputs.length; i++) {
       const txOutput = txOutputs[i]
       const txOutputScript = Buffer.from(txOutput.getOutputScript()).toString('ascii')
       if (txOutputScript.indexOf('OP_MONAD') > -1 && txOutputScript.indexOf('OP_CALLBACK') > -1) {
-        let takerTradeInfo = extractInfoFromCrossChainTxTakerOutputScript(txOutputScript)
-        takerTradeInfo['collateralizedNrg'] = internalToHuman(txOutput.getValue(), NRG)
-        takerTradeInfo['txHash'] = tx.getHash()
-        takerTradeInfo['blockHash'] = block.getHash()
-        takerTradeInfo['blockHeight'] = block.getHeight()
+        let takerTradeInfo = merge(
+          extractInfoFromCrossChainTxTakerOutputScript(txOutputScript),
+          {
+            collateralizedNrg: internalToHuman(txOutput.getValue(), NRG),
+            txHash: tx.getHash(),
+            blockHash: block.getHash(),
+            blockHeight: block.getHeight()
+          }
+        )
+
         takerTradeOrders.push(takerTradeInfo)
       }
     }
@@ -373,7 +389,7 @@ export class DexUtils {
   async formatTradeInfoForOpenOrders (
     monoidMakerTxHash:string, txHash:string,
     output:TransactionOutput, monoidMakerTxOutput:TransactionOutput,
-    tradeInfo:Object, index:number, block:BCBlock,
+    tradeInfo:Object, index:number, block: BcBlock,
     blockHasOriginalMakerTxHeight:number): Promise<Object> {
     if (monoidMakerTxHash !== txHash) {
       const remainingRatio = parseFloat(internalToHuman(output.getValue(), NRG)) / parseFloat(internalToHuman(monoidMakerTxOutput.getValue(), NRG))
