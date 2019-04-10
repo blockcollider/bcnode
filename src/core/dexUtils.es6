@@ -288,7 +288,7 @@ export class DexUtils {
     return newOutputToReceiver
   }
 
-  async makerParamsCheck (deposit: string, settle: string, makerWantsUnit: string, makerPaysUnit: string, collateralizedNrg:string, nrgUnit:string):void {
+  async makerParamsCheck (deposit: string, settle: string, makerWantsUnit: string, makerPaysUnit: string, collateralizedNrg:string, nrgUnit:string) {
     const collateralizedBN = humanToBN(collateralizedNrg, NRG)
     const unitBN = humanToBN(nrgUnit, NRG)
 
@@ -310,9 +310,13 @@ export class DexUtils {
 
   async getTransactionAndOutput (txHash: string, index: number):Promise<{tx:Transaction, txOutput:TransactionOutput}> {
     const tx = await this.persistence.getTransactionByHash(txHash, 'bc')
-    if (!tx) throw new Error(`No maker Tx associate with ${txHash}`)
+    if (!tx) {
+      throw new Error(`No maker Tx associate with ${txHash}`)
+    }
     const txOutput = tx.getOutputsList()[index]
-    if (!txOutput) throw new Error(`No maker Tx output associate with hash: ${txHash}, outputIndex: ${index}`)
+    if (!txOutput) {
+      throw new Error(`No maker Tx output associate with hash: ${txHash}, outputIndex: ${index}`)
+    }
     return {tx, txOutput}
   }
 
@@ -324,8 +328,14 @@ export class DexUtils {
 
     // partial order
     while (makerTxOutputScript.indexOf('OP_CALLBACK') > -1) {
-      [monoidMakerTxHash, monoidMakerTxOutputIndex] = makerTxOutputScript.split(' ')
-      const {txOutput} = await this.getTransactionAndOutput(monoidMakerTxHash, monoidMakerTxOutputIndex)
+      let [rawMonoidMakerTxHash, rawMonoidMakerTxOutputIndex] = makerTxOutputScript.split(' ')
+      monoidMakerTxHash = rawMonoidMakerTxHash
+      monoidMakerTxOutputIndex = parseInt(rawMonoidMakerTxOutputIndex, 10)
+      const txAndOutput = await this.getTransactionAndOutput(monoidMakerTxHash, monoidMakerTxOutputIndex)
+      if (!txAndOutput) {
+        throw new Error(`Could not find TX and output for makerTxHash: ${monoidMakerTxHash}, makerTxOutputIndex: ${monoidMakerTxOutputIndex}`)
+      }
+      const { txOutput } = txAndOutput
       makerTxOutputScript = Buffer.from(txOutput.getOutputScript()).toString('ascii')
     }
 
@@ -341,7 +351,7 @@ export class DexUtils {
     }
   }
 
-  async extractTakerFromTx (tx:Transaction, block:BCBlock):Promise<[]> {
+  async extractTakerFromTx (tx:Transaction, block:BcBlock):Promise<[]> {
     const txOutputs = tx.getOutputsList()
     let takerTradeOrders = []
 
@@ -408,10 +418,18 @@ export class DexUtils {
     return txBlockHeight
   }
 
-  async getMakerData (makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg:string):Promise<{
-    monoidMakerTxHash:string, monoidMakerTxOutputIndex:number, makerTxUnitBN:BN, makerTxCollateralizedBN:BN, blockWindow:BN}> {
-    const tx = await this.getTransactionAndOutput(makerTxHash, makerTxOutputIndex)
-    const [makerTx, makerTxOutput] = [tx.tx, tx.txOutput]
+  async getMakerData (makerTxHash: string, makerTxOutputIndex: number, collateralizedNrg:string): Promise<{
+    monoidMakerTxHash:string,
+    monoidMakerTxOutputIndex:number,
+    makerTxUnitBN:BN,
+    makerTxCollateralizedBN:BN,
+    blockWindow:BN
+  }> {
+    const txAndOutput = await this.getTransactionAndOutput(makerTxHash, makerTxOutputIndex)
+    if (!txAndOutput) {
+      throw new Error(`Could not find TX and output for makerTxHash: ${makerTxHash}, makerTxOutputIndex: ${makerTxOutputIndex}`)
+    }
+    const { tx: makerTx, txOutput: makerTxOutput } = txAndOutput
 
     // check if the order is claimed
     await this.isClaimedCheck(makerTxHash, makerTxOutputIndex)
