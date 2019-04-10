@@ -62,7 +62,6 @@ const {
   extractInfoFromCrossChainTxMakerOutputScript,
   extractInfoFromCrossChainTxTakerInputScript
 } = require('../core/txUtils')
-const { Wallet } = require('../bc/wallet')
 
 const { UnsettledTxManager } = require('../bc/unsettledTxManager')
 
@@ -73,14 +72,12 @@ export class DexLib {
   persistence: PersistenceRocksDb
   _logger: Logger
   unsettledTxManager: UnsettledTxManager
-  wallet: Wallet
   utils: DexUtils
 
   constructor (persistence: PersistenceRocksDb) {
     this.persistence = persistence
     this._logger = getLogger(__filename)
     this.unsettledTxManager = new UnsettledTxManager(this.persistence)
-    this.wallet = new Wallet(persistence, this.unsettledTxManager)
     this.utils = new DexUtils(persistence)
   }
 
