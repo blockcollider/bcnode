@@ -56,7 +56,7 @@ const { default: PersistenceRocksDb } = require('../persistence/rocksdb')
 const { Transaction } = require('../protos/core_pb')
 
 const { getLogger } = require('../logger')
-const { humanToBN, COIN_FRACS: { NRG } } = require('../core/coin')
+const { humanToBN, Currency, CurrencyInfo, COIN_FRACS: { NRG } } = require('../core/coin')
 
 const {
   extractInfoFromCrossChainTxMakerOutputScript,
@@ -94,10 +94,18 @@ export class DexLib {
     // get total amount to spend
     let {totalNRG} = await this.calculateMakerFee(shift, deposit, settle, payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit, collateralizedNrg, nrgUnit)
 
+
+    const indivisiblePaysUnit = Currency.toMinimumUnitAsStr(
+      payWithChainId, makerPaysUnit, CurrencyInfo[payWithChainId].humanUnit
+    )
+    const indivisibleWantsUnit = Currency.toMinimumUnitAsStr(
+      wantChainId, makerWantsUnit, CurrencyInfo[wantChainId].humanUnit
+    )
+
     // get maker order output
     const newOutputToReceiver = await this.utils.getMakerOrderOutput(
       shift, deposit, settle,
-      payWithChainId, wantChainId, receiveAddress, makerWantsUnit, makerPaysUnit,
+      payWithChainId, wantChainId, receiveAddress, indivisibleWantsUnit, indivisiblePaysUnit,
       makerBCAddress, collateralizedNrg, nrgUnit
     )
 
