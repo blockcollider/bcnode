@@ -317,7 +317,6 @@ export class DexLib {
 
             const referencedTx = await this.persistence.getTransactionByHash(outPointTxHash, 'bc')
             if (!referencedTx) {
-              // TODO (Arjun) - only continue if referencedTx not in persistence?
               continue
             }
             const referencedTxOutput = referencedTx.getOutputsList()[outputIndex]
