@@ -92,8 +92,13 @@ export class DexLib {
     this._logger.info(`placeMakerOrder`)
 
     // get total amount to spend
-    let {totalNRG} = await this.calculateMakerFee(shift, deposit, settle, payWithChainId, wantChainId, makerWantsUnit, makerPaysUnit, collateralizedNrg, nrgUnit)
-
+    let { totalNRG } = await this.calculateMakerFee(
+      shift, deposit, settle,
+      payWithChainId, wantChainId,
+      makerWantsUnit, makerPaysUnit,
+      collateralizedNrg, nrgUnit,
+      additionalTxFee
+    )
 
     const indivisiblePaysUnit = Currency.toMinimumUnitAsStr(
       payWithChainId, makerPaysUnit, CurrencyInfo[payWithChainId].humanUnit
@@ -127,7 +132,7 @@ export class DexLib {
     debug(`placeTakerOrder`)
 
     // get total amount to spend
-    let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
+    let { totalNRG } = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg, additionalTxFee)
 
     // get the relevant maker inputs and outpoint for the tx
     const {input, outputs} = await this.utils.getMakerInputsAndOutpointForTaker(
@@ -167,7 +172,7 @@ export class DexLib {
 
     orders.map(async ({takerWantsAddress, takerSendsAddress, makerTxHash, makerTxOutputIndex, collateralizedNrg}) => {
       // add to total amount of nrg to spend
-      let {totalNRG} = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
+      let { totalNRG } = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
       totalAmount = totalAmount.add(totalNRG)
 
       // add to inputs and outputs
@@ -227,7 +232,7 @@ export class DexLib {
     const txFee = await this.utils.calculateCrossChainTxFee(collateralizedBN, blockWindow, new BN(latestBlock.getHeight()), 'taker')
     const totalNRG = (additionalTxFee !== '0') ? txFee.add(collateralizedBN).add(humanToBN(additionalTxFee, NRG)) : txFee.add(collateralizedBN)
 
-    return {totalNRG, txFee}
+    return { totalNRG, txFee }
   }
 
   async getOpenOrders (): Promise<MakerOpenOrder[]|Error> {
