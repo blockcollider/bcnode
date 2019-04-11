@@ -52,6 +52,7 @@ const chainName = (true || BC_NETWORK === 'main') // eslint-disable-line
 const ec = new EthereumCommon(chainName)
 
 const ETH_MAX_FETCH_BLOCKS = 128
+const MAX_INVALID_COUNT = 8
 const BOOTNODES = ec.bootstrapNodes().map(node => {
   return {
     address: node.ip,
@@ -153,6 +154,8 @@ export default class Network extends EventEmitter {
   _initialSyncBlocksToFetch: [number, number][]
   _initialResync: boolean
   _resyncData: ?RoverMessage.Resync
+  _parentBlock: ?EthereumBlock
+  _invalidDifficultyCount: number
 
   constructor (config: { maximumPeers: number }) {
     super()
@@ -171,6 +174,7 @@ export default class Network extends EventEmitter {
     this._requestedBlocks = []
     this._initialSyncBlocksToFetch = []
     this._initialResync = false
+    this._invalidDifficultyCount = 0
   }
 
   get peers (): string[] {
@@ -255,6 +259,36 @@ export default class Network extends EventEmitter {
 
     const blockNumber = new BN(block.header.number).toNumber()
     this._logger.info(`Transmitting new block ${blockHashHex} with height: ${blockNumber} from peer "${getPeerAddr(peer)}"`)
+
+    // difficulty check
+    if (this._parentBlock && !isBlockFromInitialSync) {
+      const difficultyValid = block.header.validateDifficulty(this._parentBlock)
+      if (!difficultyValid) {
+        this._invalidDifficultyCount++
+        const blockInfo = {
+          parentBlock: {
+            'height': (new BN(this._parentBlock.header.number)).toString(),
+            'difficulty': (new BN(this._parentBlock.header.difficulty)).toString()
+          },
+          newBlock: {
+            'height': (new BN(block.header.number)).toString(),
+            'difficulty': (new BN(block.header.difficulty)).toString()
+          }
+        }
+        this._logger.warn(`Incoming block has invalid difficulty - rejecting the block, info: ${JSON.stringify(blockInfo)}`)
+        if (this._invalidDifficultyCount > MAX_INVALID_COUNT) {
+          this._logger.warn(`Maximum amount of invalid ETH blocks reached - restarting rover to try to connect to valid peers`)
+          process.exit(1)
+        }
+        return
+      }
+      this._invalidDifficultyCount = 0
+      this._logger.debug(`Block's ${parseInt(block.header.number.toString('hex'), 16)} difficulty is valid -> creating unified block from it`)
+    }
+    if (!isBlockFromInitialSync) {
+      this._parentBlock = block
+    }
+
     this.emit('newBlock', { block, isBlockFromInitialSync })
   }
 

@@ -33,7 +33,6 @@ const DataDecoder = new InputDataDecoder(CURRENT_EMBLEM_ABI)
 const EMB_CONTRACT_ADDRESS = networks[BC_NETWORK].rovers.eth.embContractId
 
 const ROVER_NAME = 'eth'
-const MAX_INVALID_COUNT = 8
 
 var logger = logging.getLogger('rover.eth.controller.createUnifiedBlock', false)
 
@@ -125,15 +124,12 @@ export default class Controller {
   _rpc: RpcClient
   _logger: Logger
   _isStandalone: boolean
-  _parentBlock: ?EthereumBlock
-  _invalidDifficultyCount: number
 
   constructor (isStandalone: boolean) {
     this._dpt = false
     this._rpc = new RpcClient()
     this._logger = logging.getLogger(__filename)
     this._isStandalone = isStandalone
-    this._invalidDifficultyCount = 0
   }
 
   get network (): Network {
@@ -142,33 +138,6 @@ export default class Controller {
 
   async transmitNewBlock (block: EthereumBlock, isBlockFromInitialSync: boolean = false) {
     this._logger.info(`transmitNewBlock(), ${parseInt(block.header.number.toString('hex'), 16)}, isBlockFromInitialSync: ${isBlockFromInitialSync}`)
-    if (this._parentBlock && !isBlockFromInitialSync) {
-      const difficultyValid = block.header.validateDifficulty(this._parentBlock)
-      if (!difficultyValid) {
-        this._invalidDifficultyCount++
-        const blockInfo = {
-          parentBlock: {
-            'height': (new BN(this._parentBlock.header.number)).toString(),
-            'difficulty': (new BN(this._parentBlock.header.difficulty)).toString()
-          },
-          newBlock: {
-            'height': (new BN(block.header.number)).toString(),
-            'difficulty': (new BN(block.header.difficulty)).toString()
-          }
-        }
-        this._logger.warn(`Incoming block has invalid difficulty - rejecting the block, info: ${JSON.stringify(blockInfo)}`)
-        if (this._invalidDifficultyCount > MAX_INVALID_COUNT) {
-          this._logger.warn(`Maximum amount of invalid ETH blocks reached - restarting rover to try to connect to valid peers`)
-          process.exit(1)
-        }
-        return
-      }
-      this._invalidDifficultyCount = 0
-      this._logger.debug(`Block's ${parseInt(block.header.number.toString('hex'), 16)} difficulty is valid -> creating unified block from it`)
-    }
-    if (!isBlockFromInitialSync) {
-      this._parentBlock = block
-    }
     const unifiedBlock = await createUnifiedBlock(this._isStandalone, block, this._rpc.rover, _createUnifiedBlock)
     if (!this._isStandalone) {
       this._rpc.rover.collectBlock(unifiedBlock, (err, response) => {
