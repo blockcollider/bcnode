@@ -225,9 +225,10 @@ export class ScriptTemplates {
   // TODO: move NRG transfer output script login from engine.index to here
 
   static createNRGOutputLockScript (bcAddress: string): string {
+    bcAddress = bcAddress.toLowerCase()
     const script = [
       'OP_BLAKE2BL',
-      blake2bl(blake2bl(bcAddress.toLowerCase())),
+      blake2bl(blake2bl(bcAddress)),
       'OP_EQUALVERIFY',
       'OP_CHECKSIGVERIFY'
     ]
@@ -241,6 +242,7 @@ export class ScriptTemplates {
   static createCrossChainTxTakerOutputScript (
     makerTxHash: string, makerTxOutputIndex: string|number, takerBCAddress: string
   ): string {
+    takerBCAddress = takerBCAddress.toLowerCase()
     const doubleHashedBcAddress = blake2bl(blake2bl(takerBCAddress))
     const script = [
       [makerTxHash, makerTxOutputIndex, 'OP_CALLBACK'],
@@ -260,10 +262,13 @@ export class ScriptTemplates {
     makerWantsAddress: string, makerWantsUnit: string, makerPaysUnit: string,
     makerBCAddress: string, isMakerAddressHashed: boolean = false
   ): string {
+    makerBCAddress = makerBCAddress.toLowerCase()
     let doubleHashedBcAddress = makerBCAddress
     if (!isMakerAddressHashed) {
       doubleHashedBcAddress = blake2bl(blake2bl(makerBCAddress))
     }
+
+    makerWantsAddress = makerWantsAddress.toLowerCase()
 
     const script = [
       ['OP_MONOID', shiftStartsAt, depositEndsAt, settleEndsAt, 'OP_DEPSET'],
@@ -596,6 +601,7 @@ export const txCreateCoinbase = async (
   blockTxs: Transaction[], // all other transactions for block
   minerAddress: string
 ): Transaction => {
+  minerAddress = minerAddress.toLowerCase()
   const tx = new Transaction()
 
   const txsDistanceSum = getTxsDistanceSum(blockTxs)

@@ -1483,11 +1483,15 @@ export class Engine {
     this._logger.info(`Trying to create TX: ${JSON.stringify(obj)}`)
     const latestBlock = await this.persistence.get('bc.block.latest')
 
+    const fromAddress = newTx.getFromAddr().toLowerCase()
+    const toAddress = newTx.getToAddr().toLowerCase()
+    const privateKeyHex = Buffer.from(newTx.getPrivateKeyHex(), 'hex')
+
     let balanceData
     try {
-      balanceData = await this._wallet.getBalanceData(newTx.getFromAddr().toLowerCase())
+      balanceData = await this._wallet.getBalanceData(fromAddress)
     } catch (e) {
-      const msg = `Could not find balance for given from address: ${newTx.getFromAddr()}, ${e}`
+      const msg = `Could not find balance for given from address: ${fromAddress}, ${e}`
       this._logger.warn(msg)
       throw new Error(msg)
     }
@@ -1502,12 +1506,12 @@ export class Engine {
     }
     this._logger.info(`has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN, NRG)}`)
     if ((transferAmountBN.add(txFeeBN)).gt(balanceData.confirmed)) {
-      this._logger.error(`${newTx.getFromAddr()} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN.toBuffer(), NRG)}`)
-      throw new Error(`${newTx.getFromAddr()} not enough balance`)
+      this._logger.error(`${fromAddress} not enough balance, has: ${internalToHuman(balanceData.confirmed, NRG)}, transfer: ${internalToHuman(transferAmountBN, NRG)}, fee: ${internalToHuman(txFeeBN.toBuffer(), NRG)}`)
+      throw new Error(`${fromAddress} not enough balance`)
     }
 
     const newOutputToReceiver = new TransactionOutput()
-    const outputLockScript = ScriptTemplates.createNRGOutputLockScript(newTx.getToAddr())
+    const outputLockScript = ScriptTemplates.createNRGOutputLockScript(toAddress)
 
     newOutputToReceiver.setValue(new Uint8Array(transferAmountBN.toBuffer()))
     newOutputToReceiver.setUnit(new Uint8Array(new BN(1).toBuffer()))
@@ -1533,7 +1537,7 @@ export class Engine {
         leftChangeOutput = new TransactionOutput()
         const outputLockScript = [
           'OP_BLAKE2BL',
-          blake2bl(blake2bl(newTx.getFromAddr().toLowerCase())),
+          blake2bl(blake2bl(fromAddress)),
           'OP_EQUALVERIFY',
           'OP_CHECKSIGVERIFY'
         ].join(' ')
@@ -1553,14 +1557,14 @@ export class Engine {
 
     const txTemplateInputs = spentOutPoints.map((outPoint) => {
       // txInputSignature requires txTemplate sets the outputs first
-      const signature = txInputSignature(outPoint, txTemplate, Buffer.from(newTx.getPrivateKeyHex(), 'hex'))
-      const pubKey = secp256k1.publicKeyCreate(Buffer.from(newTx.getPrivateKeyHex(), 'hex'), true)
+      const signature = txInputSignature(outPoint, txTemplate, privateKeyHex)
+      const pubKey = secp256k1.publicKeyCreate(privateKeyHex, true)
       const input = new TransactionInput()
       input.setOutPoint(outPoint)
       const inputUnlockScript = [
         signature.toString('hex'),
         pubKey.toString('hex'),
-        blake2bl(newTx.getFromAddr())
+        blake2bl(fromAddress)
       ].join(' ')
 
       input.setScriptLength(inputUnlockScript.length)
