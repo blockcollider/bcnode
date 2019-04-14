@@ -115,7 +115,7 @@ export class DexLib {
     )
 
     // compile tx
-    return this.utils.compileTx(
+    return await this.utils.compileTx(
       [newOutputToReceiver], [], totalNRG,
       makerBCAddress, makerBCPrivateKeyHex, minerKey
     )
@@ -142,7 +142,7 @@ export class DexLib {
     )
 
     // compile tx
-    return this.utils.compileTx(
+    return await this.utils.compileTx(
       outputs, [input], totalNRG,
       takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
@@ -187,7 +187,7 @@ export class DexLib {
     })
 
     // compile tx
-    return this.utils.compileTx(
+    return await this.utils.compileTx(
       allOutputs, allInputs, totalAmount,
       takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
