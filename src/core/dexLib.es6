@@ -143,7 +143,7 @@ export class DexLib {
 
     // compile tx
     return this.utils.compileTx(
-      [outputs], [input], totalNRG,
+      outputs, [input], totalNRG,
       takerBCAddress, takerBCPrivateKeyHex, minerKey
     )
   }

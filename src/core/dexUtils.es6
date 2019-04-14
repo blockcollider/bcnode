@@ -153,7 +153,7 @@ export class DexUtils {
     takerWantsAddress: string, takerSendsAddress: string,
     makerTxHash: string, makerTxOutputIndex: number,
     takerBCAddress: string, collateralizedNrg: string
-  ):Promise<{outputs:[TransactionOutput], input:TransactionInput}> {
+  ):Promise<{ outputs: TransactionOutput[], input:TransactionInput }> {
     // get relevant maker data for placing taker order
     let {
       monoidMakerTxHash, monoidMakerTxOutputIndex,
