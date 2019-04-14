@@ -163,7 +163,7 @@ proto.bc.InitialPeer.prototype.getAddress = function() {
 
 /** @param {string} value */
 proto.bc.InitialPeer.prototype.setAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -178,7 +178,7 @@ proto.bc.InitialPeer.prototype.getExpires = function() {
 
 /** @param {number} value */
 proto.bc.InitialPeer.prototype.setExpires = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 

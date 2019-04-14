@@ -5,11 +5,44 @@ var grpc = require('grpc');
 var bc_pb = require('./bc_pb.js');
 var core_pb = require('./core_pb.js');
 
+function serialize_bc_CalculateMakerFeeRequest(arg) {
+  if (!(arg instanceof bc_pb.CalculateMakerFeeRequest)) {
+    throw new Error('Expected argument of type bc.CalculateMakerFeeRequest');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_CalculateMakerFeeRequest(buffer_arg) {
+  return bc_pb.CalculateMakerFeeRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_bc_CalculateTakerFeeRequest(arg) {
+  if (!(arg instanceof bc_pb.CalculateTakerFeeRequest)) {
+    throw new Error('Expected argument of type bc.CalculateTakerFeeRequest');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_CalculateTakerFeeRequest(buffer_arg) {
+  return bc_pb.CalculateTakerFeeRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_bc_FeeResponse(arg) {
+  if (!(arg instanceof bc_pb.FeeResponse)) {
+    throw new Error('Expected argument of type bc.FeeResponse');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_FeeResponse(buffer_arg) {
+  return bc_pb.FeeResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_bc_GetBalanceRequest(arg) {
   if (!(arg instanceof bc_pb.GetBalanceRequest)) {
     throw new Error('Expected argument of type bc.GetBalanceRequest');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_GetBalanceRequest(buffer_arg) {
@@ -20,7 +53,7 @@ function serialize_bc_GetBalanceResponse(arg) {
   if (!(arg instanceof bc_pb.GetBalanceResponse)) {
     throw new Error('Expected argument of type bc.GetBalanceResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_GetBalanceResponse(buffer_arg) {
@@ -31,7 +64,7 @@ function serialize_bc_GetBlake2blRequest(arg) {
   if (!(arg instanceof bc_pb.GetBlake2blRequest)) {
     throw new Error('Expected argument of type bc.GetBlake2blRequest');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_GetBlake2blRequest(buffer_arg) {
@@ -42,7 +75,7 @@ function serialize_bc_GetBlake2blResponse(arg) {
   if (!(arg instanceof bc_pb.GetBlake2blResponse)) {
     throw new Error('Expected argument of type bc.GetBlake2blResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_GetBlake2blResponse(buffer_arg) {
@@ -53,29 +86,40 @@ function serialize_bc_GetLatestBlocksResponse(arg) {
   if (!(arg instanceof bc_pb.GetLatestBlocksResponse)) {
     throw new Error('Expected argument of type bc.GetLatestBlocksResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_GetLatestBlocksResponse(buffer_arg) {
   return bc_pb.GetLatestBlocksResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_bc_GetMatchedOpenOrdersResponse(arg) {
-  if (!(arg instanceof bc_pb.GetMatchedOpenOrdersResponse)) {
-    throw new Error('Expected argument of type bc.GetMatchedOpenOrdersResponse');
+function serialize_bc_GetMatchedOrdersRequest(arg) {
+  if (!(arg instanceof bc_pb.GetMatchedOrdersRequest)) {
+    throw new Error('Expected argument of type bc.GetMatchedOrdersRequest');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
-function deserialize_bc_GetMatchedOpenOrdersResponse(buffer_arg) {
-  return bc_pb.GetMatchedOpenOrdersResponse.deserializeBinary(new Uint8Array(buffer_arg));
+function deserialize_bc_GetMatchedOrdersRequest(buffer_arg) {
+  return bc_pb.GetMatchedOrdersRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_bc_GetMatchedOrdersResponse(arg) {
+  if (!(arg instanceof bc_pb.GetMatchedOrdersResponse)) {
+    throw new Error('Expected argument of type bc.GetMatchedOrdersResponse');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_GetMatchedOrdersResponse(buffer_arg) {
+  return bc_pb.GetMatchedOrdersResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_bc_GetOpenOrdersResponse(arg) {
   if (!(arg instanceof bc_pb.GetOpenOrdersResponse)) {
     throw new Error('Expected argument of type bc.GetOpenOrdersResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_GetOpenOrdersResponse(buffer_arg) {
@@ -86,7 +130,7 @@ function serialize_bc_HelpResponse(arg) {
   if (!(arg instanceof bc_pb.HelpResponse)) {
     throw new Error('Expected argument of type bc.HelpResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_HelpResponse(buffer_arg) {
@@ -97,7 +141,7 @@ function serialize_bc_Null(arg) {
   if (!(arg instanceof core_pb.Null)) {
     throw new Error('Expected argument of type bc.Null');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_Null(buffer_arg) {
@@ -108,7 +152,7 @@ function serialize_bc_PlaceMakerOrderRequest(arg) {
   if (!(arg instanceof bc_pb.PlaceMakerOrderRequest)) {
     throw new Error('Expected argument of type bc.PlaceMakerOrderRequest');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_PlaceMakerOrderRequest(buffer_arg) {
@@ -119,18 +163,29 @@ function serialize_bc_PlaceTakerOrderRequest(arg) {
   if (!(arg instanceof bc_pb.PlaceTakerOrderRequest)) {
     throw new Error('Expected argument of type bc.PlaceTakerOrderRequest');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_PlaceTakerOrderRequest(buffer_arg) {
   return bc_pb.PlaceTakerOrderRequest.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_bc_PlaceTakerOrdersRequest(arg) {
+  if (!(arg instanceof bc_pb.PlaceTakerOrdersRequest)) {
+    throw new Error('Expected argument of type bc.PlaceTakerOrdersRequest');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_bc_PlaceTakerOrdersRequest(buffer_arg) {
+  return bc_pb.PlaceTakerOrdersRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_bc_RpcTransaction(arg) {
   if (!(arg instanceof bc_pb.RpcTransaction)) {
     throw new Error('Expected argument of type bc.RpcTransaction');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_RpcTransaction(buffer_arg) {
@@ -141,7 +196,7 @@ function serialize_bc_RpcTransactionResponse(arg) {
   if (!(arg instanceof bc_pb.RpcTransactionResponse)) {
     throw new Error('Expected argument of type bc.RpcTransactionResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_RpcTransactionResponse(buffer_arg) {
@@ -152,7 +207,7 @@ function serialize_bc_StatsResponse(arg) {
   if (!(arg instanceof bc_pb.StatsResponse)) {
     throw new Error('Expected argument of type bc.StatsResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_StatsResponse(buffer_arg) {
@@ -163,7 +218,7 @@ function serialize_bc_VanityConvertRequest(arg) {
   if (!(arg instanceof bc_pb.VanityConvertRequest)) {
     throw new Error('Expected argument of type bc.VanityConvertRequest');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_VanityConvertRequest(buffer_arg) {
@@ -174,7 +229,7 @@ function serialize_bc_VanityConvertResponse(arg) {
   if (!(arg instanceof bc_pb.VanityConvertResponse)) {
     throw new Error('Expected argument of type bc.VanityConvertResponse');
   }
-  return Buffer.from(arg.serializeBinary());
+  return new Buffer(arg.serializeBinary());
 }
 
 function deserialize_bc_VanityConvertResponse(buffer_arg) {
@@ -260,6 +315,39 @@ var BcService = exports.BcService = {
     responseSerialize: serialize_bc_RpcTransactionResponse,
     responseDeserialize: deserialize_bc_RpcTransactionResponse,
   },
+  placeTakerOrders: {
+    path: '/bc.Bc/PlaceTakerOrders',
+    requestStream: false,
+    responseStream: false,
+    requestType: bc_pb.PlaceTakerOrdersRequest,
+    responseType: bc_pb.RpcTransactionResponse,
+    requestSerialize: serialize_bc_PlaceTakerOrdersRequest,
+    requestDeserialize: deserialize_bc_PlaceTakerOrdersRequest,
+    responseSerialize: serialize_bc_RpcTransactionResponse,
+    responseDeserialize: deserialize_bc_RpcTransactionResponse,
+  },
+  calculateMakerFee: {
+    path: '/bc.Bc/CalculateMakerFee',
+    requestStream: false,
+    responseStream: false,
+    requestType: bc_pb.CalculateMakerFeeRequest,
+    responseType: bc_pb.FeeResponse,
+    requestSerialize: serialize_bc_CalculateMakerFeeRequest,
+    requestDeserialize: deserialize_bc_CalculateMakerFeeRequest,
+    responseSerialize: serialize_bc_FeeResponse,
+    responseDeserialize: deserialize_bc_FeeResponse,
+  },
+  calculateTakerFee: {
+    path: '/bc.Bc/CalculateTakerFee',
+    requestStream: false,
+    responseStream: false,
+    requestType: bc_pb.CalculateTakerFeeRequest,
+    responseType: bc_pb.FeeResponse,
+    requestSerialize: serialize_bc_CalculateTakerFeeRequest,
+    requestDeserialize: deserialize_bc_CalculateTakerFeeRequest,
+    responseSerialize: serialize_bc_FeeResponse,
+    responseDeserialize: deserialize_bc_FeeResponse,
+  },
   getOpenOrders: {
     path: '/bc.Bc/GetOpenOrders',
     requestStream: false,
@@ -271,16 +359,16 @@ var BcService = exports.BcService = {
     responseSerialize: serialize_bc_GetOpenOrdersResponse,
     responseDeserialize: deserialize_bc_GetOpenOrdersResponse,
   },
-  getMatchedOpenOrders: {
-    path: '/bc.Bc/GetMatchedOpenOrders',
+  getMatchedOrders: {
+    path: '/bc.Bc/GetMatchedOrders',
     requestStream: false,
     responseStream: false,
-    requestType: core_pb.Null,
-    responseType: bc_pb.GetMatchedOpenOrdersResponse,
-    requestSerialize: serialize_bc_Null,
-    requestDeserialize: deserialize_bc_Null,
-    responseSerialize: serialize_bc_GetMatchedOpenOrdersResponse,
-    responseDeserialize: deserialize_bc_GetMatchedOpenOrdersResponse,
+    requestType: bc_pb.GetMatchedOrdersRequest,
+    responseType: bc_pb.GetMatchedOrdersResponse,
+    requestSerialize: serialize_bc_GetMatchedOrdersRequest,
+    requestDeserialize: deserialize_bc_GetMatchedOrdersRequest,
+    responseSerialize: serialize_bc_GetMatchedOrdersResponse,
+    responseDeserialize: deserialize_bc_GetMatchedOrdersResponse,
   },
   getBlake2bl: {
     path: '/bc.Bc/GetBlake2bl',

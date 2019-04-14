@@ -12,23 +12,28 @@ var goog = jspb;
 var global = Function('return this')();
 
 var core_pb = require('./core_pb.js');
-goog.object.extend(proto, core_pb);
+goog.exportSymbol('proto.bc.CalculateMakerFeeRequest', null, global);
+goog.exportSymbol('proto.bc.CalculateTakerFeeRequest', null, global);
+goog.exportSymbol('proto.bc.FeeResponse', null, global);
 goog.exportSymbol('proto.bc.GetBalanceRequest', null, global);
 goog.exportSymbol('proto.bc.GetBalanceResponse', null, global);
 goog.exportSymbol('proto.bc.GetBlake2blRequest', null, global);
 goog.exportSymbol('proto.bc.GetBlake2blResponse', null, global);
 goog.exportSymbol('proto.bc.GetLatestBlocksResponse', null, global);
-goog.exportSymbol('proto.bc.GetMatchedOpenOrdersResponse', null, global);
+goog.exportSymbol('proto.bc.GetMatchedOrdersRequest', null, global);
+goog.exportSymbol('proto.bc.GetMatchedOrdersResponse', null, global);
 goog.exportSymbol('proto.bc.GetOpenOrdersResponse', null, global);
 goog.exportSymbol('proto.bc.HelpResponse', null, global);
 goog.exportSymbol('proto.bc.MakerOrderInfo', null, global);
 goog.exportSymbol('proto.bc.MatchedOpenOrder', null, global);
 goog.exportSymbol('proto.bc.PlaceMakerOrderRequest', null, global);
 goog.exportSymbol('proto.bc.PlaceTakerOrderRequest', null, global);
+goog.exportSymbol('proto.bc.PlaceTakerOrdersRequest', null, global);
 goog.exportSymbol('proto.bc.RpcTransaction', null, global);
 goog.exportSymbol('proto.bc.RpcTransactionResponse', null, global);
 goog.exportSymbol('proto.bc.RpcTransactionResponseStatus', null, global);
 goog.exportSymbol('proto.bc.StatsResponse', null, global);
+goog.exportSymbol('proto.bc.TakerOrder', null, global);
 goog.exportSymbol('proto.bc.TakerOrderInfo', null, global);
 goog.exportSymbol('proto.bc.VanityConvertRequest', null, global);
 goog.exportSymbol('proto.bc.VanityConvertResponse', null, global);
@@ -171,15 +176,15 @@ proto.bc.GetLatestBlocksResponse.serializeBinaryToWriter = function(message, wri
 
 /**
  * repeated Block blocks = 1;
- * @return {!Array<!proto.bc.Block>}
+ * @return {!Array.<!proto.bc.Block>}
  */
 proto.bc.GetLatestBlocksResponse.prototype.getBlocksList = function() {
-  return /** @type{!Array<!proto.bc.Block>} */ (
+  return /** @type{!Array.<!proto.bc.Block>} */ (
     jspb.Message.getRepeatedWrapperField(this, core_pb.Block, 1));
 };
 
 
-/** @param {!Array<!proto.bc.Block>} value */
+/** @param {!Array.<!proto.bc.Block>} value */
 proto.bc.GetLatestBlocksResponse.prototype.setBlocksList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
@@ -338,7 +343,7 @@ proto.bc.HelpResponse.prototype.getHelpText = function() {
 
 /** @param {string} value */
 proto.bc.HelpResponse.prototype.setHelpText = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -480,7 +485,7 @@ proto.bc.StatsResponse.prototype.getCalls = function() {
 
 /** @param {number} value */
 proto.bc.StatsResponse.prototype.setCalls = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -670,7 +675,7 @@ proto.bc.RpcTransaction.prototype.getFromAddr = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setFromAddr = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -685,7 +690,7 @@ proto.bc.RpcTransaction.prototype.getToAddr = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setToAddr = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -700,7 +705,7 @@ proto.bc.RpcTransaction.prototype.getAmount = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setAmount = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -715,7 +720,7 @@ proto.bc.RpcTransaction.prototype.getTxFee = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setTxFee = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
+  jspb.Message.setField(this, 4, value);
 };
 
 
@@ -730,7 +735,7 @@ proto.bc.RpcTransaction.prototype.getPrivateKeyHex = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransaction.prototype.setPrivateKeyHex = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setField(this, 5, value);
 };
 
 
@@ -896,7 +901,7 @@ proto.bc.RpcTransactionResponse.prototype.getStatus = function() {
 
 /** @param {!proto.bc.RpcTransactionResponseStatus} value */
 proto.bc.RpcTransactionResponse.prototype.setStatus = function(value) {
-  jspb.Message.setProto3EnumField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -911,7 +916,7 @@ proto.bc.RpcTransactionResponse.prototype.getTxHash = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransactionResponse.prototype.setTxHash = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -926,7 +931,7 @@ proto.bc.RpcTransactionResponse.prototype.getError = function() {
 
 /** @param {string} value */
 proto.bc.RpcTransactionResponse.prototype.setError = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -1068,7 +1073,7 @@ proto.bc.GetBalanceRequest.prototype.getAddress = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceRequest.prototype.setAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -1246,7 +1251,7 @@ proto.bc.GetBalanceResponse.prototype.getConfirmed = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setConfirmed = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -1261,7 +1266,7 @@ proto.bc.GetBalanceResponse.prototype.getUnconfirmed = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setUnconfirmed = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -1276,7 +1281,7 @@ proto.bc.GetBalanceResponse.prototype.getCollateralized = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setCollateralized = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -1291,7 +1296,7 @@ proto.bc.GetBalanceResponse.prototype.getUnit = function() {
 
 /** @param {string} value */
 proto.bc.GetBalanceResponse.prototype.setUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
+  jspb.Message.setField(this, 4, value);
 };
 
 
@@ -1625,7 +1630,7 @@ proto.bc.MakerOrderInfo.prototype.getShiftStartsAt = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setShiftStartsAt = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -1640,7 +1645,7 @@ proto.bc.MakerOrderInfo.prototype.getDepositEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setDepositEndsAt = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -1655,7 +1660,7 @@ proto.bc.MakerOrderInfo.prototype.getSettleEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setSettleEndsAt = function(value) {
-  jspb.Message.setProto3IntField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -1670,7 +1675,7 @@ proto.bc.MakerOrderInfo.prototype.getPaysChainId = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setPaysChainId = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
+  jspb.Message.setField(this, 4, value);
 };
 
 
@@ -1685,7 +1690,7 @@ proto.bc.MakerOrderInfo.prototype.getWantsChainId = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setWantsChainId = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setField(this, 5, value);
 };
 
 
@@ -1700,7 +1705,7 @@ proto.bc.MakerOrderInfo.prototype.getWantsAddress = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setWantsAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setField(this, 6, value);
 };
 
 
@@ -1715,7 +1720,7 @@ proto.bc.MakerOrderInfo.prototype.getWantsUnit = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setWantsUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 7, value);
+  jspb.Message.setField(this, 7, value);
 };
 
 
@@ -1730,7 +1735,7 @@ proto.bc.MakerOrderInfo.prototype.getPaysUnit = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setPaysUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 8, value);
+  jspb.Message.setField(this, 8, value);
 };
 
 
@@ -1745,7 +1750,7 @@ proto.bc.MakerOrderInfo.prototype.getDoubleHashedBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setDoubleHashedBcAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 9, value);
+  jspb.Message.setField(this, 9, value);
 };
 
 
@@ -1760,7 +1765,7 @@ proto.bc.MakerOrderInfo.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setProto3StringField(this, 10, value);
+  jspb.Message.setField(this, 10, value);
 };
 
 
@@ -1775,7 +1780,7 @@ proto.bc.MakerOrderInfo.prototype.getNrgUnit = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setNrgUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 11, value);
+  jspb.Message.setField(this, 11, value);
 };
 
 
@@ -1790,7 +1795,7 @@ proto.bc.MakerOrderInfo.prototype.getTxHash = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setTxHash = function(value) {
-  jspb.Message.setProto3StringField(this, 12, value);
+  jspb.Message.setField(this, 12, value);
 };
 
 
@@ -1805,7 +1810,7 @@ proto.bc.MakerOrderInfo.prototype.getTxOutputIndex = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setTxOutputIndex = function(value) {
-  jspb.Message.setProto3IntField(this, 13, value);
+  jspb.Message.setField(this, 13, value);
 };
 
 
@@ -1820,7 +1825,7 @@ proto.bc.MakerOrderInfo.prototype.getBlockHash = function() {
 
 /** @param {string} value */
 proto.bc.MakerOrderInfo.prototype.setBlockHash = function(value) {
-  jspb.Message.setProto3StringField(this, 14, value);
+  jspb.Message.setField(this, 14, value);
 };
 
 
@@ -1835,7 +1840,7 @@ proto.bc.MakerOrderInfo.prototype.getBlockHeight = function() {
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setBlockHeight = function(value) {
-  jspb.Message.setProto3IntField(this, 15, value);
+  jspb.Message.setField(this, 15, value);
 };
 
 
@@ -1852,7 +1857,7 @@ proto.bc.MakerOrderInfo.prototype.getIsSettled = function() {
 
 /** @param {boolean} value */
 proto.bc.MakerOrderInfo.prototype.setIsSettled = function(value) {
-  jspb.Message.setProto3BooleanField(this, 16, value);
+  jspb.Message.setField(this, 16, value);
 };
 
 
@@ -1867,7 +1872,7 @@ proto.bc.MakerOrderInfo.prototype.getBlockHeightHasOriginalMakerTx = function() 
 
 /** @param {number} value */
 proto.bc.MakerOrderInfo.prototype.setBlockHeightHasOriginalMakerTx = function(value) {
-  jspb.Message.setProto3IntField(this, 17, value);
+  jspb.Message.setField(this, 17, value);
 };
 
 
@@ -2117,7 +2122,7 @@ proto.bc.TakerOrderInfo.prototype.getSendsAddress = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setSendsAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -2132,7 +2137,7 @@ proto.bc.TakerOrderInfo.prototype.getWantsAddress = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setWantsAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -2147,7 +2152,7 @@ proto.bc.TakerOrderInfo.prototype.getMakerTxHash = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setMakerTxHash = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -2162,7 +2167,7 @@ proto.bc.TakerOrderInfo.prototype.getMakerTxOutputIndex = function() {
 
 /** @param {number} value */
 proto.bc.TakerOrderInfo.prototype.setMakerTxOutputIndex = function(value) {
-  jspb.Message.setProto3IntField(this, 4, value);
+  jspb.Message.setField(this, 4, value);
 };
 
 
@@ -2177,7 +2182,7 @@ proto.bc.TakerOrderInfo.prototype.getDoubleHashedBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setDoubleHashedBcAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setField(this, 5, value);
 };
 
 
@@ -2192,7 +2197,7 @@ proto.bc.TakerOrderInfo.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setField(this, 6, value);
 };
 
 
@@ -2207,7 +2212,7 @@ proto.bc.TakerOrderInfo.prototype.getBlockHash = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setBlockHash = function(value) {
-  jspb.Message.setProto3StringField(this, 7, value);
+  jspb.Message.setField(this, 7, value);
 };
 
 
@@ -2222,7 +2227,7 @@ proto.bc.TakerOrderInfo.prototype.getBlockHeight = function() {
 
 /** @param {number} value */
 proto.bc.TakerOrderInfo.prototype.setBlockHeight = function(value) {
-  jspb.Message.setProto3IntField(this, 8, value);
+  jspb.Message.setField(this, 8, value);
 };
 
 
@@ -2239,7 +2244,7 @@ proto.bc.TakerOrderInfo.prototype.getIsSettled = function() {
 
 /** @param {boolean} value */
 proto.bc.TakerOrderInfo.prototype.setIsSettled = function(value) {
-  jspb.Message.setProto3BooleanField(this, 9, value);
+  jspb.Message.setField(this, 9, value);
 };
 
 
@@ -2254,7 +2259,7 @@ proto.bc.TakerOrderInfo.prototype.getTxHash = function() {
 
 /** @param {string} value */
 proto.bc.TakerOrderInfo.prototype.setTxHash = function(value) {
-  jspb.Message.setProto3StringField(this, 10, value);
+  jspb.Message.setField(this, 10, value);
 };
 
 
@@ -2424,7 +2429,7 @@ proto.bc.MatchedOpenOrder.prototype.clearMaker = function() {
 
 /**
  * Returns whether this field is set.
- * @return {boolean}
+ * @return {!boolean}
  */
 proto.bc.MatchedOpenOrder.prototype.hasMaker = function() {
   return jspb.Message.getField(this, 1) != null;
@@ -2454,7 +2459,7 @@ proto.bc.MatchedOpenOrder.prototype.clearTaker = function() {
 
 /**
  * Returns whether this field is set.
- * @return {boolean}
+ * @return {!boolean}
  */
 proto.bc.MatchedOpenOrder.prototype.hasTaker = function() {
   return jspb.Message.getField(this, 2) != null;
@@ -2600,15 +2605,15 @@ proto.bc.GetOpenOrdersResponse.serializeBinaryToWriter = function(message, write
 
 /**
  * repeated MakerOrderInfo open_orders = 1;
- * @return {!Array<!proto.bc.MakerOrderInfo>}
+ * @return {!Array.<!proto.bc.MakerOrderInfo>}
  */
 proto.bc.GetOpenOrdersResponse.prototype.getOpenOrdersList = function() {
-  return /** @type{!Array<!proto.bc.MakerOrderInfo>} */ (
+  return /** @type{!Array.<!proto.bc.MakerOrderInfo>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.MakerOrderInfo, 1));
 };
 
 
-/** @param {!Array<!proto.bc.MakerOrderInfo>} value */
+/** @param {!Array.<!proto.bc.MakerOrderInfo>} value */
 proto.bc.GetOpenOrdersResponse.prototype.setOpenOrdersList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
@@ -2640,19 +2645,163 @@ proto.bc.GetOpenOrdersResponse.prototype.clearOpenOrdersList = function() {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.bc.GetMatchedOpenOrdersResponse = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.bc.GetMatchedOpenOrdersResponse.repeatedFields_, null);
+proto.bc.GetMatchedOrdersRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.bc.GetMatchedOpenOrdersResponse, jspb.Message);
+goog.inherits(proto.bc.GetMatchedOrdersRequest, jspb.Message);
 if (true || goog.DEBUG && !COMPILED) {
-  proto.bc.GetMatchedOpenOrdersResponse.displayName = 'proto.bc.GetMatchedOpenOrdersResponse';
+  proto.bc.GetMatchedOrdersRequest.displayName = 'proto.bc.GetMatchedOrdersRequest';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.GetMatchedOrdersRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.GetMatchedOrdersRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.GetMatchedOrdersRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.GetMatchedOrdersRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    onlySettled: jspb.Message.getFieldWithDefault(msg, 1, false)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.GetMatchedOrdersRequest}
+ */
+proto.bc.GetMatchedOrdersRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.GetMatchedOrdersRequest;
+  return proto.bc.GetMatchedOrdersRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.GetMatchedOrdersRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.GetMatchedOrdersRequest}
+ */
+proto.bc.GetMatchedOrdersRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setOnlySettled(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.GetMatchedOrdersRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.GetMatchedOrdersRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.GetMatchedOrdersRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.GetMatchedOrdersRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getOnlySettled();
+  if (f) {
+    writer.writeBool(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional bool only_settled = 1;
+ * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
+ * You should avoid comparisons like {@code val === true/false} in those cases.
+ * @return {boolean}
+ */
+proto.bc.GetMatchedOrdersRequest.prototype.getOnlySettled = function() {
+  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 1, false));
+};
+
+
+/** @param {boolean} value */
+proto.bc.GetMatchedOrdersRequest.prototype.setOnlySettled = function(value) {
+  jspb.Message.setField(this, 1, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.GetMatchedOrdersResponse = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.bc.GetMatchedOrdersResponse.repeatedFields_, null);
+};
+goog.inherits(proto.bc.GetMatchedOrdersResponse, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.GetMatchedOrdersResponse.displayName = 'proto.bc.GetMatchedOrdersResponse';
 }
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.bc.GetMatchedOpenOrdersResponse.repeatedFields_ = [1];
+proto.bc.GetMatchedOrdersResponse.repeatedFields_ = [1];
 
 
 
@@ -2667,8 +2816,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.bc.GetMatchedOpenOrdersResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.bc.GetMatchedOpenOrdersResponse.toObject(opt_includeInstance, this);
+proto.bc.GetMatchedOrdersResponse.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.GetMatchedOrdersResponse.toObject(opt_includeInstance, this);
 };
 
 
@@ -2677,11 +2826,11 @@ proto.bc.GetMatchedOpenOrdersResponse.prototype.toObject = function(opt_includeI
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.bc.GetMatchedOpenOrdersResponse} msg The msg instance to transform.
+ * @param {!proto.bc.GetMatchedOrdersResponse} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.bc.GetMatchedOpenOrdersResponse.toObject = function(includeInstance, msg) {
+proto.bc.GetMatchedOrdersResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     ordersList: jspb.Message.toObjectList(msg.getOrdersList(),
     proto.bc.MatchedOpenOrder.toObject, includeInstance)
@@ -2698,23 +2847,23 @@ proto.bc.GetMatchedOpenOrdersResponse.toObject = function(includeInstance, msg) 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.bc.GetMatchedOpenOrdersResponse}
+ * @return {!proto.bc.GetMatchedOrdersResponse}
  */
-proto.bc.GetMatchedOpenOrdersResponse.deserializeBinary = function(bytes) {
+proto.bc.GetMatchedOrdersResponse.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.bc.GetMatchedOpenOrdersResponse;
-  return proto.bc.GetMatchedOpenOrdersResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.bc.GetMatchedOrdersResponse;
+  return proto.bc.GetMatchedOrdersResponse.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.bc.GetMatchedOpenOrdersResponse} msg The message object to deserialize into.
+ * @param {!proto.bc.GetMatchedOrdersResponse} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.bc.GetMatchedOpenOrdersResponse}
+ * @return {!proto.bc.GetMatchedOrdersResponse}
  */
-proto.bc.GetMatchedOpenOrdersResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.bc.GetMatchedOrdersResponse.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -2739,9 +2888,9 @@ proto.bc.GetMatchedOpenOrdersResponse.deserializeBinaryFromReader = function(msg
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.bc.GetMatchedOpenOrdersResponse.prototype.serializeBinary = function() {
+proto.bc.GetMatchedOrdersResponse.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.bc.GetMatchedOpenOrdersResponse.serializeBinaryToWriter(this, writer);
+  proto.bc.GetMatchedOrdersResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -2749,11 +2898,11 @@ proto.bc.GetMatchedOpenOrdersResponse.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.bc.GetMatchedOpenOrdersResponse} message
+ * @param {!proto.bc.GetMatchedOrdersResponse} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.bc.GetMatchedOpenOrdersResponse.serializeBinaryToWriter = function(message, writer) {
+proto.bc.GetMatchedOrdersResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getOrdersList();
   if (f.length > 0) {
@@ -2768,16 +2917,16 @@ proto.bc.GetMatchedOpenOrdersResponse.serializeBinaryToWriter = function(message
 
 /**
  * repeated MatchedOpenOrder orders = 1;
- * @return {!Array<!proto.bc.MatchedOpenOrder>}
+ * @return {!Array.<!proto.bc.MatchedOpenOrder>}
  */
-proto.bc.GetMatchedOpenOrdersResponse.prototype.getOrdersList = function() {
-  return /** @type{!Array<!proto.bc.MatchedOpenOrder>} */ (
+proto.bc.GetMatchedOrdersResponse.prototype.getOrdersList = function() {
+  return /** @type{!Array.<!proto.bc.MatchedOpenOrder>} */ (
     jspb.Message.getRepeatedWrapperField(this, proto.bc.MatchedOpenOrder, 1));
 };
 
 
-/** @param {!Array<!proto.bc.MatchedOpenOrder>} value */
-proto.bc.GetMatchedOpenOrdersResponse.prototype.setOrdersList = function(value) {
+/** @param {!Array.<!proto.bc.MatchedOpenOrder>} value */
+proto.bc.GetMatchedOrdersResponse.prototype.setOrdersList = function(value) {
   jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
 
@@ -2787,12 +2936,12 @@ proto.bc.GetMatchedOpenOrdersResponse.prototype.setOrdersList = function(value) 
  * @param {number=} opt_index
  * @return {!proto.bc.MatchedOpenOrder}
  */
-proto.bc.GetMatchedOpenOrdersResponse.prototype.addOrders = function(opt_value, opt_index) {
+proto.bc.GetMatchedOrdersResponse.prototype.addOrders = function(opt_value, opt_index) {
   return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.bc.MatchedOpenOrder, opt_index);
 };
 
 
-proto.bc.GetMatchedOpenOrdersResponse.prototype.clearOrdersList = function() {
+proto.bc.GetMatchedOrdersResponse.prototype.clearOrdersList = function() {
   this.setOrdersList([]);
 };
 
@@ -3079,7 +3228,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getShiftStartsAt = function() {
 
 /** @param {number} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setShiftStartsAt = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -3094,7 +3243,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getDepositEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setDepositEndsAt = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -3109,7 +3258,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getSettleEndsAt = function() {
 
 /** @param {number} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setSettleEndsAt = function(value) {
-  jspb.Message.setProto3IntField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -3124,7 +3273,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getPaysWithChainId = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setPaysWithChainId = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
+  jspb.Message.setField(this, 4, value);
 };
 
 
@@ -3139,7 +3288,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getWantsChainId = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setWantsChainId = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setField(this, 5, value);
 };
 
 
@@ -3154,7 +3303,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getWantsChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setWantsChainAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setField(this, 6, value);
 };
 
 
@@ -3169,7 +3318,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getWantsUnit = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setWantsUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 7, value);
+  jspb.Message.setField(this, 7, value);
 };
 
 
@@ -3184,7 +3333,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getPaysUnit = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setPaysUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 8, value);
+  jspb.Message.setField(this, 8, value);
 };
 
 
@@ -3199,7 +3348,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setBcAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 9, value);
+  jspb.Message.setField(this, 9, value);
 };
 
 
@@ -3214,7 +3363,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getBcPrivateKeyHex = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setBcPrivateKeyHex = function(value) {
-  jspb.Message.setProto3StringField(this, 10, value);
+  jspb.Message.setField(this, 10, value);
 };
 
 
@@ -3229,7 +3378,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setProto3StringField(this, 11, value);
+  jspb.Message.setField(this, 11, value);
 };
 
 
@@ -3244,7 +3393,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getNrgUnit = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setNrgUnit = function(value) {
-  jspb.Message.setProto3StringField(this, 12, value);
+  jspb.Message.setField(this, 12, value);
 };
 
 
@@ -3259,7 +3408,7 @@ proto.bc.PlaceMakerOrderRequest.prototype.getTxFee = function() {
 
 /** @param {string} value */
 proto.bc.PlaceMakerOrderRequest.prototype.setTxFee = function(value) {
-  jspb.Message.setProto3StringField(this, 13, value);
+  jspb.Message.setField(this, 13, value);
 };
 
 
@@ -3485,7 +3634,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getWantsChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setWantsChainAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -3500,7 +3649,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getSendsChainAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setSendsChainAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -3515,7 +3664,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getMakerTxHash = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setMakerTxHash = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -3530,7 +3679,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getMakerTxOutputIndex = function() {
 
 /** @param {number} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setMakerTxOutputIndex = function(value) {
-  jspb.Message.setProto3IntField(this, 4, value);
+  jspb.Message.setField(this, 4, value);
 };
 
 
@@ -3545,7 +3694,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setBcAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setField(this, 5, value);
 };
 
 
@@ -3560,7 +3709,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getBcPrivateKeyHex = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setBcPrivateKeyHex = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setField(this, 6, value);
 };
 
 
@@ -3575,7 +3724,7 @@ proto.bc.PlaceTakerOrderRequest.prototype.getCollateralizedNrg = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setCollateralizedNrg = function(value) {
-  jspb.Message.setProto3StringField(this, 7, value);
+  jspb.Message.setField(this, 7, value);
 };
 
 
@@ -3590,7 +3739,1202 @@ proto.bc.PlaceTakerOrderRequest.prototype.getTxFee = function() {
 
 /** @param {string} value */
 proto.bc.PlaceTakerOrderRequest.prototype.setTxFee = function(value) {
-  jspb.Message.setProto3StringField(this, 8, value);
+  jspb.Message.setField(this, 8, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.TakerOrder = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.bc.TakerOrder, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.TakerOrder.displayName = 'proto.bc.TakerOrder';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.TakerOrder.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.TakerOrder.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.TakerOrder} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.TakerOrder.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    wantsChainAddress: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    sendsChainAddress: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    makerTxHash: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    makerTxOutputIndex: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    collateralizedNrg: jspb.Message.getFieldWithDefault(msg, 5, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.TakerOrder}
+ */
+proto.bc.TakerOrder.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.TakerOrder;
+  return proto.bc.TakerOrder.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.TakerOrder} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.TakerOrder}
+ */
+proto.bc.TakerOrder.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setWantsChainAddress(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSendsChainAddress(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setMakerTxHash(value);
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readUint32());
+      msg.setMakerTxOutputIndex(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCollateralizedNrg(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.TakerOrder.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.TakerOrder.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.TakerOrder} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.TakerOrder.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getWantsChainAddress();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getSendsChainAddress();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getMakerTxHash();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getMakerTxOutputIndex();
+  if (f !== 0) {
+    writer.writeUint32(
+      4,
+      f
+    );
+  }
+  f = message.getCollateralizedNrg();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string wants_chain_address = 1;
+ * @return {string}
+ */
+proto.bc.TakerOrder.prototype.getWantsChainAddress = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.TakerOrder.prototype.setWantsChainAddress = function(value) {
+  jspb.Message.setField(this, 1, value);
+};
+
+
+/**
+ * optional string sends_chain_address = 2;
+ * @return {string}
+ */
+proto.bc.TakerOrder.prototype.getSendsChainAddress = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.TakerOrder.prototype.setSendsChainAddress = function(value) {
+  jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional string maker_tx_hash = 3;
+ * @return {string}
+ */
+proto.bc.TakerOrder.prototype.getMakerTxHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.TakerOrder.prototype.setMakerTxHash = function(value) {
+  jspb.Message.setField(this, 3, value);
+};
+
+
+/**
+ * optional uint32 maker_tx_output_index = 4;
+ * @return {number}
+ */
+proto.bc.TakerOrder.prototype.getMakerTxOutputIndex = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.TakerOrder.prototype.setMakerTxOutputIndex = function(value) {
+  jspb.Message.setField(this, 4, value);
+};
+
+
+/**
+ * optional string collateralized_nrg = 5;
+ * @return {string}
+ */
+proto.bc.TakerOrder.prototype.getCollateralizedNrg = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.TakerOrder.prototype.setCollateralizedNrg = function(value) {
+  jspb.Message.setField(this, 5, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.PlaceTakerOrdersRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.bc.PlaceTakerOrdersRequest.repeatedFields_, null);
+};
+goog.inherits(proto.bc.PlaceTakerOrdersRequest, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.PlaceTakerOrdersRequest.displayName = 'proto.bc.PlaceTakerOrdersRequest';
+}
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.bc.PlaceTakerOrdersRequest.repeatedFields_ = [1];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.PlaceTakerOrdersRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.PlaceTakerOrdersRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.PlaceTakerOrdersRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    ordersList: jspb.Message.toObjectList(msg.getOrdersList(),
+    proto.bc.TakerOrder.toObject, includeInstance),
+    bcAddress: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    bcPrivateKeyHex: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    txFee: jspb.Message.getFieldWithDefault(msg, 4, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.PlaceTakerOrdersRequest}
+ */
+proto.bc.PlaceTakerOrdersRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.PlaceTakerOrdersRequest;
+  return proto.bc.PlaceTakerOrdersRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.PlaceTakerOrdersRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.PlaceTakerOrdersRequest}
+ */
+proto.bc.PlaceTakerOrdersRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = new proto.bc.TakerOrder;
+      reader.readMessage(value,proto.bc.TakerOrder.deserializeBinaryFromReader);
+      msg.addOrders(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setBcAddress(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setBcPrivateKeyHex(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTxFee(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.PlaceTakerOrdersRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.PlaceTakerOrdersRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.PlaceTakerOrdersRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getOrdersList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      1,
+      f,
+      proto.bc.TakerOrder.serializeBinaryToWriter
+    );
+  }
+  f = message.getBcAddress();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
+  f = message.getBcPrivateKeyHex();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+  f = message.getTxFee();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+};
+
+
+/**
+ * repeated TakerOrder orders = 1;
+ * @return {!Array.<!proto.bc.TakerOrder>}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.getOrdersList = function() {
+  return /** @type{!Array.<!proto.bc.TakerOrder>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.bc.TakerOrder, 1));
+};
+
+
+/** @param {!Array.<!proto.bc.TakerOrder>} value */
+proto.bc.PlaceTakerOrdersRequest.prototype.setOrdersList = function(value) {
+  jspb.Message.setRepeatedWrapperField(this, 1, value);
+};
+
+
+/**
+ * @param {!proto.bc.TakerOrder=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.bc.TakerOrder}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.addOrders = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.bc.TakerOrder, opt_index);
+};
+
+
+proto.bc.PlaceTakerOrdersRequest.prototype.clearOrdersList = function() {
+  this.setOrdersList([]);
+};
+
+
+/**
+ * optional string bc_address = 2;
+ * @return {string}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.getBcAddress = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.PlaceTakerOrdersRequest.prototype.setBcAddress = function(value) {
+  jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional string bc_private_key_hex = 3;
+ * @return {string}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.getBcPrivateKeyHex = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.PlaceTakerOrdersRequest.prototype.setBcPrivateKeyHex = function(value) {
+  jspb.Message.setField(this, 3, value);
+};
+
+
+/**
+ * optional string tx_fee = 4;
+ * @return {string}
+ */
+proto.bc.PlaceTakerOrdersRequest.prototype.getTxFee = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.PlaceTakerOrdersRequest.prototype.setTxFee = function(value) {
+  jspb.Message.setField(this, 4, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.CalculateMakerFeeRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.bc.CalculateMakerFeeRequest, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.CalculateMakerFeeRequest.displayName = 'proto.bc.CalculateMakerFeeRequest';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.CalculateMakerFeeRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.CalculateMakerFeeRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.CalculateMakerFeeRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    shiftStartsAt: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    depositEndsAt: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    settleEndsAt: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    paysWithChainId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    paysUnit: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    wantsChainId: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    wantsUnit: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    collateralizedNrg: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    nrgUnit: jspb.Message.getFieldWithDefault(msg, 9, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.CalculateMakerFeeRequest}
+ */
+proto.bc.CalculateMakerFeeRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.CalculateMakerFeeRequest;
+  return proto.bc.CalculateMakerFeeRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.CalculateMakerFeeRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.CalculateMakerFeeRequest}
+ */
+proto.bc.CalculateMakerFeeRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setShiftStartsAt(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setDepositEndsAt(value);
+      break;
+    case 3:
+      var value = /** @type {number} */ (reader.readUint64());
+      msg.setSettleEndsAt(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setPaysWithChainId(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setPaysUnit(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setWantsChainId(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setWantsUnit(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCollateralizedNrg(value);
+      break;
+    case 9:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setNrgUnit(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.CalculateMakerFeeRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.CalculateMakerFeeRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.CalculateMakerFeeRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getShiftStartsAt();
+  if (f !== 0) {
+    writer.writeUint64(
+      1,
+      f
+    );
+  }
+  f = message.getDepositEndsAt();
+  if (f !== 0) {
+    writer.writeUint64(
+      2,
+      f
+    );
+  }
+  f = message.getSettleEndsAt();
+  if (f !== 0) {
+    writer.writeUint64(
+      3,
+      f
+    );
+  }
+  f = message.getPaysWithChainId();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+  f = message.getPaysUnit();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getWantsChainId();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+  f = message.getWantsUnit();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
+      f
+    );
+  }
+  f = message.getCollateralizedNrg();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
+  }
+  f = message.getNrgUnit();
+  if (f.length > 0) {
+    writer.writeString(
+      9,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional uint64 shift_starts_at = 1;
+ * @return {number}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getShiftStartsAt = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setShiftStartsAt = function(value) {
+  jspb.Message.setField(this, 1, value);
+};
+
+
+/**
+ * optional uint64 deposit_ends_at = 2;
+ * @return {number}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getDepositEndsAt = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setDepositEndsAt = function(value) {
+  jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional uint64 settle_ends_at = 3;
+ * @return {number}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getSettleEndsAt = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setSettleEndsAt = function(value) {
+  jspb.Message.setField(this, 3, value);
+};
+
+
+/**
+ * optional string pays_with_chain_id = 4;
+ * @return {string}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getPaysWithChainId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setPaysWithChainId = function(value) {
+  jspb.Message.setField(this, 4, value);
+};
+
+
+/**
+ * optional string pays_unit = 5;
+ * @return {string}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getPaysUnit = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setPaysUnit = function(value) {
+  jspb.Message.setField(this, 5, value);
+};
+
+
+/**
+ * optional string wants_chain_id = 6;
+ * @return {string}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getWantsChainId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setWantsChainId = function(value) {
+  jspb.Message.setField(this, 6, value);
+};
+
+
+/**
+ * optional string wants_unit = 7;
+ * @return {string}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getWantsUnit = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setWantsUnit = function(value) {
+  jspb.Message.setField(this, 7, value);
+};
+
+
+/**
+ * optional string collateralized_nrg = 8;
+ * @return {string}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getCollateralizedNrg = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setCollateralizedNrg = function(value) {
+  jspb.Message.setField(this, 8, value);
+};
+
+
+/**
+ * optional string nrg_unit = 9;
+ * @return {string}
+ */
+proto.bc.CalculateMakerFeeRequest.prototype.getNrgUnit = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateMakerFeeRequest.prototype.setNrgUnit = function(value) {
+  jspb.Message.setField(this, 9, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.CalculateTakerFeeRequest = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.bc.CalculateTakerFeeRequest, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.CalculateTakerFeeRequest.displayName = 'proto.bc.CalculateTakerFeeRequest';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.CalculateTakerFeeRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.CalculateTakerFeeRequest.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.CalculateTakerFeeRequest} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.CalculateTakerFeeRequest.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    makerTxHash: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    makerTxOutputIndex: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    collateralizedNrg: jspb.Message.getFieldWithDefault(msg, 3, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.CalculateTakerFeeRequest}
+ */
+proto.bc.CalculateTakerFeeRequest.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.CalculateTakerFeeRequest;
+  return proto.bc.CalculateTakerFeeRequest.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.CalculateTakerFeeRequest} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.CalculateTakerFeeRequest}
+ */
+proto.bc.CalculateTakerFeeRequest.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setMakerTxHash(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readUint32());
+      msg.setMakerTxOutputIndex(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCollateralizedNrg(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.CalculateTakerFeeRequest.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.CalculateTakerFeeRequest.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.CalculateTakerFeeRequest} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.CalculateTakerFeeRequest.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getMakerTxHash();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getMakerTxOutputIndex();
+  if (f !== 0) {
+    writer.writeUint32(
+      2,
+      f
+    );
+  }
+  f = message.getCollateralizedNrg();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string maker_tx_hash = 1;
+ * @return {string}
+ */
+proto.bc.CalculateTakerFeeRequest.prototype.getMakerTxHash = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateTakerFeeRequest.prototype.setMakerTxHash = function(value) {
+  jspb.Message.setField(this, 1, value);
+};
+
+
+/**
+ * optional uint32 maker_tx_output_index = 2;
+ * @return {number}
+ */
+proto.bc.CalculateTakerFeeRequest.prototype.getMakerTxOutputIndex = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+};
+
+
+/** @param {number} value */
+proto.bc.CalculateTakerFeeRequest.prototype.setMakerTxOutputIndex = function(value) {
+  jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional string collateralized_nrg = 3;
+ * @return {string}
+ */
+proto.bc.CalculateTakerFeeRequest.prototype.getCollateralizedNrg = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.CalculateTakerFeeRequest.prototype.setCollateralizedNrg = function(value) {
+  jspb.Message.setField(this, 3, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.bc.FeeResponse = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.bc.FeeResponse, jspb.Message);
+if (true || goog.DEBUG && !COMPILED) {
+  proto.bc.FeeResponse.displayName = 'proto.bc.FeeResponse';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.bc.FeeResponse.prototype.toObject = function(opt_includeInstance) {
+  return proto.bc.FeeResponse.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.bc.FeeResponse} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.FeeResponse.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    fee: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.bc.FeeResponse}
+ */
+proto.bc.FeeResponse.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.bc.FeeResponse;
+  return proto.bc.FeeResponse.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.bc.FeeResponse} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.bc.FeeResponse}
+ */
+proto.bc.FeeResponse.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setFee(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.bc.FeeResponse.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.bc.FeeResponse.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.bc.FeeResponse} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.bc.FeeResponse.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getFee();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string fee = 1;
+ * @return {string}
+ */
+proto.bc.FeeResponse.prototype.getFee = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.bc.FeeResponse.prototype.setFee = function(value) {
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -3744,7 +5088,7 @@ proto.bc.GetBlake2blRequest.prototype.getToBeHashed = function() {
 
 /** @param {string} value */
 proto.bc.GetBlake2blRequest.prototype.setToBeHashed = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -3759,7 +5103,7 @@ proto.bc.GetBlake2blRequest.prototype.getTimes = function() {
 
 /** @param {number} value */
 proto.bc.GetBlake2blRequest.prototype.setTimes = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -3901,7 +5245,7 @@ proto.bc.GetBlake2blResponse.prototype.getHash = function() {
 
 /** @param {string} value */
 proto.bc.GetBlake2blResponse.prototype.setHash = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -4043,7 +5387,7 @@ proto.bc.VanityConvertRequest.prototype.getVanity = function() {
 
 /** @param {string} value */
 proto.bc.VanityConvertRequest.prototype.setVanity = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -4197,7 +5541,7 @@ proto.bc.VanityConvertResponse.prototype.getBcAddress = function() {
 
 /** @param {string} value */
 proto.bc.VanityConvertResponse.prototype.setBcAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -4212,7 +5556,7 @@ proto.bc.VanityConvertResponse.prototype.getError = function() {
 
 /** @param {string} value */
 proto.bc.VanityConvertResponse.prototype.setError = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
