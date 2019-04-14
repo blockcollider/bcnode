@@ -139,7 +139,7 @@ export class DexUtils {
     const latestBlock = await this.persistence.get('bc.block.latest')
 
     txTemplate.setInputsList(inputs)
-    txTemplate.setNinCount(txTemplateInputs.length)
+    txTemplate.setNinCount(inputs.length)
     txTemplate.setVersion(1)
     txTemplate.setNonce(`${Math.abs(Random.engines.nativeMath())}${minerKey}`)
     txTemplate.setLockTime(latestBlock.getHeight() + 1)
