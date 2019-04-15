@@ -23,13 +23,13 @@ const BN = require('bn.js')
 const {
   aperture,
   contains,
-  concat,
   drop,
   head,
   init,
   isEmpty,
   last,
   map,
+  pathOr,
   range,
   reverse,
   splitEvery,
@@ -267,15 +267,16 @@ export default class Network extends EventEmitter {
         this._invalidDifficultyCount++
         const blockInfo = {
           parentBlock: {
-            'height': (new BN(this._parentBlock.header.number)).toString(),
-            'difficulty': (new BN(this._parentBlock.header.difficulty)).toString()
+            'height': parseInt(pathOr(Buffer.from('0'), ['header', 'number'], this._parentBlock), 16),
+            'difficulty': parseInt(pathOr(Buffer.from('0'), ['header', 'difficulty'], this._parentBlock), 16)
           },
           newBlock: {
             'height': (new BN(block.header.number)).toString(),
             'difficulty': (new BN(block.header.difficulty)).toString()
           }
         }
-        this._logger.warn(`Incoming block has invalid difficulty - rejecting the block, info: ${JSON.stringify(blockInfo)}`)
+        this._logger.warn(`Incoming block has invalid difficulty - rejecting the block and disconnecting peer, info: ${JSON.stringify(blockInfo)}`)
+        peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
         if (this._invalidDifficultyCount > MAX_INVALID_COUNT) {
           this._logger.warn(`Maximum amount of invalid ETH blocks reached - restarting rover to try to connect to valid peers`)
           process.exit(1)
