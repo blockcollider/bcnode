@@ -48,6 +48,7 @@ export class Wallet {
   }
 
   async getAddressRelatedOutPoints (address: string, outputTransaction: Transaction, blockHeight: number, blockchain: string = 'bc'): Promise<{ spendableOutPoints: OutPoint[], collateralizedOutPoints: OutPoint[] }> {
+    address = address.toLowerCase()
     const outputs = outputTransaction.getOutputsList()
 
     function hasAddressInScript (script: string, address: string): boolean {
@@ -174,6 +175,7 @@ export class Wallet {
       unconfirmedUnspentOutPoints: [],
       collateralizedOutPoints: []
     }
+    address = address.toLowerCase()
 
     const latestBlock = await this._persistence.get(`${blockchain}.block.latest`)
     if (!latestBlock) {

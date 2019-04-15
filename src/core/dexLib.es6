@@ -106,6 +106,8 @@ export class DexLib {
     const indivisibleWantsUnit = Currency.toMinimumUnitAsStr(
       wantChainId, makerWantsUnit, CurrencyInfo[wantChainId].humanUnit
     )
+    receiveAddress = receiveAddress.toLowerCase()
+    makerBCAddress = makerBCAddress.toLowerCase()
 
     // get maker order output
     const newOutputToReceiver = await this.utils.getMakerOrderOutput(
@@ -130,6 +132,11 @@ export class DexLib {
     minerKey: string
   ): Promise<Transaction|Error> {
     debug(`placeTakerOrder`)
+
+    takerWantsAddress = takerWantsAddress.toLowerCase()
+    takerSendsAddress = takerSendsAddress.toLowerCase()
+    takerBCAddress = takerBCAddress.toLowerCase()
+    minerKey = minerKey.toLowerCase()
 
     // get total amount to spend
     let { totalNRG } = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg, additionalTxFee)
@@ -161,6 +168,8 @@ export class DexLib {
     minerKey: string
   ): Promise<Transaction|Error> {
     debug(`placeTakerOrders`)
+    minerKey = minerKey.toLowerCase()
+    takerBCAddress = takerBCAddress.toLowerCase()
 
     // setup total amount of nrg taker has to spend, inputs and outputs
     let totalAmount = new BN(0)
@@ -171,6 +180,9 @@ export class DexLib {
     let allOutputs = []
 
     orders.map(async ({takerWantsAddress, takerSendsAddress, makerTxHash, makerTxOutputIndex, collateralizedNrg}) => {
+      takerWantsAddress = takerWantsAddress.toLowerCase()
+      takerSendsAddress = takerSendsAddress.toLowerCase()
+
       // add to total amount of nrg to spend
       let { totalNRG } = await this.calculateTakerFee(makerTxHash, makerTxOutputIndex, collateralizedNrg)
       totalAmount = totalAmount.add(totalNRG)
