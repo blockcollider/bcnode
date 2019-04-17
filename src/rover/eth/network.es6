@@ -154,7 +154,7 @@ export default class Network extends EventEmitter {
   _initialSyncBlocksToFetch: [number, number][]
   _initialResync: boolean
   _resyncData: ?RoverMessage.Resync
-  _parentBlock: ?EthereumBlock
+  _bestSeenBlock: ?EthereumBlock
   _invalidDifficultyCount: number
 
   constructor (config: { maximumPeers: number }) {
@@ -258,17 +258,19 @@ export default class Network extends EventEmitter {
     }
 
     const blockNumber = new BN(block.header.number).toNumber()
+    const bestBlockNumber = parseInt(pathOr(Buffer.from('00', 'hex'), ['header', 'number'], this._bestSeenBlock).toString('hex'), 16)
+    this._logger.info(`Best block known: ${bestBlockNumber}`) // NOTE: initial sync debug -> info
     this._logger.info(`Transmitting new block ${blockHashHex} with height: ${blockNumber} from peer "${getPeerAddr(peer)}"`)
-
     // difficulty check
-    if (this._parentBlock && !isBlockFromInitialSync) {
-      const difficultyValid = block.header.validateDifficulty(this._parentBlock)
-      if (!difficultyValid) {
+    if (this._bestSeenBlock && !isBlockFromInitialSync) {
+      const difficultyValid = block.header.validateDifficulty(this._bestSeenBlock)
+      const possiblyConsecutiveBlock = bestBlockNumber < blockNumber
+      if (!difficultyValid && !possiblyConsecutiveBlock) {
         this._invalidDifficultyCount++
         const blockInfo = {
           parentBlock: {
-            'height': parseInt(pathOr(Buffer.from('0'), ['header', 'number'], this._parentBlock), 16),
-            'difficulty': parseInt(pathOr(Buffer.from('0'), ['header', 'difficulty'], this._parentBlock), 16)
+            'height': bestBlockNumber,
+            'difficulty': parseInt(pathOr(Buffer.from('00', 'hex'), ['header', 'difficulty'], this._bestSeenBlock).toString('hex'), 16)
           },
           newBlock: {
             'height': (new BN(block.header.number)).toString(),
@@ -276,18 +278,24 @@ export default class Network extends EventEmitter {
           }
         }
         this._logger.warn(`Incoming block has invalid difficulty - rejecting the block and disconnecting peer, info: ${JSON.stringify(blockInfo)}`)
-        peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
         if (this._invalidDifficultyCount > MAX_INVALID_COUNT) {
           this._logger.warn(`Maximum amount of invalid ETH blocks reached - restarting rover to try to connect to valid peers`)
-          process.exit(1)
+          // TODO when disconnecting peer - we have to request all the headers + blocks which can possibly be in the _requestedBlocks again from another one
+          peer && peer.disconnect && peer.disconnect(RLPx.DISCONNECT_REASONS.USELESS_PEER)
         }
         return
+      }
+
+      if (possiblyConsecutiveBlock) {
+        // request missing blocks
+        this.request(this._bestSeenBlock, block);
       }
       this._invalidDifficultyCount = 0
       this._logger.debug(`Block's ${parseInt(block.header.number.toString('hex'), 16)} difficulty is valid -> creating unified block from it`)
     }
+
     if (!isBlockFromInitialSync) {
-      this._parentBlock = block
+      this._bestSeenBlock = block
     }
 
     this.emit('newBlock', { block, isBlockFromInitialSync })
