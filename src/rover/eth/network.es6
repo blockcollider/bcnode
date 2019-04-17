@@ -156,6 +156,7 @@ export default class Network extends EventEmitter {
   _resyncData: ?RoverMessage.Resync
   _bestSeenBlock: ?EthereumBlock
   _invalidDifficultyCount: number
+  _syncCheckTimeout: IntervalID
 
   constructor (config: { maximumPeers: number }) {
     super()
@@ -175,6 +176,21 @@ export default class Network extends EventEmitter {
     this._initialSyncBlocksToFetch = []
     this._initialResync = false
     this._invalidDifficultyCount = 0
+
+    this._syncCheckTimeout = setInterval(() => {
+      this._logger.info(`Checking initial sync - possibly scheduling next batch (${this._initialSyncBlocksToFetch.length} intervals remaining)`)
+      if (isEmpty(this._requestedBlocks) && !isEmpty(this._initialSyncBlocksToFetch)) {
+        const batch = head(take(1, this._initialSyncBlocksToFetch))
+        this._initialSyncBlocksToFetch = drop(1, this._initialSyncBlocksToFetch)
+        if (!batch) {
+          this._logger.warn(`Empty intervals to request: ${JSON.stringify(this._initialSyncBlocksToFetch)}`)
+          return
+        }
+        this._logger.info(`Scheduling batch ${batch}, length: ${batch[0] - batch[batch.length - 1]}`)
+        this.requestBlockRange(batch)
+      }
+    }, 10000)
+
   }
 
   get peers (): string[] {
@@ -879,5 +895,6 @@ export default class Network extends EventEmitter {
 
   close () {
     // TODO implement disconnect
+    this._syncCheckTimeout && clearInterval(this._syncCheckTimeout)
   }
 }
