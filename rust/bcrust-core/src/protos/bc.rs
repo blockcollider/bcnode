@@ -3241,7 +3241,163 @@ impl ::protobuf::reflect::ProtobufValue for GetOpenOrdersResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct GetMatchedOpenOrdersResponse {
+pub struct GetMatchedOrdersRequest {
+    // message fields
+    pub only_settled: bool,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl GetMatchedOrdersRequest {
+    pub fn new() -> GetMatchedOrdersRequest {
+        ::std::default::Default::default()
+    }
+
+    // bool only_settled = 1;
+
+    pub fn clear_only_settled(&mut self) {
+        self.only_settled = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_only_settled(&mut self, v: bool) {
+        self.only_settled = v;
+    }
+
+    pub fn get_only_settled(&self) -> bool {
+        self.only_settled
+    }
+}
+
+impl ::protobuf::Message for GetMatchedOrdersRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.only_settled = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if self.only_settled != false {
+            my_size += 2;
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if self.only_settled != false {
+            os.write_bool(1, self.only_settled)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> GetMatchedOrdersRequest {
+        GetMatchedOrdersRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "only_settled",
+                    |m: &GetMatchedOrdersRequest| { &m.only_settled },
+                    |m: &mut GetMatchedOrdersRequest| { &mut m.only_settled },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<GetMatchedOrdersRequest>(
+                    "GetMatchedOrdersRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static GetMatchedOrdersRequest {
+        static mut instance: ::protobuf::lazy::Lazy<GetMatchedOrdersRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const GetMatchedOrdersRequest,
+        };
+        unsafe {
+            instance.get(GetMatchedOrdersRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for GetMatchedOrdersRequest {
+    fn clear(&mut self) {
+        self.clear_only_settled();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for GetMatchedOrdersRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for GetMatchedOrdersRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct GetMatchedOrdersResponse {
     // message fields
     pub orders: ::protobuf::RepeatedField<MatchedOpenOrder>,
     // special fields
@@ -3249,8 +3405,8 @@ pub struct GetMatchedOpenOrdersResponse {
     cached_size: ::protobuf::CachedSize,
 }
 
-impl GetMatchedOpenOrdersResponse {
-    pub fn new() -> GetMatchedOpenOrdersResponse {
+impl GetMatchedOrdersResponse {
+    pub fn new() -> GetMatchedOrdersResponse {
         ::std::default::Default::default()
     }
 
@@ -3280,7 +3436,7 @@ impl GetMatchedOpenOrdersResponse {
     }
 }
 
-impl ::protobuf::Message for GetMatchedOpenOrdersResponse {
+impl ::protobuf::Message for GetMatchedOrdersResponse {
     fn is_initialized(&self) -> bool {
         for v in &self.orders {
             if !v.is_initialized() {
@@ -3354,8 +3510,8 @@ impl ::protobuf::Message for GetMatchedOpenOrdersResponse {
         Self::descriptor_static()
     }
 
-    fn new() -> GetMatchedOpenOrdersResponse {
-        GetMatchedOpenOrdersResponse::new()
+    fn new() -> GetMatchedOrdersResponse {
+        GetMatchedOrdersResponse::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -3368,11 +3524,11 @@ impl ::protobuf::Message for GetMatchedOpenOrdersResponse {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<MatchedOpenOrder>>(
                     "orders",
-                    |m: &GetMatchedOpenOrdersResponse| { &m.orders },
-                    |m: &mut GetMatchedOpenOrdersResponse| { &mut m.orders },
+                    |m: &GetMatchedOrdersResponse| { &m.orders },
+                    |m: &mut GetMatchedOrdersResponse| { &mut m.orders },
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<GetMatchedOpenOrdersResponse>(
-                    "GetMatchedOpenOrdersResponse",
+                ::protobuf::reflect::MessageDescriptor::new::<GetMatchedOrdersResponse>(
+                    "GetMatchedOrdersResponse",
                     fields,
                     file_descriptor_proto()
                 )
@@ -3380,31 +3536,31 @@ impl ::protobuf::Message for GetMatchedOpenOrdersResponse {
         }
     }
 
-    fn default_instance() -> &'static GetMatchedOpenOrdersResponse {
-        static mut instance: ::protobuf::lazy::Lazy<GetMatchedOpenOrdersResponse> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static GetMatchedOrdersResponse {
+        static mut instance: ::protobuf::lazy::Lazy<GetMatchedOrdersResponse> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const GetMatchedOpenOrdersResponse,
+            ptr: 0 as *const GetMatchedOrdersResponse,
         };
         unsafe {
-            instance.get(GetMatchedOpenOrdersResponse::new)
+            instance.get(GetMatchedOrdersResponse::new)
         }
     }
 }
 
-impl ::protobuf::Clear for GetMatchedOpenOrdersResponse {
+impl ::protobuf::Clear for GetMatchedOrdersResponse {
     fn clear(&mut self) {
         self.clear_orders();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for GetMatchedOpenOrdersResponse {
+impl ::std::fmt::Debug for GetMatchedOrdersResponse {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for GetMatchedOpenOrdersResponse {
+impl ::protobuf::reflect::ProtobufValue for GetMatchedOrdersResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -4507,6 +4663,1507 @@ impl ::protobuf::reflect::ProtobufValue for PlaceTakerOrderRequest {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct TakerOrder {
+    // message fields
+    pub wants_chain_address: ::std::string::String,
+    pub sends_chain_address: ::std::string::String,
+    pub maker_tx_hash: ::std::string::String,
+    pub maker_tx_output_index: u32,
+    pub collateralized_nrg: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl TakerOrder {
+    pub fn new() -> TakerOrder {
+        ::std::default::Default::default()
+    }
+
+    // string wants_chain_address = 1;
+
+    pub fn clear_wants_chain_address(&mut self) {
+        self.wants_chain_address.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_wants_chain_address(&mut self, v: ::std::string::String) {
+        self.wants_chain_address = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_wants_chain_address(&mut self) -> &mut ::std::string::String {
+        &mut self.wants_chain_address
+    }
+
+    // Take field
+    pub fn take_wants_chain_address(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.wants_chain_address, ::std::string::String::new())
+    }
+
+    pub fn get_wants_chain_address(&self) -> &str {
+        &self.wants_chain_address
+    }
+
+    // string sends_chain_address = 2;
+
+    pub fn clear_sends_chain_address(&mut self) {
+        self.sends_chain_address.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_sends_chain_address(&mut self, v: ::std::string::String) {
+        self.sends_chain_address = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_sends_chain_address(&mut self) -> &mut ::std::string::String {
+        &mut self.sends_chain_address
+    }
+
+    // Take field
+    pub fn take_sends_chain_address(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.sends_chain_address, ::std::string::String::new())
+    }
+
+    pub fn get_sends_chain_address(&self) -> &str {
+        &self.sends_chain_address
+    }
+
+    // string maker_tx_hash = 3;
+
+    pub fn clear_maker_tx_hash(&mut self) {
+        self.maker_tx_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_maker_tx_hash(&mut self, v: ::std::string::String) {
+        self.maker_tx_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_maker_tx_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.maker_tx_hash
+    }
+
+    // Take field
+    pub fn take_maker_tx_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.maker_tx_hash, ::std::string::String::new())
+    }
+
+    pub fn get_maker_tx_hash(&self) -> &str {
+        &self.maker_tx_hash
+    }
+
+    // uint32 maker_tx_output_index = 4;
+
+    pub fn clear_maker_tx_output_index(&mut self) {
+        self.maker_tx_output_index = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_maker_tx_output_index(&mut self, v: u32) {
+        self.maker_tx_output_index = v;
+    }
+
+    pub fn get_maker_tx_output_index(&self) -> u32 {
+        self.maker_tx_output_index
+    }
+
+    // string collateralized_nrg = 5;
+
+    pub fn clear_collateralized_nrg(&mut self) {
+        self.collateralized_nrg.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_collateralized_nrg(&mut self, v: ::std::string::String) {
+        self.collateralized_nrg = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_collateralized_nrg(&mut self) -> &mut ::std::string::String {
+        &mut self.collateralized_nrg
+    }
+
+    // Take field
+    pub fn take_collateralized_nrg(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.collateralized_nrg, ::std::string::String::new())
+    }
+
+    pub fn get_collateralized_nrg(&self) -> &str {
+        &self.collateralized_nrg
+    }
+}
+
+impl ::protobuf::Message for TakerOrder {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.wants_chain_address)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.sends_chain_address)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.maker_tx_hash)?;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.maker_tx_output_index = tmp;
+                },
+                5 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized_nrg)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.wants_chain_address.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.wants_chain_address);
+        }
+        if !self.sends_chain_address.is_empty() {
+            my_size += ::protobuf::rt::string_size(2, &self.sends_chain_address);
+        }
+        if !self.maker_tx_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.maker_tx_hash);
+        }
+        if self.maker_tx_output_index != 0 {
+            my_size += ::protobuf::rt::value_size(4, self.maker_tx_output_index, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.collateralized_nrg.is_empty() {
+            my_size += ::protobuf::rt::string_size(5, &self.collateralized_nrg);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.wants_chain_address.is_empty() {
+            os.write_string(1, &self.wants_chain_address)?;
+        }
+        if !self.sends_chain_address.is_empty() {
+            os.write_string(2, &self.sends_chain_address)?;
+        }
+        if !self.maker_tx_hash.is_empty() {
+            os.write_string(3, &self.maker_tx_hash)?;
+        }
+        if self.maker_tx_output_index != 0 {
+            os.write_uint32(4, self.maker_tx_output_index)?;
+        }
+        if !self.collateralized_nrg.is_empty() {
+            os.write_string(5, &self.collateralized_nrg)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> TakerOrder {
+        TakerOrder::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "wants_chain_address",
+                    |m: &TakerOrder| { &m.wants_chain_address },
+                    |m: &mut TakerOrder| { &mut m.wants_chain_address },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "sends_chain_address",
+                    |m: &TakerOrder| { &m.sends_chain_address },
+                    |m: &mut TakerOrder| { &mut m.sends_chain_address },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "maker_tx_hash",
+                    |m: &TakerOrder| { &m.maker_tx_hash },
+                    |m: &mut TakerOrder| { &mut m.maker_tx_hash },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "maker_tx_output_index",
+                    |m: &TakerOrder| { &m.maker_tx_output_index },
+                    |m: &mut TakerOrder| { &mut m.maker_tx_output_index },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "collateralized_nrg",
+                    |m: &TakerOrder| { &m.collateralized_nrg },
+                    |m: &mut TakerOrder| { &mut m.collateralized_nrg },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<TakerOrder>(
+                    "TakerOrder",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static TakerOrder {
+        static mut instance: ::protobuf::lazy::Lazy<TakerOrder> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const TakerOrder,
+        };
+        unsafe {
+            instance.get(TakerOrder::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for TakerOrder {
+    fn clear(&mut self) {
+        self.clear_wants_chain_address();
+        self.clear_sends_chain_address();
+        self.clear_maker_tx_hash();
+        self.clear_maker_tx_output_index();
+        self.clear_collateralized_nrg();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for TakerOrder {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for TakerOrder {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct PlaceTakerOrdersRequest {
+    // message fields
+    pub orders: ::protobuf::RepeatedField<TakerOrder>,
+    pub bc_address: ::std::string::String,
+    pub bc_private_key_hex: ::std::string::String,
+    pub tx_fee: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl PlaceTakerOrdersRequest {
+    pub fn new() -> PlaceTakerOrdersRequest {
+        ::std::default::Default::default()
+    }
+
+    // repeated .bc.TakerOrder orders = 1;
+
+    pub fn clear_orders(&mut self) {
+        self.orders.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_orders(&mut self, v: ::protobuf::RepeatedField<TakerOrder>) {
+        self.orders = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_orders(&mut self) -> &mut ::protobuf::RepeatedField<TakerOrder> {
+        &mut self.orders
+    }
+
+    // Take field
+    pub fn take_orders(&mut self) -> ::protobuf::RepeatedField<TakerOrder> {
+        ::std::mem::replace(&mut self.orders, ::protobuf::RepeatedField::new())
+    }
+
+    pub fn get_orders(&self) -> &[TakerOrder] {
+        &self.orders
+    }
+
+    // string bc_address = 2;
+
+    pub fn clear_bc_address(&mut self) {
+        self.bc_address.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_bc_address(&mut self, v: ::std::string::String) {
+        self.bc_address = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_bc_address(&mut self) -> &mut ::std::string::String {
+        &mut self.bc_address
+    }
+
+    // Take field
+    pub fn take_bc_address(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.bc_address, ::std::string::String::new())
+    }
+
+    pub fn get_bc_address(&self) -> &str {
+        &self.bc_address
+    }
+
+    // string bc_private_key_hex = 3;
+
+    pub fn clear_bc_private_key_hex(&mut self) {
+        self.bc_private_key_hex.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_bc_private_key_hex(&mut self, v: ::std::string::String) {
+        self.bc_private_key_hex = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_bc_private_key_hex(&mut self) -> &mut ::std::string::String {
+        &mut self.bc_private_key_hex
+    }
+
+    // Take field
+    pub fn take_bc_private_key_hex(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.bc_private_key_hex, ::std::string::String::new())
+    }
+
+    pub fn get_bc_private_key_hex(&self) -> &str {
+        &self.bc_private_key_hex
+    }
+
+    // string tx_fee = 4;
+
+    pub fn clear_tx_fee(&mut self) {
+        self.tx_fee.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_tx_fee(&mut self, v: ::std::string::String) {
+        self.tx_fee = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_tx_fee(&mut self) -> &mut ::std::string::String {
+        &mut self.tx_fee
+    }
+
+    // Take field
+    pub fn take_tx_fee(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.tx_fee, ::std::string::String::new())
+    }
+
+    pub fn get_tx_fee(&self) -> &str {
+        &self.tx_fee
+    }
+}
+
+impl ::protobuf::Message for PlaceTakerOrdersRequest {
+    fn is_initialized(&self) -> bool {
+        for v in &self.orders {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.orders)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.bc_address)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.bc_private_key_hex)?;
+                },
+                4 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.tx_fee)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        for value in &self.orders {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        if !self.bc_address.is_empty() {
+            my_size += ::protobuf::rt::string_size(2, &self.bc_address);
+        }
+        if !self.bc_private_key_hex.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.bc_private_key_hex);
+        }
+        if !self.tx_fee.is_empty() {
+            my_size += ::protobuf::rt::string_size(4, &self.tx_fee);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        for v in &self.orders {
+            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        if !self.bc_address.is_empty() {
+            os.write_string(2, &self.bc_address)?;
+        }
+        if !self.bc_private_key_hex.is_empty() {
+            os.write_string(3, &self.bc_private_key_hex)?;
+        }
+        if !self.tx_fee.is_empty() {
+            os.write_string(4, &self.tx_fee)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> PlaceTakerOrdersRequest {
+        PlaceTakerOrdersRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TakerOrder>>(
+                    "orders",
+                    |m: &PlaceTakerOrdersRequest| { &m.orders },
+                    |m: &mut PlaceTakerOrdersRequest| { &mut m.orders },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "bc_address",
+                    |m: &PlaceTakerOrdersRequest| { &m.bc_address },
+                    |m: &mut PlaceTakerOrdersRequest| { &mut m.bc_address },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "bc_private_key_hex",
+                    |m: &PlaceTakerOrdersRequest| { &m.bc_private_key_hex },
+                    |m: &mut PlaceTakerOrdersRequest| { &mut m.bc_private_key_hex },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "tx_fee",
+                    |m: &PlaceTakerOrdersRequest| { &m.tx_fee },
+                    |m: &mut PlaceTakerOrdersRequest| { &mut m.tx_fee },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<PlaceTakerOrdersRequest>(
+                    "PlaceTakerOrdersRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static PlaceTakerOrdersRequest {
+        static mut instance: ::protobuf::lazy::Lazy<PlaceTakerOrdersRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const PlaceTakerOrdersRequest,
+        };
+        unsafe {
+            instance.get(PlaceTakerOrdersRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for PlaceTakerOrdersRequest {
+    fn clear(&mut self) {
+        self.clear_orders();
+        self.clear_bc_address();
+        self.clear_bc_private_key_hex();
+        self.clear_tx_fee();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for PlaceTakerOrdersRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for PlaceTakerOrdersRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct CalculateMakerFeeRequest {
+    // message fields
+    pub shift_starts_at: u64,
+    pub deposit_ends_at: u64,
+    pub settle_ends_at: u64,
+    pub pays_with_chain_id: ::std::string::String,
+    pub pays_unit: ::std::string::String,
+    pub wants_chain_id: ::std::string::String,
+    pub wants_unit: ::std::string::String,
+    pub collateralized_nrg: ::std::string::String,
+    pub nrg_unit: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl CalculateMakerFeeRequest {
+    pub fn new() -> CalculateMakerFeeRequest {
+        ::std::default::Default::default()
+    }
+
+    // uint64 shift_starts_at = 1;
+
+    pub fn clear_shift_starts_at(&mut self) {
+        self.shift_starts_at = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_shift_starts_at(&mut self, v: u64) {
+        self.shift_starts_at = v;
+    }
+
+    pub fn get_shift_starts_at(&self) -> u64 {
+        self.shift_starts_at
+    }
+
+    // uint64 deposit_ends_at = 2;
+
+    pub fn clear_deposit_ends_at(&mut self) {
+        self.deposit_ends_at = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_deposit_ends_at(&mut self, v: u64) {
+        self.deposit_ends_at = v;
+    }
+
+    pub fn get_deposit_ends_at(&self) -> u64 {
+        self.deposit_ends_at
+    }
+
+    // uint64 settle_ends_at = 3;
+
+    pub fn clear_settle_ends_at(&mut self) {
+        self.settle_ends_at = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_settle_ends_at(&mut self, v: u64) {
+        self.settle_ends_at = v;
+    }
+
+    pub fn get_settle_ends_at(&self) -> u64 {
+        self.settle_ends_at
+    }
+
+    // string pays_with_chain_id = 4;
+
+    pub fn clear_pays_with_chain_id(&mut self) {
+        self.pays_with_chain_id.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_pays_with_chain_id(&mut self, v: ::std::string::String) {
+        self.pays_with_chain_id = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_pays_with_chain_id(&mut self) -> &mut ::std::string::String {
+        &mut self.pays_with_chain_id
+    }
+
+    // Take field
+    pub fn take_pays_with_chain_id(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.pays_with_chain_id, ::std::string::String::new())
+    }
+
+    pub fn get_pays_with_chain_id(&self) -> &str {
+        &self.pays_with_chain_id
+    }
+
+    // string pays_unit = 5;
+
+    pub fn clear_pays_unit(&mut self) {
+        self.pays_unit.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_pays_unit(&mut self, v: ::std::string::String) {
+        self.pays_unit = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_pays_unit(&mut self) -> &mut ::std::string::String {
+        &mut self.pays_unit
+    }
+
+    // Take field
+    pub fn take_pays_unit(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.pays_unit, ::std::string::String::new())
+    }
+
+    pub fn get_pays_unit(&self) -> &str {
+        &self.pays_unit
+    }
+
+    // string wants_chain_id = 6;
+
+    pub fn clear_wants_chain_id(&mut self) {
+        self.wants_chain_id.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_wants_chain_id(&mut self, v: ::std::string::String) {
+        self.wants_chain_id = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_wants_chain_id(&mut self) -> &mut ::std::string::String {
+        &mut self.wants_chain_id
+    }
+
+    // Take field
+    pub fn take_wants_chain_id(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.wants_chain_id, ::std::string::String::new())
+    }
+
+    pub fn get_wants_chain_id(&self) -> &str {
+        &self.wants_chain_id
+    }
+
+    // string wants_unit = 7;
+
+    pub fn clear_wants_unit(&mut self) {
+        self.wants_unit.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_wants_unit(&mut self, v: ::std::string::String) {
+        self.wants_unit = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_wants_unit(&mut self) -> &mut ::std::string::String {
+        &mut self.wants_unit
+    }
+
+    // Take field
+    pub fn take_wants_unit(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.wants_unit, ::std::string::String::new())
+    }
+
+    pub fn get_wants_unit(&self) -> &str {
+        &self.wants_unit
+    }
+
+    // string collateralized_nrg = 8;
+
+    pub fn clear_collateralized_nrg(&mut self) {
+        self.collateralized_nrg.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_collateralized_nrg(&mut self, v: ::std::string::String) {
+        self.collateralized_nrg = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_collateralized_nrg(&mut self) -> &mut ::std::string::String {
+        &mut self.collateralized_nrg
+    }
+
+    // Take field
+    pub fn take_collateralized_nrg(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.collateralized_nrg, ::std::string::String::new())
+    }
+
+    pub fn get_collateralized_nrg(&self) -> &str {
+        &self.collateralized_nrg
+    }
+
+    // string nrg_unit = 9;
+
+    pub fn clear_nrg_unit(&mut self) {
+        self.nrg_unit.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_nrg_unit(&mut self, v: ::std::string::String) {
+        self.nrg_unit = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_nrg_unit(&mut self) -> &mut ::std::string::String {
+        &mut self.nrg_unit
+    }
+
+    // Take field
+    pub fn take_nrg_unit(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.nrg_unit, ::std::string::String::new())
+    }
+
+    pub fn get_nrg_unit(&self) -> &str {
+        &self.nrg_unit
+    }
+}
+
+impl ::protobuf::Message for CalculateMakerFeeRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.shift_starts_at = tmp;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.deposit_ends_at = tmp;
+                },
+                3 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.settle_ends_at = tmp;
+                },
+                4 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.pays_with_chain_id)?;
+                },
+                5 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.pays_unit)?;
+                },
+                6 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.wants_chain_id)?;
+                },
+                7 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.wants_unit)?;
+                },
+                8 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized_nrg)?;
+                },
+                9 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.nrg_unit)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if self.shift_starts_at != 0 {
+            my_size += ::protobuf::rt::value_size(1, self.shift_starts_at, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.deposit_ends_at != 0 {
+            my_size += ::protobuf::rt::value_size(2, self.deposit_ends_at, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.settle_ends_at != 0 {
+            my_size += ::protobuf::rt::value_size(3, self.settle_ends_at, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.pays_with_chain_id.is_empty() {
+            my_size += ::protobuf::rt::string_size(4, &self.pays_with_chain_id);
+        }
+        if !self.pays_unit.is_empty() {
+            my_size += ::protobuf::rt::string_size(5, &self.pays_unit);
+        }
+        if !self.wants_chain_id.is_empty() {
+            my_size += ::protobuf::rt::string_size(6, &self.wants_chain_id);
+        }
+        if !self.wants_unit.is_empty() {
+            my_size += ::protobuf::rt::string_size(7, &self.wants_unit);
+        }
+        if !self.collateralized_nrg.is_empty() {
+            my_size += ::protobuf::rt::string_size(8, &self.collateralized_nrg);
+        }
+        if !self.nrg_unit.is_empty() {
+            my_size += ::protobuf::rt::string_size(9, &self.nrg_unit);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if self.shift_starts_at != 0 {
+            os.write_uint64(1, self.shift_starts_at)?;
+        }
+        if self.deposit_ends_at != 0 {
+            os.write_uint64(2, self.deposit_ends_at)?;
+        }
+        if self.settle_ends_at != 0 {
+            os.write_uint64(3, self.settle_ends_at)?;
+        }
+        if !self.pays_with_chain_id.is_empty() {
+            os.write_string(4, &self.pays_with_chain_id)?;
+        }
+        if !self.pays_unit.is_empty() {
+            os.write_string(5, &self.pays_unit)?;
+        }
+        if !self.wants_chain_id.is_empty() {
+            os.write_string(6, &self.wants_chain_id)?;
+        }
+        if !self.wants_unit.is_empty() {
+            os.write_string(7, &self.wants_unit)?;
+        }
+        if !self.collateralized_nrg.is_empty() {
+            os.write_string(8, &self.collateralized_nrg)?;
+        }
+        if !self.nrg_unit.is_empty() {
+            os.write_string(9, &self.nrg_unit)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> CalculateMakerFeeRequest {
+        CalculateMakerFeeRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "shift_starts_at",
+                    |m: &CalculateMakerFeeRequest| { &m.shift_starts_at },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.shift_starts_at },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "deposit_ends_at",
+                    |m: &CalculateMakerFeeRequest| { &m.deposit_ends_at },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.deposit_ends_at },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "settle_ends_at",
+                    |m: &CalculateMakerFeeRequest| { &m.settle_ends_at },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.settle_ends_at },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "pays_with_chain_id",
+                    |m: &CalculateMakerFeeRequest| { &m.pays_with_chain_id },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.pays_with_chain_id },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "pays_unit",
+                    |m: &CalculateMakerFeeRequest| { &m.pays_unit },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.pays_unit },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "wants_chain_id",
+                    |m: &CalculateMakerFeeRequest| { &m.wants_chain_id },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.wants_chain_id },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "wants_unit",
+                    |m: &CalculateMakerFeeRequest| { &m.wants_unit },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.wants_unit },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "collateralized_nrg",
+                    |m: &CalculateMakerFeeRequest| { &m.collateralized_nrg },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.collateralized_nrg },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "nrg_unit",
+                    |m: &CalculateMakerFeeRequest| { &m.nrg_unit },
+                    |m: &mut CalculateMakerFeeRequest| { &mut m.nrg_unit },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<CalculateMakerFeeRequest>(
+                    "CalculateMakerFeeRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static CalculateMakerFeeRequest {
+        static mut instance: ::protobuf::lazy::Lazy<CalculateMakerFeeRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const CalculateMakerFeeRequest,
+        };
+        unsafe {
+            instance.get(CalculateMakerFeeRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for CalculateMakerFeeRequest {
+    fn clear(&mut self) {
+        self.clear_shift_starts_at();
+        self.clear_deposit_ends_at();
+        self.clear_settle_ends_at();
+        self.clear_pays_with_chain_id();
+        self.clear_pays_unit();
+        self.clear_wants_chain_id();
+        self.clear_wants_unit();
+        self.clear_collateralized_nrg();
+        self.clear_nrg_unit();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for CalculateMakerFeeRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for CalculateMakerFeeRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct CalculateTakerFeeRequest {
+    // message fields
+    pub maker_tx_hash: ::std::string::String,
+    pub maker_tx_output_index: u32,
+    pub collateralized_nrg: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl CalculateTakerFeeRequest {
+    pub fn new() -> CalculateTakerFeeRequest {
+        ::std::default::Default::default()
+    }
+
+    // string maker_tx_hash = 1;
+
+    pub fn clear_maker_tx_hash(&mut self) {
+        self.maker_tx_hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_maker_tx_hash(&mut self, v: ::std::string::String) {
+        self.maker_tx_hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_maker_tx_hash(&mut self) -> &mut ::std::string::String {
+        &mut self.maker_tx_hash
+    }
+
+    // Take field
+    pub fn take_maker_tx_hash(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.maker_tx_hash, ::std::string::String::new())
+    }
+
+    pub fn get_maker_tx_hash(&self) -> &str {
+        &self.maker_tx_hash
+    }
+
+    // uint32 maker_tx_output_index = 2;
+
+    pub fn clear_maker_tx_output_index(&mut self) {
+        self.maker_tx_output_index = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_maker_tx_output_index(&mut self, v: u32) {
+        self.maker_tx_output_index = v;
+    }
+
+    pub fn get_maker_tx_output_index(&self) -> u32 {
+        self.maker_tx_output_index
+    }
+
+    // string collateralized_nrg = 3;
+
+    pub fn clear_collateralized_nrg(&mut self) {
+        self.collateralized_nrg.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_collateralized_nrg(&mut self, v: ::std::string::String) {
+        self.collateralized_nrg = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_collateralized_nrg(&mut self) -> &mut ::std::string::String {
+        &mut self.collateralized_nrg
+    }
+
+    // Take field
+    pub fn take_collateralized_nrg(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.collateralized_nrg, ::std::string::String::new())
+    }
+
+    pub fn get_collateralized_nrg(&self) -> &str {
+        &self.collateralized_nrg
+    }
+}
+
+impl ::protobuf::Message for CalculateTakerFeeRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.maker_tx_hash)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.maker_tx_output_index = tmp;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.collateralized_nrg)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.maker_tx_hash.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.maker_tx_hash);
+        }
+        if self.maker_tx_output_index != 0 {
+            my_size += ::protobuf::rt::value_size(2, self.maker_tx_output_index, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.collateralized_nrg.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.collateralized_nrg);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.maker_tx_hash.is_empty() {
+            os.write_string(1, &self.maker_tx_hash)?;
+        }
+        if self.maker_tx_output_index != 0 {
+            os.write_uint32(2, self.maker_tx_output_index)?;
+        }
+        if !self.collateralized_nrg.is_empty() {
+            os.write_string(3, &self.collateralized_nrg)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> CalculateTakerFeeRequest {
+        CalculateTakerFeeRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "maker_tx_hash",
+                    |m: &CalculateTakerFeeRequest| { &m.maker_tx_hash },
+                    |m: &mut CalculateTakerFeeRequest| { &mut m.maker_tx_hash },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "maker_tx_output_index",
+                    |m: &CalculateTakerFeeRequest| { &m.maker_tx_output_index },
+                    |m: &mut CalculateTakerFeeRequest| { &mut m.maker_tx_output_index },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "collateralized_nrg",
+                    |m: &CalculateTakerFeeRequest| { &m.collateralized_nrg },
+                    |m: &mut CalculateTakerFeeRequest| { &mut m.collateralized_nrg },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<CalculateTakerFeeRequest>(
+                    "CalculateTakerFeeRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static CalculateTakerFeeRequest {
+        static mut instance: ::protobuf::lazy::Lazy<CalculateTakerFeeRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const CalculateTakerFeeRequest,
+        };
+        unsafe {
+            instance.get(CalculateTakerFeeRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for CalculateTakerFeeRequest {
+    fn clear(&mut self) {
+        self.clear_maker_tx_hash();
+        self.clear_maker_tx_output_index();
+        self.clear_collateralized_nrg();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for CalculateTakerFeeRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for CalculateTakerFeeRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct FeeResponse {
+    // message fields
+    pub fee: ::std::string::String,
+    // special fields
+    unknown_fields: ::protobuf::UnknownFields,
+    cached_size: ::protobuf::CachedSize,
+}
+
+impl FeeResponse {
+    pub fn new() -> FeeResponse {
+        ::std::default::Default::default()
+    }
+
+    // string fee = 1;
+
+    pub fn clear_fee(&mut self) {
+        self.fee.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_fee(&mut self, v: ::std::string::String) {
+        self.fee = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_fee(&mut self) -> &mut ::std::string::String {
+        &mut self.fee
+    }
+
+    // Take field
+    pub fn take_fee(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.fee, ::std::string::String::new())
+    }
+
+    pub fn get_fee(&self) -> &str {
+        &self.fee
+    }
+}
+
+impl ::protobuf::Message for FeeResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.fee)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.fee.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.fee);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream) -> ::protobuf::ProtobufResult<()> {
+        if !self.fee.is_empty() {
+            os.write_string(1, &self.fee)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &::std::any::Any {
+        self as &::std::any::Any
+    }
+    fn as_any_mut(&mut self) -> &mut ::std::any::Any {
+        self as &mut ::std::any::Any
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<::std::any::Any> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> FeeResponse {
+        FeeResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "fee",
+                    |m: &FeeResponse| { &m.fee },
+                    |m: &mut FeeResponse| { &mut m.fee },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<FeeResponse>(
+                    "FeeResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static FeeResponse {
+        static mut instance: ::protobuf::lazy::Lazy<FeeResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const FeeResponse,
+        };
+        unsafe {
+            instance.get(FeeResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for FeeResponse {
+    fn clear(&mut self) {
+        self.clear_fee();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for FeeResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for FeeResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct GetBlake2blRequest {
     // message fields
     pub to_be_hashed: ::std::string::String,
@@ -5334,48 +6991,75 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     chedOpenOrder\x12(\n\x05maker\x18\x01\x20\x01(\x0b2\x12.bc.MakerOrderInf\
     oR\x05maker\x12(\n\x05taker\x18\x02\x20\x01(\x0b2\x12.bc.TakerOrderInfoR\
     \x05taker\"L\n\x15GetOpenOrdersResponse\x123\n\x0bopen_orders\x18\x01\
-    \x20\x03(\x0b2\x12.bc.MakerOrderInfoR\nopenOrders\"L\n\x1cGetMatchedOpen\
-    OrdersResponse\x12,\n\x06orders\x18\x01\x20\x03(\x0b2\x14.bc.MatchedOpen\
-    OrderR\x06orders\"\xfa\x03\n\x16PlaceMakerOrderRequest\x12&\n\x0fshift_s\
-    tarts_at\x18\x01\x20\x01(\x04R\rshiftStartsAt\x12&\n\x0fdeposit_ends_at\
-    \x18\x02\x20\x01(\x04R\rdepositEndsAt\x12$\n\x0esettle_ends_at\x18\x03\
-    \x20\x01(\x04R\x0csettleEndsAt\x12+\n\x12pays_with_chain_id\x18\x04\x20\
-    \x01(\tR\x0fpaysWithChainId\x12$\n\x0ewants_chain_id\x18\x05\x20\x01(\tR\
-    \x0cwantsChainId\x12.\n\x13wants_chain_address\x18\x06\x20\x01(\tR\x11wa\
-    ntsChainAddress\x12\x1d\n\nwants_unit\x18\x07\x20\x01(\tR\twantsUnit\x12\
-    \x1b\n\tpays_unit\x18\x08\x20\x01(\tR\x08paysUnit\x12\x1d\n\nbc_address\
-    \x18\t\x20\x01(\tR\tbcAddress\x12+\n\x12bc_private_key_hex\x18\n\x20\x01\
-    (\tR\x0fbcPrivateKeyHex\x12-\n\x12collateralized_nrg\x18\x0b\x20\x01(\tR\
-    \x11collateralizedNrg\x12\x19\n\x08nrg_unit\x18\x0c\x20\x01(\tR\x07nrgUn\
-    it\x12\x15\n\x06tx_fee\x18\r\x20\x01(\tR\x05txFee\"\xe1\x02\n\x16PlaceTa\
-    kerOrderRequest\x12.\n\x13wants_chain_address\x18\x01\x20\x01(\tR\x11wan\
-    tsChainAddress\x12.\n\x13sends_chain_address\x18\x02\x20\x01(\tR\x11send\
-    sChainAddress\x12\"\n\rmaker_tx_hash\x18\x03\x20\x01(\tR\x0bmakerTxHash\
-    \x121\n\x15maker_tx_output_index\x18\x04\x20\x01(\rR\x12makerTxOutputInd\
-    ex\x12\x1d\n\nbc_address\x18\x05\x20\x01(\tR\tbcAddress\x12+\n\x12bc_pri\
-    vate_key_hex\x18\x06\x20\x01(\tR\x0fbcPrivateKeyHex\x12-\n\x12collateral\
-    ized_nrg\x18\x07\x20\x01(\tR\x11collateralizedNrg\x12\x15\n\x06tx_fee\
-    \x18\x08\x20\x01(\tR\x05txFee\"L\n\x12GetBlake2blRequest\x12\x20\n\x0cto\
-    _be_hashed\x18\x01\x20\x01(\tR\ntoBeHashed\x12\x14\n\x05times\x18\x02\
-    \x20\x01(\rR\x05times\")\n\x13GetBlake2blResponse\x12\x12\n\x04hash\x18\
-    \x01\x20\x01(\tR\x04hash\".\n\x14VanityConvertRequest\x12\x16\n\x06vanit\
-    y\x18\x01\x20\x01(\tR\x06vanity\"L\n\x15VanityConvertResponse\x12\x1d\n\
-    \nbc_address\x18\x01\x20\x01(\tR\tbcAddress\x12\x14\n\x05error\x18\x02\
-    \x20\x01(\tR\x05error*8\n\x1cRpcTransactionResponseStatus\x12\x0b\n\x07S\
-    uccess\x10\0\x12\x0b\n\x07Failure\x10\x012\xb2\x05\n\x02Bc\x12:\n\x0fGet\
-    LatestBlocks\x12\x08.bc.Null\x1a\x1b.bc.GetLatestBlocksResponse\"\0\x12$\
-    \n\x04Help\x12\x08.bc.Null\x1a\x10.bc.HelpResponse\"\0\x12&\n\x05Stats\
-    \x12\x08.bc.Null\x1a\x11.bc.StatsResponse\"\0\x129\n\x05NewTx\x12\x12.bc\
-    .RpcTransaction\x1a\x1a.bc.RpcTransactionResponse\"\0\x12=\n\nGetBalance\
-    \x12\x15.bc.GetBalanceRequest\x1a\x16.bc.GetBalanceResponse\"\0\x12K\n\
-    \x0fPlaceMakerOrder\x12\x1a.bc.PlaceMakerOrderRequest\x1a\x1a.bc.RpcTran\
-    sactionResponse\"\0\x12K\n\x0fPlaceTakerOrder\x12\x1a.bc.PlaceTakerOrder\
-    Request\x1a\x1a.bc.RpcTransactionResponse\"\0\x126\n\rGetOpenOrders\x12\
-    \x08.bc.Null\x1a\x19.bc.GetOpenOrdersResponse\"\0\x12D\n\x14GetMatchedOp\
-    enOrders\x12\x08.bc.Null\x1a\x20.bc.GetMatchedOpenOrdersResponse\"\0\x12\
-    @\n\x0bGetBlake2bl\x12\x16.bc.GetBlake2blRequest\x1a\x17.bc.GetBlake2blR\
-    esponse\"\0\x12N\n\x15GetBcAddressViaVanity\x12\x18.bc.VanityConvertRequ\
-    est\x1a\x19.bc.VanityConvertResponse\"\0b\x06proto3\
+    \x20\x03(\x0b2\x12.bc.MakerOrderInfoR\nopenOrders\"<\n\x17GetMatchedOrde\
+    rsRequest\x12!\n\x0conly_settled\x18\x01\x20\x01(\x08R\x0bonlySettled\"H\
+    \n\x18GetMatchedOrdersResponse\x12,\n\x06orders\x18\x01\x20\x03(\x0b2\
+    \x14.bc.MatchedOpenOrderR\x06orders\"\xfa\x03\n\x16PlaceMakerOrderReques\
+    t\x12&\n\x0fshift_starts_at\x18\x01\x20\x01(\x04R\rshiftStartsAt\x12&\n\
+    \x0fdeposit_ends_at\x18\x02\x20\x01(\x04R\rdepositEndsAt\x12$\n\x0esettl\
+    e_ends_at\x18\x03\x20\x01(\x04R\x0csettleEndsAt\x12+\n\x12pays_with_chai\
+    n_id\x18\x04\x20\x01(\tR\x0fpaysWithChainId\x12$\n\x0ewants_chain_id\x18\
+    \x05\x20\x01(\tR\x0cwantsChainId\x12.\n\x13wants_chain_address\x18\x06\
+    \x20\x01(\tR\x11wantsChainAddress\x12\x1d\n\nwants_unit\x18\x07\x20\x01(\
+    \tR\twantsUnit\x12\x1b\n\tpays_unit\x18\x08\x20\x01(\tR\x08paysUnit\x12\
+    \x1d\n\nbc_address\x18\t\x20\x01(\tR\tbcAddress\x12+\n\x12bc_private_key\
+    _hex\x18\n\x20\x01(\tR\x0fbcPrivateKeyHex\x12-\n\x12collateralized_nrg\
+    \x18\x0b\x20\x01(\tR\x11collateralizedNrg\x12\x19\n\x08nrg_unit\x18\x0c\
+    \x20\x01(\tR\x07nrgUnit\x12\x15\n\x06tx_fee\x18\r\x20\x01(\tR\x05txFee\"\
+    \xe1\x02\n\x16PlaceTakerOrderRequest\x12.\n\x13wants_chain_address\x18\
+    \x01\x20\x01(\tR\x11wantsChainAddress\x12.\n\x13sends_chain_address\x18\
+    \x02\x20\x01(\tR\x11sendsChainAddress\x12\"\n\rmaker_tx_hash\x18\x03\x20\
+    \x01(\tR\x0bmakerTxHash\x121\n\x15maker_tx_output_index\x18\x04\x20\x01(\
+    \rR\x12makerTxOutputIndex\x12\x1d\n\nbc_address\x18\x05\x20\x01(\tR\tbcA\
+    ddress\x12+\n\x12bc_private_key_hex\x18\x06\x20\x01(\tR\x0fbcPrivateKeyH\
+    ex\x12-\n\x12collateralized_nrg\x18\x07\x20\x01(\tR\x11collateralizedNrg\
+    \x12\x15\n\x06tx_fee\x18\x08\x20\x01(\tR\x05txFee\"\xf2\x01\n\nTakerOrde\
+    r\x12.\n\x13wants_chain_address\x18\x01\x20\x01(\tR\x11wantsChainAddress\
+    \x12.\n\x13sends_chain_address\x18\x02\x20\x01(\tR\x11sendsChainAddress\
+    \x12\"\n\rmaker_tx_hash\x18\x03\x20\x01(\tR\x0bmakerTxHash\x121\n\x15mak\
+    er_tx_output_index\x18\x04\x20\x01(\rR\x12makerTxOutputIndex\x12-\n\x12c\
+    ollateralized_nrg\x18\x05\x20\x01(\tR\x11collateralizedNrg\"\xa4\x01\n\
+    \x17PlaceTakerOrdersRequest\x12&\n\x06orders\x18\x01\x20\x03(\x0b2\x0e.b\
+    c.TakerOrderR\x06orders\x12\x1d\n\nbc_address\x18\x02\x20\x01(\tR\tbcAdd\
+    ress\x12+\n\x12bc_private_key_hex\x18\x03\x20\x01(\tR\x0fbcPrivateKeyHex\
+    \x12\x15\n\x06tx_fee\x18\x04\x20\x01(\tR\x05txFee\"\xe9\x02\n\x18Calcula\
+    teMakerFeeRequest\x12&\n\x0fshift_starts_at\x18\x01\x20\x01(\x04R\rshift\
+    StartsAt\x12&\n\x0fdeposit_ends_at\x18\x02\x20\x01(\x04R\rdepositEndsAt\
+    \x12$\n\x0esettle_ends_at\x18\x03\x20\x01(\x04R\x0csettleEndsAt\x12+\n\
+    \x12pays_with_chain_id\x18\x04\x20\x01(\tR\x0fpaysWithChainId\x12\x1b\n\
+    \tpays_unit\x18\x05\x20\x01(\tR\x08paysUnit\x12$\n\x0ewants_chain_id\x18\
+    \x06\x20\x01(\tR\x0cwantsChainId\x12\x1d\n\nwants_unit\x18\x07\x20\x01(\
+    \tR\twantsUnit\x12-\n\x12collateralized_nrg\x18\x08\x20\x01(\tR\x11colla\
+    teralizedNrg\x12\x19\n\x08nrg_unit\x18\t\x20\x01(\tR\x07nrgUnit\"\xa0\
+    \x01\n\x18CalculateTakerFeeRequest\x12\"\n\rmaker_tx_hash\x18\x01\x20\
+    \x01(\tR\x0bmakerTxHash\x121\n\x15maker_tx_output_index\x18\x02\x20\x01(\
+    \rR\x12makerTxOutputIndex\x12-\n\x12collateralized_nrg\x18\x03\x20\x01(\
+    \tR\x11collateralizedNrg\"\x1f\n\x0bFeeResponse\x12\x10\n\x03fee\x18\x01\
+    \x20\x01(\tR\x03fee\"L\n\x12GetBlake2blRequest\x12\x20\n\x0cto_be_hashed\
+    \x18\x01\x20\x01(\tR\ntoBeHashed\x12\x14\n\x05times\x18\x02\x20\x01(\rR\
+    \x05times\")\n\x13GetBlake2blResponse\x12\x12\n\x04hash\x18\x01\x20\x01(\
+    \tR\x04hash\".\n\x14VanityConvertRequest\x12\x16\n\x06vanity\x18\x01\x20\
+    \x01(\tR\x06vanity\"L\n\x15VanityConvertResponse\x12\x1d\n\nbc_address\
+    \x18\x01\x20\x01(\tR\tbcAddress\x12\x14\n\x05error\x18\x02\x20\x01(\tR\
+    \x05error*8\n\x1cRpcTransactionResponseStatus\x12\x0b\n\x07Success\x10\0\
+    \x12\x0b\n\x07Failure\x10\x012\x98\x07\n\x02Bc\x12:\n\x0fGetLatestBlocks\
+    \x12\x08.bc.Null\x1a\x1b.bc.GetLatestBlocksResponse\"\0\x12$\n\x04Help\
+    \x12\x08.bc.Null\x1a\x10.bc.HelpResponse\"\0\x12&\n\x05Stats\x12\x08.bc.\
+    Null\x1a\x11.bc.StatsResponse\"\0\x129\n\x05NewTx\x12\x12.bc.RpcTransact\
+    ion\x1a\x1a.bc.RpcTransactionResponse\"\0\x12=\n\nGetBalance\x12\x15.bc.\
+    GetBalanceRequest\x1a\x16.bc.GetBalanceResponse\"\0\x12K\n\x0fPlaceMaker\
+    Order\x12\x1a.bc.PlaceMakerOrderRequest\x1a\x1a.bc.RpcTransactionRespons\
+    e\"\0\x12K\n\x0fPlaceTakerOrder\x12\x1a.bc.PlaceTakerOrderRequest\x1a\
+    \x1a.bc.RpcTransactionResponse\"\0\x12M\n\x10PlaceTakerOrders\x12\x1b.bc\
+    .PlaceTakerOrdersRequest\x1a\x1a.bc.RpcTransactionResponse\"\0\x12D\n\
+    \x11CalculateMakerFee\x12\x1c.bc.CalculateMakerFeeRequest\x1a\x0f.bc.Fee\
+    Response\"\0\x12D\n\x11CalculateTakerFee\x12\x1c.bc.CalculateTakerFeeReq\
+    uest\x1a\x0f.bc.FeeResponse\"\0\x126\n\rGetOpenOrders\x12\x08.bc.Null\
+    \x1a\x19.bc.GetOpenOrdersResponse\"\0\x12O\n\x10GetMatchedOrders\x12\x1b\
+    .bc.GetMatchedOrdersRequest\x1a\x1c.bc.GetMatchedOrdersResponse\"\0\x12@\
+    \n\x0bGetBlake2bl\x12\x16.bc.GetBlake2blRequest\x1a\x17.bc.GetBlake2blRe\
+    sponse\"\0\x12N\n\x15GetBcAddressViaVanity\x12\x18.bc.VanityConvertReque\
+    st\x1a\x19.bc.VanityConvertResponse\"\0b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

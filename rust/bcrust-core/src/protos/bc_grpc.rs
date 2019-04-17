@@ -36,9 +36,15 @@ pub trait Bc {
 
     fn place_taker_order(&self, o: ::grpc::RequestOptions, p: super::bc::PlaceTakerOrderRequest) -> ::grpc::SingleResponse<super::bc::RpcTransactionResponse>;
 
+    fn place_taker_orders(&self, o: ::grpc::RequestOptions, p: super::bc::PlaceTakerOrdersRequest) -> ::grpc::SingleResponse<super::bc::RpcTransactionResponse>;
+
+    fn calculate_maker_fee(&self, o: ::grpc::RequestOptions, p: super::bc::CalculateMakerFeeRequest) -> ::grpc::SingleResponse<super::bc::FeeResponse>;
+
+    fn calculate_taker_fee(&self, o: ::grpc::RequestOptions, p: super::bc::CalculateTakerFeeRequest) -> ::grpc::SingleResponse<super::bc::FeeResponse>;
+
     fn get_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetOpenOrdersResponse>;
 
-    fn get_matched_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetMatchedOpenOrdersResponse>;
+    fn get_matched_orders(&self, o: ::grpc::RequestOptions, p: super::bc::GetMatchedOrdersRequest) -> ::grpc::SingleResponse<super::bc::GetMatchedOrdersResponse>;
 
     fn get_blake2bl(&self, o: ::grpc::RequestOptions, p: super::bc::GetBlake2blRequest) -> ::grpc::SingleResponse<super::bc::GetBlake2blResponse>;
 
@@ -56,8 +62,11 @@ pub struct BcClient {
     method_GetBalance: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::GetBalanceRequest, super::bc::GetBalanceResponse>>,
     method_PlaceMakerOrder: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::PlaceMakerOrderRequest, super::bc::RpcTransactionResponse>>,
     method_PlaceTakerOrder: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::PlaceTakerOrderRequest, super::bc::RpcTransactionResponse>>,
+    method_PlaceTakerOrders: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::PlaceTakerOrdersRequest, super::bc::RpcTransactionResponse>>,
+    method_CalculateMakerFee: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::CalculateMakerFeeRequest, super::bc::FeeResponse>>,
+    method_CalculateTakerFee: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::CalculateTakerFeeRequest, super::bc::FeeResponse>>,
     method_GetOpenOrders: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::core::Null, super::bc::GetOpenOrdersResponse>>,
-    method_GetMatchedOpenOrders: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::core::Null, super::bc::GetMatchedOpenOrdersResponse>>,
+    method_GetMatchedOrders: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::GetMatchedOrdersRequest, super::bc::GetMatchedOrdersResponse>>,
     method_GetBlake2bl: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::GetBlake2blRequest, super::bc::GetBlake2blResponse>>,
     method_GetBcAddressViaVanity: ::std::sync::Arc<::grpc::rt::MethodDescriptor<super::bc::VanityConvertRequest, super::bc::VanityConvertResponse>>,
 }
@@ -108,14 +117,32 @@ impl BcClient {
                 req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                 resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
             }),
+            method_PlaceTakerOrders: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Bc/PlaceTakerOrders".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
+            method_CalculateMakerFee: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Bc/CalculateMakerFee".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
+            method_CalculateTakerFee: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Bc/CalculateTakerFee".to_string(),
+                streaming: ::grpc::rt::GrpcStreaming::Unary,
+                req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+            }),
             method_GetOpenOrders: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
                 name: "/bc.Bc/GetOpenOrders".to_string(),
                 streaming: ::grpc::rt::GrpcStreaming::Unary,
                 req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                 resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
             }),
-            method_GetMatchedOpenOrders: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
-                name: "/bc.Bc/GetMatchedOpenOrders".to_string(),
+            method_GetMatchedOrders: ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                name: "/bc.Bc/GetMatchedOrders".to_string(),
                 streaming: ::grpc::rt::GrpcStreaming::Unary,
                 req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                 resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
@@ -176,12 +203,24 @@ impl Bc for BcClient {
         self.grpc_client.call_unary(o, p, self.method_PlaceTakerOrder.clone())
     }
 
+    fn place_taker_orders(&self, o: ::grpc::RequestOptions, p: super::bc::PlaceTakerOrdersRequest) -> ::grpc::SingleResponse<super::bc::RpcTransactionResponse> {
+        self.grpc_client.call_unary(o, p, self.method_PlaceTakerOrders.clone())
+    }
+
+    fn calculate_maker_fee(&self, o: ::grpc::RequestOptions, p: super::bc::CalculateMakerFeeRequest) -> ::grpc::SingleResponse<super::bc::FeeResponse> {
+        self.grpc_client.call_unary(o, p, self.method_CalculateMakerFee.clone())
+    }
+
+    fn calculate_taker_fee(&self, o: ::grpc::RequestOptions, p: super::bc::CalculateTakerFeeRequest) -> ::grpc::SingleResponse<super::bc::FeeResponse> {
+        self.grpc_client.call_unary(o, p, self.method_CalculateTakerFee.clone())
+    }
+
     fn get_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetOpenOrdersResponse> {
         self.grpc_client.call_unary(o, p, self.method_GetOpenOrders.clone())
     }
 
-    fn get_matched_open_orders(&self, o: ::grpc::RequestOptions, p: super::core::Null) -> ::grpc::SingleResponse<super::bc::GetMatchedOpenOrdersResponse> {
-        self.grpc_client.call_unary(o, p, self.method_GetMatchedOpenOrders.clone())
+    fn get_matched_orders(&self, o: ::grpc::RequestOptions, p: super::bc::GetMatchedOrdersRequest) -> ::grpc::SingleResponse<super::bc::GetMatchedOrdersResponse> {
+        self.grpc_client.call_unary(o, p, self.method_GetMatchedOrders.clone())
     }
 
     fn get_blake2bl(&self, o: ::grpc::RequestOptions, p: super::bc::GetBlake2blRequest) -> ::grpc::SingleResponse<super::bc::GetBlake2blResponse> {
@@ -289,6 +328,42 @@ impl BcServer {
                 ),
                 ::grpc::rt::ServerMethod::new(
                     ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Bc/PlaceTakerOrders".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Unary,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.place_taker_orders(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Bc/CalculateMakerFee".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Unary,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.calculate_maker_fee(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
+                        name: "/bc.Bc/CalculateTakerFee".to_string(),
+                        streaming: ::grpc::rt::GrpcStreaming::Unary,
+                        req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                        resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
+                    }),
+                    {
+                        let handler_copy = handler_arc.clone();
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.calculate_taker_fee(o, p))
+                    },
+                ),
+                ::grpc::rt::ServerMethod::new(
+                    ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
                         name: "/bc.Bc/GetOpenOrders".to_string(),
                         streaming: ::grpc::rt::GrpcStreaming::Unary,
                         req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
@@ -301,14 +376,14 @@ impl BcServer {
                 ),
                 ::grpc::rt::ServerMethod::new(
                     ::std::sync::Arc::new(::grpc::rt::MethodDescriptor {
-                        name: "/bc.Bc/GetMatchedOpenOrders".to_string(),
+                        name: "/bc.Bc/GetMatchedOrders".to_string(),
                         streaming: ::grpc::rt::GrpcStreaming::Unary,
                         req_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                         resp_marshaller: Box::new(::grpc::protobuf::MarshallerProtobuf),
                     }),
                     {
                         let handler_copy = handler_arc.clone();
-                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.get_matched_open_orders(o, p))
+                        ::grpc::rt::MethodHandlerUnary::new(move |o, p| handler_copy.get_matched_orders(o, p))
                     },
                 ),
                 ::grpc::rt::ServerMethod::new(
