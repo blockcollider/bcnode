@@ -275,7 +275,7 @@ export default class Network extends EventEmitter {
 
     const blockNumber = new BN(block.header.number).toNumber()
     const bestBlockNumber = parseInt(pathOr(Buffer.from('00', 'hex'), ['header', 'number'], this._bestSeenBlock).toString('hex'), 16)
-    this._logger.info(`Best block known: ${bestBlockNumber}`) // NOTE: initial sync debug -> info
+    this._logger.debug(`Best block known: ${bestBlockNumber}`) // NOTE: initial sync debug -> info
     this._logger.info(`Transmitting new block ${blockHashHex} with height: ${blockNumber} from peer "${getPeerAddr(peer)}"`)
     // difficulty check
     if (this._bestSeenBlock && !isBlockFromInitialSync) {
@@ -421,7 +421,7 @@ export default class Network extends EventEmitter {
     const WAIT_FOR_PEERS_TIMEOUT = 10000
 
     if (peers.length < WAIT_FOR_PEERS) {
-      this._logger.info(`Peer count ${peers.length} < ${WAIT_FOR_PEERS} - postponing inital resync by ${WAIT_FOR_PEERS_TIMEOUT / 1000}s.`) // FIXME down to debug
+      this._logger.debug(`Peer count ${peers.length} < ${WAIT_FOR_PEERS} - postponing inital resync by ${WAIT_FOR_PEERS_TIMEOUT / 1000}s.`) // NOTE: initial sync debug -> info
       setTimeout(() => {
         this.requestBlockRange([to, from])
       }, WAIT_FOR_PEERS_TIMEOUT)
@@ -534,7 +534,8 @@ export default class Network extends EventEmitter {
             this._requestedBlocks = without([blockNumber], this._requestedBlocks)
             isBlockFromInitialSync = true
           }
-          this._logger.info(`Requested blocks to fetch: ${inspect(this._requestedBlocks)}`)
+          const msg = (this._requestedBlocks.length < 8) ? inspect(this._requestedBlocks) : `[${this._requestedBlocks[0]} - ${this._requestedBlocks[this._requestedBlocks.length-1]}]`;
+          this._logger.debug(`Requested blocks to fetch: ${msg}`) // NOTE: initial sync debug -> info
           this.onNewBlock(block, peer, isBlockFromInitialSync)
         } else {
           this._logger.info(`Disconnecting ${peerAddr} for invalid block body`)
@@ -613,10 +614,10 @@ export default class Network extends EventEmitter {
           this._logger.info(`Not requesting whole block ${blockNumber}, we've already seen it`)
           continue
         }
-        this._logger.info(`Requesting whole block number ${blockNumber}`) // FIXME down to debug
+        this._logger.debug(`Requesting whole block number ${blockNumber}`) // NOTE: initial sync debug -> info
         const eth = peer.getProtocols()[0]
         if (contains(blockNumber, this._requestedBlocks)) {
-          this._logger.info(`Sending request for block ${blockNumber}, h: ${header.hash().toString('hex')} to peer ${peerAddr}`) // FIXME down to debug
+          this._logger.debug(`Sending request for block ${blockNumber}, h: ${header.hash().toString('hex')} to peer ${peerAddr}`) // NOTE: initial sync debug -> info
           setTimeout(() => {
             eth.sendMessage(
               ETH.MESSAGE_CODES.GET_BLOCK_BODIES,
