@@ -1499,7 +1499,7 @@ export class PeerNode {
             return 0
           })
 
-          if (type === MESSAGES.BLOCKS && iph === 'complete' && ipd === 'complete') {
+          if (type === MESSAGES.BLOCKS && iph === 'complete' && ipd !== 'pending') {
             this._engine._emitter.emit('putblocklist', {
               data: {
                 low: sorted[sorted.length - 1], // lowest block
@@ -1507,7 +1507,7 @@ export class PeerNode {
               },
               connection: conn
             })
-          } else if (type === MESSAGES.MULTIVERSE && iph === 'complete' && ipd === 'complete') {
+          } else if (type === MESSAGES.MULTIVERSE && iph === 'complete' && ipd !== 'pending') {
             this._engine._emitter.emit('putmultiverse', {
               data: sorted,
               connection: conn

@@ -1146,7 +1146,7 @@ export class Engine {
 
                     debug(`blockFromPeer() iph: ${iph} ipd: ${ipd}`)
                     // TODO: Dibsaled if (needsResync && iph === 'complete' && ipd === 'complete') {
-                    if (needsResync && iph === 'complete' && ipd === 'complete') {
+                    if (needsResync && iph === 'complete' && ipd !== 'pending') {
                       const getBlockListMessage = {
                         data: {
                           high: newBlock.getHeight(),
@@ -1177,7 +1177,7 @@ export class Engine {
               .then(({ stored, needsResync }) => {
                 this._logger.info(`new ${fullBlock ? 'full ' : ''}block ${stored ? 'NOT ' : ''}stored ${newBlock.getHeight()}`)
                 // make sure IPH and IPD are complete before asking for sets to catch up
-                if (needsResync && iph === 'complete' && ipd === 'complete') {
+                if (needsResync && iph === 'complete' && ipd !== 'pending') {
                   this.persistence.get('bc.block.latest').then((latestBlock) => {
                     if (latestBlock !== null) {
                       const getBlockListMessage = {
